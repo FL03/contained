@@ -4,28 +4,19 @@
     Description: ... summary ...
 */
 pub use self::{actors::*, components::*, core::*, data::*};
-use serde::{Deserialize, Serialize};
 
 pub(crate) mod actors;
 pub(crate) mod components;
 pub(crate) mod core;
 pub(crate) mod data;
 
-fn main() {
+#[tokio::main(flavor = "multi_thread")]
+async fn main() -> scsys::prelude::BoxResult {
     println!("Hello, world!");
-}
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub struct Machine<T> {
-    pub inputs: Vec<T>,
-    pub outputs: Vec<String>,
-}
+    let app = Application::<contexts::Context>::default();
 
-impl<T> Machine<T> {
-    pub fn new(inputs: Vec<T>) -> Self {
-        Self {
-            inputs,
-            outputs: Default::default(),
-        }
-    }
+    println!("{}", &app);
+
+    Ok(())
 }

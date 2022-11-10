@@ -6,36 +6,10 @@
 use scsys::{components::{logging::Logger, networking::Server}, prelude::{config::{Config, Environment}, ConfigResult, collect_config_files}};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub struct AppSettings {
-    pub mode: String,
-    pub name: String,
-}
-
-impl AppSettings {
-    pub fn name(&mut self, name: Option<&str>) -> &Self {
-        self.name = match name {
-            Some(v) => v.to_string(),
-            None => self.name.clone()
-        };
-        
-        self
-    }
-    pub fn slug(&self) -> String {
-        self.name.clone().to_lowercase()
-    }
-}
-
-impl std::fmt::Display for AppSettings {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Application",)
-    }
-}
-
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
-    pub application: Option<AppSettings>,
+    pub mode: Option<String>,
+    pub name: Option<String>,
     pub logger: Option<Logger>,
     pub server: Server,
 }

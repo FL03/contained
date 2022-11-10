@@ -9,10 +9,10 @@ name = "conduit"
 repository = "https://github.com/FL03/conduit"
 version = "0.1.0"
 
-
 [build-dependencies]
 
 [dependencies]
+clap = { features = ["derive"], version = "4.0.22" }
 futures = "0.3.25"
 opentelemetry = { features = ["rt-tokio"], version = "0.18.0" }
 opentelemetry-jaeger = { features = ["full"], version = "0.17.0" }
