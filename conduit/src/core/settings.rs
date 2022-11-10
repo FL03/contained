@@ -3,14 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use scsys::{components::{logging::Logger, networking::Server}, prelude::{config::{Config, Environment}, ConfigResult, collect_config_files}};
+use scsys::{components::networking::Server, prelude::{config::{Config, Environment}, ConfigResult, collect_config_files}};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
     pub mode: Option<String>,
     pub name: Option<String>,
-    pub logger: Option<Logger>,
     pub server: Server,
 }
 

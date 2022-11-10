@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{contexts::Context, sessions::Session, states::{Stateful, States}};
-use scsys::{components::logging::Logger, prelude::BoxResult};
+use crate::{contexts::Context, rpc::RPCBackend, sessions::Session, states::States, Stateful};
+use scsys::prelude::BoxResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -21,28 +21,28 @@ impl<T: Stateful> Application<T> {
         let state = Default::default();
         Self { ctx, session, state }
     }
-    pub fn setup_logger(&self) -> &Self {
-        match &self.ctx.settings.logger {
-            Some(v) => v.setup(),
-            None => Logger::from("info").setup(),
-        }
-        self
+    ///
+    pub fn with_tracing(&self) -> BoxResult<&Self> {
+        let name = self.ctx.settings.clone().name.unwrap_or_default();
+        crate::rpc::init_tracing(&name)?;
+        tracing::info!("Successfully initiated the tracing protocol...");
+        Ok(self)
     }
+    ///
     pub fn set_state(&mut self, state: States<T>) -> &Self {
         self.state = state;
         self
     }
-    pub async fn spawn_rpc(&self) -> BoxResult<&Self> {
-        crate::rpc::RPCBackend::new(self.ctx.clone())
-            .run()
-            .await?;
-        Ok(self)
+    ///
+    pub fn setup_backend(&self) -> RPCBackend {
+        RPCBackend::new(self.ctx.clone())
     }
+    ///
     pub async fn run(&self) -> BoxResult<&Self> {
-        self.setup_logger();
-
-        self.spawn_rpc().await?;
-        // self.spawn_rpc().await?;
+        self.with_tracing()?;
+        
+        let mut backend = self.setup_backend();
+        backend.spawn().await?;
 
         Ok(self)
     }
