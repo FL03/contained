@@ -5,16 +5,25 @@
 */
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Session {
-    pub timestamp: i64,
+    pub cache: Vec<Value>,
+    pub timestamp: Timestamp,
 }
 
 impl Session {
     pub fn new() -> Self {
-        let timestamp = Timestamp::default().into();
-        Self { timestamp }
+        let cache = Default::default();
+        let timestamp = Timestamp::default();
+        Self { cache, timestamp }
+    }
+}
+
+impl Default for Session {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::Stateful;
+use crate::states::{reqres::{Request, Response}, Stateful};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use strum::{EnumString, EnumVariantNames};
@@ -13,8 +13,8 @@ use strum::{EnumString, EnumVariantNames};
 
 pub enum States<T: Stateful> {
     Idle,
-    Req(T),
-    Res(T),
+    Req(Request<T>),
+    Res(Response<T>),
 }
 
 impl<T: Stateful> States<T> {}

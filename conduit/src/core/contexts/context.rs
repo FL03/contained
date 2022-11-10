@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{agents::Agency, messages::Message, states::Stateful};
+use crate::{agents::Agency, messages::Message, states::Stateful, Settings};
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -13,15 +13,17 @@ use std::fmt::Display;
 pub struct Context<T: Display = Value> {
     pub agency: Agency,
     pub message: Message<T>,
+    pub settings: Settings,
     pub timestamp: i64,
 }
 
 impl<T: Display> Context<T> {
-    pub fn new(agency: Agency, message: Message<T>) -> Self {
+    pub fn new(agency: Agency, message: Message<T>, settings: Settings) -> Self {
         let timestamp = Timestamp::default().into();
         Self {
             agency,
             message,
+            settings,
             timestamp,
         }
     }
