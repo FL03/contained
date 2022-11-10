@@ -12,14 +12,21 @@ pub struct Application<T: Stateful> {
     pub ctx: Context,
     pub session: Session,
     pub state: States<T>,
-    
 }
 
 impl<T: Stateful> Application<T> {
     pub fn new(ctx: Context) -> Self {
         let session = Session::default();
         let state = Default::default();
-        Self { ctx, session, state }
+        Self {
+            ctx,
+            session,
+            state,
+        }
+    }
+    pub async fn graceful_shutdown(&self) {
+        tokio::signal::ctrl_c().await.expect("Failed to terminate the runtime...");
+        tracing::info!("Terminating the application and connected services...");
     }
     ///
     pub fn with_tracing(&self) -> BoxResult<&Self> {

@@ -3,7 +3,14 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use scsys::{components::networking::Server, prelude::{config::{Config, Environment}, ConfigResult, collect_config_files}};
+use scsys::{
+    components::networking::Server,
+    prelude::{
+        collect_config_files,
+        config::{Config, Environment},
+        ConfigResult,
+    },
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
