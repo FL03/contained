@@ -1,4 +1,0 @@
-# conduit
-
-## Getting Started
-
