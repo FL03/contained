@@ -3,34 +3,36 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{contexts::Context};
-use scsys::prelude::BoxResult;
+use scsys::{components::networking::Server, prelude::BoxResult};
 use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 use tokio::net::TcpListener;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RPCBackend {
-    pub ctx: Context,
+    pub server: Server
 }
 
 impl RPCBackend {
-    pub fn new(ctx: Context) -> Self {
-        Self { ctx }
+    pub fn new(server: Server) -> Self {
+        Self { server }
+    }
+    pub fn address(&self) -> SocketAddr {
+        self.server.clone().address().into()
     }
     pub async fn listener(&self) -> BoxResult<TcpListener> {
-        let addr = "127.0.0.1:8080";
-        tracing::info!("Listening at {}", addr);
-        let listener = TcpListener::bind(addr).await?;
+        tracing::info!("Listening at {}", self.server.clone().address());
+        let listener = TcpListener::bind(self.address()).await?;
         Ok(listener)
     }
     pub async fn spawn(&mut self) -> BoxResult {
         tracing::info!("Spawning the rpc server...");
         loop {
-            let (socket, _) = self.listener().await?.accept().await?;
+            let (_, _) = self.listener().await?.accept().await?;
     
             tokio::spawn(async move {
                 // Process each socket concurrently.
-                samples::world_client().await;
+                samples::world_client().await.expect("Invalid response");
             });
         }
     }

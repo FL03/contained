@@ -35,12 +35,12 @@ impl<T: Stateful> Application<T> {
     }
     ///
     pub fn setup_backend(&self) -> RPCBackend {
-        RPCBackend::new(self.ctx.clone())
+        RPCBackend::new(self.ctx.settings.server.clone())
     }
     ///
     pub async fn run(&self) -> BoxResult<&Self> {
         self.with_tracing()?;
-        
+
         let mut backend = self.setup_backend();
         backend.spawn().await?;
 
