@@ -39,7 +39,7 @@ impl<T: Stateful> Application<T> {
     }
     ///
     pub async fn run(&self) -> BoxResult<&Self> {
-        self.with_tracing()?;
+        scsys::components::logging::logger_from_env(Some("info"));
 
         let mut backend = self.setup_backend();
         backend.spawn().await?;
