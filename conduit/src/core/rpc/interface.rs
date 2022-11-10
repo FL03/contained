@@ -3,10 +3,32 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use futures::future;
 use scsys::{components::networking::Server, prelude::BoxResult};
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
+use tarpc::server::Channel;
 use tokio::net::TcpListener;
+
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct BaseServer;
+
+/* 
+    Implement the sample service on the base server for the rpc backend
+    Note: 
+        Each defined rpc generates two items within the trait; namely, a function 
+        directly servicing the RPC and an associated type representing the future output
+        of the function provided.
+*/
+impl samples::World for BaseServer {
+    type HelloFut = future::Ready<String>;
+
+    fn hello(self, _: tarpc::context::Context, name: String) -> Self::HelloFut {
+        let msg = format!("Hello, {name}!");
+        future::ready(msg)
+    }
+}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct RPCBackend {
@@ -19,6 +41,9 @@ impl RPCBackend {
     }
     pub fn address(&self) -> SocketAddr {
         self.server.clone().address().into()
+    }
+    pub async fn client(&mut self) -> BoxResult<&Self> {
+        Ok(self)
     }
     pub async fn listener(&self) -> BoxResult<TcpListener> {
         tracing::info!("Listening at {}", self.server.clone().address());
