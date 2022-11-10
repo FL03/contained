@@ -15,8 +15,8 @@ async fn main() -> scsys::prelude::BoxResult {
     println!("Hello, world!");
 
     let app = Application::<contexts::Context>::default();
-
     println!("{}", &app);
+    app.run().await?;
 
     Ok(())
 }
