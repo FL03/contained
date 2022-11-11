@@ -19,25 +19,14 @@ job("Publish to Docker Hub") {
             """
         }
 
-        docker {
-            build {
-                context = "."
-                file = "Dockerfile"
-                labels["vendor"] = "Scattered-Systems, LLC"
-
-            }
-            push {
-                tags {
-                    +"scsys/conduit:latest"
-                    +"scsys/conduit:0.1.${"$"}JB_SPACE_EXECUTION_NUMBER"
-                }
-
-            }
-        }
-
         dockerBuildPush {
-            
-            
+            context = "."
+            file = "Dockerfile"
+            labels["vendor"] = "Scattered-Systems, LLC"
+            tags {
+                +"scsys/conduit:latest"
+                +"scsys/conduit:0.1.${"$"}JB_SPACE_EXECUTION_NUMBER"
+            }
         }
     }
 }

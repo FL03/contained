@@ -13,13 +13,17 @@ COPY . .
 RUN cargo build --color ${COLOR} --release --verbose --workspace && \
     cargo test --all --all-features
 
-FROM photon:latest as runner
+FROM debian:latest as runner-base
 
-RUN yum update -y && yum upgrade -y
+RUN apt-get update -y && apt-get upgrade -y
 
-RUN yum install -y \
-    openssl-devel
+FROM runner-base as runner 
+
+RUN apt-get install -y \
+    openssl
 
 COPY --from=builder /workspace/target/release/conduit /bin/conduit
+
+FROM runner
 
 CMD ["conduit"]
