@@ -15,6 +15,14 @@ RUN cargo build --color ${COLOR} --release --verbose --workspace && \
 
 FROM photon:latest as runner
 
+RUN yum update -y && yum upgrade -y
+
+RUN yum install -y \
+    build-essential \
+    libcrypto \
+    libssl \
+    libtls
+
 COPY --from=builder /workspace/target/release/conduit /bin/conduit
 
 CMD ["conduit"]
