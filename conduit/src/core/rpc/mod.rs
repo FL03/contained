@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{interface::*, utils::*};
+pub use self::{interface::*, services::*, utils::*};
 
 pub(crate) mod interface;
-
+pub(crate) mod services;
 pub(crate) mod utils {
     use scsys::prelude::BoxResult;
     use tracing_subscriber::{fmt::format::FmtSpan, prelude::*};

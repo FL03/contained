@@ -75,7 +75,9 @@ impl RPCBackend {
     pub fn address(&self) -> SocketAddr {
         self.server.clone().address().into()
     }
-    pub async fn client(&mut self) -> BoxResult<&Self> {
+    pub async fn client(&mut self, name: Option<String>) -> BoxResult<&Self> {
+        simple_rpc_client(name).await?;
+
         Ok(self)
     }
     pub async fn listener(&self) -> BoxResult<TcpListener> {
@@ -158,6 +160,9 @@ pub(crate) mod samples {
         Ok(client)
     }
 
+    /*
+
+    */
     pub async fn basic_wc_action() -> BoxResult {
         let client = world_client().await?;
         // The client has an RPC method for each RPC defined in the annotated trait. It takes the same

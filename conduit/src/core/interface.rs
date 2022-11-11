@@ -25,7 +25,9 @@ impl<T: Stateful> Application<T> {
         }
     }
     pub async fn graceful_shutdown(&self) {
-        tokio::signal::ctrl_c().await.expect("Failed to terminate the runtime...");
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to terminate the runtime...");
         tracing::info!("Terminating the application and connected services...");
     }
     ///
