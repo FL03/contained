@@ -1,3 +1,47 @@
+job("Publish to Docker Hub") {
+    startOn {
+        gitPush { 
+            branchFilter {
+                +"refs/heads/main"
+                +"refs/tags/v*.*.*"
+            }
+        }
+        schedule { cron("0 8 * * *") }
+    }
+    host("Build artifacts and a Docker image") {
+        // assign project secrets to environment variables
+        env["HUB_USER"] = Secrets("dockerhub_username")
+        env["HUB_TOKEN"] = Secrets("dockerhub_token")
+
+        shellScript {
+            content = """
+                docker login --username ${'$'}HUB_USER --password "${'$'}HUB_TOKEN"
+            """
+        }
+
+        docker {
+            build {
+                context = "."
+                file = "Dockerfile"
+                labels["vendor"] = "Scattered-Systems, LLC"
+
+            }
+            push {
+                tags {
+                    +"scsys/conduit:latest"
+                    +"scsys/conduit:0.1.${"$"}JB_SPACE_EXECUTION_NUMBER"
+                }
+
+            }
+        }
+
+        dockerBuildPush {
+            
+            
+        }
+    }
+}
+
 job("Test (crates)") {
     startOn {
         gitPush { 
