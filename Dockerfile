@@ -18,10 +18,7 @@ FROM photon:latest as runner
 RUN yum update -y && yum upgrade -y
 
 RUN yum install -y \
-    build-essential \
-    libcrypto \
-    libssl \
-    libtls
+    openssl-devel
 
 COPY --from=builder /workspace/target/release/conduit /bin/conduit
 
