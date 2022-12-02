@@ -2,17 +2,17 @@ name: Docker
 
 on:
   push:
-    # branches: [ "main" ]
+    branches: [ "main" ]
     tags: [ "v*.*.*" ]
-  # schedule:
-  #   - cron: "30 9 * * 5"
+  schedule:
+    - cron: "30 9 * * 5"
   workflow_dispatch:
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: hub.docker.com
   # github.repository as <account>/<repo>
-  IMAGE_NAME: scsys/proton
+  IMAGE_NAME: jo3mccain/conduit
   IMAGE_TAG: latest
 
 
