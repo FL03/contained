@@ -1,31 +1,30 @@
-# puzzled/conduit
+# template-workspace
 
-A complete finite automata
+A barebones repository template for quickly setting up a proper workspace
 
-## Getting Started
+## Installation
 
-Download links:
+Start by cloning the repository
 
-SSH clone URL: ssh://git@git.jetbrains.space/scsys/puzzled/conduit.git
-
-HTTPS clone URL: https://git.jetbrains.space/scsys/puzzled/conduit.git
-
-
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-## Prerequisites
-
-What things you need to install the software and how to install them.
+```bash
+git clone https://github.com/FL03/template-workspace
 
 ```
-Examples
+
+## Usage
+
+```rust
+
 ```
 
-## Deployment
+## Contributing
 
-Add additional notes about how to deploy this on a production system.
+Pull requests are welcome. For major changes, please open an issue first
+to discuss what you would like to change.
 
-## Resources
+Please make sure to update tests as appropriate.
 
-Add links to external resources for this project, such as CI server, bug tracker, etc.
+## License
+
+* [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
+* [MIT](https://choosealicense.com/licenses/mit/)
