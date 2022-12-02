@@ -8,11 +8,13 @@ pub use self::{application::*, settings::*};
 pub(crate) mod application;
 pub(crate) mod settings;
 
+pub mod cli;
+
 #[tokio::main]
 async fn main() -> scsys::BoxResult {
     let mut app = Application::default();
     println!("{:?}", &app);
-    app.with_logging();
+    app.quickstart().await?;
 
     Ok(())
 }

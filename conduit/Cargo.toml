@@ -14,8 +14,8 @@ version = "0.1.0"
 [build-dependencies]
 
 [dependencies]
-async-tungstenite = { features = ["tokio-native-tls"], version = "0.18.0" }
-clap = { features = ["derive"], version = "4.0.29" }
+async-tungstenite = { features = ["tokio-runtime"], version = "0.18.0" }
+clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"
 opentelemetry = { features = ["rt-tokio"], version = "0.18.0" }
 opentelemetry-jaeger = { features = ["full"], version = "0.17.0" }

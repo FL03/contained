@@ -1,9 +1,9 @@
 /*
-    Appellation: application <library>
+    Appellation: application <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::Settings;
+use crate::{cli::Cli, Settings};
 use scsys::prelude::{BoxResult, Configurable, Context};
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +17,7 @@ impl Application {
     pub fn new(cnf: Settings, ctx: Context<Settings>) -> Self {
         Self { cnf, ctx }
     }
+
     // Initialize application logging
     pub fn with_logging(&mut self) -> &Self {
         self.cnf.logger().clone().setup(None);
@@ -24,10 +25,21 @@ impl Application {
         tracing::debug!("Success: Initialized the logging protocols");
         self
     }
+    pub async fn cli(&mut self) -> BoxResult<Cli> {
+        let cli = Cli::default();
+        Ok(cli)
+    }
+    pub async fn spawn(&mut self) -> BoxResult {
+        let cli = self.cli().await?;
+        tracing::debug!("{:?}", cli);
+
+        Ok(())
+    }
 
     pub async fn quickstart(&mut self) -> BoxResult<&Self> {
         self.with_logging();
         tracing::info!("Startup: Application initializing...");
+        self.spawn().await?;
 
         Ok(self)
     }

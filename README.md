@@ -1,14 +1,17 @@
-# template-workspace
+# Conduit
 
-A barebones repository template for quickly setting up a proper workspace
+[![Clippy](https://github.com/FL03/conduit/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/clippy.yml)
+[![Docker](https://github.com/FL03/conduit/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/docker.yml)
+[![Rust](https://github.com/FL03/conduit/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/rust.yml)
 
 ## Installation
 
 Start by cloning the repository
 
 ```bash
-git clone https://github.com/FL03/template-workspace
-
+git clone https://github.com/FL03/conduit
+cd conduit
+cargo build --release --workspace
 ```
 
 ## Usage
