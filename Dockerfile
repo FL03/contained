@@ -1,32 +1,35 @@
-FROM scsys/rust:debian-lts as base-image
+FROM rust:latest as base
 
 RUN apt-get update -y && apt-get upgrade -y
 
-FROM base-image as builder
+FROM base as builder-base
 
-ENV COLOR=always
+RUN rustup update
+
+FROM builder-base as builder
+
+ENV CARGO_TERM_COLOR=always
 
 ADD . /workspace
 WORKDIR /workspace
 
 COPY . .
-RUN cargo build --color ${COLOR} --release --verbose --workspace && \
-    cargo test --all --all-features
+RUN cargo build --release -v --workspace
 
-FROM debian:latest as runner-base
+FROM debian:buster-slim as runner-base
 
-ENV RUST_LOG = "info" \
+ENV RUST_LOG="info" \
     SERVER_PORT=8080
 
 RUN apt-get update -y && apt-get upgrade -y
 
-RUN mkdir config
-VOLUME [ "/config" ]
-
-FROM runner-base as runner 
+RUN mkdir data
+VOLUME [ "/data" ]
 
 COPY --chown=55 Conduit.toml /config/Conduit.toml
-COPY --from=builder /workspace/target/release/conduit /bin/conduit
+VOLUME [ "/config" ]
+
+COPY --chown=55 --from=builder /workspace/target/release/conduit /bin/conduit
 
 FROM runner
 
@@ -34,5 +37,4 @@ EXPOSE 80
 EXPOSE ${SERVER_PORT}
 
 ENTRYPOINT [ "conduit" ]
-
 CMD [ "-h" ]
