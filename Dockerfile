@@ -25,10 +25,7 @@ VOLUME [ "/config" ]
 
 FROM runner-base as runner 
 
-RUN apt-get install -y \
-    openssl
-
-COPY --chown=55 conduit/Conduit.toml /config/Conduit.toml
+COPY --chown=55 Conduit.toml /config/Conduit.toml
 COPY --from=builder /workspace/target/release/conduit /bin/conduit
 
 FROM runner
@@ -38,4 +35,4 @@ EXPOSE ${SERVER_PORT}
 
 ENTRYPOINT [ "conduit" ]
 
-CMD [""]
+CMD [ "-h" ]

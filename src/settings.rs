@@ -6,40 +6,48 @@
 use scsys::prelude::config::{Config, Environment};
 use scsys::prelude::{try_collect_config_files, ConfigResult, Configurable, Logger, Server};
 use serde::{Deserialize, Serialize};
+use std::env;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
     pub logger: Logger,
+    pub mode: String,
+    pub name: String,
     pub server: Server,
 }
 
 impl Settings {
+    pub fn new(mode: Option<String>, name: Option<String>) -> Self {
+        let (mode, name) = (
+            mode.unwrap_or_else(|| String::from("production")),
+            name.unwrap_or_else(|| String::from("conduit")),
+        );
+        let (logger, server) = (Default::default(), Default::default());
+        Self {
+            logger,
+            mode,
+            name,
+            server,
+        }
+    }
     pub fn build() -> ConfigResult<Self> {
         let mut builder = Config::builder()
             .add_source(Environment::default().separator("__"))
+            .set_default("mode", "production")?
+            .set_default("name", "conduit")?
             .set_default("logger.level", "info")?
             .set_default("server.host", "127.0.0.1")?
-            .set_default("server.port", 9090)?;
-        match try_collect_config_files("**/Conduit.toml", false) {
-            Err(_) => {}
-            Ok(v) => {
-                builder = builder.add_source(v);
-            }
+            .set_default("server.port", 8080)?;
+
+        if let Ok(files) = try_collect_config_files("**/Conduit.toml", false) {
+            builder = builder.add_source(files);
         }
-        match std::env::var("RUST_LOG") {
-            Err(_) => {}
-            Ok(v) => {
-                builder = builder.set_override("logger.level", Some(v))?;
-            }
+        if let Ok(log) = env::var("RUST_LOG") {
+            builder = builder.set_override("logger.level", log)?;
         };
-
-        match std::env::var("SERVER_PORT") {
-            Err(_) => {}
-            Ok(v) => {
-                builder = builder.set_override("server.port", v)?;
-            }
+        if let Ok(port) = env::var("SERVER_PORT") {
+            builder = builder.set_override("server.port", port)?;
         };
-
         builder.build()?.try_deserialize()
     }
 
@@ -62,10 +70,7 @@ impl Configurable for Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        let d = Settings {
-            logger: Default::default(),
-            server: Server::new("127.0.0.1".to_string(), 8080),
-        };
+        let d = Self::new(None, None);
         Self::build().unwrap_or(d)
     }
 }

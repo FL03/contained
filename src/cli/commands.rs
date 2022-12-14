@@ -13,15 +13,14 @@ pub enum Commands {
         address: String,
     },
     System {
-        #[arg(action = clap::ArgAction::Count, long, short)]
-        on: u8,
+        #[arg(action = clap::ArgAction::SetTrue, long, short)]
+        up: bool,
     },
 }
 
 impl Commands {
     pub async fn handler(&self) -> &Self {
         tracing::info!("Processing commands issued to the cli...");
-
         self
     }
 }

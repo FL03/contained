@@ -1,0 +1,5 @@
+mode = "staging"
+name = "Conduit"
+
+[logger]
+level = "info"

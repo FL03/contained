@@ -7,6 +7,10 @@ pub use self::{commands::*, context::*};
 
 pub(crate) mod commands;
 
+pub fn new() -> Cli {
+    Cli::default()
+}
+
 pub(crate) mod context {
     use super::Commands;
     use clap::Parser;
@@ -14,12 +18,16 @@ pub(crate) mod context {
 
     #[derive(Clone, Debug, Deserialize, Eq, Hash, Parser, PartialEq, Serialize)]
     #[clap(about, author, version)]
-    #[clap(long_about = "Welcome, listed below is some availible commands for the application")]
+    #[clap(long_about = None)]
     pub struct Cli {
         #[clap(subcommand)]
         pub command: Option<Commands>,
-        #[arg(action = clap::ArgAction::Count, long, short)]
-        pub debug: u8,
+        #[arg(action = clap::ArgAction::SetTrue, long, short)]
+        pub debug: bool,
+        #[arg(action = clap::ArgAction::SetTrue, long)]
+        pub detached: bool,
+        #[arg(action = clap::ArgAction::SetTrue, long, short)]
+        pub update: bool,
     }
 
     impl Cli {
