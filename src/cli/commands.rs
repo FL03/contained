@@ -4,6 +4,7 @@
     Description: ... Summary ...
 */
 use clap::Subcommand;
+use scsys::BoxResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, Subcommand)]
@@ -19,8 +20,18 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handler(&self) -> &Self {
+    pub async fn handle(&self) -> BoxResult<&Self> {
         tracing::info!("Processing commands issued to the cli...");
-        self
+        match self.clone() {
+            Commands::Connect { address } => {
+                println!("{:?}", address);
+            }
+            Commands::System { up } => {
+                if up {
+                    tracing::info!("Turning on the application subsystems...");
+                }
+            }
+        }
+        Ok(self)
     }
 }

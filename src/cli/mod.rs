@@ -13,8 +13,11 @@ pub fn new() -> Cli {
 
 pub(crate) mod context {
     use super::Commands;
+    use crate::states::{State, States};
     use clap::Parser;
+    use scsys::BoxResult;
     use serde::{Deserialize, Serialize};
+    use std::sync::{Arc, Mutex};
 
     #[derive(Clone, Debug, Deserialize, Eq, Hash, Parser, PartialEq, Serialize)]
     #[clap(about, author, version)]
@@ -33,6 +36,19 @@ pub(crate) mod context {
     impl Cli {
         pub fn new() -> Self {
             Self::parse()
+        }
+        pub async fn handle(&self, state: Arc<Mutex<States>>) -> BoxResult<&Self> {
+            if let Some(cmds) = self.command.clone() {
+                cmds.handle().await?;
+            }
+            if self.debug {
+                std::env::set_var("RUST_LOG", "debug");
+            }
+            if self.update {
+                tracing::info!("Updating the application...");
+            }
+
+            Ok(self)
         }
     }
 

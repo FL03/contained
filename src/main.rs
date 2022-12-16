@@ -11,7 +11,7 @@ pub(crate) mod settings;
 pub mod cli;
 pub mod states;
 
-use scsys::prelude::{BoxResult, Context, Message};
+use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
 use std::sync::{Arc, Mutex};
 
@@ -35,18 +35,18 @@ pub trait AppSpec: Default {
     fn slug(&self) -> String {
         self.name().to_ascii_lowercase()
     }
-    fn state(&self) -> Arc<Mutex<states::States>>;
+    fn state(&self) -> &Arc<Mutex<states::States>>;
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct Application {
     pub cnf: Settings,
-    pub ctx: Context<Settings>,
+    pub ctx: Context,
     pub state: Arc<Mutex<states::States>>,
 }
 
 impl Application {
-    pub fn new(cnf: Settings, ctx: Context<Settings>, state: Arc<Mutex<states::States>>) -> Self {
+    pub fn new(cnf: Settings, ctx: Context, state: Arc<Mutex<states::States>>) -> Self {
         cnf.logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::info!("Application initialized; completing setup...");
@@ -54,22 +54,8 @@ impl Application {
     }
     /// Initialize the command line interface
     pub async fn cli(&mut self) -> BoxResult<&Self> {
-        let cli = cli::Cli::default();
-        if cli.debug {
-            std::env::set_var("RUST_LOG", "debug");
-        }
-        if let Some(cmds) = cli.command.clone() {
-            match cmds {
-                cli::Commands::Connect { address } => {
-                    println!("{:?}", address);
-                }
-                cli::Commands::System { up } => {
-                    if up {
-                        tracing::info!("Turning on the application subsystems...");
-                    }
-                }
-            }
-        }
+        cli::Cli::default().handle(Arc::clone(self.state())).await?;
+        
         Ok(self)
     }
     /// Change the application state
@@ -100,14 +86,20 @@ impl Application {
     }
 }
 
-impl std::convert::From<Settings> for Application {
-    fn from(data: Settings) -> Self {
-        Self::new(data.clone(), Context::new(data), Default::default())
+impl Default for Application {
+    fn default() -> Self {
+        Self::from(Context::default())
     }
 }
 
-impl std::convert::From<Context<Settings>> for Application {
-    fn from(data: Context<Settings>) -> Self {
+impl std::convert::From<Settings> for Application {
+    fn from(data: Settings) -> Self {
+        Self::new(data.clone(), Context::from(data), Default::default())
+    }
+}
+
+impl std::convert::From<Context> for Application {
+    fn from(data: Context) -> Self {
         Self::new(data.clone().cnf, data, Default::default())
     }
 }
