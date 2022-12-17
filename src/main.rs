@@ -44,10 +44,14 @@ async fn main() -> BoxResult {
     Ok(())
 }
 
-pub async fn sample_handler() -> BoxResult {
-    let _bufs = [0, 1, 2];
-
-    Ok(())
+pub async fn sample_handler() -> tokio::task::JoinHandle<BoxResult> {
+    let _tmp = [0, 1, 2];
+    tokio::spawn(async move {
+        for i in _tmp {  
+            println!("{}", Message::from(i))
+        }
+        Ok(())
+    })
 }
 
 pub trait AppSpec: Default {
