@@ -3,10 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{context::*, settings::*};
+pub use self::{context::*, settings::*, utils::*};
 
 pub(crate) mod context;
 pub(crate) mod settings;
+pub(crate) mod utils;
 
 pub mod cli;
 pub mod states;
@@ -14,22 +15,55 @@ pub mod states;
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
 use std::{convert::From, sync::{mpsc, Arc, Mutex}, thread::JoinHandle};
+use tokio::sync::broadcast;
+
+
+pub async fn fundamental() -> Message {
+    let msg = Message::from(json!({"view": "inner"}));
+    msg
+}
+
+pub async fn middle(mut rz: broadcast::Receiver<Message>) -> String {
+    let res = rz.recv().await.unwrap().to_string();
+    res
+}
+
+pub async fn outer(mut ry: broadcast::Receiver<String>) -> String {
+    let res = ry.recv().await.unwrap();
+    res
+}
 
 #[tokio::main]
 async fn main() -> BoxResult {
-    let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        tx.send("test").unwrap();
-
-    });
-    println!("{:?}", rx.recv()?);
+    // Create an application instance
     let mut app = Application::default();
+    // Quickstart the application runtime with the following command
     app.start().await?;
 
+    // Initialize the asynchronous sender / receiver for the given channel
+    let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+    let (ty, mut ry) = tokio::sync::mpsc::channel(2);
+    let (tz, mut rz) = tokio::sync::mpsc::channel(3);
+    tokio::spawn(async move {
+        tokio::spawn(async move {
+            tokio::spawn(async move {
+                tz.send(fundamental().await).await.expect("");
+            });
+            let mut msg = rz.recv().await.unwrap();
+            msg.push(json!({"view": "middle"}));
+            ty.send(msg.clone()).await.expect("");
+        });
+        let mut msg = ry.recv().await.unwrap();
+        msg.push(json!({"view": "outer"}));
+        tx.send(msg.clone()).await.expect("");
+    });
+    println!("{:?}", rx.recv().await.unwrap());
     Ok(())
 }
 
+pub struct Originator;
 
+#[derive(Debug)]
 pub struct Conduit<T> {
     pub receiver: mpsc::Receiver<T>,
     pub sender: mpsc::Sender<T>,
@@ -48,56 +82,6 @@ impl<T> Default for Conduit<T> where T: Default {
     }
 }
 
-pub trait Handler<T: Send + Sync + 'static> {
-    fn handle(&self) -> JoinHandle<T>;
-    fn spawn(&self) -> BoxResult<&Self>;
-}
-
-pub trait Contract: Send + Sync + 'static {
-
-}
-
-pub trait Transformation<S> {
-    type Error;
-    type Res;
-
-    fn transform(&self, data: S) -> Result<Self::Res, Self::Error>;
-}
-
-pub trait Spawnable: Send + Sync + 'static {
-    type Error;
-    fn handle(&self) -> JoinHandle<&Self>;
-
-}
-
-pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(data: S, transform: fn(S) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn( move || {
-        std::thread::spawn(move || {
-            tracing::info!("Spawned the detached thread");
-
-        });
-        transform(data.clone())
-    });
-
-    Ok(handle)
-}
-/// A minimal function wrapper for
-pub fn spawner<F: Send + Sync + 'static, T>(handle: F) -> JoinHandle<F> {
-    std::thread::spawn( move || {
-        handle
-    })
-}
-
-pub fn handler<T: Send + Sync + 'static>(data: T, transform: fn(T) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn( move || {
-        transform(data)
-    });
-
-    Ok(handle)
-}
-
-
-
 pub trait AppSpec: Default {
     type Cnf;
     type Ctx;
@@ -111,6 +95,11 @@ pub trait AppSpec: Default {
         self.name().to_ascii_lowercase()
     }
     fn state(&self) -> &Arc<Mutex<states::States>>;
+}
+
+#[derive(Debug)]
+pub struct ApplicationChannels {
+    pub state: tokio::sync::broadcast::Sender<Arc<states::States>>
 }
 
 #[derive(Clone, Debug)]
@@ -167,6 +156,41 @@ impl Application {
         self.runtime().await?;
 
         Ok(self)
+    }
+}
+
+impl AppSpec for Application {
+    type Cnf = Settings;
+
+    type Ctx = Context;
+
+    type State = states::States;
+
+    fn init() -> Self {
+        Self::default()
+    }
+
+    fn context(&self) -> Self::Ctx {
+        self.ctx.clone()
+    }
+
+    fn name(&self) -> String {
+        String::from("Conduit")
+    }
+
+    fn settings(&self) -> Self::Cnf {
+        self.cnf.clone()
+    }
+
+    fn setup(&mut self) -> BoxResult<&Self> {
+        tracing_subscriber::fmt::init();
+        tracing::info!("Application initialized; completing setup...");
+
+        Ok(self)
+    }
+
+    fn state(&self) -> &Arc<Mutex<states::States>> {
+        &self.state
     }
 }
 
