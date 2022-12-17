@@ -6,6 +6,7 @@
 use clap::Subcommand;
 use scsys::BoxResult;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, Subcommand)]
 pub enum Commands {
@@ -20,6 +21,14 @@ pub enum Commands {
 }
 
 impl Commands {
+    pub fn handle(&self) -> tokio::task::JoinHandle<Arc<Self>> {
+        let cmds = Arc::new(self.clone());
+        tokio::spawn(async move {
+            cmds.handler().ok().unwrap();
+            println!("{:?}", cmds.clone());
+            cmds
+        })
+    }
     pub fn handler(&self) -> BoxResult<&Self> {
         tracing::info!("Processing commands issued to the cli...");
 
@@ -36,4 +45,3 @@ impl Commands {
         Ok(self)
     }
 }
-

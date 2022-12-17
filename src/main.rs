@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{context::*, settings::*, utils::*};
+pub use self::{context::*, primitives::*, settings::*, utils::*};
 
 pub(crate) mod context;
+pub(crate) mod primitives;
 pub(crate) mod settings;
 pub(crate) mod utils;
 
@@ -14,25 +15,23 @@ pub mod states;
 
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
-use std::{convert::From, sync::{mpsc, Arc, Mutex}};
-use tokio::{sync, task};
-pub type ChannelPackStd<T> = (mpsc::Sender<T>, mpsc::Receiver<T>);
-
-pub type Locked<T> = Arc<Mutex<T>>;
+use std::{
+    convert::From,
+    sync::{Arc, Mutex},
+};
+use tokio::{sync};
 
 pub async fn fundamental() -> Message {
-    let msg = Message::from(json!({"view": "inner"}));
+    
+    Message::from(json!({"view": "inner"}))
+}
+
+pub async fn middle(msg: Message) -> Message {
     msg
 }
 
-pub async fn middle(mut rz: tokio::sync::mpsc::Receiver<Message>) -> String {
-    let res = rz.recv().await.unwrap().to_string();
-    res
-}
-
-pub async fn outer(mut ry:  tokio::sync::mpsc::Receiver<String>) -> String {
-    let res = ry.recv().await.unwrap();
-    res
+pub async fn outer(msg: Message) -> Message {
+    msg
 }
 
 #[tokio::main]
@@ -42,29 +41,12 @@ async fn main() -> BoxResult {
     // Quickstart the application runtime with the following command
     app.start().await?;
 
-    
     Ok(())
 }
 
 pub async fn sample_handler() -> BoxResult {
-    let bufs = [0, 1, 2];
-    
-    // Initialize the asynchronous sender / receiver for the given channel
-    let (tx, mut rx) = sync::mpsc::channel(1);
-    let (ty, mut ry) = sync::mpsc::channel(2);
-    let (tz, mut rz) = sync::mpsc::channel(3);
-    tokio::spawn(async move {
-        tokio::spawn(async move {
-            tokio::spawn(async move {
-                tz.send(fundamental().await).await.expect("");
-            });
-            let mut msg = rz.recv().await.unwrap();
-            msg.push(json!({"view": "middle"}));
-            ty.send(middle(rz).await).await.expect("");
-        });
-        tx.send(outer(ry).await).await.expect("");
-    });
-    println!("{:?}", rx.recv().await.unwrap());
+    let _bufs = [0, 1, 2];
+
     Ok(())
 }
 
@@ -85,7 +67,7 @@ pub trait AppSpec: Default {
 
 #[derive(Debug)]
 pub struct ApplicationChannels {
-    pub state: sync::mpsc::Sender<Arc<states::States>>
+    pub state: sync::mpsc::Sender<Arc<states::States>>,
 }
 
 #[derive(Clone, Debug)]
@@ -103,35 +85,32 @@ impl Application {
         Self { cnf, ctx, state }
     }
     // initializes a pack of channels
-    pub fn channels<T>(&self) -> ChannelPackStd<T> {
-        mpsc::channel::<T>()
-    }
-    /// Initialize the command line interface
-    pub fn cli(&mut self) -> BoxResult<task::JoinHandle<Arc<cli::Cli>>> {
-        let cli = Arc::new(cli::new());
-        let handle = tokio::spawn(async move {
-            cli.handle();
-            cli
-        });   
-        Ok(handle)
+    pub fn channels<T>(&self, buffer: usize) -> TokioChannelPackMPSC<T> {
+        sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
-    pub fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
+    pub async fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
         // Update the application state
         self.state = Arc::new(Mutex::new(state.clone()));
         // Post the change of state to the according channel(s)
-        self.channels().0.send(self.state.clone()).unwrap();
+        self.channels(1).0.send(self.state.clone()).await?;
         tracing::info!("Updating the application state to {}", state);
         Ok(self)
     }
     /// Application runtime
     pub async fn runtime(&mut self) -> BoxResult {
+        let cli = cli::new();
         self.set_state(states::States::Process(Message::from(
-            json!({"startup": "success"}),
-        )))?;
+            json!({"cli": cli.clone()}),
+        )))
+        .await?;
         // Fetch the initialized cli and process the results
-        // self.cli().await?;
-        cli::new().handler()?;
+        cli.handle().await?;
+        // TODO: Broadcast the results on a channel
+        self.set_state(states::States::Complete(Message::from(
+            json!({"results": ""}),
+        )))
+        .await?;
         Ok(())
     }
     /// Function wrapper for returning the current application state

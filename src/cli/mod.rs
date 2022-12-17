@@ -39,10 +39,12 @@ pub(crate) mod context {
         pub fn locked(&self) -> Arc<Mutex<Self>> {
             Arc::from(Mutex::new(self.clone()))
         }
-        pub fn handle(&self) -> std::thread::JoinHandle<Arc<Mutex<Self>>> {
-            let cli = self.locked();
-            let handle = std::thread::spawn(move || cli.clone());
-            handle
+        pub fn handle(&self) -> tokio::task::JoinHandle<Arc<Self>> {
+            let cli = Arc::new(self.clone());
+            tokio::spawn(async move {
+                cli.handler().ok().unwrap();
+                cli.clone()
+            })
         }
         pub fn handler(&self) -> BoxResult<&Self> {
             if let Some(cmds) = self.command.clone() {
