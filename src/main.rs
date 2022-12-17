@@ -13,18 +13,39 @@ pub mod states;
 
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
-use std::{
-    convert::From,
-    sync::{Arc, Mutex},
-    thread::JoinHandle,
-};
+use std::{convert::From, sync::{mpsc, Arc, Mutex}, thread::JoinHandle};
 
 #[tokio::main]
 async fn main() -> BoxResult {
+    let (tx, rx) = mpsc::channel();
+    std::thread::spawn(move || {
+        tx.send("test").unwrap();
+
+    });
+    println!("{:?}", rx.recv()?);
     let mut app = Application::default();
     app.start().await?;
 
     Ok(())
+}
+
+
+pub struct Conduit<T> {
+    pub receiver: mpsc::Receiver<T>,
+    pub sender: mpsc::Sender<T>,
+}
+
+impl<T> Conduit<T> {
+    pub fn new() -> Self {
+        let (sender, receiver) = mpsc::channel();
+        Self { receiver, sender }
+    }
+}
+
+impl<T> Default for Conduit<T> where T: Default {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 pub trait Handler<T: Send + Sync + 'static> {
@@ -32,7 +53,9 @@ pub trait Handler<T: Send + Sync + 'static> {
     fn spawn(&self) -> BoxResult<&Self>;
 }
 
-pub trait Contract: Send + Sync + 'static {}
+pub trait Contract: Send + Sync + 'static {
+
+}
 
 pub trait Transformation<S> {
     type Error;
@@ -44,15 +67,14 @@ pub trait Transformation<S> {
 pub trait Spawnable: Send + Sync + 'static {
     type Error;
     fn handle(&self) -> JoinHandle<&Self>;
+
 }
 
-pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(
-    data: S,
-    transform: fn(S) -> Arc<T>,
-) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn(move || {
+pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(data: S, transform: fn(S) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn( move || {
         std::thread::spawn(move || {
             tracing::info!("Spawned the detached thread");
+
         });
         transform(data.clone())
     });
@@ -60,18 +82,21 @@ pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'stati
     Ok(handle)
 }
 /// A minimal function wrapper for
-pub fn spawner<F: Send + Sync + 'static, T>(name: &str, handle: F) -> JoinHandle<F> {
-    std::thread::spawn(move || handle)
+pub fn spawner<F: Send + Sync + 'static, T>(handle: F) -> JoinHandle<F> {
+    std::thread::spawn( move || {
+        handle
+    })
 }
 
-pub fn handler<T: Send + Sync + 'static>(
-    data: T,
-    transform: fn(T) -> Arc<T>,
-) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn(move || transform(data));
+pub fn handler<T: Send + Sync + 'static>(data: T, transform: fn(T) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn( move || {
+        transform(data)
+    });
 
     Ok(handle)
 }
+
+
 
 pub trait AppSpec: Default {
     type Cnf;
@@ -102,21 +127,23 @@ impl Application {
         tracing::info!("Application initialized; completing setup...");
         Self { cnf, ctx, state }
     }
+    pub fn channels<T>(&self) -> Conduit<T> {
+        Conduit::new()
+    }
     /// Initialize the command line interface
     pub fn cli(&mut self) -> BoxResult<JoinHandle<Arc<cli::Cli>>> {
-        let handle = std::thread::Builder::new()
-            .name("runtime".to_string())
-            .spawn(move || {
-                let cli = Arc::from(cli::new());
+        let handle = std::thread::Builder::new().name("runtime".to_string()).spawn(move || {
+            let cli = Arc::from(cli::new());
 
-                cli.handle();
-                Arc::clone(&cli)
-            })?;
+            cli.handle();
+            Arc::clone(&cli)
+        })?;        
         Ok(handle)
     }
     /// Change the application state
     pub fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
         self.state = Arc::new(Mutex::new(state.clone()));
+        self.channels().sender.send(Arc::clone(&self.state)).unwrap();
         tracing::info!("Update: Application State updated to {}", state);
         Ok(self)
     }

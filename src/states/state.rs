@@ -43,23 +43,19 @@ where
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub struct State<T = String> {
-    pub message: Message<T>,
-
+pub struct State<T: Default + Display> {
+    pub message: States<T>,
     pub timestamp: Timestamp,
 }
 
-impl<T> State<T> {
-    pub fn new(message: Message<T>) -> Self {
+impl<T: Default + Display> State<T> {
+    pub fn new(message: States<T>) -> Self {
         let timestamp = Timestamp::default();
         Self { message, timestamp }
     }
 }
 
-impl<T> Default for State<T>
-where
-    T: Default,
-{
+impl<T: Default + Display> Default for State<T> {
     fn default() -> Self {
         Self::new(Default::default())
     }
