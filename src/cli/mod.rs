@@ -37,9 +37,20 @@ pub(crate) mod context {
         pub fn new() -> Self {
             Self::parse()
         }
-        pub async fn handle(&self, state: Arc<Mutex<States>>) -> BoxResult<&Self> {
+        pub fn locked(&self) -> Arc<Mutex<Self>> {
+            Arc::from(Mutex::new(self.clone()))
+        }
+        pub async fn handle(&self) -> std::thread::JoinHandle<Arc<Mutex<Self>>> {
+            let cli = self.locked();
+            let handle = std::thread::spawn(move || {
+                    cli.clone()
+                }
+            );
+            handle
+        }
+        pub async fn handler(&self, state: &mut Arc<Mutex<States>>) -> BoxResult<&Self> {
             if let Some(cmds) = self.command.clone() {
-                cmds.handle().await?;
+                cmds.handler().await?;
             }
             if self.debug {
                 std::env::set_var("RUST_LOG", "debug");

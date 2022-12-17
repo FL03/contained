@@ -31,7 +31,7 @@ VOLUME [ "/config" ]
 
 COPY --chown=55 --from=builder /workspace/target/release/conduit /bin/conduit
 
-FROM runner
+FROM runner-base as runner
 
 EXPOSE 80
 EXPOSE ${SERVER_PORT}

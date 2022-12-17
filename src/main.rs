@@ -13,7 +13,7 @@ pub mod states;
 
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
-use std::sync::{Arc, Mutex};
+use std::{convert::From, sync::{Arc, Mutex}, thread::JoinHandle};
 
 #[tokio::main]
 async fn main() -> BoxResult {
@@ -21,6 +21,20 @@ async fn main() -> BoxResult {
     app.start().await?;
 
     Ok(())
+}
+
+pub trait Handler<T: Send + Sync + 'static> {
+    fn handle(&self) -> JoinHandle<T>;
+    fn spawn(&self) -> BoxResult<&Self>;
+}
+
+
+pub fn handler<T: Send + Sync + 'static>(f: Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn( move || {
+        f
+    });
+
+    Ok(handle)
 }
 
 pub trait AppSpec: Default {
@@ -54,9 +68,16 @@ impl Application {
     }
     /// Initialize the command line interface
     pub async fn cli(&mut self) -> BoxResult<&Self> {
-        cli::Cli::default().handle(Arc::clone(self.state())).await?;
+        cli::Cli::default().handler(&mut Arc::clone(self.state())).await?;
         
         Ok(self)
+    }
+    pub async fn handle<T: Send + Sync + 'static>(&mut self, f: Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+        let handle = std::thread::spawn( move || {
+            f
+        });
+
+        Ok(handle)
     }
     /// Change the application state
     pub fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
@@ -92,13 +113,13 @@ impl Default for Application {
     }
 }
 
-impl std::convert::From<Settings> for Application {
+impl From<Settings> for Application {
     fn from(data: Settings) -> Self {
         Self::new(data.clone(), Context::from(data), Default::default())
     }
 }
 
-impl std::convert::From<Context> for Application {
+impl From<Context> for Application {
     fn from(data: Context) -> Self {
         Self::new(data.clone().cnf, data, Default::default())
     }
