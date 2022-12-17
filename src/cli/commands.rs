@@ -22,6 +22,7 @@ pub enum Commands {
 impl Commands {
     pub fn handler(&self) -> BoxResult<&Self> {
         tracing::info!("Processing commands issued to the cli...");
+        
         match self.clone() {
             Commands::Connect { address } => {
                 println!("{:?}", address);
@@ -34,4 +35,8 @@ impl Commands {
         }
         Ok(self)
     }
+}
+
+pub fn connect(address: String) -> BoxResult {
+    Ok(())
 }
