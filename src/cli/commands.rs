@@ -20,7 +20,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handler(&self) -> BoxResult<&Self> {
+    pub fn handler(&self) -> BoxResult<&Self> {
         tracing::info!("Processing commands issued to the cli...");
         match self.clone() {
             Commands::Connect { address } => {

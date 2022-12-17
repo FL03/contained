@@ -28,10 +28,44 @@ pub trait Handler<T: Send + Sync + 'static> {
     fn spawn(&self) -> BoxResult<&Self>;
 }
 
+pub trait Contract: Send + Sync + 'static {
 
-pub fn handler<T: Send + Sync + 'static>(f: Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+}
+
+pub trait Transformation<S> {
+    type Error;
+    type Res;
+
+    fn transform(&self, data: S) -> Result<Self::Res, Self::Error>;
+}
+
+pub trait Spawnable: Send + Sync + 'static {
+    type Error;
+    fn handle(&self) -> JoinHandle<&Self>;
+
+}
+
+pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(data: S, transform: fn(S) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
     let handle = std::thread::spawn( move || {
-        f
+        std::thread::spawn(move || {
+            tracing::info!("Spawned the detached thread");
+
+        });
+        transform(data.clone())
+    });
+
+    Ok(handle)
+}
+/// A minimal function wrapper for
+pub fn spawner<F: Send + Sync + 'static, T>(name: &str, handle: F) -> JoinHandle<F> {
+    std::thread::spawn( move || {
+        handle
+    })
+}
+
+pub fn handler<T: Send + Sync + 'static>(data: T, transform: fn(T) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn( move || {
+        transform(data)
     });
 
     Ok(handle)
@@ -67,16 +101,13 @@ impl Application {
         Self { cnf, ctx, state }
     }
     /// Initialize the command line interface
-    pub async fn cli(&mut self) -> BoxResult<&Self> {
-        cli::Cli::default().handler(&mut Arc::clone(self.state())).await?;
-        
-        Ok(self)
-    }
-    pub async fn handle<T: Send + Sync + 'static>(&mut self, f: Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
-        let handle = std::thread::spawn( move || {
-            f
-        });
+    pub fn cli(&mut self) -> BoxResult<JoinHandle<Arc<cli::Cli>>> {
+        let handle = std::thread::Builder::new().name("runtime".to_string()).spawn(move || {
+            let cli = Arc::from(cli::new());
 
+            cli.handle();
+            Arc::clone(&cli)
+        })?;        
         Ok(handle)
     }
     /// Change the application state
@@ -91,7 +122,8 @@ impl Application {
             json!({"startup": "success"}),
         )))?;
         // Fetch the initialized cli and process the results
-        self.cli().await?;
+        // self.cli().await?;
+        cli::new().handler()?;
         Ok(())
     }
     /// Function wrapper for returning the current application state

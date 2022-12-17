@@ -13,7 +13,6 @@ pub fn new() -> Cli {
 
 pub(crate) mod context {
     use super::Commands;
-    use crate::states::{State, States};
     use clap::Parser;
     use scsys::BoxResult;
     use serde::{Deserialize, Serialize};
@@ -40,7 +39,7 @@ pub(crate) mod context {
         pub fn locked(&self) -> Arc<Mutex<Self>> {
             Arc::from(Mutex::new(self.clone()))
         }
-        pub async fn handle(&self) -> std::thread::JoinHandle<Arc<Mutex<Self>>> {
+        pub fn handle(&self) -> std::thread::JoinHandle<Arc<Mutex<Self>>> {
             let cli = self.locked();
             let handle = std::thread::spawn(move || {
                     cli.clone()
@@ -48,9 +47,9 @@ pub(crate) mod context {
             );
             handle
         }
-        pub async fn handler(&self, state: &mut Arc<Mutex<States>>) -> BoxResult<&Self> {
+        pub fn handler(&self) -> BoxResult<&Self> {
             if let Some(cmds) = self.command.clone() {
-                cmds.handler().await?;
+                cmds.handler()?;
             }
             if self.debug {
                 std::env::set_var("RUST_LOG", "debug");
