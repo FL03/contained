@@ -9,7 +9,7 @@ use std::convert::From;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {
-    pub cnf: Settings
+    pub cnf: Settings,
 }
 
 impl Context {

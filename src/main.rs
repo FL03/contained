@@ -13,7 +13,11 @@ pub mod states;
 
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
-use std::{convert::From, sync::{Arc, Mutex}, thread::JoinHandle};
+use std::{
+    convert::From,
+    sync::{Arc, Mutex},
+    thread::JoinHandle,
+};
 
 #[tokio::main]
 async fn main() -> BoxResult {
@@ -28,9 +32,7 @@ pub trait Handler<T: Send + Sync + 'static> {
     fn spawn(&self) -> BoxResult<&Self>;
 }
 
-pub trait Contract: Send + Sync + 'static {
-
-}
+pub trait Contract: Send + Sync + 'static {}
 
 pub trait Transformation<S> {
     type Error;
@@ -42,14 +44,15 @@ pub trait Transformation<S> {
 pub trait Spawnable: Send + Sync + 'static {
     type Error;
     fn handle(&self) -> JoinHandle<&Self>;
-
 }
 
-pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(data: S, transform: fn(S) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn( move || {
+pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'static>(
+    data: S,
+    transform: fn(S) -> Arc<T>,
+) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn(move || {
         std::thread::spawn(move || {
             tracing::info!("Spawned the detached thread");
-
         });
         transform(data.clone())
     });
@@ -58,15 +61,14 @@ pub fn detached_handle<S: Clone + Send + Sync + 'static, T: Send + Sync + 'stati
 }
 /// A minimal function wrapper for
 pub fn spawner<F: Send + Sync + 'static, T>(name: &str, handle: F) -> JoinHandle<F> {
-    std::thread::spawn( move || {
-        handle
-    })
+    std::thread::spawn(move || handle)
 }
 
-pub fn handler<T: Send + Sync + 'static>(data: T, transform: fn(T) -> Arc<T>) -> BoxResult<JoinHandle<Arc<T>>> {
-    let handle = std::thread::spawn( move || {
-        transform(data)
-    });
+pub fn handler<T: Send + Sync + 'static>(
+    data: T,
+    transform: fn(T) -> Arc<T>,
+) -> BoxResult<JoinHandle<Arc<T>>> {
+    let handle = std::thread::spawn(move || transform(data));
 
     Ok(handle)
 }
@@ -102,12 +104,14 @@ impl Application {
     }
     /// Initialize the command line interface
     pub fn cli(&mut self) -> BoxResult<JoinHandle<Arc<cli::Cli>>> {
-        let handle = std::thread::Builder::new().name("runtime".to_string()).spawn(move || {
-            let cli = Arc::from(cli::new());
+        let handle = std::thread::Builder::new()
+            .name("runtime".to_string())
+            .spawn(move || {
+                let cli = Arc::from(cli::new());
 
-            cli.handle();
-            Arc::clone(&cli)
-        })?;        
+                cli.handle();
+                Arc::clone(&cli)
+            })?;
         Ok(handle)
     }
     /// Change the application state

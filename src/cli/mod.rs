@@ -41,10 +41,7 @@ pub(crate) mod context {
         }
         pub fn handle(&self) -> std::thread::JoinHandle<Arc<Mutex<Self>>> {
             let cli = self.locked();
-            let handle = std::thread::spawn(move || {
-                    cli.clone()
-                }
-            );
+            let handle = std::thread::spawn(move || cli.clone());
             handle
         }
         pub fn handler(&self) -> BoxResult<&Self> {
