@@ -12,6 +12,8 @@ version = "0.1.0" # TODO: Update the package version
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+name = "xtask"
+path = "src/lib.rs"
 test = true
 
 [build-dependencies]
