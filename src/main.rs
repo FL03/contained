@@ -11,6 +11,7 @@ pub(crate) mod settings;
 pub(crate) mod utils;
 
 pub mod cli;
+pub mod runtime;
 pub mod states;
 
 use scsys::prelude::{BoxResult, Message};
