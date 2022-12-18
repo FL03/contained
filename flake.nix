@@ -1,11 +1,24 @@
 {
-  description = "A very basic flake";
+  description = "A flake for building a Rust workspace using buildRustPackage.";
 
-  outputs = { self, nixpkgs }: {
-
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
-
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
-
+  inputs = {
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-utils.follows = "rust-overlay/flake-utils";
+    nixpkgs.follows = "rust-overlay/nixpkgs";
   };
+
+  outputs = inputs: with inputs;
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        code = pkgs.callPackage ./. { inherit nixpkgs system rust-overlay; };
+      in rec {
+        packages = {
+          default = pkgs.symlinkJoin {
+            name = "all";
+            paths = with code; [];
+          };
+        };
+      }
+    );
 }
