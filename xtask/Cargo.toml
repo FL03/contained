@@ -1,14 +1,14 @@
 [package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)", "Scattered-Systems (https://github.com/scattered-systems)"]
 categories = []
-description = "scsys-xtask"
+description = "xtask"
 edition = "2021"
-homepage = "https://github.com/scattered-systems/scsys/wiki"
+homepage = "https://github.com/FL03/conduit/wiki"
 keywords = [ "scsys" ]
 license = "Apache-2.0"
-name = "scsys-xtask"
-repository = "https://github.com/scattered-systems/scsys"
-version = "0.1.37" # TODO: Update the package version
+name = "conduit-xtask"
+repository = "https://github.com/FL03/conduit"
+version = "0.1.0" # TODO: Update the package version
 
 [lib]
 crate-type = ["cdylib", "rlib"]

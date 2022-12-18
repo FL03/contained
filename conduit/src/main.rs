@@ -20,10 +20,9 @@ use std::{
     convert::From,
     sync::{Arc, Mutex},
 };
-use tokio::{sync};
+use tokio::sync;
 
 pub async fn fundamental() -> Message {
-    
     Message::from(json!({"view": "inner"}))
 }
 
@@ -48,7 +47,7 @@ async fn main() -> BoxResult {
 pub async fn sample_handler() -> tokio::task::JoinHandle<BoxResult> {
     let _tmp = [0, 1, 2];
     tokio::spawn(async move {
-        for i in _tmp {  
+        for i in _tmp {
             println!("{}", Message::from(i))
         }
         Ok(())

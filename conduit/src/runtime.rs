@@ -9,7 +9,7 @@ use tokio::sync::mpsc::Receiver;
 
 #[derive(Debug)]
 pub struct Runtime {
-    pub(crate) state: Receiver<Arc<States>>
+    pub(crate) state: Receiver<Arc<States>>,
 }
 
 impl Runtime {

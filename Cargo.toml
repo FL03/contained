@@ -2,10 +2,11 @@
 default-members = [
     "conduit"
 ]
-exclude = [ ]
+exclude = [
+    "xtask"
+]
 members = [
     "conduit",
-    "xtask"
 ]
 
 [profile.dev]

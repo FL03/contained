@@ -3,28 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use std::{
-    path::{Path, PathBuf},
-    process::Command,
-};
+pub use self::utils::*;
+
+pub(crate) mod utils;
+
+pub mod cli;
 
 ///
-pub fn command(program: &str, args: Vec<&str>) -> anyhow::Result<()> {
-    let mut cmd = Command::new(program);
-    cmd.current_dir(project_root());
-    cmd.args(args.as_slice()).status()?;
-    Ok(())
-}
-
-/// Fetch the project root unless specified otherwise with a CARGO_MANIFEST_DIR env variable
-pub fn project_root() -> PathBuf {
-    Path::new(&env!("CARGO_MANIFEST_DIR"))
-        .ancestors()
-        .nth(1)
-        .unwrap()
-        .to_path_buf()
-}
-
+pub type Bundle<T = String> = std::collections::HashMap<T, Vec<Vec<T>>>;
+///
 #[macro_export]
 macro_rules! cmd {
     ($(
