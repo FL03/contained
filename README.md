@@ -4,7 +4,21 @@
 [![Docker](https://github.com/FL03/conduit/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/docker.yml)
 [![Rust](https://github.com/FL03/conduit/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/rust.yml)
 
-## Installation
+***
+
+Conduit is a simple command line interface designed for testing the proposed harmonic runtime which leverages the Neo-Riemannian Theory as a means of preserving the I/O from remote surfaces transformed according to some set of LPR transformations. This theory directly ties into to our desire to implement a dynamic encryption protocol combining fully-homomorphic encryption mechanisms with elliptic-curve cryptography, something more formally discussed under the guise of [aqueduct](https://github.com/scattered-systems/aqueduct).
+
+## Concepts
+
+### _Tonnetz_
+
+### _Triads_
+
+## Getting Started
+
+Make sure you have rust installed on your host device!
+
+### Building from the source
 
 Start by cloning the repository
 
@@ -16,8 +30,10 @@ cargo build --release --workspace
 
 ## Usage
 
-```rust
+### Builder
 
+```rust
+cargo xtask
 ```
 
 ## Contributing
