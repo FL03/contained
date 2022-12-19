@@ -59,4 +59,3 @@
 !**/*.env.example
 !**/*.config.js
 !**/*.config.cjs
-!**/flake.lock

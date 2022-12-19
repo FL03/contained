@@ -6,7 +6,6 @@
 use scsys::prelude::config::{Config, Environment};
 use scsys::prelude::{try_collect_config_files, ConfigResult, Configurable, Logger, Server};
 use serde::{Deserialize, Serialize};
-use std::env;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
@@ -42,10 +41,10 @@ impl Settings {
         if let Ok(files) = try_collect_config_files("**/Conduit.toml", false) {
             builder = builder.add_source(files);
         }
-        if let Ok(log) = env::var("RUST_LOG") {
+        if let Ok(log) = std::env::var("RUST_LOG") {
             builder = builder.set_override("logger.level", log)?;
         };
-        if let Ok(port) = env::var("SERVER_PORT") {
+        if let Ok(port) = std::env::var("SERVER_PORT") {
             builder = builder.set_override("server.port", port)?;
         };
         builder.build()?.try_deserialize()
