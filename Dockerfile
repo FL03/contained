@@ -1,14 +1,3 @@
-FROM scratch as volumes
-
-COPY --chown=55 . /config
-VOLUME [ "/workspace" ]
-
-COPY --chown=55 .config /config
-VOLUME [ "/config" ]
-
-RUN mkdir data
-VOLUME [ "/data" ]
-
 FROM rust:latest as base
 
 RUN apt-get update -y && apt-get upgrade -y
