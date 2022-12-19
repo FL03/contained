@@ -1,3 +1,14 @@
+FROM scratch as volumes
+
+COPY --chown=55 . /config
+VOLUME [ "/workspace" ]
+
+COPY --chown=55 .config /config
+VOLUME [ "/config" ]
+
+RUN mkdir data
+VOLUME [ "/data" ]
+
 FROM rust:latest as base
 
 RUN apt-get update -y && apt-get upgrade -y
@@ -26,7 +37,7 @@ RUN apt-get update -y && apt-get upgrade -y
 RUN mkdir data
 VOLUME [ "/data" ]
 
-COPY --chown=55 Conduit.toml /config/Conduit.toml
+COPY --chown=55 .config /config
 VOLUME [ "/config" ]
 
 COPY --chown=55 --from=builder /workspace/target/release/conduit /bin/conduit

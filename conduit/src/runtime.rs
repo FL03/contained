@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use crate::states::States;
-use std::sync::{Arc};
+use std::sync::Arc;
 use tokio::sync::mpsc::Receiver;
 
 #[derive(Debug)]

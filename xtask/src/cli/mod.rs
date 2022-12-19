@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::{commands::*, context::*};
+pub use self::{args::*, commands::*, context::*};
 
+pub(crate) mod args;
 pub(crate) mod commands;
 
 use std::{sync::Arc, thread::JoinHandle};
@@ -34,10 +35,6 @@ pub(crate) mod context {
         pub command: Option<Commands>,
         #[arg(action = clap::ArgAction::SetTrue, long, short)]
         pub debug: bool,
-        #[arg(action = clap::ArgAction::SetTrue, long)]
-        pub desktop: bool,
-        #[arg(action = clap::ArgAction::SetTrue, long, short)]
-        pub release: bool,
         #[arg(action = clap::ArgAction::SetTrue, long, short)]
         pub update: bool,
     }
@@ -46,10 +43,10 @@ pub(crate) mod context {
         pub fn new() -> Self {
             Self::parse()
         }
-        pub fn handler(&self) -> anyhow::Result<&Self> {
+        pub fn handler(&self) -> scsys::BoxResult<&Self> {
             if self.debug {}
             if let Some(cmds) = &self.command {
-                cmds.handler(self.desktop.clone(), self.release.clone())?;
+                cmds.handler()?;
             }
             Ok(self)
         }

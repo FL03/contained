@@ -5,6 +5,7 @@
 */
 pub use self::{commands::*, context::*};
 
+pub mod args;
 pub(crate) mod commands;
 
 pub fn new() -> Cli {

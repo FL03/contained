@@ -10,13 +10,13 @@ use std::{convert::From, path::PathBuf};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {
     pub cnf: Settings,
-    pub workdir: PathBuf
+    pub workdir: PathBuf,
 }
 
 impl Context {
     pub fn new(workdir: Option<PathBuf>) -> Self {
         let cnf = Settings::default();
-        let workdir = workdir.unwrap_or_else(|| project_root());
+        let workdir = workdir.unwrap_or_else(project_root);
         Self { cnf, workdir }
     }
     pub fn settings(&self) -> &Settings {
@@ -33,7 +33,10 @@ impl Context {
 
 impl From<Settings> for Context {
     fn from(data: Settings) -> Self {
-        Self { cnf: data, workdir: project_root() }
+        Self {
+            cnf: data,
+            workdir: project_root(),
+        }
     }
 }
 
