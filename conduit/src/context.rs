@@ -5,17 +5,19 @@
 */
 use crate::Settings;
 use serde::{Deserialize, Serialize};
-use std::convert::From;
+use std::{convert::From, path::PathBuf};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {
     pub cnf: Settings,
+    pub workdir: PathBuf
 }
 
 impl Context {
-    pub fn new() -> Self {
+    pub fn new(workdir: Option<PathBuf>) -> Self {
         let cnf = Settings::default();
-        Self { cnf }
+        let workdir = workdir.unwrap_or_else(|| project_root());
+        Self { cnf, workdir }
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
@@ -24,11 +26,14 @@ impl Context {
         self.cnf = cnf;
         self
     }
+    pub fn project_root(&self) -> std::path::PathBuf {
+        project_root()
+    }
 }
 
 impl From<Settings> for Context {
     fn from(data: Settings) -> Self {
-        Self { cnf: data }
+        Self { cnf: data, workdir: project_root() }
     }
 }
 
@@ -36,4 +41,12 @@ impl std::fmt::Display for Context {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(self).unwrap())
     }
+}
+
+fn project_root() -> std::path::PathBuf {
+    std::path::Path::new(&env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(1)
+        .unwrap()
+        .to_path_buf()
 }

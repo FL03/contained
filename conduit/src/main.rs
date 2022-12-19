@@ -20,7 +20,7 @@ use std::{
     convert::From,
     sync::{Arc, Mutex},
 };
-use tokio::sync;
+use tokio::{sync::mpsc::Sender, task::JoinHandle};
 
 pub async fn fundamental() -> Message {
     Message::from(json!({"view": "inner"}))
@@ -44,7 +44,7 @@ async fn main() -> BoxResult {
     Ok(())
 }
 
-pub async fn sample_handler() -> tokio::task::JoinHandle<BoxResult> {
+pub async fn sample_handler() -> JoinHandle<BoxResult> {
     let _tmp = [0, 1, 2];
     tokio::spawn(async move {
         for i in _tmp {
@@ -71,7 +71,7 @@ pub trait AppSpec: Default {
 
 #[derive(Debug)]
 pub struct ApplicationChannels {
-    pub state: sync::mpsc::Sender<Arc<states::States>>,
+    pub state: Sender<Arc<states::States>>,
 }
 
 #[derive(Clone, Debug)]
@@ -90,7 +90,7 @@ impl Application {
     }
     // initializes a pack of channels
     pub fn channels<T>(&self, buffer: usize) -> TokioChannelPackMPSC<T> {
-        sync::mpsc::channel::<T>(buffer)
+        tokio::sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
     pub async fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
@@ -110,7 +110,6 @@ impl Application {
         .await?;
         // Fetch the initialized cli and process the results
         cli.handle().await?;
-        // TODO: Broadcast the results on a channel
         self.set_state(states::States::Complete(Message::from(
             json!({"results": ""}),
         )))
