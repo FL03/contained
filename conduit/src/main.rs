@@ -22,18 +22,6 @@ use std::{
 };
 use tokio::{sync::mpsc::Sender, task::JoinHandle};
 
-pub async fn fundamental() -> Message {
-    Message::from(json!({"view": "inner"}))
-}
-
-pub async fn middle(msg: Message) -> Message {
-    msg
-}
-
-pub async fn outer(msg: Message) -> Message {
-    msg
-}
-
 #[tokio::main]
 async fn main() -> BoxResult {
     // Create an application instance

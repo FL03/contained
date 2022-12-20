@@ -5,7 +5,7 @@
 */
 use crate::Settings;
 use serde::{Deserialize, Serialize};
-use std::{convert::From, path::PathBuf};
+use std::{convert::From, path::{Path, PathBuf}};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {
@@ -26,8 +26,8 @@ impl Context {
         self.cnf = cnf;
         self
     }
-    pub fn project_root(&self) -> std::path::PathBuf {
-        project_root()
+    pub fn workdir(&self) -> &PathBuf {
+        &self.workdir
     }
 }
 
@@ -46,8 +46,8 @@ impl std::fmt::Display for Context {
     }
 }
 
-fn project_root() -> std::path::PathBuf {
-    std::path::Path::new(&env!("CARGO_MANIFEST_DIR"))
+fn project_root() -> PathBuf {
+    Path::new(&env!("CARGO_MANIFEST_DIR"))
         .ancestors()
         .nth(1)
         .unwrap()

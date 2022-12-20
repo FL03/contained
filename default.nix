@@ -12,7 +12,7 @@ let
   rustDefaultTarget = rustPkgs.rust-bin.stable.${rustVersion}.default;
 
   rustWithWasmTarget = rustPkgs.rust-bin.nightly.${rustVersion}.default.override {
-    targets = [ wasmUnknownUknown, wasm32Wasi ];
+    targets = [ wasmUnknownUknown ];
   };
 
   rustPlatform = makeRustPlatform {
@@ -37,7 +37,7 @@ let
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
   };
 in {
-  workspace = pkgs.rustPlatform.buildRustPackage (common // {
+  workspace = pkgs.rustPlatformWasm.buildRustPackage (common // {
     cargoBuildFlags = "--release --workspace";
   });
 }
