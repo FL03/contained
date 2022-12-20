@@ -5,7 +5,10 @@
 */
 use crate::Settings;
 use serde::{Deserialize, Serialize};
-use std::{convert::From, path::{Path, PathBuf}};
+use std::{
+    convert::From,
+    path::{Path, PathBuf},
+};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {

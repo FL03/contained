@@ -21,7 +21,10 @@ impl System {
         Ok(self)
     }
     pub fn handler(&self) -> BoxResult<&Self> {
-        tracing::info!("Setting up the workspace...");
+        tracing::debug!("System processing...");
+        if self.up {
+            tracing::info!("Success: Booting up the application...");
+        }
         self.commands()?;
         Ok(self)
     }
