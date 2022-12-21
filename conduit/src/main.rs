@@ -3,17 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{context::*, primitives::*, settings::*, utils::*};
+pub use self::{context::*, settings::*};
 
 pub(crate) mod context;
-pub(crate) mod primitives;
 pub(crate) mod settings;
-pub(crate) mod utils;
 
 pub mod cli;
-pub mod runtime;
-pub mod states;
+pub mod server;
 
+use conduit_sdk::prelude::{AppSpec, Locked, States, TokioChannelPackMPSC};
 use scsys::prelude::{BoxResult, Message};
 use serde_json::json;
 use std::{
@@ -42,35 +40,20 @@ pub async fn sample_handler() -> JoinHandle<BoxResult> {
     })
 }
 
-pub trait AppSpec: Default {
-    type Cnf;
-    type Ctx;
-    type State;
-    fn init() -> Self;
-    fn context(&self) -> Self::Ctx;
-    fn name(&self) -> String;
-    fn settings(&self) -> Self::Cnf;
-    fn setup(&mut self) -> BoxResult<&Self>;
-    fn slug(&self) -> String {
-        self.name().to_ascii_lowercase()
-    }
-    fn state(&self) -> &Locked<states::States>;
-}
-
 #[derive(Debug)]
 pub struct ApplicationChannels {
-    pub state: Sender<Arc<states::States>>,
+    pub state: Sender<Arc<States>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Application {
     pub cnf: Settings,
     pub ctx: Context,
-    pub state: Locked<states::States>,
+    pub state: Locked<States>,
 }
 
 impl Application {
-    pub fn new(cnf: Settings, ctx: Context, state: Locked<states::States>) -> Self {
+    pub fn new(cnf: Settings, ctx: Context, state: Locked<States>) -> Self {
         cnf.logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::info!("Application initialized; completing setup...");
@@ -81,7 +64,7 @@ impl Application {
         tokio::sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
-    pub async fn set_state(&mut self, state: states::States) -> BoxResult<&Self> {
+    pub async fn set_state(&mut self, state: States) -> BoxResult<&Self> {
         // Update the application state
         self.state = Arc::new(Mutex::new(state.clone()));
         // Post the change of state to the according channel(s)
@@ -92,20 +75,16 @@ impl Application {
     /// Application runtime
     pub async fn runtime(&mut self) -> BoxResult {
         let cli = cli::new();
-        self.set_state(states::States::Process(Message::from(
-            json!({"cli": cli.clone()}),
-        )))
-        .await?;
+        self.set_state(States::Process(Message::from(json!({"cli": cli.clone()}))))
+            .await?;
         // Fetch the initialized cli and process the results
         cli.handle().await?;
-        self.set_state(states::States::Complete(Message::from(
-            json!({"results": ""}),
-        )))
-        .await?;
+        self.set_state(States::Complete(Message::from(json!({"results": ""}))))
+            .await?;
         Ok(())
     }
     /// Function wrapper for returning the current application state
-    pub fn state(&self) -> &Locked<states::States> {
+    pub fn state(&self) -> &Locked<States> {
         &self.state
     }
     /// AIO method for running the initialized application
@@ -122,7 +101,7 @@ impl AppSpec for Application {
 
     type Ctx = Context;
 
-    type State = states::States;
+    type State = States;
 
     fn init() -> Self {
         Self::default()
@@ -147,7 +126,7 @@ impl AppSpec for Application {
         Ok(self)
     }
 
-    fn state(&self) -> &Arc<Mutex<states::States>> {
+    fn state(&self) -> &Locked<States> {
         &self.state
     }
 }

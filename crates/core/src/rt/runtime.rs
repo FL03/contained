@@ -1,7 +1,7 @@
 /*
     Appellation: runtime <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description: ... Summary ...
 */
 use crate::states::States;
 use std::sync::Arc;
@@ -15,5 +15,12 @@ pub struct Runtime {
 impl Runtime {
     pub fn new(state: Receiver<Arc<States>>) -> Self {
         Self { state }
+    }
+}
+
+impl Default for Runtime {
+    fn default() -> Self {
+        let (_tx, rx) = tokio::sync::mpsc::channel(1);
+        Self::new(rx)
     }
 }

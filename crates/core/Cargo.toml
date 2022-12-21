@@ -1,0 +1,31 @@
+[package]
+authors = ["FL03 <jo3mccain@icloud.com>"]
+categories = []
+description = "Conduit is a command line interface"
+edition = "2021"
+homepage = "https://github.com/FL03/conduit/wiki"
+keywords = []
+license = "Apache-2.0"
+name = "conduit-core"
+repository = "https://github.com/FL03/conduit"
+version = "0.1.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+test = true
+
+[build-dependencies]
+
+[dependencies]
+clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
+scsys = { features = [], version = "0.1.37" }
+serde = { features = ["derive"], version = "1.0.151" }
+serde_json = "1.0.91"
+strum = { features = ["derive"], version = "0.24.1" }
+tokio = { features = ["macros", "signal"], version = "1.23.0" }
+
+[dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]

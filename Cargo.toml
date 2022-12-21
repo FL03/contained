@@ -1,12 +1,15 @@
 [workspace]
 default-members = [
-    "conduit"
+    "conduit",
+    "crates/sdk"
 ]
 exclude = [
     "xtask"
 ]
 members = [
     "conduit",
+    "crates/core",
+    "crates/sdk"
     # "xtask"
 ]
 
