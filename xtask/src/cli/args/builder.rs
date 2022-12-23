@@ -4,8 +4,8 @@
     Description: ... Summary ...
 */
 use crate::command;
+use anyhow::Result;
 use clap::Args;
-use scsys::BoxResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Args, Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -20,7 +20,7 @@ impl Builder {
     pub fn new(release: bool, workspace: bool) -> Self {
         Self { release, workspace }
     }
-    fn commands(&self) -> BoxResult<&Self> {
+    fn commands(&self) -> Result<&Self> {
         let mut args = vec!["build"];
         
         if self.release {
@@ -32,7 +32,7 @@ impl Builder {
         command("cargo", args)?;
         Ok(self)
     }
-    pub fn handler(&self) -> BoxResult<&Self> {
+    pub fn handler(&self) -> Result<&Self> {
         tracing::info!("Building the workspace...");
         self.commands()?;
         Ok(self)

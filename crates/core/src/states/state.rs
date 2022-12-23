@@ -8,6 +8,12 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use strum::{EnumString, EnumVariantNames};
 
+pub trait Stateful {
+    fn name(self) -> String;
+    fn state(self) -> Self;
+    fn timestamp(self) -> i64;
+}
+
 #[derive(
     Clone, Debug, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, Serialize,
 )]

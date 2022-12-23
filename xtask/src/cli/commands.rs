@@ -4,8 +4,8 @@
     Description: ... Summary ...
 */
 use super::{Auto, Builder, Runner, Setup};
+use anyhow::Result;
 use clap::Subcommand;
-use scsys::BoxResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Hash, PartialEq, Serialize, Subcommand)]
@@ -17,7 +17,7 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub fn handler(&self) -> BoxResult<&Self> {
+    pub fn handler(&self) -> Result<&Self> {
         tracing::info!("Processing commands issued to the cli...");
         match self {
             Self::Auto(auto) => {

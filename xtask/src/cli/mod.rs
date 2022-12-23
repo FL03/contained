@@ -25,6 +25,7 @@ pub fn handle() -> JoinHandle<Arc<CommandLineInterface>> {
 
 pub(crate) mod context {
     use super::Commands;
+    use anyhow::Result;
     use clap::Parser;
 
     #[derive(Clone, Debug, Hash, Parser, PartialEq)]
@@ -43,7 +44,7 @@ pub(crate) mod context {
         pub fn new() -> Self {
             Self::parse()
         }
-        pub fn handler(&self) -> scsys::BoxResult<&Self> {
+        pub fn handler(&self) -> Result<&Self> {
             if self.debug {}
             if let Some(cmds) = &self.command {
                 cmds.handler()?;

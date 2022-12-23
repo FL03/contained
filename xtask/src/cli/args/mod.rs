@@ -11,15 +11,15 @@ pub(crate) mod setup;
 
 pub(crate) mod auto {
     use crate::command;
+    use anyhow::Result;
     use clap::Args;
-    use scsys::BoxResult;
     use serde::{Deserialize, Serialize};
 
     #[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
     pub struct Auto {}
 
     impl Auto {
-        fn testing(&self) -> BoxResult<&Self> {
+        fn testing(&self) -> Result<&Self> {
             tracing::info!("Testing the workspace...");
 
             command(
@@ -28,7 +28,7 @@ pub(crate) mod auto {
             )?;
             Ok(self)
         }
-        pub fn handler(&self) -> BoxResult<&Self> {
+        pub fn handler(&self) -> Result<&Self> {
             tracing::info!("Initializing the CI/CD pipeline");
             tracing::info!("Formatting the codespace...");
             command("cargo", vec!["fmt", "--all"])?;

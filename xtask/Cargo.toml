@@ -20,13 +20,11 @@ test = true
 
 [dependencies]
 anyhow = "1.0.66"
-clap = { features = ["derive"], version = "4.0.29" }
+clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 devx-cmd = "0.5.0"
 devx-pre-commit = "0.5.0" 
 duct = "0.13.6"
-log = "0.4.17"
 man = "0.3.0"
-scsys = "0.1.37"
 serde = { features = ["derive"], version = "1.0.151" }
 serde_json = "1.0.91"
 tracing = "0.1.37"

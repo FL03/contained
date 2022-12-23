@@ -4,8 +4,8 @@
     Description: ... Summary ...
 */
 use crate::command;
+use anyhow::Result;
 use clap::Args;
-use scsys::BoxResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -20,7 +20,7 @@ impl Runner {
     pub fn new(package: Option<String>, release: bool) -> Self {
         Self { package, release }
     }
-    fn commands(&self) -> BoxResult<&Self> {
+    fn commands(&self) -> Result<&Self> {
         let mut args = vec!["run"];
         if self.release {
             args.push("--release");
@@ -30,7 +30,7 @@ impl Runner {
         command("cargo", args.clone())?;
         Ok(self)
     }
-    pub fn handler(&self) -> BoxResult<&Self> {
+    pub fn handler(&self) -> Result<&Self> {
         tracing::info!("Initializing the application...");
         self.commands()?;
         Ok(self)
