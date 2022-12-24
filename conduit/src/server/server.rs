@@ -14,17 +14,34 @@ pub struct ServerParams {
 }
 
 impl ServerParams {
-    pub fn new(address: SocketAddr) -> Self {
+    pub fn new(host: Option<[u8; 4]>, port: u16) -> Self {
+        let address = SocketAddr::from((host.unwrap_or([127, 0, 0, 1]), port));
+        Self { address }
+    }
+    pub fn address(&self) -> SocketAddr {
+        self.address
+    }
+}
+
+impl From<([u8; 4], u16)> for ServerParams {
+    fn from(data: ([u8; 4], u16)) -> Self {
+        let address = SocketAddr::from(data);
+        Self::from(address)
+    }
+}
+
+impl From<SocketAddr> for ServerParams {
+    fn from(address: SocketAddr) -> Self {
         Self { address }
     }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct AppServer {
+pub struct Server {
     pub params: ServerParams,
 }
 
-impl AppServer {
+impl Server {
     pub fn new(params: ServerParams) -> Self {
         Self { params }
     }
