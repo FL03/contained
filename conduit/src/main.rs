@@ -11,9 +11,9 @@ pub(crate) mod settings;
 pub mod cli;
 pub mod server;
 
-use conduit_sdk::prelude::{AppSpec, Locked, States, TokioChannelPackMPSC};
+use conduit_sdk::prelude::{AppSpec, Locked, State, States, TokioChannelPackMPSC};
 use scsys::prelude::{BoxResult, Message};
-use serde_json::json;
+
 use std::{
     convert::From,
     sync::{Arc, Mutex},
@@ -42,18 +42,18 @@ pub async fn sample_handler() -> JoinHandle<BoxResult> {
 
 #[derive(Debug)]
 pub struct ApplicationChannels {
-    pub state: Sender<Arc<States>>,
+    pub state: Sender<Arc<State>>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Application {
     pub cnf: Settings,
     pub ctx: Context,
-    pub state: Locked<States>,
+    pub state: Locked<State>,
 }
 
 impl Application {
-    pub fn new(cnf: Settings, ctx: Context, state: Locked<States>) -> Self {
+    pub fn new(cnf: Settings, ctx: Context, state: Locked<State>) -> Self {
         cnf.logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::info!("Application initialized; completing setup...");
@@ -64,7 +64,7 @@ impl Application {
         tokio::sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
-    pub async fn set_state(&mut self, state: States) -> BoxResult<&Self> {
+    pub async fn set_state(&mut self, state: State) -> BoxResult<&Self> {
         // Update the application state
         self.state = Arc::new(Mutex::new(state.clone()));
         // Post the change of state to the according channel(s)
@@ -75,16 +75,16 @@ impl Application {
     /// Application runtime
     pub async fn runtime(&mut self) -> BoxResult {
         let cli = cli::new();
-        self.set_state(States::Process(Message::from(json!({"cli": cli.clone()}))))
+        self.set_state(State::new(Message::from("".to_string()), States::Process))
             .await?;
         // Fetch the initialized cli and process the results
         cli.handle().await?;
-        self.set_state(States::Complete(Message::from(json!({"results": ""}))))
+        self.set_state(State::new(Message::from("".to_string()), States::Complete))
             .await?;
         Ok(())
     }
     /// Function wrapper for returning the current application state
-    pub fn state(&self) -> &Locked<States> {
+    pub fn state(&self) -> &Locked<State> {
         &self.state
     }
     /// AIO method for running the initialized application
@@ -101,7 +101,7 @@ impl AppSpec for Application {
 
     type Ctx = Context;
 
-    type State = States;
+    type State = State;
 
     fn init() -> Self {
         Self::default()
@@ -126,7 +126,7 @@ impl AppSpec for Application {
         Ok(self)
     }
 
-    fn state(&self) -> &Locked<States> {
+    fn state(&self) -> &Locked<State> {
         &self.state
     }
 }

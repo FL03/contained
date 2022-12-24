@@ -7,8 +7,8 @@ pub use self::{state::*, utils::*};
 
 pub(crate) mod state;
 
-pub fn new() -> States {
-    States::default()
+pub fn new() -> State {
+    State::default()
 }
 
 pub(crate) mod utils {}

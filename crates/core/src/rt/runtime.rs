@@ -3,17 +3,17 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::states::States;
+use crate::states::State;
 use std::sync::Arc;
 use tokio::sync::mpsc::Receiver;
 
 #[derive(Debug)]
 pub struct Runtime {
-    pub(crate) state: Receiver<Arc<States>>,
+    pub(crate) state: Receiver<Arc<State>>,
 }
 
 impl Runtime {
-    pub fn new(state: Receiver<Arc<States>>) -> Self {
+    pub fn new(state: Receiver<Arc<State>>) -> Self {
         Self { state }
     }
 }
