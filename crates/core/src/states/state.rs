@@ -5,7 +5,6 @@
 */
 use scsys::prelude::{Id, Message, Timestamp};
 use serde::{Deserialize, Serialize};
-
 use strum::{EnumString, EnumVariantNames};
 
 pub trait Stateful<S> {
@@ -13,6 +12,13 @@ pub trait Stateful<S> {
     fn message(self) -> Self::Msg;
     fn state(self) -> S;
     fn timestamp(self) -> i64;
+}
+
+pub trait StatefulExt<S>: Stateful<S> {
+    fn now() -> i64 {
+        Timestamp::default().into()
+    }
+    fn update_state(&mut self, msg: Option<Self::Msg>, state: S) -> &Self;
 }
 
 #[derive(
@@ -48,6 +54,12 @@ impl std::fmt::Display for States {
             "{}",
             crate::fnl_remove(serde_json::to_string(&self).unwrap())
         )
+    }
+}
+
+impl From<States> for i64 {
+    fn from(val: States) -> Self {
+        val as i64
     }
 }
 
@@ -87,6 +99,13 @@ impl<T: Default> Stateful<States> for State<T> {
         self.timestamp
     }
 }
+impl<T: Default> StatefulExt<States> for State<T> {
+    fn update_state(&mut self, msg: Option<Self::Msg>, state: States) -> &Self {
+        self.message = msg.unwrap_or_default();
+        self.state = state;
+        self
+    }
+}
 
 impl<T: Default> Default for State<T> {
     fn default() -> Self {
@@ -122,8 +141,12 @@ mod tests {
     #[test]
     fn test_default_state() {
         let a = State::<serde_json::Value>::default();
-        let b = a.clone();
+        let mut b = a.clone();
 
-        assert_eq!(a, b)
+        assert_eq!(&a, &b);
+        assert_eq!(a.state() as i64, 1);
+
+        b.update_state(None, States::Complete);
+        assert_eq!(b.state(), States::Complete)
     }
 }
