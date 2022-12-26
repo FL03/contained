@@ -21,12 +21,12 @@ test = true
 [dependencies]
 anyhow = "1.0.66"
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
+config = "0.13.3"
 devx-cmd = "0.5.0"
 devx-pre-commit = "0.5.0" 
 duct = "0.13.6"
-man = "0.3.0"
-serde = { features = ["derive"], version = "1.0.151" }
-serde_json = "1.0.91"
+serde = { features = ["derive"], version = "1" }
+serde_json = "1"
 tracing = "0.1.37"
 tracing-subscriber = "0.3.16"
 

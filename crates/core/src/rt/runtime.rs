@@ -3,22 +3,22 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::states::State;
+use scsys::prelude::{State, StatePack};
 use std::sync::Arc;
 use tokio::sync::mpsc::Receiver;
 
 #[derive(Debug)]
-pub struct Runtime {
-    pub(crate) state: Receiver<Arc<State>>,
+pub struct Runtime<S: StatePack> {
+    pub(crate) state: Receiver<Arc<State<S>>>,
 }
 
-impl Runtime {
-    pub fn new(state: Receiver<Arc<State>>) -> Self {
+impl<S: StatePack> Runtime<S> {
+    pub fn new(state: Receiver<Arc<State<S>>>) -> Self {
         Self { state }
     }
 }
 
-impl Default for Runtime {
+impl<S: StatePack> Default for Runtime<S> {
     fn default() -> Self {
         let (_tx, rx) = tokio::sync::mpsc::channel(1);
         Self::new(rx)

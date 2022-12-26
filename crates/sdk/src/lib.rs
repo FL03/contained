@@ -10,5 +10,5 @@ pub mod prelude {
     pub use super::*;
 
     #[cfg(feature = "core")]
-    pub use super::{rt::*, states::*};
+    pub use super::{rt::*};
 }
