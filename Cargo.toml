@@ -1,16 +1,12 @@
 [workspace]
 default-members = [
-    "conduit",
-    "crates/sdk"
+    "conduit"
 ]
 exclude = [
     "xtask"
 ]
 members = [
-    "conduit",
-    "crates/core",
-    "crates/sdk"
-    # "xtask"
+    "conduit"
 ]
 
 [profile.dev]
@@ -19,7 +15,7 @@ debug = true
 debug-assertions = true
 incremental = true
 lto = false
-panic = 'unwind'
+panic = "unwind"
 rpath = false
 opt-level = 0
 overflow-checks = true
@@ -30,7 +26,7 @@ debug = false
 debug-assertions = false
 incremental = false
 lto = false
-panic = 'unwind'
+panic = "unwind"
 rpath = false
-opt-level = 'z'
+opt-level = "z"
 overflow-checks = false

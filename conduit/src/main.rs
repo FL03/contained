@@ -12,7 +12,7 @@ pub(crate) mod states;
 pub mod cli;
 pub mod server;
 
-use conduit_sdk::prelude::{AppSpec, TokioChannelPackMPSC};
+use acme::prelude::AppSpec;
 use scsys::prelude::{BoxResult, Locked, Message, State};
 
 use std::{
@@ -20,6 +20,11 @@ use std::{
     sync::{Arc, Mutex},
 };
 use tokio::{sync::mpsc::Sender, task::JoinHandle};
+
+///
+pub type ChannelPackStd<T> = (std::sync::mpsc::Sender<T>, std::sync::mpsc::Receiver<T>);
+///
+pub type TokioChannelPackMPSC<T> = (tokio::sync::mpsc::Sender<T>, tokio::sync::mpsc::Receiver<T>);
 
 #[tokio::main]
 async fn main() -> BoxResult {

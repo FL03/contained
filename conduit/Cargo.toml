@@ -21,7 +21,7 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme = { features = [], git = "https://github.com/FL03/acme", branch = "v0.2.3", version = "0.2.3" }
+acme = { features = [], version = "0.2.3" }
 axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"
@@ -36,11 +36,6 @@ tower = "0.4.13"
 tower-http = { features = ["full"], version = "0.3.5" }
 tracing = "0.1.37"
 tracing-subscriber = { features = ["env-filter"], version = "0.3.16" }
-
-[dependencies.conduit-sdk]
-features = ["full"]
-path = "../crates/sdk"
-version = "0.1.0"
 
 [package.metadata.docs.rs]
 all-features = true
