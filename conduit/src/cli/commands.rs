@@ -1,39 +1,37 @@
 /*
     Appellation: commands <module>
-    Contributors: FL03 <jo3mccain@icloud.com>
+    Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::args::*;
+use super::args::{Services, System};
 use clap::Subcommand;
-use scsys::BoxResult;
+use scsys::AsyncResult;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, Subcommand)]
+#[derive(Clone, Debug, Deserialize, Hash, PartialEq, Eq, Serialize, Subcommand)]
 pub enum Commands {
-    Connect(Connector),
+    Account {
+        #[clap(long, short, value_parser)]
+        address: String,
+    },
+    Services(Services),
     System(System),
 }
 
 impl Commands {
-    pub fn handle(&self) -> tokio::task::JoinHandle<Arc<Self>> {
-        let cmds = Arc::new(self.clone());
-        tokio::spawn(async move {
-            cmds.handler().ok().unwrap();
-            println!("{:?}", cmds.clone());
-            cmds
-        })
-    }
-    pub fn handler(&self) -> BoxResult<&Self> {
+    pub async fn handler(&self) -> AsyncResult<&Self> {
         tracing::info!("Processing commands issued to the cli...");
-        match self.clone() {
-            Commands::Connect(connector) => {
-                connector.handler()?;
+        match self {
+            Self::Account { address } => {
+                println!("{:?}", address);
             }
-            Commands::System(system) => {
-                system.handler()?;
+            Self::Services(services) => {
+                services.handler().await?;
             }
-        }
+            Self::System(system) => {
+                system.handler().await?;
+            }
+        };
         Ok(self)
     }
 }

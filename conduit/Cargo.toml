@@ -21,7 +21,7 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme = { features = [], version = "0.2.3" }
+acme = { features = ["full"], version = "0.2.3" }
 axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"

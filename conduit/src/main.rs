@@ -9,8 +9,8 @@ pub(crate) mod context;
 pub(crate) mod settings;
 pub(crate) mod states;
 
+pub mod api;
 pub mod cli;
-pub mod server;
 
 use acme::prelude::AppSpec;
 use scsys::prelude::{BoxResult, Locked, Message, State};
@@ -84,7 +84,7 @@ impl Application {
         self.set_state(State::new(None, None, Some(States::Process)))
             .await?;
         // Fetch the initialized cli and process the results
-        cli.handle().await?;
+        cli.handler().await?;
         self.set_state(State::new(None, None, Some(States::Complete)))
             .await?;
         Ok(())
