@@ -89,10 +89,6 @@ impl Application {
             .await?;
         Ok(())
     }
-    /// Function wrapper for returning the current application state
-    pub fn state(&self) -> &Locked<State<States>> {
-        &self.state
-    }
     /// AIO method for running the initialized application
     pub async fn start(&mut self) -> BoxResult<&Self> {
         tracing::info!("Startup: Application initializing...");
