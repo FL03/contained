@@ -28,7 +28,7 @@ pub type TokioChannelPackMPSC<T> = (tokio::sync::mpsc::Sender<T>, tokio::sync::m
 async fn main() -> BoxResult {
     let oai = conduit_services::OpenAI::from_env(Some("OPENAI_SECRET_KEY"));
     let req = oai.create_request("What is music theory?");
-    println!("{:?}", oai.response(req).await?);
+    println!("{:?}", conduit_services::Notion::from_env(None).client()?.list_databases().await?);
     // Create an application instance
     let mut app = Application::default();
     // Quickstart the application runtime with the following command
