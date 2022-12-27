@@ -6,40 +6,33 @@ edition = "2021"
 homepage = "https://github.com/FL03/conduit/wiki"
 keywords = []
 license = "Apache-2.0"
-name = "conduit"
+name = "conduit-services"
 repository = "https://github.com/FL03/conduit"
 version = "0.1.0"
 
-[[bin]]
-bench = false
-name = "conduit"
-path = "src/main.rs"
-test = true
 
 [build-dependencies]
 
 [dev-dependencies]
 
 [dependencies]
-acme = { features = ["full"], git = "https://github.com/FL03/acme", branch = "v0.2.4", version = "0.2.4" }
-axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
+acme = { features = [], git = "https://github.com/FL03/acme", branch = "v0.2.4", version = "0.2.4" }
+async-openai = "0.2.0"
+axum-core = "0.3.0"
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"
 http = "0.2.8"
 hyper = { features = ["full"], version = "0.14.23" }
+notion = "0.4.1"
 scsys = { features = ["full"], version = "0.1.38" }
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
 strum = { features = ["derive"], version = "0.24.1" }
-tokio = { features = ["full"], version = "1.23.0" }
+tokio = { features = ["macros", "process", "signal"], version = "1.23.0" }
 tower = "0.4.13"
 tower-http = { features = ["full"], version = "0.3.5" }
 tracing = "0.1.37"
 tracing-subscriber = { features = ["env-filter"], version = "0.3.16" }
-
-[dependencies.conduit-services]
-path = "../crates/services"
-version = "0.1.0"
 
 [package.metadata.docs.rs]
 all-features = true

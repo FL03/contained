@@ -8,6 +8,12 @@ use scsys::prelude::{try_collect_config_files, ConfigResult, Configurable, Logge
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub enum Services {
+    Notion { token: String },
+    OpenAI { secret: String },
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
     pub logger: Logger,
     pub mode: String,

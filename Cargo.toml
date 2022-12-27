@@ -6,7 +6,8 @@ exclude = [
     "xtask"
 ]
 members = [
-    "conduit"
+    "conduit",
+    "crates/*"
 ]
 
 [profile.dev]

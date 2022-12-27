@@ -13,13 +13,11 @@ pub mod api;
 pub mod cli;
 
 use acme::prelude::AppSpec;
-use scsys::prelude::{BoxResult, Locked, Message, State};
-
+use scsys::prelude::{BoxResult, Locked, State};
 use std::{
     convert::From,
     sync::{Arc, Mutex},
 };
-use tokio::{sync::mpsc::Sender, task::JoinHandle};
 
 ///
 pub type ChannelPackStd<T> = (std::sync::mpsc::Sender<T>, std::sync::mpsc::Receiver<T>);
@@ -28,27 +26,15 @@ pub type TokioChannelPackMPSC<T> = (tokio::sync::mpsc::Sender<T>, tokio::sync::m
 
 #[tokio::main]
 async fn main() -> BoxResult {
+    let oai = conduit_services::OpenAI::from_env(Some("OPENAI_SECRET_KEY"));
+    let req = oai.create_request("What is music theory?");
+    println!("{:?}", oai.response(req).await?);
     // Create an application instance
     let mut app = Application::default();
     // Quickstart the application runtime with the following command
     app.start().await?;
 
     Ok(())
-}
-
-pub async fn sample_handler() -> JoinHandle<BoxResult> {
-    let _tmp = [0, 1, 2];
-    tokio::spawn(async move {
-        for i in _tmp {
-            println!("{}", Message::from(i))
-        }
-        Ok(())
-    })
-}
-
-#[derive(Debug)]
-pub struct ApplicationChannels {
-    pub state: Sender<Arc<State<States>>>,
 }
 
 #[derive(Clone, Debug)]
@@ -97,7 +83,6 @@ impl Application {
         Ok(self)
     }
 }
-
 
 impl AppSpec for Application {
     type Cnf = Settings;

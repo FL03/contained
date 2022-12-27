@@ -27,9 +27,7 @@ impl States {
     }
 }
 
-impl StatePack for States {
-
-}
+impl StatePack for States {}
 
 impl Default for States {
     fn default() -> Self {
@@ -52,7 +50,6 @@ impl From<States> for i64 {
         val as i64
     }
 }
-
 
 #[cfg(test)]
 mod tests {
