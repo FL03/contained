@@ -21,15 +21,15 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme = { features = ["full"], version = "0.2.3" }
+acme = { features = ["full"], git = "https://github.com/FL03/acme", branch = "v0.2.4", version = "0.2.4" }
 axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"
 http = "0.2.8"
 hyper = { features = ["full"], version = "0.14.23" }
-scsys = { features = ["full"], version = "0.1.37" }
-serde = { features = ["derive"], version = "1.0.151" }
-serde_json = "1.0.90"
+scsys = { features = ["full"], version = "0.1.38" }
+serde = { features = ["derive"], version = "1" }
+serde_json = "1"
 strum = { features = ["derive"], version = "0.24.1" }
 tokio = { features = ["full"], version = "1.23.0" }
 tower = "0.4.13"

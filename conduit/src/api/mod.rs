@@ -17,9 +17,9 @@ pub fn from_context(ctx: crate::Context) -> Api {
 
 pub(crate) mod interface {
     use crate::{api::routes, Context};
+    use acme::servers::{Server, ServerSpec};
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
-    use acme::servers::{Server, ServerSpec};
     use scsys::AsyncResult;
     use serde::{Deserialize, Serialize};
     use tower_http::{
@@ -43,8 +43,7 @@ pub(crate) mod interface {
         pub async fn client(&self) -> Router {
             let mut router = Router::new();
             // Merge other routers into the base router
-            router = router
-                .merge(routes::index::router());
+            router = router.merge(routes::index::router());
             router = router
                 .layer(
                     TraceLayer::new_for_http()
