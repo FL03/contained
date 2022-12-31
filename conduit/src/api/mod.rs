@@ -17,7 +17,7 @@ pub fn from_context(ctx: crate::Context) -> Api {
 
 pub(crate) mod interface {
     use crate::{api::routes, Context};
-    use acme::servers::{Server, ServerSpec};
+    use acme::net::{Server, ServerSpec};
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;
