@@ -31,11 +31,12 @@ async fn main() -> BoxResult {
     Ok(())
 }
 
-pub type TokioChannelPackMPSC<T = ()> = (tokio::sync::mpsc::Sender<T>, tokio::sync::mpsc::Receiver<T>);
+pub type TokioChannelPackMPSC<T = ()> =
+    (tokio::sync::mpsc::Sender<T>, tokio::sync::mpsc::Receiver<T>);
 
 pub trait ChannelSpec: std::fmt::Debug {
     type Msg: Clone + Default + ToString;
-    
+
     fn buffer(&self) -> usize;
     fn channel(&self) -> TokioChannelPackMPSC<Self::Msg> {
         tokio::sync::mpsc::channel(self.buffer())
@@ -50,7 +51,7 @@ pub trait ChannelSpec: std::fmt::Debug {
 
 #[derive(Debug)]
 pub struct Channels {
-    pub state: TokioChannelPackMPSC<State<States>>
+    pub state: TokioChannelPackMPSC<State<States>>,
 }
 
 impl Channels {
@@ -80,7 +81,11 @@ impl Application {
         ctx.cnf.logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::info!("Application initialized; completing setup...");
-        Self { channels, ctx, state }
+        Self {
+            channels,
+            ctx,
+            state,
+        }
     }
     /// initializes a pack of channels
     pub fn channels<T>(&self, buffer: usize) -> TokioChannelPackMPSC<T> {

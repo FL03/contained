@@ -15,7 +15,6 @@ pub enum Services {
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Settings {
-    
     pub logger: Logger,
     pub mode: String,
     pub name: String,

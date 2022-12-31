@@ -4,8 +4,13 @@
    Description: ... Summary ...
 */
 use crate::Context;
-use axum::{body::{boxed, Body, BoxBody}, extract::Path, routing::get, Extension, Json, Router};
-use http::{Response, Request};
+use axum::{
+    body::{boxed, Body, BoxBody},
+    extract::Path,
+    routing::get,
+    Extension, Json, Router,
+};
+use http::{Request, Response};
 use hyper::{StatusCode, Uri};
 use scsys::prelude::Message;
 use serde_json::{json, Value};
@@ -66,4 +71,4 @@ async fn static_assets(dir: &str, uri: Uri) -> Result<Response<BoxBody>, (Status
             format!("Something went wrong: {}", err),
         )),
     }
- }
+}

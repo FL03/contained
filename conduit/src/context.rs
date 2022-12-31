@@ -5,10 +5,7 @@
 */
 use crate::Settings;
 use serde::{Deserialize, Serialize};
-use std::{
-    convert::From,
-    path::PathBuf,
-};
+use std::{convert::From, path::PathBuf};
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Services {
@@ -25,11 +22,15 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(cnf: Option<Settings>, services: Option<Vec<Services>>, workdir: Option<PathBuf>) -> Self {
-        Self { 
-            cnf: cnf.unwrap_or_default(), 
-            services: services.unwrap_or(vec![Default::default()]), 
-            workdir: workdir.unwrap_or_else(scsys::project_root) 
+    pub fn new(
+        cnf: Option<Settings>,
+        services: Option<Vec<Services>>,
+        workdir: Option<PathBuf>,
+    ) -> Self {
+        Self {
+            cnf: cnf.unwrap_or_default(),
+            services: services.unwrap_or(vec![Default::default()]),
+            workdir: workdir.unwrap_or_else(scsys::project_root),
         }
     }
     pub fn settings(&self) -> &Settings {
@@ -52,16 +53,23 @@ impl From<Settings> for Context {
 
 impl std::fmt::Debug for Context {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", scsys::fnl_remove(serde_json::to_string_pretty(self).unwrap()))
+        write!(
+            f,
+            "{}",
+            scsys::fnl_remove(serde_json::to_string_pretty(self).unwrap())
+        )
     }
 }
 
 impl std::fmt::Display for Context {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", scsys::fnl_remove(serde_json::to_string(self).unwrap()))
+        write!(
+            f,
+            "{}",
+            scsys::fnl_remove(serde_json::to_string(self).unwrap())
+        )
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -70,7 +78,7 @@ mod tests {
     #[test]
     fn test_default() {
         let a = Context::default();
-        let b = Context::from(a.clone());
+        let b = a.clone();
         assert_eq!(a, b)
     }
 }
