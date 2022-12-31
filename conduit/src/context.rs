@@ -7,20 +7,30 @@ use crate::Settings;
 use serde::{Deserialize, Serialize};
 use std::{
     convert::From,
-    path::{Path, PathBuf},
+    path::PathBuf,
 };
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub enum Services {
+    #[default]
+    None = 0,
+    Authenticator = 1,
+}
+
+#[derive(Clone, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct Context {
     pub cnf: Settings,
+    pub services: Vec<Services>,
     pub workdir: PathBuf,
 }
 
 impl Context {
-    pub fn new(workdir: Option<PathBuf>) -> Self {
-        let cnf = Settings::default();
-        let workdir = workdir.unwrap_or_else(project_root);
-        Self { cnf, workdir }
+    pub fn new(cnf: Option<Settings>, services: Option<Vec<Services>>, workdir: Option<PathBuf>) -> Self {
+        Self { 
+            cnf: cnf.unwrap_or_default(), 
+            services: services.unwrap_or(vec![Default::default()]), 
+            workdir: workdir.unwrap_or_else(scsys::project_root) 
+        }
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
@@ -36,23 +46,31 @@ impl Context {
 
 impl From<Settings> for Context {
     fn from(data: Settings) -> Self {
-        Self {
-            cnf: data,
-            workdir: project_root(),
-        }
+        Self::new(Some(data), None, None)
+    }
+}
+
+impl std::fmt::Debug for Context {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", scsys::fnl_remove(serde_json::to_string_pretty(self).unwrap()))
     }
 }
 
 impl std::fmt::Display for Context {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(self).unwrap())
+        write!(f, "{}", scsys::fnl_remove(serde_json::to_string(self).unwrap()))
     }
 }
 
-fn project_root() -> PathBuf {
-    Path::new(&env!("CARGO_MANIFEST_DIR"))
-        .ancestors()
-        .nth(1)
-        .unwrap()
-        .to_path_buf()
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default() {
+        let a = Context::default();
+        let b = Context::from(a.clone());
+        assert_eq!(a, b)
+    }
 }
