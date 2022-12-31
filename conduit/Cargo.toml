@@ -21,7 +21,7 @@ test = true
 [dev-dependencies]
 
 [dependencies]
-acme = { features = ["full"], git = "https://github.com/FL03/acme", branch = "v0.2.4", version = "0.2.4" }
+acme = { features = [], git = "https://github.com/FL03/acme", branch = "v0.2.4", version = "0.2.4" }
 axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
 clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
 futures = "0.3.25"

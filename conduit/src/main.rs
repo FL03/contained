@@ -12,17 +12,12 @@ pub(crate) mod states;
 pub mod api;
 pub mod cli;
 
-use acme::prelude::AppSpec;
+use acme::prelude::{AppSpec, ChannelPackStd, TokioChannelPackMPSC};
 use scsys::prelude::{BoxResult, Locked, State};
 use std::{
     convert::From,
     sync::{Arc, Mutex},
 };
-
-///
-pub type ChannelPackStd<T> = (std::sync::mpsc::Sender<T>, std::sync::mpsc::Receiver<T>);
-///
-pub type TokioChannelPackMPSC<T> = (tokio::sync::mpsc::Sender<T>, tokio::sync::mpsc::Receiver<T>);
 
 #[tokio::main]
 async fn main() -> BoxResult {
@@ -36,19 +31,18 @@ async fn main() -> BoxResult {
 
 #[derive(Clone, Debug)]
 pub struct Application {
-    pub cnf: Settings,
     pub ctx: Context,
     pub state: Locked<State<States>>,
 }
 
 impl Application {
-    pub fn new(cnf: Settings, ctx: Context, state: Locked<State<States>>) -> Self {
-        cnf.logger().clone().setup(None);
+    pub fn new(ctx: Context, state: Locked<State<States>>) -> Self {
+        ctx.cnf.logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::info!("Application initialized; completing setup...");
-        Self { cnf, ctx, state }
+        Self { ctx, state }
     }
-    // initializes a pack of channels
+    /// initializes a pack of channels
     pub fn channels<T>(&self, buffer: usize) -> TokioChannelPackMPSC<T> {
         tokio::sync::mpsc::channel::<T>(buffer)
     }
@@ -101,7 +95,7 @@ impl AppSpec for Application {
     }
 
     fn settings(&self) -> Self::Cnf {
-        self.cnf.clone()
+        self.ctx.settings().clone()
     }
 
     fn setup(&mut self) -> BoxResult<&Self> {
@@ -124,13 +118,13 @@ impl Default for Application {
 
 impl From<Settings> for Application {
     fn from(data: Settings) -> Self {
-        Self::new(data.clone(), Context::from(data), Default::default())
+        Self::from(Context::from(data))
     }
 }
 
 impl From<Context> for Application {
     fn from(data: Context) -> Self {
-        Self::new(data.clone().cnf, data, Default::default())
+        Self::new(data, Default::default())
     }
 }
 
