@@ -12,8 +12,8 @@ pub(crate) mod states;
 pub mod api;
 pub mod cli;
 
-use acme::prelude::AppSpec;
-use scsys::prelude::{BoxResult, Locked, State};
+use acme::prelude::{AppSpec, AsyncSpawable};
+use scsys::prelude::{AsyncResult, Locked, State};
 use std::{
     convert::From,
     sync::{Arc, Mutex},
@@ -22,11 +22,12 @@ use std::{
 const DEFAULT_STATE_CHANNEL: usize = 999;
 
 #[tokio::main]
-async fn main() -> BoxResult {
+async fn main() -> AsyncResult {
     // Create an application instance
     let mut app = Application::default();
     // Quickstart the application runtime with the following command
-    app.start().await?;
+    app.setup()?;
+    app.spawn().await?;
 
     Ok(())
 }
@@ -78,9 +79,6 @@ pub struct Application {
 
 impl Application {
     pub fn new(channels: Channels, ctx: Context, state: Locked<State<States>>) -> Self {
-        ctx.cnf.logger().clone().setup(None);
-        tracing_subscriber::fmt::init();
-        tracing::info!("Application initialized; completing setup...");
         Self {
             channels,
             ctx,
@@ -92,30 +90,33 @@ impl Application {
         tokio::sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
-    pub async fn set_state(&mut self, state: State<States>) -> BoxResult<&Self> {
+    pub async fn set_state(&mut self, state: States) -> AsyncResult<&Self> {
         // Update the application state
-        self.state = Arc::new(Mutex::new(state.clone()));
+        self.state = Arc::new(Mutex::new(State::new(None, None, Some(state.clone()))));
         // Post the change of state to the according channel(s)
-        self.channels(1).0.send(self.state.clone()).await?;
+        self.channels(DEFAULT_STATE_CHANNEL)
+            .0
+            .send(self.state.clone())
+            .await?;
         tracing::info!("Updating the application state to {}", state);
         Ok(self)
     }
     /// Application runtime
-    pub async fn runtime(&mut self) -> BoxResult {
+    pub async fn runtime(&mut self) -> AsyncResult {
         let cli = cli::new();
-        self.set_state(State::new(None, None, Some(States::Process)))
-            .await?;
+        self.set_state(States::Process).await?;
         // Fetch the initialized cli and process the results
         cli.handler().await?;
-        self.set_state(State::new(None, None, Some(States::Complete)))
-            .await?;
+        self.set_state(States::Complete).await?;
         Ok(())
     }
-    /// AIO method for running the initialized application
-    pub async fn start(&mut self) -> BoxResult<&Self> {
-        tracing::info!("Startup: Application initializing...");
-        self.runtime().await?;
+}
 
+#[async_trait::async_trait]
+impl AsyncSpawable for Application {
+    async fn spawn(&mut self) -> AsyncResult<&Self> {
+        tracing::debug!("Spawning the application and related services...");
+        self.runtime().await?;
         Ok(self)
     }
 }
@@ -136,17 +137,17 @@ impl AppSpec for Application {
     }
 
     fn name(&self) -> String {
-        String::from("Conduit")
+        self.settings().name.clone()
     }
 
     fn settings(&self) -> Self::Cnf {
         self.ctx.settings().clone()
     }
 
-    fn setup(&mut self) -> BoxResult<&Self> {
+    fn setup(&mut self) -> AsyncResult<&Self> {
+        self.settings().logger().clone().setup(None);
         tracing_subscriber::fmt::init();
-        tracing::info!("Application initialized; completing setup...");
-
+        tracing::debug!("Application initialized; completing setup...");
         Ok(self)
     }
 
