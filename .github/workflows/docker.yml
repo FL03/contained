@@ -13,39 +13,24 @@ on:
 
 env:
   REGISTRY: hub.docker.com
-  IMAGE_NAME: jo3mccain/conduit
   IMAGE_TAG: latest
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        workdir:
-          - .
-        image: 
-          - conduit
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
-        run: docker buildx build --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }} ${{ matrix.workdir }}
+        run: docker buildx build --tag ${{ secrets.DOCKERHUB_USERNAME }}/contained:latest .
   publish:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dockerfile:
-          - Dockerfile
-        image: 
-          - conduit
     steps:
     - uses: actions/checkout@v3
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
-        dockerfile: ${{ matrix.dockerfile }}
-        name: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}
+        dockerfile: Dockerfile
+        name: ${{ secrets.DOCKERHUB_USERNAME }}/contained
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         snapshot: true
         username: ${{ secrets.DOCKERHUB_USERNAME }}

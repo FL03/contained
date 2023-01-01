@@ -4,11 +4,12 @@ env:
   CARGO_TERM_COLOR: always
 
 on:
-  push:
-    branches: [ "main" ]
+  pull_request:
+    branches: [ "main", "master", "prod" ]
     tags: [ "v*.*.*" ]
-  schedule:
-    - cron: "30 9 * * *"
+  push:
+    branches: [ "main", "master", "prod" ]
+    tags: [ "v*.*.*" ]
   workflow_dispatch:
     inputs:
       publish:
@@ -32,16 +33,12 @@ jobs:
         run: rustup default ${{ matrix.toolchain }}
       - run: cargo build --workspace
       - run: cargo test --all --all-features -v
-  
   publish:
     if: ${{ github.event.inputs.publish == true }}
     name: Publish
+    needs: [ build ]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package:
-          - conduit
     steps:
       - uses: actions/checkout@v3
-      - name: Publish (${{matrix.package}})
-        run: cargo publish --all-features -v -p ${{ matrix.package }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish (contained)
+        run: cargo publish --all-features -v -p contained --token ${{ secrets.CARGO_REGISTRY_TOKEN }}

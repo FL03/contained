@@ -1,18 +1,18 @@
 [package]
-authors = ["FL03 <jo3mccain@icloud.com>"]
+authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
-description = "Conduit is a command line interface"
+description = "contained is a research project implementing the proposed harmonic runtime for orchestrating cloud-native systems"
 edition = "2021"
-homepage = "https://github.com/FL03/conduit/wiki"
+homepage = "https://github.com/FL03/contained/wiki"
 keywords = []
 license = "Apache-2.0"
-name = "conduit"
-repository = "https://github.com/FL03/conduit"
-version = "0.1.0"
+name = "contained"
+repository = "https://github.com/FL03/contained"
+version = "0.1.2"
 
 [[bin]]
 bench = false
-name = "conduit"
+name = "contained"
 path = "src/main.rs"
 test = true
 
