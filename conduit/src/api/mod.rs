@@ -18,6 +18,7 @@ pub fn from_context(ctx: crate::Context) -> Api {
 pub(crate) mod interface {
     use crate::{api::routes, Context};
     use acme::net::servers::{Server, ServerSpec};
+    use acme::net::WebBackend;
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;
@@ -41,6 +42,42 @@ pub(crate) mod interface {
             Self { ctx, server }
         }
         pub async fn client(&self) -> Router {
+            Router::new()
+                .merge(routes::router())
+                .layer(
+                    TraceLayer::new_for_http()
+                        .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                        .on_request(DefaultOnRequest::new().level(tracing::Level::INFO))
+                        .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
+                )
+                .layer(SetSensitiveHeadersLayer::new(std::iter::once(
+                    AUTHORIZATION,
+                )))
+                .layer(CompressionLayer::new())
+                .layer(PropagateHeaderLayer::new(HeaderName::from_static(
+                    "x-request-id",
+                )))
+                .layer(axum::Extension(self.ctx.clone()))
+        }
+        /// Quickstart the server with the outlined client
+        pub async fn start(&self) -> AsyncResult {
+            self.server().serve(self.client().await).await
+        }
+    }
+
+    impl std::fmt::Display for Api {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", serde_json::to_string(&self).ok().unwrap())
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl WebBackend for Api {
+        type Ctx = Context;
+
+        type Server = Server;
+
+        async fn client(&self) -> axum::Router {
             let mut router = Router::new();
             // Merge other routers into the base router
             router = router.merge(routes::index::router());
@@ -61,19 +98,13 @@ pub(crate) mod interface {
                 .layer(axum::Extension(self.ctx.clone()));
             router
         }
-        /// Returns an owned instance of the server
-        pub fn server(&self) -> &Server {
-            &self.server
-        }
-        /// Quickstart the server with the outlined client
-        pub async fn serve(&self) -> AsyncResult {
-            self.server().serve(self.client().await).await
-        }
-    }
 
-    impl std::fmt::Display for Api {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{}", serde_json::to_string(&self).ok().unwrap())
+        fn context(&self) -> Self::Ctx {
+            self.ctx.clone()
+        }
+
+        fn server(&self) -> Self::Server {
+            self.server.clone()
         }
     }
 }

@@ -4,6 +4,7 @@
     Description: ... summary ...
 */
 use crate::Settings;
+use scsys::prelude::Contextual;
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
 
@@ -42,6 +43,16 @@ impl Context {
     }
     pub fn workdir(&self) -> &PathBuf {
         &self.workdir
+    }
+}
+
+impl Contextual for Context {
+    type Cnf = Settings;
+
+    type Ctx = Self;
+
+    fn context(&self) -> &Self::Ctx {
+        self
     }
 }
 

@@ -25,7 +25,7 @@ impl Settings {
     pub fn new(mode: Option<String>, name: Option<String>) -> Self {
         let (mode, name) = (
             mode.unwrap_or_else(|| String::from("production")),
-            name.unwrap_or_else(|| String::from("conduit")),
+            name.unwrap_or_else(|| String::from(env!("CARGO_PKG_NAME"))),
         );
         let (logger, server) = (Default::default(), Default::default());
         Self {
@@ -39,12 +39,12 @@ impl Settings {
         let mut builder = Config::builder()
             .add_source(Environment::default().separator("__"))
             .set_default("mode", "production")?
-            .set_default("name", "conduit")?
+            .set_default("name", env!("CARGO_PKG_NAME"))?
             .set_default("logger.level", "info")?
             .set_default("server.host", "127.0.0.1")?
             .set_default("server.port", 8080)?;
 
-        if let Ok(files) = try_collect_config_files("**/Conduit.toml", false) {
+        if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
             builder = builder.add_source(files);
         }
         if let Ok(log) = std::env::var("RUST_LOG") {
