@@ -12,7 +12,7 @@ pub(crate) mod states;
 pub mod api;
 pub mod cli;
 
-use acme::prelude::{AppSpec, AsyncSpawable};
+use acme::prelude::{AppSpec, AsyncSpawnable};
 use scsys::prelude::{AsyncResult, Locked, State};
 use std::{
     convert::From,
@@ -113,7 +113,7 @@ impl Application {
 }
 
 #[async_trait::async_trait]
-impl AsyncSpawable for Application {
+impl AsyncSpawnable for Application {
     async fn spawn(&mut self) -> AsyncResult<&Self> {
         tracing::debug!("Spawning the application and related services...");
         self.runtime().await?;
@@ -121,9 +121,7 @@ impl AsyncSpawable for Application {
     }
 }
 
-impl AppSpec for Application {
-    type Cnf = Settings;
-
+impl AppSpec<Settings> for Application {
     type Ctx = Context;
 
     type State = State<States>;
@@ -140,7 +138,7 @@ impl AppSpec for Application {
         self.settings().name.clone()
     }
 
-    fn settings(&self) -> Self::Cnf {
+    fn settings(&self) -> Settings {
         self.ctx.settings().clone()
     }
 
