@@ -12,14 +12,12 @@ pub(crate) mod states;
 pub mod api;
 pub mod cli;
 
-use acme::prelude::{AppSpec, AsyncSpawnable};
+use acme::prelude::{AppSpec, AsyncSpawnable, TokioChannelPackMPSC};
 use scsys::prelude::{AsyncResult, Locked, State};
 use std::{
     convert::From,
     sync::{Arc, Mutex},
 };
-
-const DEFAULT_STATE_CHANNEL: usize = 999;
 
 #[tokio::main]
 async fn main() -> AsyncResult {
@@ -30,24 +28,6 @@ async fn main() -> AsyncResult {
     app.spawn().await?;
 
     Ok(())
-}
-
-pub type TokioChannelPackMPSC<T = ()> =
-    (tokio::sync::mpsc::Sender<T>, tokio::sync::mpsc::Receiver<T>);
-
-pub trait ChannelSpec: std::fmt::Debug {
-    type Msg: Clone + Default + ToString;
-
-    fn buffer(&self) -> usize;
-    fn channel(&self) -> TokioChannelPackMPSC<Self::Msg> {
-        tokio::sync::mpsc::channel(self.buffer())
-    }
-    fn sender(&self) -> tokio::sync::mpsc::Sender<Self::Msg> {
-        self.channel().0
-    }
-    fn receiver(&self) -> tokio::sync::mpsc::Receiver<Self::Msg> {
-        self.channel().1
-    }
 }
 
 #[derive(Debug)]
@@ -66,7 +46,7 @@ impl Channels {
 
 impl Default for Channels {
     fn default() -> Self {
-        Self::new(tokio::sync::mpsc::channel(DEFAULT_STATE_CHANNEL))
+        Self::new(tokio::sync::mpsc::channel(100))
     }
 }
 
@@ -94,7 +74,7 @@ impl Application {
         // Update the application state
         self.state = Arc::new(Mutex::new(State::new(None, None, Some(state.clone()))));
         // Post the change of state to the according channel(s)
-        self.channels(DEFAULT_STATE_CHANNEL)
+        self.channels(1)
             .0
             .send(self.state.clone())
             .await?;
