@@ -12,7 +12,7 @@ pub fn new() -> Api {
 }
 
 pub fn from_context(ctx: crate::Context) -> Api {
-    Api::new(ctx.clone(), ctx.cnf.server.port)
+    Api::new(ctx.clone())
 }
 
 pub(crate) mod interface {
@@ -22,7 +22,7 @@ pub(crate) mod interface {
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;
-    use serde::{Deserialize, Serialize};
+    use std::sync::Arc;
     use tower_http::{
         compression::CompressionLayer,
         propagate_header::PropagateHeaderLayer,
@@ -30,18 +30,36 @@ pub(crate) mod interface {
         trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     };
 
-    #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+    #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
     pub struct Api {
-        pub ctx: Context,
+        pub ctx: Arc<Context>,
         pub server: Server,
     }
 
     impl Api {
-        pub fn new(ctx: Context, port: u16) -> Self {
-            let server = Server::from(port);
-            Self { ctx, server }
+        pub fn new(ctx: Context) -> Self {
+            let server = Server::from(ctx.cnf.server.pieces());
+            Self { ctx: Arc::new(ctx), server }
         }
-        pub async fn client(&self) -> Router {
+        /// Quickstart the server with the outlined client
+        pub async fn start(&self) -> AsyncResult {
+            self.server().serve(self.client().await).await
+        }
+    }
+
+    impl std::fmt::Display for Api {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}, {:?}", self.ctx.as_ref(), self.server)
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl WebBackend for Api {
+        type Ctx = Context;
+
+        type Server = Server;
+
+        async fn client(&self) -> axum::Router {
             Router::new()
                 .merge(routes::router())
                 .layer(
@@ -59,48 +77,9 @@ pub(crate) mod interface {
                 )))
                 .layer(axum::Extension(self.ctx.clone()))
         }
-        /// Quickstart the server with the outlined client
-        pub async fn start(&self) -> AsyncResult {
-            self.server().serve(self.client().await).await
-        }
-    }
-
-    impl std::fmt::Display for Api {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{}", serde_json::to_string(&self).ok().unwrap())
-        }
-    }
-
-    #[async_trait::async_trait]
-    impl WebBackend for Api {
-        type Ctx = Context;
-
-        type Server = Server;
-
-        async fn client(&self) -> axum::Router {
-            let mut router = Router::new();
-            // Merge other routers into the base router
-            router = router.merge(routes::index::router());
-            router = router
-                .layer(
-                    TraceLayer::new_for_http()
-                        .make_span_with(DefaultMakeSpan::new().include_headers(true))
-                        .on_request(DefaultOnRequest::new().level(tracing::Level::INFO))
-                        .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
-                )
-                .layer(SetSensitiveHeadersLayer::new(std::iter::once(
-                    AUTHORIZATION,
-                )))
-                .layer(CompressionLayer::new())
-                .layer(PropagateHeaderLayer::new(HeaderName::from_static(
-                    "x-request-id",
-                )))
-                .layer(axum::Extension(self.ctx.clone()));
-            router
-        }
 
         fn context(&self) -> Self::Ctx {
-            self.ctx.clone()
+            self.ctx.as_ref().clone()
         }
 
         fn server(&self) -> Self::Server {

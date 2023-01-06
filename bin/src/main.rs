@@ -103,10 +103,18 @@ impl Application {
     }
     /// Application runtime
     pub async fn runtime(&mut self) -> AsyncResult {
+        // Post the application context to its channels
+        // let (sendr, _) = crate::context_channel();
+        // let ctx = Arc::new(self.ctx.clone());
+        // tokio::spawn(async move {
+        //     sendr.send(ctx).await.expect("");
+        // }).await?;
+        
+
         let cli = cli::new();
         self.set_state(States::Process).await?;
         // Fetch the initialized cli and process the results
-        cli.handler().await?;
+        cli.handler(self.ctx.clone()).await?;
         self.set_state(States::Complete).await?;
         Ok(())
     }

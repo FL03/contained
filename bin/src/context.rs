@@ -4,9 +4,14 @@
     Description: ... summary ...
 */
 use crate::Settings;
+use acme::TokioChannelPackMPSC;
 use scsys::prelude::Contextual;
 use serde::{Deserialize, Serialize};
-use std::{convert::From, path::PathBuf};
+use std::{convert::From, path::PathBuf, sync::Arc};
+
+pub fn context_channel() -> TokioChannelPackMPSC<Arc<Context>> {
+    tokio::sync::mpsc::channel(10)
+}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Services {

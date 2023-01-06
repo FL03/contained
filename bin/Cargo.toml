@@ -22,13 +22,13 @@ test = true
 
 [dependencies]
 acme = { features = ["net"], git = "https://github.com/FL03/acme", branch = "v0.2.5", version = "0.2.5" }
-async-trait = "0.1.60"
-axum = { features = ["headers", "http2", "macros"], version = "0.6.1" }
-clap = { features = ["cargo", "derive", "env"], version = "4.0.29" }
-futures = "0.3.25"
-http = "0.2.8"
-hyper = { features = ["full"], version = "0.14.23" }
-scsys = { features = ["full"], version = "0.1.40" }
+async-trait = "0.1"
+axum = { features = ["headers", "http2", "macros"], version = "0.6" }
+clap = { features = ["cargo", "derive", "env"], version = "4" }
+futures = "0.3"
+http = "0.2"
+hyper = { features = [], version = "0.14" }
+scsys = { features = [], version = "0.1.40" }
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
 smart-default = "0.6.0"
