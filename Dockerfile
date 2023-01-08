@@ -4,7 +4,12 @@ RUN apt-get update -y && apt-get upgrade -y
 
 FROM base as builder-base
 
-RUN rustup update
+RUN apt-get install -y \
+    protobuf-compiler
+
+RUN rustup update && \
+    rustup default nightly && \
+    rustup target add wasm32-unknown-unknown wasm32-wasi --toolchain nightly
 
 FROM builder-base as builder
 
@@ -22,6 +27,9 @@ ENV RUST_LOG="info" \
     SERVER_PORT=8080
 
 RUN apt-get update -y && apt-get upgrade -y
+
+RUN apt-get install -y \
+    protobuf-compiler
 
 RUN mkdir data
 VOLUME [ "/data" ]
