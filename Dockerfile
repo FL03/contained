@@ -45,4 +45,4 @@ EXPOSE 80
 EXPOSE ${SERVER_PORT}
 
 ENTRYPOINT [ "contained" ]
-CMD [ "-h" ]
+CMD [ "--up" ]

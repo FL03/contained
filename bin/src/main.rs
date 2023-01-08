@@ -1,5 +1,5 @@
 /*
-    Appellation: Conduit <binary>
+    Appellation: contained <binary>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
@@ -11,6 +11,7 @@ pub(crate) mod settings;
 pub(crate) mod states;
 
 pub mod api;
+pub mod network;
 pub mod runtime;
 
 use acme::prelude::{AppSpec, AsyncSpawnable};

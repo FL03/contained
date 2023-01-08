@@ -23,9 +23,15 @@ impl Runtime {
         Self { ctx }
     }
     pub async fn handler(&self) -> AsyncResult<&Self> {
-        if let Some(_up) = self.matches().get_one::<bool>("up") {
-            let api = crate::api::from_context(self.context().clone());
-            api.start().await?;
+        let ctx = self.ctx.clone();
+
+        if let Some(_) = self.matches().get_one::<bool>("up") {
+            tokio::spawn(async move {
+                let api = crate::api::from_context(ctx.as_ref().clone());
+                // api.start().await.expect("");
+            })
+            .await?;
+            crate::network::startup("/ip4/0.0.0.0/tcp/0".parse()?).await?;
         }
         Ok(self)
     }
