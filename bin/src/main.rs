@@ -3,17 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{context::*, settings::*, states::*};
+pub use self::{channels::*, context::*, settings::*, states::*};
 
+pub(crate) mod channels;
 pub(crate) mod context;
 pub(crate) mod settings;
 pub(crate) mod states;
 
 pub mod api;
-pub mod cli;
+pub mod runtime;
 
-use acme::prelude::{AppSpec, AsyncSpawnable, TokioChannelPackMPSC};
-use scsys::prelude::{AsyncResult, Locked, State};
+use acme::prelude::{AppSpec, AsyncSpawnable};
+use scsys::prelude::{AsyncResult, Locked};
 use std::{
     convert::From,
     sync::{Arc, Mutex},
@@ -31,72 +32,36 @@ async fn main() -> AsyncResult {
 }
 
 #[derive(Debug)]
-pub struct Channels {
-    pub state: TokioChannelPackMPSC<State<States>>,
-}
-
-impl Channels {
-    pub fn new(state: TokioChannelPackMPSC<State<States>>) -> Self {
-        Self { state }
-    }
-    pub fn state_channels(&self) -> &TokioChannelPackMPSC<State<States>> {
-        &self.state
-    }
-}
-
-impl Default for Channels {
-    fn default() -> Self {
-        Self::new(tokio::sync::mpsc::channel(100))
-    }
-}
-
-#[derive(Debug)]
 pub struct Application {
-    pub channels: Channels,
-    pub ctx: Context,
-    pub state: Locked<State<States>>,
+    pub channels: AppChannels,
+    pub ctx: Arc<Context>,
+    pub runtime: Arc<runtime::Runtime>,
+    pub state: Locked<State>,
 }
 
 impl Application {
-    pub fn new(channels: Channels, ctx: Context, state: Locked<State<States>>) -> Self {
+    pub fn new(ctx: Arc<Context>) -> Self {
+        let channels = AppChannels::new();
+        let state = States::default().into();
         Self {
             channels,
-            ctx,
+            ctx: ctx.clone(),
+            runtime: Arc::new(runtime::Runtime::new(ctx)),
             state,
         }
-    }
-    /// initializes a pack of channels
-    pub fn channels<T>(&self, buffer: usize) -> TokioChannelPackMPSC<T> {
-        tokio::sync::mpsc::channel::<T>(buffer)
     }
     /// Change the application state
     pub async fn set_state(&mut self, state: States) -> AsyncResult<&Self> {
         // Update the application state
         self.state = Arc::new(Mutex::new(State::new(None, None, Some(state.clone()))));
         // Post the change of state to the according channel(s)
-        self.channels(1)
-            .0
-            .send(self.state.clone())
-            .await?;
+        self.channels.state.0.send(self.state.clone())?;
         tracing::info!("Updating the application state to {}", state);
         Ok(self)
     }
     /// Application runtime
-    pub async fn runtime(&mut self) -> AsyncResult {
-        // Post the application context to its channels
-        // let (sendr, _) = crate::context_channel();
-        // let ctx = Arc::new(self.ctx.clone());
-        // tokio::spawn(async move {
-        //     sendr.send(ctx).await.expect("");
-        // }).await?;
-        
-
-        let cli = cli::new();
-        self.set_state(States::Process).await?;
-        // Fetch the initialized cli and process the results
-        cli.handler(self.ctx.clone()).await?;
-        self.set_state(States::Complete).await?;
-        Ok(())
+    pub fn runtime(&mut self) -> runtime::Runtime {
+        self.runtime.as_ref().clone()
     }
 }
 
@@ -104,7 +69,11 @@ impl Application {
 impl AsyncSpawnable for Application {
     async fn spawn(&mut self) -> AsyncResult<&Self> {
         tracing::debug!("Spawning the application and related services...");
-        self.runtime().await?;
+        self.set_state(States::Process).await?;
+        // Fetch the initialized cli and process the results
+        self.runtime.handler().await?;
+        self.set_state(States::Complete).await?;
+        self.set_state(States::Idle).await?;
         Ok(self)
     }
 }
@@ -112,18 +81,18 @@ impl AsyncSpawnable for Application {
 impl AppSpec<Settings> for Application {
     type Ctx = Context;
 
-    type State = State<States>;
+    type State = State;
 
     fn init() -> Self {
         Self::default()
     }
 
     fn context(&self) -> Self::Ctx {
-        self.ctx.clone()
+        self.ctx.as_ref().clone()
     }
 
     fn name(&self) -> String {
-        self.settings().name.clone()
+        self.settings().name
     }
 
     fn settings(&self) -> Settings {
@@ -137,7 +106,7 @@ impl AppSpec<Settings> for Application {
         Ok(self)
     }
 
-    fn state(&self) -> &Locked<State<States>> {
+    fn state(&self) -> &Locked<State> {
         &self.state
     }
 }
@@ -156,12 +125,12 @@ impl From<Settings> for Application {
 
 impl From<Context> for Application {
     fn from(data: Context) -> Self {
-        Self::new(Default::default(), data, Default::default())
+        Self::new(Arc::new(data))
     }
 }
 
 impl std::fmt::Display for Application {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self.ctx).unwrap())
+        write!(f, "{}", serde_json::to_string(&self.ctx.as_ref()).unwrap())
     }
 }

@@ -21,23 +21,56 @@ test = true
 [dev-dependencies]
 
 [dependencies]
+# Custom crates
 acme = { features = ["net"], git = "https://github.com/FL03/acme", branch = "v0.2.5", version = "0.2.5" }
+scsys = { features = ["full"], version = "0.1.40" }
+
+# Standard dependencies
 async-trait = "0.1"
 axum = { features = ["headers", "http2", "macros"], version = "0.6" }
 clap = { features = ["cargo", "derive", "env"], version = "4" }
-futures = "0.3"
-http = "0.2"
+futures = "0.3.25"
+http = "0.2.8"
 hyper = { features = [], version = "0.14" }
-scsys = { features = [], version = "0.1.40" }
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
 smart-default = "0.6.0"
 strum = { features = ["derive"], version = "0.24.1" }
-tokio = { features = ["full"], version = "1.23.0" }
+tarpc = { features = ["full"], version = "0.31" }
+tokio = { features = ["full"], version = "1" }
 tower = "0.4.13"
 tower-http = { features = ["full"], version = "0.3.5" }
 tracing = "0.1.37"
 tracing-subscriber = { features = ["env-filter"], version = "0.3.16" }
+
+[dependencies.libp2p]
+features = [
+    "autonat",
+    "dns",
+    "ecdsa",
+    "floodsub",
+    "gossipsub",
+    "identify",
+    "kad",
+    "mdns",
+    "metrics",
+    "mplex",
+    "noise",
+    "ping",
+    "pnet",
+    "macros",
+    "relay",
+    "rendezvous",
+    "request-response",
+    "rsa",
+    "secp256k1",
+    "serde",
+    "tcp",
+    "tls",
+    "tokio",
+    "uds"
+]
+version = "0.50"
 
 [package.metadata.docs.rs]
 all-features = true

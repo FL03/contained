@@ -12,17 +12,27 @@ pub fn new() -> Api {
 }
 
 pub fn from_context(ctx: crate::Context) -> Api {
-    Api::new(ctx.clone())
+    Api::new(ctx)
+}
+
+pub async fn handle(ctx: crate::Context) -> tokio::task::JoinHandle<Api> {
+    tokio::spawn(async move {
+        let api = std::sync::Arc::new(from_context(ctx));
+        api.start().await.expect("");
+        api.as_ref().clone()
+    })
 }
 
 pub(crate) mod interface {
     use crate::{api::routes, Context};
-    use acme::net::servers::{Server, ServerSpec};
-    use acme::net::WebBackend;
+    use acme::prelude::{
+        servers::{Server, ServerSpec},
+        WebBackend,
+    };
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;
-    use std::sync::Arc;
+    use serde::{Deserialize, Serialize};
     use tower_http::{
         compression::CompressionLayer,
         propagate_header::PropagateHeaderLayer,
@@ -30,16 +40,16 @@ pub(crate) mod interface {
         trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     };
 
-    #[derive(Clone, Debug, Default, Eq, Hash, PartialEq)]
+    #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
     pub struct Api {
-        pub ctx: Arc<Context>,
+        pub ctx: Context,
         pub server: Server,
     }
 
     impl Api {
         pub fn new(ctx: Context) -> Self {
             let server = Server::from(ctx.cnf.server.pieces());
-            Self { ctx: Arc::new(ctx), server }
+            Self { ctx, server }
         }
         /// Quickstart the server with the outlined client
         pub async fn start(&self) -> AsyncResult {
@@ -49,7 +59,7 @@ pub(crate) mod interface {
 
     impl std::fmt::Display for Api {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "{}, {:?}", self.ctx.as_ref(), self.server)
+            write!(f, "{}", serde_json::to_string(&self).ok().unwrap())
         }
     }
 
@@ -61,7 +71,7 @@ pub(crate) mod interface {
 
         async fn client(&self) -> axum::Router {
             Router::new()
-                .merge(routes::router())
+                .merge(routes::api())
                 .layer(
                     TraceLayer::new_for_http()
                         .make_span_with(DefaultMakeSpan::new().include_headers(true))
@@ -79,7 +89,7 @@ pub(crate) mod interface {
         }
 
         fn context(&self) -> Self::Ctx {
-            self.ctx.as_ref().clone()
+            self.ctx.clone()
         }
 
         fn server(&self) -> Self::Server {

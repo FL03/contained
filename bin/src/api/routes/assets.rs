@@ -19,7 +19,7 @@ pub fn router() -> Router {
 
 ///
 pub async fn wasm_handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    let dir = "../wasm/pkg";
+    let dir = "/wasm/pkg";
     let res = static_assets(dir, uri.clone()).await?;
 
     if res.status() == StatusCode::NOT_FOUND {

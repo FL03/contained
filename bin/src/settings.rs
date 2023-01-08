@@ -4,12 +4,12 @@
     Description: ... summary ...
 */
 use scsys::prelude::config::{Config, Environment};
-use scsys::prelude::{try_collect_config_files, ConfigResult, Configurable, Logger, Server};
+use scsys::prelude::{
+    try_collect_config_files, ConfigResult, Configurable, Logger, SerdeDisplay, Server,
+};
 use serde::{Deserialize, Serialize};
 
-
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Settings {
     pub logger: Logger,
     pub mode: String,
@@ -18,12 +18,12 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new(logger: Option<Logger>, mode: Option<String>, name: Option<String>, server: Option<Server>) -> Self {
+    pub fn new(mode: Option<String>, name: Option<String>) -> Self {
         Self {
-            logger: logger.unwrap_or_default(),
+            logger: Default::default(),
             mode: mode.unwrap_or_else(|| String::from("production")),
             name: name.unwrap_or_else(|| String::from(env!("CARGO_PKG_NAME"))),
-            server: server.unwrap_or(Server::new("0.0.0.0".to_string(), 8080)),
+            server: Server::new("0.0.0.0".to_string(), 8080),
         }
     }
     pub fn build() -> ConfigResult<Self> {
@@ -66,13 +66,7 @@ impl Configurable for Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        let d = Self::new(None, None, None, None);
+        let d = Self::new(None, None);
         Self::build().unwrap_or(d)
-    }
-}
-
-impl std::fmt::Display for Settings {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }

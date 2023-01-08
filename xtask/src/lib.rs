@@ -3,9 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::{primitives::*, utils::*};
+pub use self::{commands::*, primitives::*, utils::*};
 
-pub mod cli;
+pub(crate) mod commands;
 
 ///
 #[macro_export]
@@ -37,7 +37,7 @@ pub(crate) mod utils {
     use anyhow::Result;
     use std::path::{Path, PathBuf};
     use std::{collections::HashMap, fs, io, process::Command};
-    
+
     ///
     pub fn command(program: &str, args: Vec<&str>) -> Result<()> {
         let mut cmd = Command::new(program);
@@ -75,6 +75,10 @@ pub(crate) mod utils {
         }
         Ok(())
     }
+
+    pub fn rustup(args: Vec<&str>) -> Result<()> {
+        command("rustup", args)
+    }
     /// Fetch the project root unless specified otherwise with a CARGO_MANIFEST_DIR env variable
     pub fn project_root() -> PathBuf {
         Path::new(&env!("CARGO_MANIFEST_DIR"))
@@ -82,5 +86,5 @@ pub(crate) mod utils {
             .nth(1)
             .unwrap()
             .to_path_buf()
-    }    
+    }
 }

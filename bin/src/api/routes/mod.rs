@@ -7,8 +7,8 @@
 pub mod assets;
 pub mod index;
 
-use axum::Router;
-
-pub fn router() -> Router {
-    Router::new().nest("/app", assets::router()).merge(index::router())
+pub fn api() -> axum::Router {
+    axum::Router::new()
+        .merge(index::router())
+        .nest("/app", assets::router())
 }

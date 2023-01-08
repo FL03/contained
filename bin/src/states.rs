@@ -3,9 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use scsys::prelude::{fnl_remove, StatePack};
+use scsys::prelude::{fnl_remove, Locked, StatePack};
 use serde::{Deserialize, Serialize};
+use std::sync::{Arc, Mutex};
 use strum::{EnumString, EnumVariantNames};
+
+pub type State = scsys::prelude::State<States>;
 
 #[derive(
     Clone, Debug, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, Serialize,
@@ -48,6 +51,24 @@ impl std::fmt::Display for States {
 impl From<States> for i64 {
     fn from(val: States) -> Self {
         val as i64
+    }
+}
+
+impl From<State> for States {
+    fn from(val: State) -> Self {
+        val.state
+    }
+}
+
+impl From<States> for State {
+    fn from(val: States) -> Self {
+        State::new(None, None, Some(val))
+    }
+}
+
+impl From<States> for Locked<State> {
+    fn from(val: States) -> Self {
+        Arc::new(Mutex::new(State::new(None, None, Some(val))))
     }
 }
 
