@@ -5,34 +5,21 @@
 */
 use crate::{Context, State};
 use scsys::prelude::Locked;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{broadcast, mpsc, oneshot, watch};
 
-pub type OneshotChannels<T> = (oneshot::Sender<T>, oneshot::Receiver<T>);
+pub type AsyncMutex<T = ()> = tokio::sync::Mutex<T>;
 
-pub type UnboundedMPSC<T> = (mpsc::UnboundedSender<T>, mpsc::UnboundedReceiver<T>);
+pub type BroadcastChannels<T = ()> = (broadcast::Sender<T>, broadcast::Receiver<T>);
 
-#[derive(Debug)]
-pub struct AppChannels {
-    pub ctx: OneshotChannels<Context>,
-    pub state: UnboundedMPSC<Locked<State>>,
-}
+pub type OneshotChannels<T = ()> = (oneshot::Sender<T>, oneshot::Receiver<T>);
 
-impl AppChannels {
-    pub fn new() -> Self {
-        let ctx = oneshot::channel();
-        let state = mpsc::unbounded_channel();
-        Self { ctx, state }
-    }
-    pub fn context(&self) -> &OneshotChannels<Context> {
-        &self.ctx
-    }
-    pub fn state_channels(&self) -> &UnboundedMPSC<Locked<State>> {
-        &self.state
-    }
-}
+pub type UnboundedMPSC<T = ()> = (mpsc::UnboundedSender<T>, mpsc::UnboundedReceiver<T>);
 
-impl Default for AppChannels {
-    fn default() -> Self {
-        Self::new()
-    }
+pub type WatchChannels<T = ()> = (watch::Sender<T>, watch::Receiver<T>);
+
+pub enum Channel {
+    Broadcast,
+    MPSC,
+    Oneshot,
+    Unbounded,
 }

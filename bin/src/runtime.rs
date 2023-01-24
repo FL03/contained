@@ -3,118 +3,93 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{Context, Settings};
-use clap::{arg, command, value_parser, ArgAction, ArgMatches, Command};
-use scsys::prelude::{AsyncResult, Contextual};
-use std::{path::PathBuf, sync::Arc};
+use crate::cli::{cmd::Commands, CommandLineInterface};
+use crate::Context;
+use acme::prelude::{AsyncSpawnable, Session};
+use clap::Parser;
+use scsys::prelude::AsyncResult;
+use std::sync::Arc;
+use tokio::sync::{oneshot, watch};
 use tokio::task::JoinHandle;
 
-pub async fn handle() -> JoinHandle<AsyncResult> {
-    tokio::spawn(async move { Ok(()) })
+pub async fn handle_cli(cli: CommandLineInterface) -> AsyncResult {
+    if let Some(cmd) = cli.command() {
+        match cmd {
+            Commands::System(sys) => {
+                if sys.up {
+                    tracing::info!("Message Recieved: System initializing...");
+                    
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
+
+pub enum Surfaces {
+    API = 0,
+    CLI = 1,
+    RPC = 2,
+    P2P = 3,
+    WebRTC = 4,
+}
+
+pub struct Interface<T>(T, Surfaces);
 
 #[derive(Clone, Debug)]
 pub struct Runtime {
-    pub ctx: Arc<Context>,
+    pub ctx: watch::Receiver<Arc<Context>>,
+    pub cli: Arc<CommandLineInterface>,
+    pub session: Session,
 }
 
 impl Runtime {
-    pub fn new(ctx: Arc<Context>) -> Self {
-        Self { ctx }
+    pub fn new(ctx: Arc<Context>, session: Session) -> Self {
+        Self {
+            cli: CommandLineInterface::parse().into(),
+            ctx: watch::channel(ctx.clone()).1,
+            session,
+        }
+    }
+    pub async fn handle(&self) -> JoinHandle<AsyncResult> {
+        let rt = Arc::new(self.clone());
+        let ctx = watch::channel(self.ctx.clone());
+
+        tokio::spawn(async move {
+            let cli = rt.cli.clone();
+            loop {
+                // Watch for updates to the application context
+                if rt.ctx.has_changed().expect("Context channel droppped...") {
+                    let ctx = rt.ctx.borrow().clone();
+                    tracing::info!("Context changed: {:?}", ctx);
+                }
+
+                handle_cli(cli.as_ref().clone()).await?;
+            }
+        })
     }
     pub async fn handler(&self) -> AsyncResult<&Self> {
-        let ctx = self.ctx.clone();
+        handle_cli(self.cli.as_ref().clone()).await?;
 
-        if let Some(_) = self.matches().get_one::<bool>("up") {
-            tokio::spawn(async move {
-                let api = crate::api::from_context(ctx.as_ref().clone());
-                // api.start().await.expect("");
-            })
-            .await?;
-            crate::network::startup("/ip4/0.0.0.0/tcp/0".parse()?).await?;
-        }
         Ok(self)
     }
 }
 
 impl Default for Runtime {
     fn default() -> Self {
-        Self::new(Arc::new(Context::default()))
-    }
-}
-
-impl RuntimeCliSpec for Runtime {
-    fn command(&self) -> Command {
-        Command::new("command")
-            .about("Select an availible actor to command")
-            .arg(arg!(service: -s --service <SERVICE>).action(ArgAction::SetTrue))
-    }
-}
-
-impl Contextual for Runtime {
-    type Cnf = Settings;
-
-    type Ctx = Context;
-
-    fn context(&self) -> &Self::Ctx {
-        self.ctx.as_ref()
+        Self::from(Context::default())
     }
 }
 
 impl From<Arc<Context>> for Runtime {
     fn from(ctx: Arc<Context>) -> Self {
-        Self::new(ctx)
+        Self::new(ctx, Default::default())
     }
 }
 
 impl From<Context> for Runtime {
     fn from(ctx: Context) -> Self {
         Self::from(Arc::new(ctx))
-    }
-}
-
-impl std::fmt::Display for Runtime {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::json!({"ctx": self.ctx.as_ref()}))
-    }
-}
-
-pub trait RuntimeCliSpec {
-    fn base(&self, sc: Command) -> ArgMatches {
-        command!()
-            .subcommand(sc)
-            .arg(
-                arg!(
-                    -c --config <FILE> "Sets a custom config file"
-                )
-                // We don't have syntax yet for optional options, so manually calling `required`
-                .required(false)
-                .value_parser(value_parser!(PathBuf))
-                .default_value("/config/Conduit.toml"),
-            )
-            .arg(
-                arg!(debug: -d --debug)
-                    .action(ArgAction::SetTrue)
-                    .help("Optionally startup the debugger"),
-            )
-            .arg(
-                arg!(release: -r --release)
-                    .action(ArgAction::SetTrue)
-                    .help("Optionally startup application in release mode"),
-            )
-            .arg(
-                arg!(up: -u --up)
-                    .action(ArgAction::SetTrue)
-                    .help("Signals for a system to turn on"),
-            )
-            .arg(arg!(verbose: -v --verbose).action(ArgAction::SetTrue))
-            .propagate_version(true)
-            .subcommand_required(false)
-            .arg_required_else_help(true)
-            .get_matches()
-    }
-    fn command(&self) -> Command;
-    fn matches(&self) -> ArgMatches {
-        self.base(self.command())
     }
 }

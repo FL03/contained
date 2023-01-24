@@ -4,16 +4,12 @@
     Description: ... summary ...
 */
 use crate::{OneshotChannels, Settings, UnboundedMPSC};
-use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
+use decanter::prelude::{Hash, Hashable};
+use scsys::prelude::{Contextual, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
-use tokio::sync::oneshot;
 
-pub fn context_channels() -> OneshotChannels<Context> {
-    oneshot::channel()
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Context {
     pub cnf: Settings,
     pub workdir: PathBuf,
@@ -35,6 +31,12 @@ impl Context {
     }
     pub fn workdir(&self) -> &PathBuf {
         &self.workdir
+    }
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Self::new(None, None)
     }
 }
 

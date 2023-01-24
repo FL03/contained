@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use decanter::prelude::{Hash, Hashable};
 use scsys::prelude::{fnl_remove, Locked, StatePack};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
