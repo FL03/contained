@@ -30,17 +30,14 @@ scsys = { features = [], version = "0.1.41" }
 # Standard dependencies
 async-trait = "0.1"
 clap = { features = ["cargo", "derive", "env"], version = "4" }
-futures = "0.3.25"
-http = "0.2.8"
+futures = "0.3"
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
-smart-default = "0.6.0"
-strum = { features = ["derive"], version = "0.24.1" }
+smart-default = "0.6"
+strum = { features = ["derive"], version = "0.24" }
 tokio = { features = ["full"], version = "1" }
-tower = "0.4.13"
-tower-http = { features = ["full"], version = "0.3.5" }
-tracing = "0.1.37"
-tracing-subscriber = { features = ["env-filter"], version = "0.3.16" }
+tracing = "0.1"
+tracing-subscriber = { features = ["env-filter"], version = "0.3" }
 
 [package.metadata.docs.rs]
 all-features = true

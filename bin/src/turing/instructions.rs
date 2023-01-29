@@ -8,10 +8,43 @@ use scsys::prelude::fnl_remove;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
-pub struct MachineHead(State, String);
+pub struct Head<S: Symbolic>(State, S);
 
-pub struct MachineTail(State, String, Move);
-pub struct Instruction(MachineHead, MachineTail);
+impl<S: Symbolic> Head<S> {
+    pub fn new(state: State, symbol: S) -> Self {
+        Self(state, symbol)
+    }
+    pub fn state(&self) -> &State {
+        &self.0
+    }
+    pub fn symbol(&self) -> &S {
+        &self.1
+    }
+}
+
+pub struct Tail<S: Symbolic>(Move, State, S);
+
+impl<S: Symbolic> Tail<S> {
+    pub fn new(action: Move, state: State, symbol: S) -> Self {
+        Self(action, state, symbol)
+    }
+    pub fn action(&self) -> &Move {
+        &self.0
+    }
+    pub fn state(&self) -> &State {
+        &self.1
+    }
+    pub fn symbol(&self) -> &S {
+        &self.2
+    }
+}
+
+pub struct Instruction<S: Symbolic> {
+    pub head: Head<S>,
+    pub tail: Tail<S>
+}
+
+
 
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, PartialOrd, Serialize)]
