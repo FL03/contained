@@ -3,10 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{states::*, turing::*};
+pub use self::states::*;
 
 pub(crate) mod states;
-pub(crate) mod turing;
+
+pub mod turing;
 
 use scsys::prelude::AsyncResult;
 use std::sync::Arc;
