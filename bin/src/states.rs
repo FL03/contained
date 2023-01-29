@@ -12,7 +12,7 @@ use strum::{EnumString, EnumVariantNames};
 pub type State = scsys::prelude::State<States>;
 
 #[derive(
-    Clone, Debug, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, Serialize,
+    Clone, Copy, Debug, Deserialize, EnumString, EnumVariantNames, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum States {

@@ -3,11 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{cells::*, instructions::*, machine::*, };
+pub use self::{cells::*, instructions::*, machine::*, programs::*};
 
 pub(crate) mod cells;
 pub(crate) mod instructions;
 pub(crate) mod machine;
+pub(crate) mod programs;
 
 pub type Dirac<S, T> = dyn Fn(S) -> T;
 

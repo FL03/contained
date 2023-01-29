@@ -8,6 +8,7 @@ use scsys::prelude::fnl_remove;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq)]
 pub struct Head<S: Symbolic>(State, S);
 
 impl<S: Symbolic> Head<S> {
