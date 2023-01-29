@@ -21,7 +21,6 @@ pub trait Transition<S: Clone> {
 
     fn data(&self) -> &S;
     fn dirac(&self) -> &Dirac<S, Self::Output>;
-
     fn resultant(&self) -> Self::Output {
         self.dirac()(self.data().clone())
     }

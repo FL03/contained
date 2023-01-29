@@ -19,8 +19,6 @@ test = true
 
 [build-dependencies]
 
-[dev-dependencies]
-
 [dependencies]
 # Custom crates
 acme = { features = ["net"], version = "0.2.5" }
@@ -38,6 +36,8 @@ strum = { features = ["derive"], version = "0.24" }
 tokio = { features = ["full"], version = "1" }
 tracing = "0.1"
 tracing-subscriber = { features = ["env-filter"], version = "0.3" }
+
+[dev-dependencies]
 
 [package.metadata.docs.rs]
 all-features = true

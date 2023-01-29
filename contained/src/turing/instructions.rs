@@ -23,20 +23,32 @@ impl<S: Symbolic> Head<S> {
     }
 }
 
-pub struct Tail<S: Symbolic>(Move, State, S);
+impl<S: Symbolic> From<Head<S>> for (State, S) {
+    fn from(v: Head<S>) -> (State, S) {
+        (v.0, v.1)
+    }
+}
+
+impl<S: Symbolic> From<(State, S)> for Head<S> {
+    fn from(value: (State, S)) -> Self {
+        Self(value.0, value.1)
+    }
+}
+
+pub struct Tail<S: Symbolic>(State, S, Move);
 
 impl<S: Symbolic> Tail<S> {
-    pub fn new(action: Move, state: State, symbol: S) -> Self {
-        Self(action, state, symbol)
+    pub fn new(state: State, symbol: S, act: Move) -> Self {
+        Self(state, symbol, act)
     }
     pub fn action(&self) -> &Move {
-        &self.0
+        &self.2
     }
     pub fn state(&self) -> &State {
-        &self.1
+        &self.0
     }
     pub fn symbol(&self) -> &S {
-        &self.2
+        &self.1
     }
 }
 
@@ -45,10 +57,19 @@ pub struct Instruction<S: Symbolic> {
     pub tail: Tail<S>
 }
 
+impl<S: Symbolic> Instruction<S> {
+    pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
+        Self { head, tail }
+    }
+}
 
-
-
-
+impl<S: Symbolic> From<(State, S, State, S, Move)> for Instruction<S> {
+    fn from(value: (State, S, State, S, Move)) -> Self {
+        let head = Head::new(value.0, value.1);
+        let tail = Tail::new(value.2, value.3, value.4);
+        Self::new(head, tail)
+    }
+}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, PartialOrd, Serialize)]
 #[strum(serialize_all = "snake_case")]
@@ -85,10 +106,10 @@ impl From<Move> for i64 {
 mod tests {
     use super::*;
 
+
     #[test]
     fn test_move_default() {
         let a = Move::default();
         assert_eq!(a.clone(), Move::Stay);
-        
     }
 }

@@ -1,8 +1,0 @@
-
-setup:
-  platforms:
-
-    ubuntu-latest
-
-pipelines:
-  
