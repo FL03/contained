@@ -48,6 +48,8 @@ pub struct Instruction<S: Symbolic> {
 
 
 
+
+
 #[derive(Clone, Copy, Debug, Default, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, PartialOrd, Serialize)]
 #[strum(serialize_all = "snake_case")]
 pub enum Move {
