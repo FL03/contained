@@ -11,8 +11,7 @@ pub(crate) mod turing;
 use scsys::prelude::AsyncResult;
 use std::sync::Arc;
 
-#[tokio::main]
-async fn main() -> AsyncResult {
+fn main() -> AsyncResult {
     
 
     Ok(())
