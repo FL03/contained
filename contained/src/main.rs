@@ -10,7 +10,6 @@ pub(crate) mod states;
 pub mod turing;
 
 use scsys::prelude::AsyncResult;
-use std::sync::Arc;
 
 fn main() -> AsyncResult {
     Ok(())
@@ -25,12 +24,4 @@ pub trait TuringMachine {
     fn transition(&self) -> Self::State;
 }
 
-pub struct Machine {
-    pub state: States,
-}
 
-impl Machine {
-    pub fn new(state: States) -> Self {
-        Self { state }
-    }
-}

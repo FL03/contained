@@ -55,8 +55,7 @@ impl From<i64> for States {
     fn from(val: i64) -> States {
         match val {
             0 => States::Invalid,
-            1 => States::Valid,
-            _ => States::Invalid,
+            _ => States::Valid,
         }
     }
 }
@@ -80,7 +79,7 @@ mod tests {
         assert_eq!(&a, &b);
         assert_eq!(a.state() as i64, 1);
 
-        b.update_state(None, States::Invalid);
-        assert_eq!(b.state(), States::Invalid)
+        b.update_state(None, 10.into());
+        assert_eq!(b.state(), States::Valid)
     }
 }

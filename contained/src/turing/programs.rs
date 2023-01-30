@@ -7,8 +7,10 @@ use super::{Head, Instruction, Symbolic};
 use crate::States;
 
 use scsys::Result;
+use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Program<S: Symbolic> {
     pub alphabet: Vec<S>,
     pub instructions: Vec<Instruction<S>>,

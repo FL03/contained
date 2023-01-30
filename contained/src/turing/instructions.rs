@@ -8,7 +8,7 @@ use scsys::prelude::fnl_remove;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Head<S: Symbolic>(States, S);
 
 impl<S: Symbolic> Head<S> {
@@ -35,7 +35,7 @@ impl<S: Symbolic> From<(States, S)> for Head<S> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Tail<S: Symbolic>(States, S, Move);
 
 impl<S: Symbolic> Tail<S> {
@@ -53,7 +53,7 @@ impl<S: Symbolic> Tail<S> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Instruction<S: Symbolic> {
     pub head: Head<S>,
     pub tail: Tail<S>,
