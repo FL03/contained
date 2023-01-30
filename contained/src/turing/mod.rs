@@ -14,7 +14,13 @@ pub type Dirac<S, T> = dyn Fn(S) -> T;
 
 pub type Tape = Vec<Cell>;
 
-pub trait Symbolic: Clone + Default + PartialEq + ToString {} 
+pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
+
+impl Symbolic for char {}
+
+impl Symbolic for &str {}
+
+impl Symbolic for String {}
 
 pub trait Transition<S: Clone> {
     type Output;

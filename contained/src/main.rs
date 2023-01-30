@@ -13,28 +13,24 @@ use scsys::prelude::AsyncResult;
 use std::sync::Arc;
 
 fn main() -> AsyncResult {
-    
-
     Ok(())
 }
 
 pub trait TuringMachine {
     type Alphabet: Clone;
     type State: Default;
-    
+
     fn args(&self) -> Vec<Self::Alphabet>;
     fn state(&self) -> Self::State;
     fn transition(&self) -> Self::State;
 }
 
 pub struct Machine {
-    pub state: State,
+    pub state: States,
 }
 
 impl Machine {
-    pub fn new(state: State) -> Self {
+    pub fn new(state: States) -> Self {
         Self { state }
     }
 }
-
-

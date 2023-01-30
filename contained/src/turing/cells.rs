@@ -7,13 +7,26 @@ use scsys::prelude::fnl_remove;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, EnumString, EnumVariantNames, Eq, Hash, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+)]
 #[strum(serialize_all = "snake_case")]
 pub enum Cell {
     Zero = 0,
     One = 1,
     #[default]
-    Blank = 2
+    Blank = 2,
 }
 
 impl std::fmt::Display for Cell {
