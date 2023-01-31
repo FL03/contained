@@ -2,22 +2,11 @@
 
 [![Clippy](https://github.com/FL03/contained/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/clippy.yml)
 [![Docker](https://github.com/FL03/contained/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/docker.yml)
-[![Nightly](https://github.com/FL03/contained/actions/workflows/nightly.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/nightly.yml)
 [![Rust](https://github.com/FL03/contained/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/rust.yml)
 
 ***
 
-Contained is a simple command line interface designed for testing the proposed harmonic runtime which leverages the Neo-Riemannian Theory as a means of preserving the I/O from remote surfaces transformed according to some set of LPR transformations. This theory directly ties into to our desire to implement a dynamic encryption protocol combining fully-homomorphic encryption mechanisms with elliptic-curve cryptography, something more formally discussed under the guise of [aqueduct](https://github.com/scattered-systems/aqueduct).
-
-## Concepts
-
-### The Neo-Riemannian Theory
-
-The Neo-Riemannian Theory is a set of theoretical approaches to the study of harmony and tonal organization in Western music. It was developed in the early 2000s by a group of scholars and theorists, and is based on nineteenth-century German music theorist Hugo Riemann’s theories of tonal space. Neo-Riemannian theorists have developed a number of analytical tools to study and describe the relationships between chords and keys in music. These tools include the concept of “Voice-Leading Spaces”, which is a visual representation of all the possible transitions between chords. Neo-Riemannian Theory is a powerful tool for understanding the harmonic structure of music, and has been used to explain a wide variety of musical styles, from classical to jazz and popular music.
-
-#### _Tonnetz_
-
-#### _Triads_
+Contained is a research oriented project focusing on implementing the proposed harmonic computational framework. Contained considers a harmonic framework capable of efficiently orchestrating clusters of devices following a set of instructions broadcast from valid actors preserving only the I/O and required metadata. The metadata stored typically pertains to the temporality or ordering of events which lead to the completion of any particular task and generally distributed as a part of a unique proof. In order to do so, we consider the neo-Riemannian theory and its potential implications for computational systems. Consequentially, several more traditional notions of harmonic analysis are additionally introduced to complete the theorem and solidify the framework. The resulting compositional procedures suggest novel means of generating ephemeral computational spaces capable of supporting interactions across each of the four permutations facilitated by digital systems. Typically these spaces are leveraged in conjunction with one another to elegantly orchestrate complex workloads.
 
 ## Getting Started
 
@@ -64,5 +53,5 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-* [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
-* [MIT](https://choosealicense.com/licenses/mit/)
+- [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
+- [MIT](https://choosealicense.com/licenses/mit/)

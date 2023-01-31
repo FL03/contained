@@ -1,13 +1,3 @@
-[workspace]
-default-members = [
-    "bin"
-]
-exclude = [
-    "xtask"
-]
-members = [
-    "bin"
-]
 [workspace.package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 description = "contained is a research project implementing the proposed harmonic runtime for orchestrating cloud-native systems"
@@ -16,6 +6,17 @@ homepage = "https://github.com/FL03/contained/wiki"
 license = "Apache-2.0"
 repository = "https://github.com/FL03/contained"
 version = "0.1.2"
+
+[workspace]
+default-members = [
+    "contained"
+]
+exclude = [
+    "xtask"
+]
+members = [
+    "contained"
+]
 
 [profile.dev]
 codegen-units = 256
