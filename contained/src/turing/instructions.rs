@@ -4,7 +4,6 @@
     Description: ... summary ...
 */
 use crate::{turing::Symbolic, States};
-use scsys::prelude::fnl_remove;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
@@ -97,7 +96,12 @@ pub enum Move {
 
 impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", fnl_remove(serde_json::to_string(self).unwrap()))
+        let p = match self.clone() as i64 {
+            0 => "left",
+            1 => "right",
+            _ => "stay",
+        };
+        write!(f, "{}", p)
     }
 }
 

@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::{fnl_remove, StatePack};
+use scsys::prelude::StatePack;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
@@ -43,11 +43,11 @@ impl StatePack for States {}
 
 impl std::fmt::Display for States {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}",
-            fnl_remove(serde_json::to_string(&self).unwrap()).to_ascii_lowercase()
-        )
+        let p = match self.clone() as i64 {
+            0 => "invalid",
+            _ => "valid",
+        };
+        write!(f, "{}", p)
     }
 }
 

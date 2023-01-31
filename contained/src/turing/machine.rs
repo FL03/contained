@@ -7,7 +7,6 @@ use super::{Program, Symbolic};
 
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Machine<S: Symbolic> {
     pub ds: S, // the default symbol
@@ -19,7 +18,10 @@ impl<S: Symbolic> Machine<S> {
         if program.alphabet().contains(&ds) {
             Ok(Self { ds, program })
         } else {
-            return Err(format!("Default symbol ({}) is not present within the program's alphabet...", ds.to_string()))
+            return Err(format!(
+                "The indicated default symbol ({}) is not present in the provided alphabet...",
+                ds.to_string()
+            ));
         }
     }
     pub fn initial(&self) -> S {
@@ -39,7 +41,7 @@ mod test {
         let alphabet = vec!["a", "b", "c"];
         let mut program = Program::new(alphabet, 1.into());
         program.insert(inst.clone()).unwrap();
-        
+
         assert!(Machine::new("a", program.clone()).is_ok());
         assert!(Machine::new("", program.clone()).is_err())
     }

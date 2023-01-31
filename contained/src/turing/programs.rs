@@ -6,7 +6,7 @@
 use super::{Head, Instruction, Symbolic};
 use crate::States;
 
-use scsys::Result;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 

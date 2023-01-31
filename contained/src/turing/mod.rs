@@ -3,16 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{configuration::*, instructions::*, machine::*, programs::*};
+pub use self::{configuration::*, instructions::*, machine::*, programs::*, tapes::*};
 
 pub(crate) mod configuration;
 pub(crate) mod instructions;
 pub(crate) mod machine;
 pub(crate) mod programs;
+pub(crate) mod tapes;
 
 pub type Dirac<S, T> = dyn Fn(S) -> T;
-
-pub type Tape<S> = Vec<S>;
 
 pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
 
@@ -31,4 +30,3 @@ pub trait Transition<S: Clone> {
         self.dirac()(self.data().clone())
     }
 }
-
