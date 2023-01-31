@@ -16,13 +16,13 @@ impl<S: Symbolic> Tape<S> {
     pub fn get(&self, pos: usize) -> Option<&S> {
         self.tape().get(pos)
     }
-    pub fn insert(&mut self, elem: S, pos: usize) {
+    pub fn insert(&mut self, pos: usize, elem: S) {
         self.0.insert(pos, elem);
     }
     pub fn len(&self) -> usize {
         self.tape().len()
     }
-    pub fn set(&mut self, elem: S, index: usize) {
+    pub fn set(&mut self, index: usize, elem: S) {
         self.0[index] = elem;
     }
     pub fn tape(&self) -> &Vec<S> {
@@ -39,5 +39,20 @@ impl<S: Symbolic> From<Vec<S>> for Tape<S> {
 impl<S: Symbolic> From<Tape<S>> for Vec<S> {
     fn from(d: Tape<S>) -> Vec<S> {
         d.tape().clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tape() {
+        let alpha = vec!["a", "b", "c"];
+
+        let a = Tape::new(alpha);
+        let b = Tape::new(["a", "b", "c"]);
+        assert_eq!(a.len(), 3);
+        assert_eq!(a, b);
     }
 }

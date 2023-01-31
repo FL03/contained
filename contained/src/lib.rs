@@ -9,10 +9,12 @@ pub(crate) mod states;
 
 pub mod turing;
 
-pub type StrResult<T = ()> = Result<T, String>;
+pub type Resultant<T = (), E = String> = Result<T, E>;
 
-pub trait Turing {
-    type Symbol: turing::Symbolic;
+pub trait Stateful {
+    type State;
 
-    fn tape(&self) -> &turing::Tape<Self::Symbol>;
+    fn state(&self) -> &Self::State
+    where
+        Self: Sized;
 }

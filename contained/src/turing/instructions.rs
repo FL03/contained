@@ -3,18 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{turing::Symbolic, States};
+use crate::{turing::Symbolic, State};
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Head<S: Symbolic>(States, S);
+pub struct Head<S: Symbolic>(State, S);
 
 impl<S: Symbolic> Head<S> {
-    pub fn new(state: States, symbol: S) -> Self {
+    pub fn new(state: State, symbol: S) -> Self {
         Self(state, symbol)
     }
-    pub fn state(&self) -> &States {
+    pub fn state(&self) -> &State {
         &self.0
     }
     pub fn symbol(&self) -> &S {
@@ -22,29 +22,29 @@ impl<S: Symbolic> Head<S> {
     }
 }
 
-impl<S: Symbolic> From<Head<S>> for (States, S) {
-    fn from(v: Head<S>) -> (States, S) {
+impl<S: Symbolic> From<Head<S>> for (State, S) {
+    fn from(v: Head<S>) -> (State, S) {
         (v.0, v.1)
     }
 }
 
-impl<S: Symbolic> From<(States, S)> for Head<S> {
-    fn from(value: (States, S)) -> Self {
+impl<S: Symbolic> From<(State, S)> for Head<S> {
+    fn from(value: (State, S)) -> Self {
         Self(value.0, value.1)
     }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Tail<S: Symbolic>(States, S, Move);
+pub struct Tail<S: Symbolic>(State, S, Move);
 
 impl<S: Symbolic> Tail<S> {
-    pub fn new(state: States, symbol: S, act: Move) -> Self {
+    pub fn new(state: State, symbol: S, act: Move) -> Self {
         Self(state, symbol, act)
     }
     pub fn action(&self) -> &Move {
         &self.2
     }
-    pub fn state(&self) -> &States {
+    pub fn state(&self) -> &State {
         &self.0
     }
     pub fn symbol(&self) -> &S {
@@ -64,8 +64,8 @@ impl<S: Symbolic> Instruction<S> {
     }
 }
 
-impl<S: Symbolic> From<(States, S, States, S, Move)> for Instruction<S> {
-    fn from(value: (States, S, States, S, Move)) -> Self {
+impl<S: Symbolic> From<(State, S, State, S, Move)> for Instruction<S> {
+    fn from(value: (State, S, State, S, Move)) -> Self {
         let head = Head::new(value.0, value.1);
         let tail = Tail::new(value.2, value.3, value.4);
         Self::new(head, tail)
@@ -127,8 +127,8 @@ mod tests {
 
     #[test]
     fn test_instructions() {
-        let head = Head::new(States::from(0), "b");
-        let tail = Tail::new(States::from(0), "a", Move::Right);
+        let head = Head::new(State::from(0), "b");
+        let tail = Tail::new(State::from(0), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
         assert_eq!(instructions.tail.action(), &Move::Right)
     }

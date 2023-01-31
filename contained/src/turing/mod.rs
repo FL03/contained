@@ -30,3 +30,40 @@ pub trait Transition<S: Clone> {
         self.dirac()(self.data().clone())
     }
 }
+
+pub trait Turing {
+    type Symbol: Symbolic;
+    ///
+    fn execute(
+        &self,
+        cnf: &mut Configuration<Self::Symbol>,
+    ) -> crate::Resultant<Configuration<Self::Symbol>> {
+        self.execute_until(cnf, |cnf| cnf.state == 0.into())
+    }
+    ///
+    fn execute_once(
+        &self,
+        cnf: &mut Configuration<Self::Symbol>,
+    ) -> crate::Resultant<Configuration<Self::Symbol>>;
+    ///
+    fn execute_until(
+        &self,
+        cnf: &mut Configuration<Self::Symbol>,
+        until: impl Fn(&Configuration<Self::Symbol>) -> bool,
+    ) -> crate::Resultant<Configuration<Self::Symbol>>;
+    /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
+    /// method as the [`Configuration::new_std`].
+    fn translate_std(&self, tape: Tape<Self::Symbol>) -> Result<Tape<Self::Symbol>, String> {
+        let mut conf = Configuration::std(tape)?;
+        let exec = self.execute(&mut conf)?;
+        Ok(exec.tape())
+    }
+
+    /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
+    /// method as the [`Configuration::new_nrm`].
+    fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Result<Tape<Self::Symbol>, String> {
+        let mut conf = Configuration::norm(tape)?;
+        let exec = self.execute(&mut conf)?;
+        Ok(exec.tape())
+    }
+}

@@ -3,10 +3,45 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::StatePack;
+use decanter::prelude::{hasher, Hashable};
+use scsys::prelude::{SerdeDisplay, StatePack};
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
+
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
+)]
+pub struct State {
+    pub state: States,
+}
+
+impl State {
+    pub fn new(state: States) -> Self {
+        Self { state }
+    }
+}
+
+impl From<i64> for State {
+    fn from(data: i64) -> State {
+        Self::new(data.into())
+    }
+}
+
+impl From<State> for i64 {
+    fn from(data: State) -> i64 {
+        data.state.into()
+    }
+}
 
 #[derive(
     Clone,
@@ -36,6 +71,12 @@ impl States {
     }
     pub fn valid() -> Self {
         Self::Valid
+    }
+}
+
+impl Hashable for States {
+    fn hash(&self) -> decanter::prelude::H256 {
+        hasher(&self).into()
     }
 }
 
