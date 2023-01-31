@@ -7,6 +7,7 @@ use super::{Program, Symbolic};
 
 use serde::{Deserialize, Serialize};
 
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Machine<S: Symbolic> {
     pub ds: S, // the default symbol
