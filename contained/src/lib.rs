@@ -9,6 +9,8 @@ pub(crate) mod states;
 
 pub mod turing;
 
+pub type Dirac<S, T> = dyn Fn(S) -> T;
+
 pub type Resultant<T = (), E = String> = Result<T, E>;
 
 pub trait Stateful {

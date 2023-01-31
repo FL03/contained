@@ -11,7 +11,7 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-pub type Dirac<S, T> = dyn Fn(S) -> T;
+use crate::{Dirac, Resultant};
 
 pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
 
@@ -37,23 +37,23 @@ pub trait Turing {
     fn execute(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
-    ) -> crate::Resultant<Configuration<Self::Symbol>> {
+    ) -> Resultant<Configuration<Self::Symbol>> {
         self.execute_until(cnf, |cnf| cnf.state == 0.into())
     }
     ///
     fn execute_once(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
-    ) -> crate::Resultant<Configuration<Self::Symbol>>;
+    ) -> Resultant<Configuration<Self::Symbol>>;
     ///
     fn execute_until(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
         until: impl Fn(&Configuration<Self::Symbol>) -> bool,
-    ) -> crate::Resultant<Configuration<Self::Symbol>>;
+    ) -> Resultant<Configuration<Self::Symbol>>;
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_std`].
-    fn translate_std(&self, tape: Tape<Self::Symbol>) -> Result<Tape<Self::Symbol>, String> {
+    fn translate_std(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
         let mut conf = Configuration::std(tape)?;
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape())
@@ -61,7 +61,7 @@ pub trait Turing {
 
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_nrm`].
-    fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Result<Tape<Self::Symbol>, String> {
+    fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
         let mut conf = Configuration::norm(tape)?;
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape())
