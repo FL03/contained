@@ -70,7 +70,7 @@ mod test {
         let alphabet = vec!["a", "b", "c"];
 
         let tape = Tape::new(alphabet.clone());
-        let cnf = Configuration::new(1, 1.into(), tape);
+        let cnf = Configuration::norm(tape);
 
         assert!(cnf.is_ok());
 
@@ -83,6 +83,6 @@ mod test {
         assert!(a.is_ok());
         assert!(Machine::new("", program.clone()).is_err());
 
-        // assert!(a.unwrap().execute(&mut cnf.unwrap()).is_ok())
+        assert!(a.unwrap().execute(&mut cnf.unwrap()).is_ok())
     }
 }
