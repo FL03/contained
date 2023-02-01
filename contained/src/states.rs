@@ -22,18 +22,32 @@ use strum::{EnumString, EnumVariantNames};
     Serialize,
 )]
 pub struct State {
-    pub state: States,
+    pub message: String,
+    state: States,
 }
 
 impl State {
-    pub fn new(state: States) -> Self {
-        Self { state }
+    pub fn new(message: String, state: States) -> Self {
+        Self { message, state }
+    }
+    pub fn state(&self) -> States {
+        self.state
+    }
+    pub fn update_state(&mut self, state: States) {
+        self.state = state;
+
+    }
+}
+
+impl Hashable for State {
+    fn hash(&self) -> decanter::prelude::H256 {
+        hasher(&self).into()
     }
 }
 
 impl From<i64> for State {
     fn from(data: i64) -> State {
-        Self::new(data.into())
+        Self::new(String::new(), data.into())
     }
 }
 
@@ -110,17 +124,17 @@ impl From<States> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scsys::prelude::{State, Stateful, StatefulExt};
+
 
     #[test]
     fn test_default_state() {
-        let a = State::<States>::default();
+        let a = State::default();
         let mut b = a.clone();
 
         assert_eq!(&a, &b);
         assert_eq!(a.state() as i64, 1);
 
-        b.update_state(None, 10.into());
+        b.update_state(10.into());
         assert_eq!(b.state(), States::Valid)
     }
 }

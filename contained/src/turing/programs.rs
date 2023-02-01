@@ -18,10 +18,12 @@ pub trait Programatic<S: Symbolic> {
     fn mut_instructions(&mut self) -> &mut Vec<Instruction<S>>;
     ///
     fn final_state(&self) -> &State;
-    ///
+    /// Given some [Head], find the coresponding [Instruction]
     fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
         if self.final_state() < head.state() {
-            panic!("The provided head is greater than the final state...")
+            return Err(format!(
+                "The provided head is greater than the final state..."
+            ));
         } else {
             match self
                 .instructions()
@@ -33,8 +35,9 @@ pub trait Programatic<S: Symbolic> {
             }
         }
     }
-    ///
+    /// Insert a new [Instruction] set into the program
     fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
+        // TODO: Fix the state
         if inst.head.state() == &State::from(0) {
             return Err(format!(
                 "Set error: Instruction cannot have 0 state in head..."
