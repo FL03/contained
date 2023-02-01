@@ -5,20 +5,23 @@
 */
 extern crate contained;
 
-use contained::turing::{Configuration, Instruction, Machine, Move, Program, Programatic, Tape, Turing};
+use contained::turing::{Configuration, Machine, Move, Program, Programatic, Tape, Turing};
+use contained::{Resultant, State};
 
-fn main() -> Result<(), String> {
+fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(alphabet.clone());
     let mut cnf = Configuration::norm(tape)?;
 
-    let inst = Instruction::from((1.into(), "a", 0.into(), "b", Move::Right));
-    let mut program = Program::new(alphabet, 2.into());
-    program.insert(inst.clone()).unwrap();
+    // Setup the program
+    let final_state = State::new(2);
+    let mut program = Program::new(alphabet, final_state);
+    program.insert((1.into(), "a", 1.into(), "c", Move::Right).into())?;
+    program.insert((1.into(), "b", 1.into(), "a", Move::Right).into())?;
+    program.insert((1.into(), "c", 0.into(), "a", Move::Left).into())?;
 
-    let a = Machine::new("b", program.clone())?;
-
+    let a = Machine::new("a", program.clone())?;
 
     println!("{:?}", a.execute(&mut cnf)?);
 

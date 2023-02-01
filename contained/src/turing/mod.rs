@@ -11,7 +11,7 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Dirac, Resultant};
+use crate::{Dirac, Resultant, State};
 
 pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
 
@@ -38,7 +38,7 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state == 0.into())
+        self.execute_until(cnf, |cnf| cnf.state == State::new(0))
     }
     ///
     fn execute_once(

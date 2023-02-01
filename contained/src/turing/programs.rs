@@ -30,7 +30,11 @@ pub trait Programatic<S: Symbolic> {
                 .iter()
                 .find(|inst: &&Instruction<S>| &inst.head == &head)
             {
-                None => panic!("Failed to find instructions for the provided head..."),
+                None => {
+                    return Err(format!(
+                        "Failed to find instructions for the provided head..."
+                    ))
+                }
                 Some(v) => Ok(v),
             }
         }
@@ -79,8 +83,8 @@ pub struct Program<S: Symbolic> {
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = final_state.clone().into();
-        let capacity = alphabet.clone().len() * s as usize;
+        let s: usize = final_state.clone().into();
+        let capacity = alphabet.clone().len() * s;
         let instructions = Vec::with_capacity(capacity);
 
         Self {
