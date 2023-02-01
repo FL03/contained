@@ -11,8 +11,9 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Dirac, Resultant, State};
+use crate::{Resultant, State};
 
+/// Simple trait for compatible symbols
 pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
 
 impl Symbolic for char {}
@@ -21,16 +22,7 @@ impl Symbolic for &str {}
 
 impl Symbolic for String {}
 
-pub trait Transition<S: Clone> {
-    type Output;
-
-    fn data(&self) -> &S;
-    fn dirac(&self) -> &Dirac<S, Self::Output>;
-    fn resultant(&self) -> Self::Output {
-        self.dirac()(self.data().clone())
-    }
-}
-
+/// Describes the basic functionality of a Turing machine
 pub trait Turing {
     type Symbol: Symbolic;
     ///
@@ -38,7 +30,7 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state == State::new(0))
+        self.execute_until(cnf, |cnf| cnf.state() == State::new(0))
     }
     ///
     fn execute_once(

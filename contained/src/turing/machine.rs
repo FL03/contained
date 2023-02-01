@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use super::{Configuration, Head, Program, Programatic, Symbolic, Turing};
-
+use crate::Resultant;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -14,7 +14,7 @@ pub struct Machine<S: Symbolic> {
 }
 
 impl<S: Symbolic> Machine<S> {
-    pub fn new(ds: S, program: Program<S>) -> Result<Self, String> {
+    pub fn new(ds: S, program: Program<S>) -> Resultant<Self> {
         if program.alphabet().contains(&ds) {
             Ok(Self { ds, program })
         } else {
@@ -35,7 +35,7 @@ impl<S: Symbolic> Turing for Machine<S> {
     fn execute_once(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
-    ) -> crate::Resultant<Configuration<Self::Symbol>> {
+    ) -> Resultant<Configuration<Self::Symbol>> {
         let head = Head::new(cnf.state().clone(), cnf.symbol().expect("").clone());
         let inst = self.program.get(head)?.clone();
         cnf.state = inst.tail.state().clone();
@@ -48,7 +48,7 @@ impl<S: Symbolic> Turing for Machine<S> {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
         until: impl Fn(&Configuration<Self::Symbol>) -> bool,
-    ) -> crate::Resultant<Configuration<Self::Symbol>> {
+    ) -> Resultant<Configuration<Self::Symbol>> {
         while !until(&cnf) {
             let head = Head::new(cnf.state.clone(), cnf.symbol().expect("").clone());
             let inst = self.program.get(head)?.clone();

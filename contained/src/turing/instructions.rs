@@ -1,7 +1,9 @@
 /*
     Appellation: reactions <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description:
+        Turing machines are given three degrees of freedom when considering possible movements
+
 */
 use crate::{turing::Symbolic, State};
 use serde::{Deserialize, Serialize};

@@ -17,6 +17,7 @@ fn main() -> Resultant {
     // Setup the program
     let final_state = State::new(2);
     let mut program = Program::new(alphabet, final_state);
+
     program.insert((1.into(), "a", 1.into(), "c", Move::Right).into())?;
     program.insert((1.into(), "b", 1.into(), "a", Move::Right).into())?;
     program.insert((1.into(), "c", 0.into(), "a", Move::Left).into())?;

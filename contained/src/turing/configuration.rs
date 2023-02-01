@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Configuration<S: Symbolic> {
     index: usize,
-    pub state: State,
+    pub(crate) state: State,
     tape: Tape<S>,
 }
 
@@ -41,16 +41,19 @@ impl<S: Symbolic> Configuration<S> {
     /// then [`Tape`] extends by [`Tape::insert`] method, otherwise only
     /// changes self index.
     pub fn shift(&mut self, movement: Move, default: S) {
-        match movement {
-            Move::Left if self.index == 0 => self.tape.insert(0, default),
-            Move::Left => self.index -= 1,
-            Move::Stay => {}
-            Move::Right => {
+        match movement as i64 {
+            // Left
+            0 if self.index == 0 => self.tape.insert(0, default),
+            0 => self.index -= 1,
+            // Right
+            1 => {
                 self.index += 1;
                 if self.index == self.tape.len() {
                     self.tape.insert(self.index, default);
                 }
             }
+            // Stay
+            _ => {}
         };
     }
     pub fn state(&self) -> State {
