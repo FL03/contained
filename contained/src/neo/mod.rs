@@ -14,7 +14,7 @@ use futures::Stream;
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
-/// A type alias for a [Stream] of [Fn] which take one object and transform it into another
+/// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another
 /// as defined in Clifton Callender's work on continuous transformations.
 pub type HarmonicInterpolation<S, T> = dyn Stream<Item = dyn Fn(S) -> T>;
 
