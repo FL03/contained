@@ -3,12 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
-
-        Computationally, the triad is a three-tuple of 
-
-
+        Generaically, triad's share two of its notes with three of its inversions.
 */
-use crate::neo::{Note, Pitch};
+use crate::neo::cmp::{Note, Pitch};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

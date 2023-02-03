@@ -4,11 +4,12 @@
     Description:
         This module is dedicated to the proposed harmonic computational fabric
 */
-pub use self::{note::*, tonnetz::*, triad::*};
+pub use self::{tonnetz::*, triad::*};
 
-pub(crate) mod note;
 pub(crate) mod tonnetz;
 pub(crate) mod triad;
+
+pub mod cmp;
 
 use futures::Stream;
 use serde::{Deserialize, Serialize};
