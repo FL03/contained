@@ -13,3 +13,19 @@ use serde::{Deserialize, Serialize};
 /// A [Note] consists of some [Pitch] and a [Epoch] which indicates a start time and optionally signals a duration
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Note<P: Pitch>(P, Epoch);
+
+impl<P: Pitch> Note<P> {
+    pub fn new(pitch: P, epoch: Epoch) -> Self {
+        Self(pitch, epoch)
+    }
+}
+
+pub enum NaturalNote<P: Pitch> {
+    A(P),
+    B(P),
+    C(P),
+    D(P),
+    E(P),
+    F(P),
+    G(P)
+}
