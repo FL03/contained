@@ -8,36 +8,61 @@
 
 */
 use super::{Epoch, PitchClass};
-use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 pub trait Notable {
     fn pitch(&self) -> &PitchClass
     where
         Self: Sized;
-    fn epoch(&self) -> &Epoch
+    fn epoch(&self) -> &Option<Epoch>
     where
         Self: Sized;
 }
 
 /// A [Note] consists of some [Pitch] and a [Epoch] which indicates a start time and optionally signals a duration
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    Deserialize,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    SerdeDisplay,
-    Serialize,
-)]
-pub struct Note(PitchClass, Epoch);
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
+pub struct Note(PitchClass, Option<Epoch>);
 
 impl Note {
-    pub fn new(pitch: PitchClass, epoch: Epoch) -> Self {
+    pub fn new(pitch: PitchClass, epoch: Option<Epoch>) -> Self {
         Self(pitch, epoch)
+    }
+}
+
+impl PartialEq for Note {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl std::fmt::Display for Note {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+
+impl TryFrom<&str> for Note {
+    type Error = std::string::ParseError;
+
+    fn try_from(d: &str) -> Result<Note, Self::Error> {
+        match PitchClass::from_str(d) {
+            Ok(v) => Ok(Note::from(v)),
+            Err(e) => panic!("ParseError")
+        }
+    }
+}
+
+impl From<PitchClass> for Note {
+    fn from(d: PitchClass) -> Note {
+        Note::new(d, None)
+    }
+}
+
+impl From<i64> for Note {
+    fn from(d: i64) -> Note {
+        let pitch: PitchClass = d.into();
+        Note::from(pitch)
     }
 }
