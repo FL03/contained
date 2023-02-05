@@ -5,6 +5,7 @@
 */
 use super::{Configuration, Head, Program, Programatic, Symbolic, Turing};
 use crate::Resultant;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]

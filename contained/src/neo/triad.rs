@@ -11,7 +11,7 @@
             b != c
 */
 use crate::neo::cmp::{Note, PitchClass};
-use crate::turing::Symbolic;
+use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
 ///
@@ -45,12 +45,40 @@ impl std::fmt::Display for Triad {
     }
 }
 
+impl Symbolic for Triad {}
+
+impl From<Triad> for Configuration<Note> {
+    fn from(value: Triad) -> Configuration<Note> {
+        let triad: Tape<Note> = value.into();
+        Configuration::norm(triad).unwrap()
+    }
+}
+
+impl From<Triad> for Vec<Note> {
+    fn from(value: Triad) -> Vec<Note> {
+        vec![value.0, value.1, value.2]
+    }
+}
+
+impl From<Triad> for Tape<Note> {
+    fn from(value: Triad) -> Tape<Note> {
+        let t = [value.0, value.1, value.2];
+        Tape::new(t)
+    }
+}
+
 impl TryFrom<(&str, &str, &str)> for Triad {
     type Error = std::string::ParseError;
 
     fn try_from(d: (&str, &str, &str)) -> Result<Triad, Self::Error> {
         let (root, third, fifth) = (Note::try_from(d.0)?, Note::try_from(d.1)?, Note::try_from(d.2)?);
         Ok(Triad::new(root, third, fifth))
+    }
+}
+
+impl From<(i64, i64, i64)> for Triad {
+    fn from(d: (i64, i64, i64)) -> Triad {
+        Triad(d.0.into(), d.1.into(), d.2.into())
     }
 }
 

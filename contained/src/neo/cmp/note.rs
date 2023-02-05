@@ -8,6 +8,7 @@
 
 */
 use super::{Epoch, PitchClass};
+use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
@@ -42,6 +43,8 @@ impl std::fmt::Display for Note {
     }
 }
 
+impl Symbolic for Note {}
+
 
 impl TryFrom<&str> for Note {
     type Error = std::string::ParseError;
@@ -49,7 +52,7 @@ impl TryFrom<&str> for Note {
     fn try_from(d: &str) -> Result<Note, Self::Error> {
         match PitchClass::from_str(d) {
             Ok(v) => Ok(Note::from(v)),
-            Err(e) => panic!("ParseError")
+            Err(_) => panic!("ParseError")
         }
     }
 }

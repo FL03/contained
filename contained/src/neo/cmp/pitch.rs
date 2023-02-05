@@ -1,7 +1,10 @@
 /*
     Appellation: pitch <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
+    Description:
+        A pitch essentially represents the frequency of a sound wave and has been mathematically expressed to be
+            p = log(2f)
+        empirically based on the octave doubling of frequency exponetially
 */
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
