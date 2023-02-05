@@ -7,7 +7,7 @@
 */
 use crate::{turing::Symbolic, State};
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, EnumVariantNames};
+use strum::{Display, EnumString, EnumVariantNames};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Head<T: Symbolic>(State, T);
@@ -80,6 +80,7 @@ impl<S: Symbolic> From<(State, S, State, S, Move)> for Instruction<S> {
     Debug,
     Default,
     Deserialize,
+    Display,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -94,17 +95,6 @@ pub enum Move {
     Right = 1,
     #[default]
     Stay = 2,
-}
-
-impl std::fmt::Display for Move {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let p = match *self as i64 {
-            0 => "left",
-            1 => "right",
-            _ => "stay",
-        };
-        write!(f, "{}", p)
-    }
 }
 
 impl From<i64> for Move {

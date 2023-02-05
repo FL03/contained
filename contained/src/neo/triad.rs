@@ -14,6 +14,26 @@ use crate::neo::cmp::{Note, PitchClass};
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
+pub trait Triadic {
+    
+    fn is_valid(&self) -> bool {
+        if self.root() != self.third() && self.root() != self.fifth() && self.third() != self.fifth() {
+            return true;
+        }
+        false
+    }
+    fn triad(&self) -> (&Note, &Note, &Note);
+    fn root(&self) -> &Note {
+        self.triad().0
+    }
+    fn third(&self) -> &Note {
+        self.triad().1
+    }
+    fn fifth(&self) -> &Note {
+        self.triad().2
+    }
+}
+
 ///
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad(Note, Note, Note);

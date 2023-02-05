@@ -12,6 +12,9 @@ use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
 use crate::{Resultant, State, States};
 use serde::{Deserialize, Serialize};
 
+pub fn triadic_machine(triad: Triad, program: Program<Note>) -> Resultant<Machine<Note>> {
+    Machine::new(triad.root().clone(), program)
+}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tonnetz {
