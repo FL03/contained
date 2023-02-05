@@ -20,8 +20,26 @@ fn main() -> Resultant {
     let final_state = State::from(&States::invalid());
     let mut program = Program::new(alphabet, final_state);
     // Instruction set; turn ["c", "d#", "f"] into ["d#", "d#", "d#"]
-    program.insert((State::default(), 0.into(), State::default(), 3.into(), Move::Right).into())?;
-    program.insert((State::default(), 3.into(), State::default(), 3.into(), Move::Right).into())?;
+    program.insert(
+        (
+            State::default(),
+            0.into(),
+            State::default(),
+            3.into(),
+            Move::Right,
+        )
+            .into(),
+    )?;
+    program.insert(
+        (
+            State::default(),
+            3.into(),
+            State::default(),
+            3.into(),
+            Move::Right,
+        )
+            .into(),
+    )?;
     program.insert(
         (
             State::default(),

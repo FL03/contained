@@ -45,14 +45,13 @@ impl std::fmt::Display for Note {
 
 impl Symbolic for Note {}
 
-
 impl TryFrom<&str> for Note {
     type Error = std::string::ParseError;
 
     fn try_from(d: &str) -> Result<Note, Self::Error> {
         match PitchClass::from_str(d) {
             Ok(v) => Ok(Note::from(v)),
-            Err(_) => panic!("ParseError")
+            Err(_) => panic!("ParseError"),
         }
     }
 }

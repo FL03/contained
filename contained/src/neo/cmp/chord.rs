@@ -2,7 +2,7 @@
     Appellation: chord <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
-     
+
 */
 use crate::neo::cmp::{Epoch, Note, PitchClass};
 use serde::{Deserialize, Serialize};

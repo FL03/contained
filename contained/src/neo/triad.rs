@@ -15,9 +15,11 @@ use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
 pub trait Triadic {
-    
     fn is_valid(&self) -> bool {
-        if self.root() != self.third() && self.root() != self.fifth() && self.third() != self.fifth() {
+        if self.root() != self.third()
+            && self.root() != self.fifth()
+            && self.third() != self.fifth()
+        {
             return true;
         }
         false
@@ -61,7 +63,7 @@ impl Triad {
 
 impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}.{}.{}", self.0, self.1, self.2)
+        write!(f, "{}{}{}", self.0, self.1, self.2)
     }
 }
 
@@ -91,7 +93,11 @@ impl TryFrom<(&str, &str, &str)> for Triad {
     type Error = std::string::ParseError;
 
     fn try_from(d: (&str, &str, &str)) -> Result<Triad, Self::Error> {
-        let (root, third, fifth) = (Note::try_from(d.0)?, Note::try_from(d.1)?, Note::try_from(d.2)?);
+        let (root, third, fifth) = (
+            Note::try_from(d.0)?,
+            Note::try_from(d.1)?,
+            Note::try_from(d.2)?,
+        );
         Ok(Triad::new(root, third, fifth))
     }
 }
@@ -111,5 +117,19 @@ impl From<(Note, Note, Note)> for Triad {
 impl From<Triad> for (Note, Note, Note) {
     fn from(d: Triad) -> (Note, Note, Note) {
         (d.0, d.1, d.2)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_triad() {
+        let a = Triad::from((0, 1, 2));
+        let b = Triad::from((2, 1, 0));
+        assert!(a.is_valid());
+        assert!(b.is_valid());
+        assert_ne!(a, b)
     }
 }
