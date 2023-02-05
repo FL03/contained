@@ -7,25 +7,37 @@
         For our purposes, let a pitch represent a unique behavior and a pitch-class be a system addressed by the behavior
 
 */
-use super::{Epoch, Pitch};
+use super::{Epoch, PitchClass};
+use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
 
-/// A [Note] consists of some [Pitch] and a [Epoch] which indicates a start time and optionally signals a duration
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Note<P: Pitch>(P, Epoch);
-
-impl<P: Pitch> Note<P> {
-    pub fn new(pitch: P, epoch: Epoch) -> Self {
-        Self(pitch, epoch)
-    }
+pub trait Notable {
+    fn pitch(&self) -> &PitchClass
+    where
+        Self: Sized;
+    fn epoch(&self) -> &Epoch
+    where
+        Self: Sized;
 }
 
-pub enum NaturalNote<P: Pitch> {
-    A(P),
-    B(P),
-    C(P),
-    D(P),
-    E(P),
-    F(P),
-    G(P),
+/// A [Note] consists of some [Pitch] and a [Epoch] which indicates a start time and optionally signals a duration
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
+)]
+pub struct Note(PitchClass, Epoch);
+
+impl Note {
+    pub fn new(pitch: PitchClass, epoch: Epoch) -> Self {
+        Self(pitch, epoch)
+    }
 }

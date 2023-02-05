@@ -7,7 +7,7 @@
 use decanter::prelude::{Hash, Hashable};
 use scsys::prelude::{Message, SerdeDisplay, StatePack, Stateful, Timestamp};
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, EnumVariantNames};
+use strum::{Display, EnumString, EnumVariantNames};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize, SerdeDisplay)]
 pub struct State<S: Clone + StatePack = States, T: Clone + Default + Serialize = String> {
@@ -61,6 +61,7 @@ impl<S: Clone + StatePack, T: Clone + Default + Serialize> From<&S> for State<S,
     Debug,
     Default,
     Deserialize,
+    Display,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -70,6 +71,7 @@ impl<S: Clone + StatePack, T: Clone + Default + Serialize> From<&S> for State<S,
     PartialOrd,
     Serialize,
 )]
+#[strum(serialize_all = "snake_case")]
 pub enum States {
     #[default]
     Valid = 0,
@@ -82,16 +84,6 @@ impl States {
     }
     pub fn valid() -> Self {
         Self::Valid
-    }
-}
-
-impl std::fmt::Display for States {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let res = match *self as i64 {
-            0 => "valid",
-            _ => "invalid",
-        };
-        write!(f, "{}", res)
     }
 }
 

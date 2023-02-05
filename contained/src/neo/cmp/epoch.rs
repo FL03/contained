@@ -3,11 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use scsys::prelude::Timestamp;
+use scsys::prelude::{SerdeDisplay, Timestamp};
 use serde::{Deserialize, Serialize};
 
 /// An [Epoch] consists of a start time and optionally, a duration (seconds). If None, the system assumes an infinite duration
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
+)]
 pub struct Epoch(i64, Option<i64>);
 
 impl Epoch {

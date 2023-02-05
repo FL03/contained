@@ -13,7 +13,7 @@ pub mod cmp;
 
 use futures::Stream;
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, EnumVariantNames};
+use strum::{Display, EnumString, EnumVariantNames};
 
 /// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another
 /// as defined in Clifton Callender's work on continuous transformations.
@@ -25,6 +25,7 @@ pub type HarmonicInterpolation<S, T> = dyn Stream<Item = dyn Fn(S) -> T>;
     Debug,
     Default,
     Deserialize,
+    Display,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -33,6 +34,7 @@ pub type HarmonicInterpolation<S, T> = dyn Stream<Item = dyn Fn(S) -> T>;
     PartialOrd,
     Serialize,
 )]
+#[strum(serialize_all = "snake_case")]
 pub enum Transform {
     #[default]
     L = 0,

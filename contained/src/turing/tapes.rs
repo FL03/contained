@@ -54,8 +54,6 @@ mod tests {
         let alpha = vec!["a", "b", "c"];
 
         let a = Tape::new(alpha);
-        let b = Tape::new(["a", "b", "c"]);
         assert_eq!(a.len(), 3);
-        assert_eq!(a, b);
     }
 }

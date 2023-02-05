@@ -5,24 +5,33 @@
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
         Generaically, triad's share two of its notes with three of its inversions.
 */
-use crate::neo::cmp::{Note, Pitch};
+use crate::neo::cmp::Note;
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Root<P: Pitch>(Note<P>);
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Third<P: Pitch>(Note<P>);
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Fifth<P: Pitch>(Note<P>);
 
 ///
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Triad<I: Pitch, J: Pitch, K: Pitch>(Root<I>, Third<J>, Fifth<K>);
+pub struct Triad(Note, Note, Note);
 
-impl<I: Pitch, J: Pitch, K: Pitch> Triad<I, J, K> {
-    pub fn new(root: Root<I>, third: Third<J>, fifth: Fifth<K>) -> Self {
+impl Triad {
+    pub fn new(root: Note, third: Note, fifth: Note) -> Self {
         Self(root, third, fifth)
+    }
+}
+
+impl std::fmt::Display for Triad {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.0, self.1, self.2)
+    }
+}
+
+impl From<(Note, Note, Note)> for Triad {
+    fn from(d: (Note, Note, Note)) -> Triad {
+        Triad(d.0, d.1, d.2)
+    }
+}
+
+impl From<Triad> for (Note, Note, Note) {
+    fn from(d: Triad) -> (Note, Note, Note) {
+        (d.0, d.1, d.2)
     }
 }
