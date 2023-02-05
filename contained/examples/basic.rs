@@ -6,7 +6,7 @@
 extern crate contained;
 
 use contained::turing::{Configuration, Machine, Move, Program, Programatic, Tape, Turing};
-use contained::{Resultant, State};
+use contained::{Resultant, State, States};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
@@ -15,16 +15,26 @@ fn main() -> Resultant {
     let mut cnf = Configuration::norm(tape)?;
 
     // Setup the program
-    let final_state = State::new(2);
+    let final_state = State::from(&States::invalid());
     let mut program = Program::new(alphabet, final_state);
-
-    program.insert((1.into(), "a", 1.into(), "c", Move::Right).into())?;
-    program.insert((1.into(), "b", 1.into(), "a", Move::Right).into())?;
-    program.insert((1.into(), "c", 0.into(), "a", Move::Left).into())?;
+    // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
+    program.insert((State::default(), "a", State::default(), "c", Move::Right).into())?;
+    program.insert((State::default(), "b", State::default(), "a", Move::Right).into())?;
+    program.insert(
+        (
+            State::default(),
+            "c",
+            State::from(&States::invalid()),
+            "a",
+            Move::Left,
+        )
+            .into(),
+    )?;
 
     let a = Machine::new("a", program.clone())?;
-
-    println!("{:?}", a.execute(&mut cnf)?);
+    let res = a.execute(&mut cnf)?;
+    assert_eq!(res.tape().tape().clone(), vec!["c", "a", "a"]);
+    println!("{:?}", res);
 
     Ok(())
 }

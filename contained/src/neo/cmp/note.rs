@@ -27,5 +27,5 @@ pub enum NaturalNote<P: Pitch> {
     D(P),
     E(P),
     F(P),
-    G(P)
+    G(P),
 }

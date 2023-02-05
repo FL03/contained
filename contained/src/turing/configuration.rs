@@ -20,13 +20,16 @@ impl<S: Symbolic> Configuration<S> {
         Self::try_from((index, state, tape))
     }
     pub fn norm(tape: Tape<S>) -> Result<Self, String> {
-        Self::new(0, 1.into(), tape)
+        Self::new(0, Default::default(), tape)
     }
     pub fn std(tape: Tape<S>) -> Result<Self, String> {
-        Self::new(tape.len() - 1, 1.into(), tape)
+        Self::new(tape.len() - 1, Default::default(), tape)
     }
     pub fn len(&self) -> usize {
         self.tape().len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.tape().is_empty()
     }
     pub fn position(&self) -> usize {
         self.index

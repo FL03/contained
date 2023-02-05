@@ -10,16 +10,16 @@ use serde::{Deserialize, Serialize};
 use strum::{EnumString, EnumVariantNames};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Head<S: Symbolic>(State, S);
+pub struct Head<T: Symbolic>(State, T);
 
-impl<S: Symbolic> Head<S> {
-    pub fn new(state: State, symbol: S) -> Self {
+impl<T: Symbolic> Head<T> {
+    pub fn new(state: State, symbol: T) -> Self {
         Self(state, symbol)
     }
     pub fn state(&self) -> &State {
         &self.0
     }
-    pub fn symbol(&self) -> &S {
+    pub fn symbol(&self) -> &T {
         &self.1
     }
 }
@@ -98,7 +98,7 @@ pub enum Move {
 
 impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let p = match self.clone() as i64 {
+        let p = match *self as i64 {
             0 => "left",
             1 => "right",
             _ => "stay",
@@ -126,11 +126,12 @@ impl From<Move> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::States;
 
     #[test]
     fn test_instructions() {
-        let head = Head::new(State::from(0), "b");
-        let tail = Tail::new(State::from(0), "a", Move::Right);
+        let head = Head::new(State::new(None, States::invalid()), "b");
+        let tail = Tail::new(State::new(None, States::invalid()), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
         assert_eq!(instructions.tail.action(), &Move::Right)
     }

@@ -6,7 +6,6 @@
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 
-
 /// An [Epoch] consists of a start time and optionally, a duration (seconds). If None, the system assumes an infinite duration
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Epoch(i64, Option<i64>);
@@ -22,4 +21,3 @@ impl Default for Epoch {
         Self::new(Timestamp::default().into(), Some(1000))
     }
 }
-

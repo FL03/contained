@@ -11,7 +11,8 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Resultant, State};
+use crate::{Resultant, States};
+use scsys::prelude::Stateful;
 
 /// Simple trait for compatible symbols
 pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
@@ -30,7 +31,7 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state() == State::new(0))
+        self.execute_until(cnf, |cnf| cnf.state().state() == States::invalid())
     }
     ///
     fn execute_once(

@@ -1,5 +1,7 @@
 #[cfg(test)]
 #[test]
 fn compiles() {
-    assert!(0 == 0)
+    let f = |i: usize| i * i;
+
+    assert_eq!(f(2), 4)
 }

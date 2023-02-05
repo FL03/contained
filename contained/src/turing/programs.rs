@@ -4,8 +4,9 @@
     Description: ... summary ...
 */
 use super::{Head, Instruction, Symbolic};
-use crate::{Resultant, State};
+use crate::{Resultant, State, States};
 
+use scsys::prelude::Stateful;
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
@@ -20,21 +21,15 @@ pub trait Programatic<S: Symbolic> {
     fn final_state(&self) -> &State;
     /// Given some [Head], find the coresponding [Instruction]
     fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
-        if self.final_state() < head.state() {
-            return Err(format!(
-                "The provided head is greater than the final state..."
-            ));
+        if self.final_state().clone().state() < head.state().clone().state() {
+            Err("The provided head is greater than the final state...".to_string())
         } else {
             match self
                 .instructions()
                 .iter()
-                .find(|inst: &&Instruction<S>| &inst.head == &head)
+                .find(|inst: &&Instruction<S>| inst.head == head)
             {
-                None => {
-                    return Err(format!(
-                        "Failed to find instructions for the provided head..."
-                    ))
-                }
+                None => Err("Failed to find instructions for the provided head...".to_string()),
                 Some(v) => Ok(v),
             }
         }
@@ -42,22 +37,21 @@ pub trait Programatic<S: Symbolic> {
     /// Insert a new [Instruction] set into the program
     fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
         // TODO: Fix the state
-        if inst.head.state() == &State::from(0) {
-            return Err(format!(
-                "Set error: Instruction cannot have 0 state in head..."
-            ));
+        if inst.head.state() == &State::from(&States::invalid()) {
+            return Err("Set error: Instruction cannot have 0 state in head...".to_string());
         }
         if !self.alphabet().contains(inst.head.symbol())
             || !self.alphabet().contains(inst.tail.symbol())
         {
-            return Err(format!(
+            return Err(
                 "The provided instruction set fails to be represented within the alphabet..."
-            ));
+                    .to_string(),
+            );
         }
-        if self.final_state() < inst.head.state() || self.final_state() < inst.tail.state() {
-            return Err(format!(
-                "Instructions have states greater than the ones availible..."
-            ));
+        if self.final_state().clone().state() < inst.head.state().clone().state()
+            || self.final_state().clone().state() < inst.tail.state().clone().state()
+        {
+            return Err("Instructions have states greater than the ones availible...".to_string());
         }
         let position = self
             .instructions()
@@ -83,8 +77,8 @@ pub struct Program<S: Symbolic> {
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: usize = final_state.clone().into();
-        let capacity = alphabet.clone().len() * s;
+        let s: i64 = final_state.clone().state().into();
+        let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);
 
         Self {
@@ -117,12 +111,19 @@ impl<S: Symbolic> Programatic<S> for Program<S> {
 mod test {
     use super::*;
     use crate::turing::{Instruction, Move};
+    use crate::{State, States};
 
     #[test]
     fn test_program() {
-        let inst = Instruction::from((1.into(), "a", 2.into(), "b", Move::Right));
+        let inst = Instruction::from((
+            State::from(&States::valid()),
+            "a",
+            State::from(&States::valid()),
+            "b",
+            Move::Right,
+        ));
         let alphabet = vec!["a", "b", "c"];
-        let mut program = Program::new(alphabet, 1.into());
+        let mut program = Program::new(alphabet, State::from(&States::invalid()));
 
         assert!(program.insert(inst.clone()).is_ok());
         assert!(program.get(inst.head).is_ok())

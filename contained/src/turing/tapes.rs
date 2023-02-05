@@ -19,6 +19,9 @@ impl<S: Symbolic> Tape<S> {
     pub fn insert(&mut self, pos: usize, elem: S) {
         self.0.insert(pos, elem);
     }
+    pub fn is_empty(&self) -> bool {
+        self.tape().is_empty()
+    }
     pub fn len(&self) -> usize {
         self.tape().len()
     }

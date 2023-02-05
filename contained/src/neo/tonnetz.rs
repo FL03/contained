@@ -8,5 +8,4 @@
         any particular topology and preserves the overall flexability of the system.
 */
 
-
 pub struct Tonnetz;

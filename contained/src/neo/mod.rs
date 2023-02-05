@@ -37,5 +37,5 @@ pub enum Transform {
     #[default]
     L = 0,
     P = 1,
-    R = 2
+    R = 2,
 }
