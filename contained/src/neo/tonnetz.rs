@@ -8,6 +8,7 @@
         This means that each device will run at least one "cell" where a cell is a circular graph
 
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
+        
 */
 use crate::neo::{cmp::Note, Triad, Triadic};
 use crate::turing::{Configuration, Machine, Program};

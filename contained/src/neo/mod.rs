@@ -17,3 +17,15 @@ use futures::Stream;
 /// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another
 /// as defined in Clifton Callender's work on continuous transformations.
 pub type HarmonicInterpolation<S, T> = dyn Stream<Item = dyn Fn(S) -> T>;
+
+pub trait Transformation<S: Clone> {
+    type Error;
+    type Output;
+
+    fn args(&self) -> &S;
+    /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
+    fn dirac(&self) -> &dyn Fn(&S) -> Result<Option<Self::Output>, Self::Error>;
+    fn transform(&self) -> Result<Option<Self::Output>, Self::Error> {
+        self.dirac()(self.args())
+    }
+}

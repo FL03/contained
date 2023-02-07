@@ -9,12 +9,6 @@ use crate::neo::Triad;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-pub trait Transformation<S> {
-    type Output;
-
-    fn dirac(&self) -> dyn Fn(S) -> Self::Output;
-}
-
 #[derive(
     Clone,
     Copy,

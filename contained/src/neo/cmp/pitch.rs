@@ -71,7 +71,6 @@ pub enum PitchClass {
     G = 10,
     #[strum(serialize = "g#")]
     Gs = 11,
-    
 }
 
 impl Pitch for PitchClass {}
