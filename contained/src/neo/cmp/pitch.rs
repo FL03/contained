@@ -127,4 +127,10 @@ mod tests {
         assert_eq!(b.to_string(), "a#".to_string());
         assert_eq!(a + b, "ca#".to_string())
     }
+
+    #[test]
+    fn test_modularity() {
+        let a = PitchClass::from(144);
+        assert_eq!(a.clone(), PitchClass::C);
+    }
 }

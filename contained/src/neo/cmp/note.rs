@@ -29,6 +29,12 @@ impl Note {
     pub fn new(pitch: PitchClass, epoch: Option<Epoch>) -> Self {
         Self(pitch, epoch)
     }
+    pub fn pitch(&self) -> &PitchClass {
+        &self.0
+    }
+    pub fn epoch(&self) -> &Option<Epoch> {
+        &self.1
+    }
 }
 
 impl PartialEq for Note {

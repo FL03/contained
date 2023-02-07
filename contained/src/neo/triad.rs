@@ -34,6 +34,7 @@ pub trait Triadic {
     fn fifth(&self) -> &Note {
         self.triad().2
     }
+    fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>);
 }
 
 ///
@@ -44,20 +45,23 @@ impl Triad {
     pub fn new(root: Note, third: Note, fifth: Note) -> Self {
         Self(root, third, fifth)
     }
-    pub fn is_valid(&self) -> bool {
-        if self.0 != self.1 && self.0 != self.2 && self.1 != self.2 {
-            return true;
+}
+
+impl Triadic for Triad {
+    fn triad(&self) -> (&Note, &Note, &Note) {
+        (&self.0, &self.1, &self.2)
+    }
+
+    fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>) {
+        if let Some(n) = root {
+            self.0 = n;
         }
-        false
-    }
-    pub fn fifth(&self) -> &Note {
-        &self.2
-    }
-    pub fn root(&self) -> &Note {
-        &self.0
-    }
-    pub fn third(&self) -> &Note {
-        &self.1
+        if let Some(n) = third {
+            self.1 = n;
+        }
+        if let Some(n) = fifth {
+            self.2 = n;
+        }
     }
 }
 
@@ -99,6 +103,16 @@ impl TryFrom<(&str, &str, &str)> for Triad {
             Note::try_from(d.2)?,
         );
         Ok(Triad::new(root, third, fifth))
+    }
+}
+
+impl From<Triad> for (i64, i64, i64) {
+    fn from(d: Triad) -> (i64, i64, i64) {
+        (
+            d.0.pitch().clone().into(),
+            d.1.pitch().clone().into(),
+            d.2.pitch().clone().into(),
+        )
     }
 }
 
