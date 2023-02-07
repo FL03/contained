@@ -53,3 +53,21 @@ impl Tonnetz {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tonnetz() {
+        let triad = Triad::from((0, 3, 5));
+
+        let mut a = Tonnetz::new(triad.clone());
+        // Apply a single leading transformation to the scope
+        a.transform(LPR::L);
+        assert_eq!(a.scope().clone(), Triad::from((0, 3, 6)));
+        // Apply three consecutive transformations to the scope
+        a.walk(vec![LPR::L, LPR::P, LPR::R]);
+        assert_eq!(a.scope().clone(), Triad::from((0, 4, 9)))
+    }
+}

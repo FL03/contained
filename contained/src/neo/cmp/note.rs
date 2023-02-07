@@ -6,14 +6,14 @@
 
         For our purposes, let a pitch represent a unique behavior and a pitch-class be a system addressed by the behavior
 
+        If a note is simply a symbolic representation of a pitch than we can assume all pitches to be modulus of 12
 */
-use super::{Epoch, PitchClass};
+use super::{Epoch, Pitch};
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
 
 pub trait Notable {
-    fn pitch(&self) -> &PitchClass
+    fn pitch(&self) -> &Pitch
     where
         Self: Sized;
     fn epoch(&self) -> &Option<Epoch>
@@ -21,15 +21,16 @@ pub trait Notable {
         Self: Sized;
 }
 
+
 /// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
-pub struct Note(PitchClass, Option<Epoch>);
+pub struct Note(Pitch, Option<Epoch>);
 
 impl Note {
-    pub fn new(pitch: PitchClass, epoch: Option<Epoch>) -> Self {
+    pub fn new(pitch: Pitch, epoch: Option<Epoch>) -> Self {
         Self(pitch, epoch)
     }
-    pub fn pitch(&self) -> &PitchClass {
+    pub fn pitch(&self) -> &Pitch {
         &self.0
     }
     pub fn epoch(&self) -> &Option<Epoch> {
@@ -51,25 +52,8 @@ impl std::fmt::Display for Note {
 
 impl Symbolic for Note {}
 
-impl TryFrom<&str> for Note {
-    type Error = std::string::ParseError;
-
-    fn try_from(d: &str) -> Result<Note, Self::Error> {
-        match PitchClass::from_str(d) {
-            Ok(v) => Ok(Note::from(v)),
-            Err(_) => panic!("ParseError"),
-        }
-    }
-}
-
-impl From<PitchClass> for Note {
-    fn from(d: PitchClass) -> Note {
-        Note::new(d, None)
-    }
-}
-
 impl From<i64> for Note {
     fn from(d: i64) -> Note {
-        Note::from(PitchClass::from(d))
+        Note::new(Pitch::from(d), None)
     }
 }

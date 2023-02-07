@@ -93,19 +93,6 @@ impl From<Triad> for Tape<Note> {
     }
 }
 
-impl TryFrom<(&str, &str, &str)> for Triad {
-    type Error = std::string::ParseError;
-
-    fn try_from(d: (&str, &str, &str)) -> Result<Triad, Self::Error> {
-        let (root, third, fifth) = (
-            Note::try_from(d.0)?,
-            Note::try_from(d.1)?,
-            Note::try_from(d.2)?,
-        );
-        Ok(Triad::new(root, third, fifth))
-    }
-}
-
 impl From<Triad> for (i64, i64, i64) {
     fn from(d: Triad) -> (i64, i64, i64) {
         (
