@@ -53,24 +53,25 @@ pub trait Pitch: Clone + Default + ToString {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum PitchClass {
-    #[default]
-    C = 0,
-    #[strum(serialize = "c#")]
-    Cs = 1,
-    D = 2,
-    #[strum(serialize = "d#")]
-    Ds = 3,
-    E = 4,
-    F = 5,
-    #[strum(serialize = "f#")]
-    Fs = 6,
-    G = 7,
-    #[strum(serialize = "g#")]
-    Gs = 8,
-    A = 9,
+    A = 0,
     #[strum(serialize = "a#")]
-    As = 10,
-    B = 11,
+    As = 1,
+    B = 2,
+    #[default]
+    C = 3,
+    #[strum(serialize = "c#")]
+    Cs = 4,
+    D = 5,
+    #[strum(serialize = "d#")]
+    Ds = 6,
+    E = 7,
+    F = 8,
+    #[strum(serialize = "f#")]
+    Fs = 9,
+    G = 10,
+    #[strum(serialize = "g#")]
+    Gs = 11,
+    
 }
 
 impl Pitch for PitchClass {}
@@ -82,19 +83,18 @@ impl From<i64> for PitchClass {
             data = data % 12;
         }
         match data {
-            0 => Self::C,
-            1 => Self::Cs,
-            2 => Self::D,
-            3 => Self::Ds,
-            4 => Self::E,
-            5 => Self::F,
-            6 => Self::Fs,
-            7 => Self::G,
-            8 => Self::Gs,
-            9 => Self::A,
-            10 => Self::As,
-            11 => Self::B,
-            _ => Self::C,
+            0 => Self::A,
+            1 => Self::As,
+            2 => Self::B,
+            3 => Self::C,
+            4 => Self::Cs,
+            5 => Self::D,
+            6 => Self::Ds,
+            7 => Self::E,
+            8 => Self::F,
+            9 => Self::Fs,
+            10 => Self::G,
+            _ => Self::Gs,
         }
     }
 }
