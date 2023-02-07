@@ -10,7 +10,7 @@
             a != c
             b != c
 */
-use crate::neo::cmp::Note;
+use crate::neo::{cmp::Note, LPR};
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
@@ -37,7 +37,7 @@ pub trait Triadic {
     fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>);
 }
 
-///
+/// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad(Note, Note, Note);
 

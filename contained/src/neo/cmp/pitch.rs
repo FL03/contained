@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn test_pitch_class() {
         let a = PitchClass::default();
-        let b: PitchClass = 10.into();
+        let b: PitchClass = 1.into();
         assert_eq!(a.to_string(), "c".to_string());
         assert_eq!(b.to_string(), "a#".to_string());
         assert_eq!(a + b, "ca#".to_string())
@@ -130,6 +130,6 @@ mod tests {
     #[test]
     fn test_modularity() {
         let a = PitchClass::from(144);
-        assert_eq!(a.clone(), PitchClass::C);
+        assert_eq!(a.clone(), PitchClass::A);
     }
 }

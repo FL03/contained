@@ -51,6 +51,14 @@ impl LPR {
     }
 }
 
+impl std::ops::Mul<Triad> for LPR {
+    type Output = Triad;
+
+    fn mul(self, rhs: Triad) -> Self::Output {
+        self.transform(&mut rhs.clone())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -60,7 +68,9 @@ mod tests {
     fn test_lpr_transformation() {
         let a = Triad::from((0, 1, 14));
         let b = LPR::default().transform(&mut a.clone());
+        let c = LPR::default() * a.clone();
         assert_ne!(a.clone(), b.clone());
-        assert_eq!(b.clone(), Triad::from((0, 1, 3)))
+        assert_eq!(b.clone(), Triad::from((0, 1, 3)));
+        assert_eq!(b.clone(), c)
     }
 }
