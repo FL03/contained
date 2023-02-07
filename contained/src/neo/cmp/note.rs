@@ -70,7 +70,6 @@ impl From<PitchClass> for Note {
 
 impl From<i64> for Note {
     fn from(d: i64) -> Note {
-        let pitch: PitchClass = d.into();
-        Note::from(pitch)
+        Note::from(PitchClass::from(d))
     }
 }

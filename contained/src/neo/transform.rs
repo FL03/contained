@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_lpr_transformation() {
-        let a = Triad::from((0, 1, 2));
+        let a = Triad::from((0, 1, 14));
         let b = LPR::default().transform(&mut a.clone());
         assert_ne!(a.clone(), b.clone());
         assert_eq!(b.clone(), Triad::from((0, 1, 3)))
