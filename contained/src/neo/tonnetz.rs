@@ -10,7 +10,7 @@
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         
 */
-use crate::neo::{cmp::Note, Triad, Triadic};
+use crate::neo::{cmp::Note, LPR, Triad, Triadic};
 use crate::turing::{Configuration, Machine, Program};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
@@ -33,5 +33,11 @@ impl Tonnetz {
     }
     pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
         Machine::new(self.scope.root().clone(), program)
+    }
+    pub fn scope(&self) -> &Triad {
+        &self.scope
+    }
+    pub fn transform(&mut self, shift: LPR) {
+        self.scope = shift.transform(&mut self.scope.clone());
     }
 }
