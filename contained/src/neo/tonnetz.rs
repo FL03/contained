@@ -28,16 +28,28 @@ impl Tonnetz {
     pub fn new(scope: Triad) -> Self {
         Self { scope }
     }
+    /// Converts the active [Triad] into a [Configuration] for [crate::turing::Turing]
     pub fn config(&self) -> Configuration<Note> {
         self.scope.clone().into()
     }
+    /// Attempt to create a [Machine] with the given [Program] and active [Triad]
     pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
         Machine::new(self.scope.root().clone(), program)
     }
+    /// Returns an owned instance of the active [Triad]
     pub fn scope(&self) -> &Triad {
         &self.scope
     }
+    /// Apply a single [LPR] transformation onto the active machine
+    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, shift: LPR) {
-        self.scope = shift.transform(&mut self.scope.clone());
+        self.scope = shift * self.scope().clone();
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow a set of machines to accomplish one task, S -> T
+    pub fn walk(&mut self, shifts: Vec<LPR>) {
+        for s in shifts {
+            self.transform(s)
+        }
     }
 }

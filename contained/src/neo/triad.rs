@@ -24,15 +24,15 @@ pub trait Triadic {
         }
         false
     }
-    fn triad(&self) -> (Note, Note, Note);
+    fn chord(&self) -> (Note, Note, Note);
     fn root(&self) -> Note {
-        self.triad().0
+        self.chord().0
     }
     fn third(&self) -> Note {
-        self.triad().1
+        self.chord().1
     }
     fn fifth(&self) -> Note {
-        self.triad().2
+        self.chord().2
     }
     fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>);
 }
@@ -48,7 +48,7 @@ impl Triad {
 }
 
 impl Triadic for Triad {
-    fn triad(&self) -> (Note, Note, Note) {
+    fn chord(&self) -> (Note, Note, Note) {
         self.clone().into()
     }
 
