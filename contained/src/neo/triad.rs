@@ -10,7 +10,7 @@
             a != c
             b != c
 */
-use crate::neo::cmp::{Note, PitchClass};
+use crate::neo::cmp::Note;
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
@@ -24,14 +24,14 @@ pub trait Triadic {
         }
         false
     }
-    fn triad(&self) -> (&Note, &Note, &Note);
-    fn root(&self) -> &Note {
+    fn triad(&self) -> (Note, Note, Note);
+    fn root(&self) -> Note {
         self.triad().0
     }
-    fn third(&self) -> &Note {
+    fn third(&self) -> Note {
         self.triad().1
     }
-    fn fifth(&self) -> &Note {
+    fn fifth(&self) -> Note {
         self.triad().2
     }
     fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>);
@@ -48,8 +48,8 @@ impl Triad {
 }
 
 impl Triadic for Triad {
-    fn triad(&self) -> (&Note, &Note, &Note) {
-        (&self.0, &self.1, &self.2)
+    fn triad(&self) -> (Note, Note, Note) {
+        self.clone().into()
     }
 
     fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>) {
