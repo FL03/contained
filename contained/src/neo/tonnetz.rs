@@ -10,7 +10,7 @@
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         Another option being considered is the multiway turing machine
 */
-use crate::neo::{cmp::Note, LPR, Triad, Triadic};
+use crate::neo::{cmp::Note, Triad, Triadic, LPR};
 use crate::turing::{Configuration, Machine, Program};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
@@ -30,7 +30,7 @@ impl Tonnetz {
     }
     /// Converts the active [Triad] into a [Configuration] for [crate::turing::Turing]
     pub fn config(&self) -> Configuration<Note> {
-        self.scope.clone().into()
+        self.scope.clone().config()
     }
     /// Attempt to create a [Machine] with the given [Program] and active [Triad]
     pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {

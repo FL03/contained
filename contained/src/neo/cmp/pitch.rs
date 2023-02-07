@@ -14,11 +14,30 @@ use serde::{Deserialize, Serialize};
 use std::ops::Add;
 use strum::{Display, EnumString, EnumVariantNames};
 
-pub enum Classes {
-    Flat(FlatNote),
-    Sharp(SharpNote)
+/// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
+/// Given a [NaturalNote] find its optional sharp and flat variations
+pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64>) {
+    let note = natural as i64;
+    // Calculate the modulus of the next (a) and prev (b) position
+    let (a, b) = if note.clone() == 0 {
+        (1, 11)
+    } else {
+        ((note.clone() + 1) % 12, (note.clone() - 1) % 12)
+    };
+    // If a natural note exists with a modulus a semitone above the entry, than it only has one option at -1 (flat)
+    if NaturalNote::try_from(a.clone()).is_ok() {
+        return (note, None, Some(b));
+    }
+    // If a natural note exists with a modulus a semitone below the entry, than it only has one option at +1 (sharp)
+    if NaturalNote::try_from(b.clone()).is_ok() {
+        return (note, Some(a), None);
+    }
+    // If a natural note doesn't exists a semitone above or below the entry, than it has two possible variations
+    // a sharp a semitone above and a flat a semitone below
+    (note, Some(a), Some(b))
 }
 
+/// [Pitch] describes the modular index of a given frequency
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Pitch(i64);
 
@@ -28,6 +47,10 @@ impl Pitch {
     }
     pub fn pitch(&self) -> i64 {
         self.0
+    }
+    /// Simple way to detect if the pitch is natural or not
+    pub fn is_natural(&self) -> bool {
+        NaturalNote::try_from(self.pitch()).is_ok()
     }
 }
 
@@ -49,7 +72,6 @@ impl From<Pitch> for i64 {
     }
 }
 
-
 #[derive(
     Clone,
     Copy,
@@ -69,12 +91,12 @@ impl From<Pitch> for i64 {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum FlatNote {
-    A = 11,
+    A = 7,
+    B = 10,
     #[default]
-    B = 1,
-    D = 4,
-    E = 6,
-    G = 9
+    D = 1,
+    E = 3,
+    G = 6,
 }
 
 #[derive(
@@ -96,12 +118,12 @@ pub enum FlatNote {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum SharpNote {
+    A = 10,
     #[default]
-    A = 1,
-    C = 4,
-    D = 6,
-    F = 9,
-    G = 11
+    C = 1,
+    D = 3,
+    F = 6,
+    G = 9,
 }
 
 #[derive(
@@ -123,17 +145,36 @@ pub enum SharpNote {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum NaturalNote {
+    C = 0,
+    D = 2,
+    E = 4,
+    F = 5,
+    G = 7,
     #[default]
-    A = 0,
-    B = 2,
-    C = 3,
-    D = 5,
-    E = 7,
-    F = 8,
-    G = 10
+    A = 9,
+    B = 11,
 }
 
+impl TryFrom<i64> for NaturalNote {
+    type Error = String;
 
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        let mut data = value.clone();
+        if value >= 12 {
+            data = value % 12;
+        }
+        match data {
+            0 => Ok(Self::C),
+            2 => Ok(Self::D),
+            4 => Ok(Self::E),
+            5 => Ok(Self::F),
+            7 => Ok(Self::G),
+            9 => Ok(Self::A),
+            11 => Ok(Self::B),
+            _ => Err(format!("")),
+        }
+    }
+}
 
 #[derive(
     Clone,
@@ -154,24 +195,24 @@ pub enum NaturalNote {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum PitchClass {
-    A = 0,
-    #[strum(serialize = "a#")]
-    As = 1,
-    B = 2,
     #[default]
-    C = 3,
+    C = 0,
     #[strum(serialize = "c#")]
-    Cs = 4,
-    D = 5,
+    Cs = 1,
+    D = 2,
     #[strum(serialize = "d#")]
-    Ds = 6,
-    E = 7,
-    F = 8,
+    Ds = 3,
+    E = 4,
+    F = 5,
     #[strum(serialize = "f#")]
-    Fs = 9,
-    G = 10,
+    Fs = 6,
+    G = 7,
     #[strum(serialize = "g#")]
-    Gs = 11,
+    Gs = 8,
+    A = 9,
+    #[strum(serialize = "a#")]
+    As = 10,
+    B = 11,
 }
 
 impl From<i64> for PitchClass {
@@ -181,18 +222,18 @@ impl From<i64> for PitchClass {
             data = data % 12;
         }
         match data {
-            0 => Self::A,
-            1 => Self::As,
-            2 => Self::B,
-            3 => Self::C,
-            4 => Self::Cs,
-            5 => Self::D,
-            6 => Self::Ds,
-            7 => Self::E,
-            8 => Self::F,
-            9 => Self::Fs,
-            10 => Self::G,
-            _ => Self::Gs,
+            0 => Self::C,
+            1 => Self::Cs,
+            2 => Self::D,
+            3 => Self::Ds,
+            4 => Self::E,
+            5 => Self::F,
+            6 => Self::Fs,
+            7 => Self::G,
+            8 => Self::Gs,
+            9 => Self::A,
+            10 => Self::As,
+            _ => Self::B,
         }
     }
 }
@@ -218,6 +259,11 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_detect() {
+        assert_eq!(detect_accidentals(NaturalNote::A), (9, Some(10), Some(8)));
+        assert_eq!(detect_accidentals(NaturalNote::C), (0, Some(1), None));
+    }
+    #[test]
     fn test_pitch() {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
@@ -229,13 +275,13 @@ mod tests {
         let a = PitchClass::default();
         let b: PitchClass = 1.into();
         assert_eq!(a.to_string(), "c".to_string());
-        assert_eq!(b.to_string(), "a#".to_string());
-        assert_eq!(a + b, "ca#".to_string())
+        assert_eq!(b.to_string(), "c#".to_string());
+        assert_eq!(a + b, "cc#".to_string())
     }
 
     #[test]
     fn test_modularity() {
         let a = PitchClass::from(144);
-        assert_eq!(a.clone(), PitchClass::A);
+        assert_eq!(a.clone(), PitchClass::C);
     }
 }

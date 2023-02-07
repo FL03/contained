@@ -25,6 +25,9 @@ pub trait Triadic {
         false
     }
     fn chord(&self) -> (Note, Note, Note);
+    fn config(&self) -> Configuration<Note> {
+        Configuration::norm(Tape::new(vec![self.root(), self.third(), self.fifth()])).unwrap()
+    }
     fn root(&self) -> Note {
         self.chord().0
     }
@@ -73,23 +76,13 @@ impl std::fmt::Display for Triad {
 
 impl Symbolic for Triad {}
 
-impl From<Triad> for Configuration<Note> {
-    fn from(value: Triad) -> Configuration<Note> {
-        let triad: Tape<Note> = value.into();
-        Configuration::norm(triad).unwrap()
-    }
-}
+impl IntoIterator for Triad {
+    type Item = Note;
 
-impl From<Triad> for Vec<Note> {
-    fn from(value: Triad) -> Vec<Note> {
-        vec![value.0, value.1, value.2]
-    }
-}
+    type IntoIter = std::vec::IntoIter<Self::Item>;
 
-impl From<Triad> for Tape<Note> {
-    fn from(value: Triad) -> Tape<Note> {
-        let t = [value.0, value.1, value.2];
-        Tape::new(t)
+    fn into_iter(self) -> Self::IntoIter {
+        vec![self.0, self.1, self.2].into_iter()
     }
 }
 

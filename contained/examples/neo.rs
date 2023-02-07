@@ -5,7 +5,7 @@
 */
 extern crate contained;
 
-use contained::neo::{cmp::Note, Tonnetz, Triad};
+use contained::neo::{cmp::Note, Tonnetz, Triad, Triadic};
 use contained::turing::{Configuration, Machine, Move, Program, Programatic, Turing};
 use contained::{Resultant, State, States};
 
@@ -13,8 +13,8 @@ fn main() -> Resultant {
     let triad = Triad::from((0, 3, 5));
     let _tonnetz = Tonnetz::new(triad.clone());
 
-    let alphabet: Vec<Note> = triad.clone().into();
-    let mut cnf: Configuration<Note> = triad.into();
+    let alphabet: Vec<Note> = triad.clone().into_iter().collect();
+    let mut cnf: Configuration<Note> = triad.config();
 
     // Setup the program
     let final_state = State::from(&States::invalid());

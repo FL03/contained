@@ -29,7 +29,7 @@ impl Chord {
     pub fn chord(&self) -> &Vec<Pitch> {
         &self.0
     }
-    
+
     pub fn append(&mut self, elem: &mut Vec<Pitch>) {
         self.0.append(elem);
     }
@@ -38,6 +38,16 @@ impl Chord {
     }
     pub fn insert(&mut self, index: usize, elem: Pitch) {
         self.0.insert(index, elem);
+    }
+}
+
+impl IntoIterator for Chord {
+    type Item = Pitch;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 

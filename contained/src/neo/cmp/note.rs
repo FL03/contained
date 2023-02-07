@@ -21,7 +21,6 @@ pub trait Notable {
         Self: Sized;
 }
 
-
 /// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
 pub struct Note(Pitch, Option<Epoch>);
