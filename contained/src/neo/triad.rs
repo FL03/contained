@@ -11,7 +11,7 @@
             b != c
 */
 use crate::neo::{cmp::Note, LPR};
-use crate::turing::{Configuration, Symbolic, Tape};
+use crate::turing::{Configuration, Symbolic, Tape, Turing};
 use serde::{Deserialize, Serialize};
 
 pub trait Triadic {
@@ -105,7 +105,7 @@ mod tests {
     #[test]
     fn test_triad() {
         let a = Triad::from((0, 1, 2));
-        let b = Triad::from((2, 1, 0));
+        let b = Triad::from((2, 4, 9));
         assert!(a.is_valid());
         assert!(b.is_valid());
         assert_ne!(a, b)

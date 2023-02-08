@@ -11,12 +11,30 @@
         Another option being considered is the multiway turing machine
 */
 use crate::neo::{cmp::Note, Triad, LPR};
-use crate::turing::{Machine, Program};
+use crate::turing::{Machine, Program, Turing};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
 
 pub fn triadic_machine(triad: Triad, program: Program<Note>) -> Resultant<Machine<Note>> {
     Machine::new(triad.root().clone(), program)
+}
+
+///
+pub struct Conduit {
+    fabric: Tonnetz,
+    program: Program<Note>,
+}
+
+impl Turing for Conduit {
+    type Symbol = Note;
+
+    fn default_symbol(&self) -> &Self::Symbol {
+        self.fabric.scope().root()
+    }
+
+    fn program(&self) -> &crate::turing::Program<Self::Symbol> {
+        &self.program
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

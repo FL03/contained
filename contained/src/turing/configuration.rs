@@ -8,6 +8,11 @@ use crate::State;
 
 use serde::{Deserialize, Serialize};
 
+pub enum Configurations<S: Symbolic> {
+    Normal(Configuration<S>),
+    Standard(Configuration<S>),
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Configuration<S: Symbolic> {
     index: usize,
