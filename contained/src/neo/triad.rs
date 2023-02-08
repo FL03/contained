@@ -10,11 +10,12 @@
             a != c
             b != c
 */
-use crate::neo::{cmp::Note, LPR};
+use crate::neo::cmp::Note;
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
 pub trait Triadic {
+    /// [Triadic::is_valid] determine if the provided notes are a possible configuration
     fn is_valid(&self) -> bool {
         if self.root() != self.third()
             && self.root() != self.fifth()
@@ -25,9 +26,6 @@ pub trait Triadic {
         false
     }
     fn chord(&self) -> (Note, Note, Note);
-    fn config(&self) -> Configuration<Note> {
-        Configuration::norm(Tape::new(vec![self.root(), self.third(), self.fifth()])).unwrap()
-    }
     fn root(&self) -> Note {
         self.chord().0
     }
@@ -47,6 +45,10 @@ pub struct Triad(Note, Note, Note);
 impl Triad {
     pub fn new(root: Note, third: Note, fifth: Note) -> Self {
         Self(root, third, fifth)
+    }
+    /// Create a new [Configuration] with the [Triad] as its alphabet
+    pub fn config(&self) -> Configuration<Note> {
+        Configuration::norm(Tape::new(self.clone())).unwrap()
     }
 }
 

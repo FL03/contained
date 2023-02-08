@@ -260,6 +260,7 @@ mod tests {
 
     #[test]
     fn test_detect() {
+        assert!(NaturalNote::try_from(1).is_err());
         assert_eq!(detect_accidentals(NaturalNote::A), (9, Some(10), Some(8)));
         assert_eq!(detect_accidentals(NaturalNote::C), (0, Some(1), None));
     }
