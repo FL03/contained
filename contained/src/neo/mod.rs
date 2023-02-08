@@ -14,6 +14,7 @@ pub mod cmp;
 
 use futures::Stream;
 
+/// [Dirac] describes a function, [Fn] which takes one object and produces another
 pub type Dirac<S, T> = dyn Fn(S) -> T;
 
 /// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another
