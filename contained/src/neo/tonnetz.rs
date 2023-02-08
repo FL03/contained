@@ -10,7 +10,7 @@
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         Another option being considered is the multiway turing machine
 */
-use crate::neo::{cmp::Note, Triad, Triadic, LPR};
+use crate::neo::{cmp::Note, Triad, LPR};
 use crate::turing::{Machine, Program};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};

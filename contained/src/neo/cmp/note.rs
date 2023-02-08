@@ -8,7 +8,7 @@
 
         If a note is simply a symbolic representation of a pitch than we can assume all pitches to be modulus of 12
 */
-use super::{Epoch, Pitch};
+use crate::neo::cmp::{Epoch, Pitch};
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
@@ -16,9 +16,12 @@ pub trait Notable {
     fn pitch(&self) -> &Pitch
     where
         Self: Sized;
-    fn epoch(&self) -> &Option<Epoch>
+    fn is_natural(&self) -> bool
     where
-        Self: Sized;
+        Self: Sized,
+    {
+        self.pitch().is_natural()
+    }
 }
 
 /// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration

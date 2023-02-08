@@ -9,9 +9,7 @@
         * All notes or pitches are of mod 12, giving us { 0, 1, ..., 10, 11 }
         * Sharp notes and flat notes are simply opposite; if sharp is up then flat is down
 */
-use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
-use std::ops::Add;
 use strum::{Display, EnumString, EnumVariantNames};
 
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
@@ -91,12 +89,36 @@ impl From<Pitch> for i64 {
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum FlatNote {
-    A = 7,
+    A = 8,
     B = 10,
     #[default]
     D = 1,
     E = 3,
     G = 6,
+}
+
+impl TryFrom<i64> for FlatNote {
+    type Error = String;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        let data = value.clone() % 12;
+        match data {
+            1 => Ok(Self::D),
+            3 => Ok(Self::E),
+            6 => Ok(Self::G),
+            8 => Ok(Self::A),
+            10 => Ok(Self::B),
+            _ => Err(format!("")),
+        }
+    }
+}
+
+impl TryFrom<Pitch> for FlatNote {
+    type Error = String;
+
+    fn try_from(value: Pitch) -> Result<Self, Self::Error> {
+        FlatNote::try_from(value.pitch())
+    }
 }
 
 #[derive(
@@ -123,54 +145,28 @@ pub enum SharpNote {
     C = 1,
     D = 3,
     F = 6,
-    G = 9,
+    G = 8,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum NaturalNote {
-    C = 0,
-    D = 2,
-    E = 4,
-    F = 5,
-    G = 7,
-    #[default]
-    A = 9,
-    B = 11,
+impl TryFrom<Pitch> for SharpNote {
+    type Error = String;
+
+    fn try_from(value: Pitch) -> Result<Self, Self::Error> {
+        SharpNote::try_from(value.pitch())
+    }
 }
 
-impl TryFrom<i64> for NaturalNote {
+impl TryFrom<i64> for SharpNote {
     type Error = String;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
-        let mut data = value.clone();
-        if value >= 12 {
-            data = value % 12;
-        }
+        let data = value.clone() % 12;
         match data {
-            0 => Ok(Self::C),
-            2 => Ok(Self::D),
-            4 => Ok(Self::E),
-            5 => Ok(Self::F),
-            7 => Ok(Self::G),
-            9 => Ok(Self::A),
-            11 => Ok(Self::B),
+            1 => Ok(Self::C),
+            3 => Ok(Self::D),
+            6 => Ok(Self::F),
+            8 => Ok(Self::G),
+            10 => Ok(Self::A),
             _ => Err(format!("")),
         }
     }
@@ -194,63 +190,40 @@ impl TryFrom<i64> for NaturalNote {
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
-pub enum PitchClass {
+pub enum NaturalNote {
     #[default]
     C = 0,
-    #[strum(serialize = "c#")]
-    Cs = 1,
     D = 2,
-    #[strum(serialize = "d#")]
-    Ds = 3,
     E = 4,
     F = 5,
-    #[strum(serialize = "f#")]
-    Fs = 6,
     G = 7,
-    #[strum(serialize = "g#")]
-    Gs = 8,
     A = 9,
-    #[strum(serialize = "a#")]
-    As = 10,
     B = 11,
 }
 
-impl From<i64> for PitchClass {
-    fn from(d: i64) -> PitchClass {
-        let mut data = d;
-        if data > 11 {
-            data = data % 12;
-        }
+impl TryFrom<Pitch> for NaturalNote {
+    type Error = String;
+
+    fn try_from(value: Pitch) -> Result<Self, Self::Error> {
+        NaturalNote::try_from(value.pitch())
+    }
+}
+
+impl TryFrom<i64> for NaturalNote {
+    type Error = String;
+
+    fn try_from(value: i64) -> Result<Self, Self::Error> {
+        let data = value.clone() % 12;
         match data {
-            0 => Self::C,
-            1 => Self::Cs,
-            2 => Self::D,
-            3 => Self::Ds,
-            4 => Self::E,
-            5 => Self::F,
-            6 => Self::Fs,
-            7 => Self::G,
-            8 => Self::Gs,
-            9 => Self::A,
-            10 => Self::As,
-            _ => Self::B,
+            0 => Ok(Self::C),
+            2 => Ok(Self::D),
+            4 => Ok(Self::E),
+            5 => Ok(Self::F),
+            7 => Ok(Self::G),
+            9 => Ok(Self::A),
+            11 => Ok(Self::B),
+            _ => Err(format!("")),
         }
-    }
-}
-
-impl Symbolic for PitchClass {}
-
-impl From<PitchClass> for i64 {
-    fn from(d: PitchClass) -> i64 {
-        d as i64
-    }
-}
-
-impl Add for PitchClass {
-    type Output = String;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        format!("{}{}", self, rhs)
     }
 }
 
@@ -269,20 +242,6 @@ mod tests {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
         assert_eq!(a.clone(), b.clone());
-    }
-
-    #[test]
-    fn test_pitch_class() {
-        let a = PitchClass::default();
-        let b: PitchClass = 1.into();
-        assert_eq!(a.to_string(), "c".to_string());
-        assert_eq!(b.to_string(), "c#".to_string());
-        assert_eq!(a + b, "cc#".to_string())
-    }
-
-    #[test]
-    fn test_modularity() {
-        let a = PitchClass::from(144);
-        assert_eq!(a.clone(), PitchClass::C);
+        assert!(a.is_natural())
     }
 }

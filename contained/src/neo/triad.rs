@@ -10,32 +10,21 @@
             a != c
             b != c
 */
-use crate::neo::cmp::Note;
+use crate::neo::{cmp::Note, LPR};
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 
 pub trait Triadic {
-    /// [Triadic::is_valid] determine if the provided notes are a possible configuration
-    fn is_valid(&self) -> bool {
-        if self.root() != self.third()
-            && self.root() != self.fifth()
-            && self.third() != self.fifth()
-        {
-            return true;
-        }
-        false
-    }
-    fn chord(&self) -> (Note, Note, Note);
-    fn root(&self) -> Note {
-        self.chord().0
-    }
-    fn third(&self) -> Note {
-        self.chord().1
-    }
-    fn fifth(&self) -> Note {
-        self.chord().2
-    }
-    fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>);
+    fn fifth(&self) -> Note;
+    fn root(&self) -> Note;
+    fn third(&self) -> Note;
+    fn triad(&self) -> Triad;
+}
+
+pub enum Triads {
+    Augmented(Triad),
+    Major(Triad),
+    Minor(Triad),
 }
 
 /// [Triad] is a set of three [Note], the root, third, and fifth.
@@ -50,25 +39,24 @@ impl Triad {
     pub fn config(&self) -> Configuration<Note> {
         Configuration::norm(Tape::new(self.clone())).unwrap()
     }
-}
-
-impl Triadic for Triad {
-    fn chord(&self) -> (Note, Note, Note) {
-        self.clone().into()
+    pub fn is_valid(&self) -> bool {
+        if self.root() < self.third() && self.root() < self.fifth() && self.third() < self.fifth() {
+            return true;
+        }
+        false
     }
-
-    fn update(&mut self, root: Option<Note>, third: Option<Note>, fifth: Option<Note>) {
-        if let Some(n) = root {
-            self.0 = n;
-        }
-        if let Some(n) = third {
-            self.1 = n;
-        }
-        if let Some(n) = fifth {
-            self.2 = n;
-        }
+    pub fn fifth(&self) -> &Note {
+        &self.2
+    }
+    pub fn root(&self) -> &Note {
+        &self.0
+    }
+    pub fn third(&self) -> &Note {
+        &self.1
     }
 }
+
+impl Symbolic for Triad {}
 
 impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -76,7 +64,13 @@ impl std::fmt::Display for Triad {
     }
 }
 
-impl Symbolic for Triad {}
+impl std::ops::Mul<LPR> for Triad {
+    type Output = Triad;
+
+    fn mul(self, rhs: LPR) -> Self::Output {
+        rhs.transform(&mut self.clone())
+    }
+}
 
 impl IntoIterator for Triad {
     type Item = Note;
@@ -101,18 +95,6 @@ impl From<Triad> for (i64, i64, i64) {
 impl From<(i64, i64, i64)> for Triad {
     fn from(d: (i64, i64, i64)) -> Triad {
         Triad(d.0.into(), d.1.into(), d.2.into())
-    }
-}
-
-impl From<(Note, Note, Note)> for Triad {
-    fn from(d: (Note, Note, Note)) -> Triad {
-        Triad(d.0, d.1, d.2)
-    }
-}
-
-impl From<Triad> for (Note, Note, Note) {
-    fn from(d: Triad) -> (Note, Note, Note) {
-        (d.0, d.1, d.2)
     }
 }
 
