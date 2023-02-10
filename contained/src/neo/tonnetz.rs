@@ -60,7 +60,7 @@ impl Tonnetz {
         self.scope = shift * self.scope().clone();
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
-    /// The goal here is to allow the machine to work on and in the scope 
+    /// The goal here is to allow the machine to work on and in the scope
     pub fn walk(&mut self, shifts: Vec<LPR>) {
         for s in shifts {
             self.transform(s)

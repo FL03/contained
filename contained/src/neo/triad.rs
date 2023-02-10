@@ -13,6 +13,7 @@
 use crate::neo::{cmp::Note, LPR};
 use crate::turing::{Configuration, Symbolic, Tape, Turing};
 use serde::{Deserialize, Serialize};
+use std::cmp;
 
 pub trait Triadic {
     fn fifth(&self) -> Note;
@@ -39,8 +40,12 @@ impl Triad {
     pub fn config(&self) -> Configuration<Note> {
         Configuration::norm(Tape::new(self.clone())).unwrap()
     }
+    /// A method for establishing the validity of the given notes
     pub fn is_valid(&self) -> bool {
-        if self.root() < self.third() && self.root() < self.fifth() && self.third() < self.fifth() {
+        if self.root() != self.third()
+            && self.root() != self.fifth()
+            && self.third() != self.fifth()
+        {
             return true;
         }
         false

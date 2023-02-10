@@ -33,7 +33,7 @@ pub enum LPR {
 }
 
 impl LPR {
-    pub fn transform(&self, triad: &mut Triad) -> Triad {
+    pub fn transform(&self, triad: &Triad) -> Triad {
         let (r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
         match self.clone() as i64 {
             0 => {
@@ -67,7 +67,7 @@ mod tests {
     #[test]
     fn test_lpr_transformation() {
         let a = Triad::from((0, 1, 14));
-        let b = LPR::default().transform(&mut a.clone());
+        let b = LPR::default().transform(&a.clone());
         let c = LPR::default() * a.clone();
         assert_ne!(a.clone(), b.clone());
         assert_eq!(b.clone(), Triad::from((0, 1, 3)));

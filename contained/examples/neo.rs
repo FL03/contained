@@ -10,7 +10,7 @@ use contained::turing::{Configuration, Machine, Move, Program, Programatic, Turi
 use contained::{Resultant, State, States};
 
 fn main() -> Resultant {
-    let triad = Triad::from((0, 3, 5));
+    let triad = Triad::from((0, -3, 5));
     let _tonnetz = Tonnetz::new(triad.clone());
 
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
@@ -19,13 +19,13 @@ fn main() -> Resultant {
     // Setup the program
     let final_state = State::from(&States::invalid());
     let mut program = Program::new(alphabet, final_state);
-    // Instruction set; turn ["c", "d#", "f"] into ["d#", "d#", "d#"]
+    // Instruction set; turn ["C", "Eb", "F"] into ["Eb", "Eb", "Eb"]
     program.insert(
         (
             State::default(),
             0.into(),
             State::default(),
-            3.into(),
+            Note::from(-3),
             Move::Right,
         )
             .into(),
@@ -33,9 +33,9 @@ fn main() -> Resultant {
     program.insert(
         (
             State::default(),
-            3.into(),
+            Note::from(-3),
             State::default(),
-            3.into(),
+            Note::from(-3),
             Move::Right,
         )
             .into(),
@@ -45,8 +45,8 @@ fn main() -> Resultant {
             State::default(),
             5.into(),
             State::from(&States::invalid()),
-            3.into(),
-            Move::Left,
+            Note::from(-3),
+            Move::Stay,
         )
             .into(),
     )?;

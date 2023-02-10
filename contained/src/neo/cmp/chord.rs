@@ -5,20 +5,12 @@
 
 */
 use crate::neo::cmp::{Note, Pitch};
+use crate::ArrayLike;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
-pub trait ArrayLike {
-    type Data;
-
-    fn content(&self) -> &Vec<Self::Data>;
-    fn mut_content(&mut self) -> &mut Vec<Self::Data>;
-    fn insert(&mut self, index: usize, elem: Self::Data) {
-        self.mut_content().insert(index, elem)
-    }
-}
-
+/// [Chord] is a wrapper for a [Vec] of [Pitch]
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Chord(Vec<Pitch>);
 
@@ -26,18 +18,20 @@ impl Chord {
     pub fn new(chord: impl IntoIterator<Item = Pitch>) -> Self {
         Self(Vec::from_iter(chord))
     }
-    pub fn chord(&self) -> &Vec<Pitch> {
+    pub fn chord(&self) -> &Self {
+        &self
+    }
+}
+
+impl ArrayLike for Chord {
+    type Data = Pitch;
+
+    fn content(&self) -> &Vec<Self::Data> {
         &self.0
     }
 
-    pub fn append(&mut self, elem: &mut Vec<Pitch>) {
-        self.0.append(elem);
-    }
-    pub fn extend(&mut self, elem: impl IntoIterator<Item = Pitch>) {
-        self.0.extend(Vec::from_iter(elem));
-    }
-    pub fn insert(&mut self, index: usize, elem: Pitch) {
-        self.0.insert(index, elem);
+    fn mut_content(&mut self) -> &mut Vec<Self::Data> {
+        &mut self.0
     }
 }
 
@@ -91,6 +85,16 @@ pub type Fifth = Note;
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::neo::cmp::Pitch;
+
+    #[test]
+    fn test_chords() {
+        let a = vec![Pitch::from(0), Pitch::from(3), Pitch::from(8)];
+        let mut b = Chord::default();
+        assert!(b.is_empty());
+        b.append(&mut a.clone());
+        assert_eq!(b.len(), 3);
+    }
 
     #[test]
     fn test_chord_factors() {
