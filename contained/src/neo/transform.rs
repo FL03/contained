@@ -92,8 +92,9 @@ mod tests {
     fn test_lpr_transformation() {
         let a = Triad::build(0.into(), Triads::Major);
         let b = LPR::default() * a.clone();
+        let c = LPR::L * b.clone();
         assert_ne!(a.clone(), b.clone());
-        // assert_eq!(b.clone(), Triad::try_from((0, 4, 9)).unwrap());
-        assert_eq!(b.clone(), Triad::try_from((4, 7, 11)).unwrap())
+        assert_eq!(b.clone(), Triad::try_from((4, 7, 11)).unwrap());
+        assert_eq!(a.clone(), c.clone());
     }
 }

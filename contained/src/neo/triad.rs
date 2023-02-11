@@ -41,12 +41,10 @@ pub fn classify_triad(triad: &Triad) -> Option<Triads> {
 /// rather than enforcing a 'perfect fifth' relationship between root -> fifth
 pub fn create_triad(notes: (Note, Note, Note)) -> Option<Triad> {
     let args = vec![notes.0, notes.1, notes.2];
-    for i in 0..3 {
-        let tmp = [(i + 1) % 3, (i + 2) % 3];
-        println!("{:?}", tmp.clone());
+    for i in 0..args.len() {
+        let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
         for j in 0..tmp.len() {
-            let (a, b, c) = (args[i].clone(), args[j].clone(), args[(j + 1) % tmp.len()].clone());
-            println!("{:?}, {:?}, {:?}", a.clone(), b.clone(), c.clone());
+            let (a, b, c) = (args[i].clone(), args[tmp[j]].clone(), args[tmp[(j + 1) % tmp.len()]].clone());
             // Creates a triad if the current root -> current third & current third -> current fifth are both thirds
             if is_third(a.clone().into(), b.clone().into()) && is_third(b.clone().into(), c.clone().into()) {
                 return Some(Triad::new(a, b, c))
