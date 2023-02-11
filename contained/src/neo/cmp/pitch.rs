@@ -19,17 +19,17 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64>) {
     let note = natural as i64;
     // Calculate the modulus of the next (a) and prev (b) position
-    let (a, b) = if note.clone() == 0 {
+    let (a, b) = if note == 0 {
         (1, 11)
     } else {
-        ((note.clone() + 1) % 12, (note.clone() - 1) % 12)
+        ((note + 1) % 12, (note - 1) % 12)
     };
     // If a natural note exists with a modulus a semitone above the entry, than it only has one option at -1 (flat)
-    if NaturalNote::try_from(a.clone()).is_ok() {
+    if NaturalNote::try_from(a).is_ok() {
         return (note, None, Some(b));
     }
     // If a natural note exists with a modulus a semitone below the entry, than it only has one option at +1 (sharp)
-    if NaturalNote::try_from(b.clone()).is_ok() {
+    if NaturalNote::try_from(b).is_ok() {
         return (note, Some(a), None);
     }
     // If a natural note doesn't exists a semitone above or below the entry, than it has two possible variations
@@ -71,9 +71,8 @@ impl TryFrom<i64> for Accidentals {
                 Accidentals::Flat(FlatNote::try_from(data)?)
             };
             return Ok(note);
-        } else {
-            return Err(String::from("Provided note is natural"));
         }
+        Err(String::from("Provided note is natural"))
     }
 }
 
@@ -153,9 +152,9 @@ impl From<i64> for PitchClass {
     fn from(value: i64) -> PitchClass {
         let data = value % 12;
         if let Ok(v) = Accidentals::try_from(data) {
-            return PitchClass::from(v);
+            PitchClass::from(v)
         } else {
-            return PitchClass::from(NaturalNote::try_from(data).expect(""));
+            PitchClass::from(NaturalNote::try_from(data).expect(""))
         }
     }
 }
@@ -387,7 +386,7 @@ mod tests {
     fn test_pitch() {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
-        assert_eq!(a.clone(), b.clone());
+        assert_eq!(a, b);
         assert!(a.is_natural())
     }
 }

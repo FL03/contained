@@ -19,7 +19,7 @@ impl Chord {
         Self(Vec::from_iter(chord))
     }
     pub fn chord(&self) -> &Self {
-        &self
+        self
     }
 }
 
@@ -99,6 +99,6 @@ mod test {
     #[test]
     fn test_chord_factors() {
         let a = ChordFactors::default();
-        assert_eq!(a.clone(), ChordFactors::Root(Default::default()))
+        assert_eq!(a, ChordFactors::Root(Default::default()))
     }
 }

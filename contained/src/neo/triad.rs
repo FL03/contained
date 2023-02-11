@@ -192,9 +192,7 @@ impl TryFrom<(Note, Note, Note)> for Triad {
         if let Some(triad) = create_triad(data) {
             return Ok(triad);
         }
-        Err(format!(
-            "The provided notes don't contain the required relationships..."
-        ))
+        Err("The provided notes don't contain the required relationships...".to_string())
     }
 }
 
@@ -206,7 +204,7 @@ impl From<Triad> for (Note, Note, Note) {
 
 impl From<Triad> for (i64, i64, i64) {
     fn from(d: Triad) -> (i64, i64, i64) {
-        (d.0.clone().into(), d.1.clone().into(), d.2.clone().into())
+        (d.0.into(), d.1.into(), d.2.into())
     }
 }
 

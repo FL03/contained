@@ -2,20 +2,17 @@
     Appellation: transform <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        The neo-Riemannian theory introduces three primary means of transforming triad's, namely: 
+        The neo-Riemannian theory introduces three primary means of transforming triad's, namely:
             (L) Leading
             (P) Parallel
             (R) Relative
         These transformations can be chained and each preserve two of the original notes, only shifting one
         More so, if the same transformation is applied back-to-back than the resulting triad is identical to the original.
-        
+
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use crate::neo::{
-    cmp::is_minor_third,
-    Triad,
-};
+use crate::neo::{cmp::is_minor_third, Triad};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -103,17 +100,17 @@ mod tests {
         let a = Triad::build(0.into(), Triads::Major);
         let b = LPR::default() * a.clone();
         let c = LPR::L * b.clone();
-        assert_ne!(a.clone(), b.clone());
-        assert_eq!(b.clone(), Triad::try_from((4, 7, 11)).unwrap());
-        assert_eq!(a.clone(), c.clone());
+        assert_ne!(a, b);
+        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
+        assert_eq!(a, c);
     }
 
     #[test]
     fn test_parallel() {
         let a = Triad::build(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
-        assert_ne!(a.clone(), b.clone());
-        assert_eq!(b.clone(), Triad::try_from((0, 3, 7)).unwrap());
+        assert_ne!(a, b);
+        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
         assert_eq!(LPR::P * b, a)
     }
 
@@ -121,8 +118,8 @@ mod tests {
     fn test_relative() {
         let a = Triad::build(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
-        assert_ne!(a.clone(), b.clone());
-        assert_eq!(b.clone(), Triad::try_from((0, 4, 9)).unwrap());
+        assert_ne!(a, b);
+        assert_eq!(b, Triad::try_from((0, 4, 9)).unwrap());
         assert_eq!(LPR::R * b, a)
     }
 }
