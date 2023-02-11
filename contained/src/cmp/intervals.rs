@@ -37,20 +37,17 @@ pub fn is_minor_third(a: i64, b: i64) -> bool {
 
 ///
 pub fn major_third(pitch: i64) -> i64 {
-    let res = Thirds::Major * Note::from(pitch);
-    res.into()
+    Thirds::Major * pitch
 }
 
 ///
 pub fn minor_third(pitch: i64) -> i64 {
-    let res = Thirds::Minor * Note::from(pitch);
-    res.into()
+    Thirds::Minor * pitch
 }
 
 ///
 pub fn perfect_fifth(pitch: i64) -> i64 {
-    let res = Fifths::Perfect * Note::from(pitch);
-    res.into()
+    Fifths::Perfect * pitch
 }
 
 #[derive(
@@ -86,6 +83,14 @@ impl Fifths {
             Fifths::Diminshed => Note::from((pitch + 6) % 12),
             Fifths::Perfect => Note::from((pitch + 7) % 12),
         }
+    }
+}
+
+impl std::ops::Mul<i64> for Fifths {
+    type Output = i64;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        self.compute(rhs.into()).into()
     }
 }
 
@@ -129,11 +134,21 @@ impl Thirds {
             Self::Minor => Note::from((n + 3 * SEMITONE as i64) % 12),
         }
     }
+    /// Functional method for creating a major third
     pub fn major() -> Self {
         Self::Major
     }
+    /// Functional method for creating a minor third
     pub fn minor() -> Self {
         Self::Minor
+    }
+}
+
+impl std::ops::Mul<i64> for Thirds {
+    type Output = i64;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        self.compute(rhs.into()).into()
     }
 }
 
