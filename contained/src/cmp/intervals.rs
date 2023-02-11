@@ -6,8 +6,9 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use crate::neo::{cmp::Note, SEMITONE};
+use crate::{cmp::Note, SEMITONE};
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
 /// [is_third] compares two notes to see if either a major or minor third interval exists
@@ -36,24 +37,26 @@ pub fn is_minor_third(a: i64, b: i64) -> bool {
 
 ///
 pub fn major_third(pitch: i64) -> i64 {
-    Thirds::Major.compute(pitch.into()).into()
+    let res = Thirds::Major * Note::from(pitch);
+    res.into()
 }
 
 ///
 pub fn minor_third(pitch: i64) -> i64 {
-    Thirds::Minor.compute(pitch.into()).into()
+    let res = Thirds::Minor * Note::from(pitch);
+    res.into()
 }
 
 ///
 pub fn perfect_fifth(pitch: i64) -> i64 {
-    (pitch + 7) % 12
+    let res = Fifths::Perfect * Note::from(pitch);
+    res.into()
 }
 
 #[derive(
     Clone,
     Copy,
     Debug,
-    Default,
     Deserialize,
     Display,
     EnumString,
@@ -64,6 +67,51 @@ pub fn perfect_fifth(pitch: i64) -> i64 {
     PartialEq,
     PartialOrd,
     Serialize,
+    SmartDefault,
+)]
+#[repr(i64)]
+#[strum(serialize_all = "snake_case")]
+pub enum Fifths {
+    Augmented = 1,
+    Diminshed = 2,
+    #[default]
+    Perfect = 0,
+}
+
+impl Fifths {
+    pub fn compute(&self, note: Note) -> Note {
+        let pitch: i64 = note.into();
+        match self {
+            Fifths::Augmented => Note::from((pitch + 8) % 12),
+            Fifths::Diminshed => Note::from((pitch + 6) % 12),
+            Fifths::Perfect => Note::from((pitch + 7) % 12)
+        }
+    }
+}
+
+impl std::ops::Mul<Note> for Fifths {
+    type Output = Note;
+
+    fn mul(self, rhs: Note) -> Self::Output {
+        self.compute(rhs)
+    }
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    SmartDefault
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
@@ -86,5 +134,13 @@ impl Thirds {
     }
     pub fn minor() -> Self {
         Self::Minor
+    }
+}
+
+impl std::ops::Mul<Note> for Thirds {
+    type Output = Note;
+
+    fn mul(self, rhs: Note) -> Self::Output {
+        self.compute(rhs)
     }
 }

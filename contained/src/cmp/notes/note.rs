@@ -8,7 +8,7 @@
 
         If a note is simply a symbolic representation of a pitch than we can assume all pitches to be modulus of 12
 */
-use crate::neo::cmp::{Epoch, Pitch, PitchClass};
+use crate::cmp::{Epoch, Pitch, PitchClass};
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 

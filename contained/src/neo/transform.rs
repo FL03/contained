@@ -8,11 +8,13 @@
             (R) Relative
         These transformations can be chained and each preserve two of the original notes, only shifting one
         More so, if the same transformation is applied back-to-back than the resulting triad is identical to the original.
+        The property of enharmonics allows us to apply the transformations according to a notes assigned position, which is a modulus of 12.
 
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use crate::neo::{cmp::is_minor_third, Triad};
+use super::Triad;
+use crate::cmp::is_minor_third;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

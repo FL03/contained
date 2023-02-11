@@ -4,7 +4,7 @@
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 
 */
-use crate::neo::cmp::{Note, Pitch};
+use crate::cmp::{Note, Pitch};
 use crate::ArrayLike;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -85,7 +85,7 @@ pub type Fifth = Note;
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::neo::cmp::Pitch;
+    use crate::cmp::Pitch;
 
     #[test]
     fn test_chords() {

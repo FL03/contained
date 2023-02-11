@@ -10,16 +10,15 @@
             a != c
             b != c
 */
-use crate::neo::{
-    cmp::{
-        is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Note,
-    },
-    LPR,
+use super::LPR;
+use crate::cmp::{
+    is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Note,
 };
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
+/// [classify_triad] detects if the given triad is augments, diminshed, major, or minor
 pub fn classify_triad(triad: &Triad) -> Option<Triads> {
     let (r, t, f) = triad.clone().into();
 
@@ -68,6 +67,23 @@ pub trait Triadic {
     fn fifth(&self) -> Note;
     fn root(&self) -> Note;
     fn third(&self) -> Note;
+    fn triad(&self) -> (Note, Note, Note) {
+        (self.root(), self.third(), self.fifth())
+    }
+}
+
+impl Triadic for (Note, Note, Note) {
+    fn fifth(&self) -> Note {
+        self.2.clone()
+    }
+
+    fn root(&self) -> Note {
+        self.0.clone()
+    }
+
+    fn third(&self) -> Note {
+        self.1.clone()
+    }
 }
 
 #[derive(
@@ -93,7 +109,59 @@ pub enum Triads {
     Diminshed, // If the root -> third is minor and if third -> fifth is minor
     #[default]
     Major, // If the root -> third is major and if third -> fifth is minor
-    Minor,     // If the root -> third is minor and if third -> fifth is major
+    Minor, // If the root -> third is minor and if third -> fifth is major
+}
+
+impl Triads {
+    pub fn create(&self, root: Note) -> Triad {
+        let pitch: i64 = root.clone().into();
+        let (third_maj, third_minor) = (major_third(pitch), minor_third(pitch));
+        match self.clone() {
+            Triads::Augmented => Triad::new(
+                root,
+                Note::from(third_maj),
+                Note::from(major_third(third_maj)),
+            ),
+            Triads::Diminshed => Triad::new(
+                root,
+                Note::from(third_minor),
+                Note::from(minor_third(third_minor)),
+            ),
+            Triads::Major => Triad::new(
+                root,
+                Note::from(third_maj),
+                Note::from(minor_third(third_maj)),
+            ),
+            Triads::Minor => Triad::new(
+                root,
+                Note::from(third_minor),
+                Note::from(major_third(third_minor)),
+            ),
+        }
+    }
+}
+
+impl TryFrom<Triad> for Triads {
+    type Error = String;
+
+    fn try_from(data: Triad) -> Result<Triads, Self::Error> {
+        let (r, t, f) = data.clone().into();
+
+        if perfect_fifth(r) == f {
+            if is_major_third(r, t) {
+                return Ok(Triads::Major);
+            } else {
+                return Ok(Triads::Minor);
+            }
+        } else {
+            if is_major_third(r, t) && is_major_third(t, f) {
+                return Ok(Triads::Augmented);
+            } else if is_minor_third(r, t) && is_minor_third(t, f) {
+                return Ok(Triads::Diminshed);
+            }
+            return Err("".to_string());
+        }
+    }
 }
 
 /// [Triad] is a set of three [Note], the root, third, and fifth.
@@ -186,6 +254,12 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
+impl From<Triad> for (i64, i64, i64) {
+    fn from(d: Triad) -> (i64, i64, i64) {
+        (d.0.into(), d.1.into(), d.2.into())
+    }
+}
+
 impl TryFrom<(Note, Note, Note)> for Triad {
     type Error = String;
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
@@ -202,11 +276,7 @@ impl From<Triad> for (Note, Note, Note) {
     }
 }
 
-impl From<Triad> for (i64, i64, i64) {
-    fn from(d: Triad) -> (i64, i64, i64) {
-        (d.0.into(), d.1.into(), d.2.into())
-    }
-}
+
 
 #[cfg(test)]
 mod tests {
@@ -214,7 +284,7 @@ mod tests {
 
     #[test]
     fn test_triad() {
-        let a = Triad::build(0.into(), Triads::Major);
+        let a = Triads::Major.create(0.into());
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));

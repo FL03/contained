@@ -5,9 +5,9 @@
 */
 extern crate contained;
 
-use contained::neo::{cmp::Note, Tonnetz, Triad, Triads};
+use contained::neo::{Tonnetz, Triad, Triads};
 use contained::turing::{Configuration, Machine, Move, Program, Programatic, Turing};
-use contained::{Resultant, State, States};
+use contained::{cmp::Note, Resultant, State, States};
 
 fn main() -> Resultant {
     let triad = Triad::build(0.into(), Triads::Diminshed);

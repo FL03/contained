@@ -3,19 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::states::*;
+pub use self::{primitives::*, states::*};
 
+pub(crate) mod primitives;
 pub(crate) mod states;
 
+pub mod cmp;
 pub mod neo;
 pub mod turing;
 
 use serde::{Deserialize, Serialize};
 
-/// Dirac is a generic [Fn] which transforms one object into another
-pub type Dirac<S, T> = dyn Fn(S) -> T;
-/// Type alias for a [Result]
-pub type Resultant<T = (), E = String> = Result<T, E>;
+
 
 /// [ArrayLike] describes the basic behaviors of array-like structures
 pub trait ArrayLike {
@@ -47,12 +46,21 @@ pub trait ArrayLike {
     }
 }
 
-/// [Appellation] is a novel naming schematic which provides up to three variations of the same data
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, PartialOrd, Serialize)]
-pub struct Appellation<T: Clone + Default = i64>(T, Option<T>, Option<T>);
+/// [Appellation] is a novel naming schematic for relating two variations to a 'root' or base structure / type
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Appellation<I, J, K>(I, J, K);
 
-impl<T: Clone + Default> Appellation<T> {
-    pub fn new(a: T, b: Option<T>, c: Option<T>) -> Self {
+impl<I, J, K> Appellation<I, J, K> {
+    pub fn new(a: I, b: J, c: K) -> Self {
         Self(a, b, c)
+    }
+    pub fn primary(&self) -> &J {
+        &self.1
+    }
+    pub fn root(&self) -> &I {
+        &self.0
+    }
+    pub fn secondary(&self) -> &K {
+        &self.2
     }
 }
