@@ -111,6 +111,10 @@ pub fn minor_third(pitch: i64) -> i64 {
     (pitch + 3 * SEMITONE as i64) % 12
 }
 
+pub fn perfect_fifth(pitch: i64) -> i64 {
+    (pitch + 7) % 12
+}
+
 pub fn classify_triad(triad: &Triad) -> Option<Triads> {
     let (r, t, f) = triad.clone().into();
 

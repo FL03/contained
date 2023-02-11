@@ -42,11 +42,10 @@ impl LPR {
         
         match self.clone() as i64 {
             0 => {
-                if !a && b {
-                    r -= 1;
-                }
                 if a && !b {
                     f -= 1;
+                } else {
+                    r -= 1;
                 }
             }
             1 => {
@@ -57,11 +56,10 @@ impl LPR {
                 }
             }
             2 => {
-                if !a && b {
-                    f += 1;
-                }
                 if a && !b {
                     r += 1;
+                } else {
+                    f += 1;
                 }
             }
             _ => {}
