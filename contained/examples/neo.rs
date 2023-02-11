@@ -5,12 +5,12 @@
 */
 extern crate contained;
 
-use contained::neo::{cmp::Note, Tonnetz, Triad};
+use contained::neo::{cmp::Note, Tonnetz, Triad, Triads};
 use contained::turing::{Configuration, Machine, Move, Program, Programatic, Turing};
 use contained::{Resultant, State, States};
 
 fn main() -> Resultant {
-    let triad = Triad::from((0, -3, 5));
+    let triad = Triad::build(0.into(), Triads::Diminshed);
     let _tonnetz = Tonnetz::new(triad.clone());
 
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
@@ -19,13 +19,13 @@ fn main() -> Resultant {
     // Setup the program
     let final_state = State::from(&States::invalid());
     let mut program = Program::new(alphabet, final_state);
-    // Instruction set; turn ["C", "Eb", "F"] into ["Eb", "Eb", "Eb"]
+    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
     program.insert(
         (
             State::default(),
             0.into(),
             State::default(),
-            Note::from(-3),
+            6.into(),
             Move::Right,
         )
             .into(),
@@ -33,9 +33,9 @@ fn main() -> Resultant {
     program.insert(
         (
             State::default(),
-            Note::from(-3),
+            3.into(),
             State::default(),
-            Note::from(-3),
+            3.into(),
             Move::Right,
         )
             .into(),
@@ -43,9 +43,9 @@ fn main() -> Resultant {
     program.insert(
         (
             State::default(),
-            5.into(),
+            6.into(),
             State::from(&States::invalid()),
-            Note::from(-3),
+            3.into(),
             Move::Stay,
         )
             .into(),

@@ -5,9 +5,11 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use crate::neo::Triad;
+use crate::neo::{Triad, is_third};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
+
+use super::is_minor_third;
 
 #[derive(
     Clone,
@@ -27,23 +29,40 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[strum(serialize_all = "snake_case")]
 pub enum LPR {
     #[default]
-    L = 0, // Preservese the third; shift the fifth by a semitone
-    P = 1, // Preserves the fifth; shifts the third by a semitone
-    R = 2, // Preserves the major third; shifts the fifth a whole note
+    L = 0, // Preserves the minor third; shifts the remaining note by a semitone
+    P = 1, // Preserves the perfect fifth; shifts the remaining note by a semitone
+    R = 2, // preserves the major third in the triad and moves the remaining note by whole tone.
 }
 
 impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
-        let (r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
+        let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
+
+        let (a, b) = (is_minor_third(r.clone(), t.clone()), is_minor_third(t.clone(), f.clone()));
+        
         match self.clone() as i64 {
             0 => {
-                f += 1;
+                if !a && b {
+                    r -= 1;
+                }
+                if a && !b {
+                    f -= 1;
+                }
             }
             1 => {
-                t += 1;
+                if a {
+                    t += 1;
+                } else {
+                    t -= 1;
+                }
             }
             2 => {
-                f += 2;
+                if !a && b {
+                    f += 1;
+                }
+                if a && !b {
+                    r += 1;
+                }
             }
             _ => {}
         }
