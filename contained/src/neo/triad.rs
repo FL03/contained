@@ -10,7 +10,12 @@
             a != c
             b != c
 */
-use crate::neo::{cmp::{Note, is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth}, LPR};
+use crate::neo::{
+    cmp::{
+        is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Note,
+    },
+    LPR,
+};
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -20,20 +25,19 @@ pub fn classify_triad(triad: &Triad) -> Option<Triads> {
 
     if perfect_fifth(r) == f {
         if is_major_third(r, t) {
-            return Some(Triads::Major)
+            return Some(Triads::Major);
         } else {
-            return Some(Triads::Minor)
+            return Some(Triads::Minor);
         }
     } else {
         if is_major_third(r, t) && is_major_third(t, f) {
-            return Some(Triads::Augmented)
+            return Some(Triads::Augmented);
         } else if is_minor_third(r, t) && is_minor_third(t, f) {
             return Some(Triads::Diminshed);
-        } 
-        return None
+        }
+        return None;
     }
 }
-
 
 /// [create_triad] trys to create a triad from the given notes
 /// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
@@ -44,10 +48,16 @@ pub fn create_triad(notes: (Note, Note, Note)) -> Option<Triad> {
     for i in 0..args.len() {
         let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
         for j in 0..tmp.len() {
-            let (a, b, c) = (args[i].clone(), args[tmp[j]].clone(), args[tmp[(j + 1) % tmp.len()]].clone());
+            let (a, b, c) = (
+                args[i].clone(),
+                args[tmp[j]].clone(),
+                args[tmp[(j + 1) % tmp.len()]].clone(),
+            );
             // Creates a triad if the current root -> current third & current third -> current fifth are both thirds
-            if is_third(a.clone().into(), b.clone().into()) && is_third(b.clone().into(), c.clone().into()) {
-                return Some(Triad::new(a, b, c))
+            if is_third(a.clone().into(), b.clone().into())
+                && is_third(b.clone().into(), c.clone().into())
+            {
+                return Some(Triad::new(a, b, c));
             }
         }
     }
@@ -182,27 +192,21 @@ impl TryFrom<(Note, Note, Note)> for Triad {
         if let Some(triad) = create_triad(data) {
             return Ok(triad);
         }
-        Err(format!("The provided notes don't contain the required relationships..."))
+        Err(format!(
+            "The provided notes don't contain the required relationships..."
+        ))
     }
 }
 
 impl From<Triad> for (Note, Note, Note) {
     fn from(d: Triad) -> (Note, Note, Note) {
-        (
-            d.0.clone(),
-            d.1.clone(),
-            d.2.clone(),
-        )
+        (d.0.clone(), d.1.clone(), d.2.clone())
     }
 }
 
 impl From<Triad> for (i64, i64, i64) {
     fn from(d: Triad) -> (i64, i64, i64) {
-        (
-            d.0.clone().into(),
-            d.1.clone().into(),
-            d.2.clone().into(),
-        )
+        (d.0.clone().into(), d.1.clone().into(), d.2.clone().into())
     }
 }
 

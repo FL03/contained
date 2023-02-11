@@ -5,7 +5,10 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use crate::neo::{cmp::{is_minor_third, Note}, Triad};
+use crate::neo::{
+    cmp::{is_minor_third, Note},
+    Triad,
+};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -36,8 +39,8 @@ impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
         let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
 
-        let rt_interval= is_minor_third(r.clone(), t.clone());
-        
+        let rt_interval = is_minor_third(r.clone(), t.clone());
+
         match self {
             LPR::L => {
                 if rt_interval {

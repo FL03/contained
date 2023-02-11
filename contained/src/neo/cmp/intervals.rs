@@ -41,7 +41,7 @@ pub fn major_third(pitch: i64) -> i64 {
 
 ///
 pub fn minor_third(pitch: i64) -> i64 {
-   Thirds::Minor.compute(pitch.into()).into()
+    Thirds::Minor.compute(pitch.into()).into()
 }
 
 ///
@@ -78,7 +78,7 @@ impl Thirds {
         let n: i64 = note.into();
         match self {
             Self::Major => Note::from((n + 4 * SEMITONE as i64) % 12),
-            Self::Minor => Note::from((n + 3 * SEMITONE as i64) % 12)
+            Self::Minor => Note::from((n + 3 * SEMITONE as i64) % 12),
         }
     }
     pub fn major() -> Self {
