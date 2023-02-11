@@ -14,6 +14,9 @@ pub mod cmp;
 
 use futures::Stream;
 
+pub const SEMITONE: usize = 1;
+pub const TONE: usize = 2;
+
 /// [Dirac] describes a function, [Fn] which takes one object and produces another
 pub type Dirac<S, T> = dyn Fn(S) -> T;
 
