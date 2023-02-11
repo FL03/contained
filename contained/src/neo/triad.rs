@@ -19,25 +19,6 @@ use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-/// [classify_triad] detects if the given triad is augments, diminshed, major, or minor
-pub fn classify_triad(triad: &Triad) -> Resultant<Triads> {
-    let (r, t, f) = triad.clone().into();
-
-    if perfect_fifth(r) == f {
-        if is_major_third(r, t) {
-            return Ok(Triads::Major);
-        } else {
-            return Ok(Triads::Minor);
-        }
-    } else {
-        if is_major_third(r, t) && is_major_third(t, f) {
-            return Ok(Triads::Augmented);
-        } else if is_minor_third(r, t) && is_minor_third(t, f) {
-            return Ok(Triads::Diminshed);
-        }
-        Err("Failed to find the required relationships...".to_string())
-    }
-}
 
 /// [create_triad] trys to create a triad from the given notes
 /// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
@@ -64,7 +45,38 @@ pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
     Err("Failed to find the required relationships within the given notes...".to_string())
 }
 
-pub trait Triadic {
+pub trait Triadic: Clone {
+    /// Create a new [Configuration] with the [Triad] as its alphabet
+    fn config(&self) -> Configuration<Note> {
+        Configuration::norm(Tape::new(vec![self.root(), self.third(), self.fifth()])).unwrap()
+    }
+    /// [Triadic::machine] Tries to create a [Machine] running the given [Program] with a default set to the triad's root
+    fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
+        Machine::new(self.root(), program)
+    }
+    /// [Triadic::classify] tries to define the triad by searching for triadic relations
+    fn classify(&self) -> Resultant<Triads> {
+        let (r, t, f) = (self.root().into(), self.third().into(), self.fifth().into());
+
+        if perfect_fifth(r) == f {
+            if is_major_third(r, t) {
+                return Ok(Triads::Major);
+            } else {
+                return Ok(Triads::Minor);
+            }
+        } else {
+            if is_major_third(r, t) && is_major_third(t, f) {
+                return Ok(Triads::Augmented);
+            } else if is_minor_third(r, t) && is_minor_third(t, f) {
+                return Ok(Triads::Diminshed);
+            }
+            Err("Failed to find the required relationships...".to_string())
+        }
+    }
+    /// A method for establishing the validity of the given notes
+    fn is_valid(&self) -> bool {
+        self.classify().is_ok()
+    }
     fn fifth(&self) -> Note;
     fn root(&self) -> Note;
     fn third(&self) -> Note;
@@ -113,12 +125,6 @@ pub enum Triads {
     Minor,     // If the root -> third is minor and if third -> fifth is major
 }
 
-impl Triads {
-    pub fn classify(triad: &Triad) -> Resultant<Self> {
-        classify_triad(triad)
-    }
-}
-
 /// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad(Note, Note, Note);
@@ -149,20 +155,6 @@ impl Triad {
                 Note::from(major_third(third_minor)),
             ),
         }
-    }
-    pub fn classify(&self) -> Resultant<Triads> {
-        classify_triad(self)
-    }
-    /// Create a new [Configuration] with the [Triad] as its alphabet
-    pub fn config(&self) -> Configuration<Note> {
-        Configuration::norm(Tape::new(self.clone())).unwrap()
-    }
-    pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
-        Machine::new(self.root(), program)
-    }
-    /// A method for establishing the validity of the given notes
-    pub fn is_valid(&self) -> bool {
-        self.classify().is_ok()
     }
 }
 

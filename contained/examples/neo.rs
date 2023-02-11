@@ -5,7 +5,7 @@
 */
 extern crate contained;
 
-use contained::neo::{Triad, Triads};
+use contained::neo::{Triad, Triadic, Triads};
 use contained::turing::{Configuration, Program, Programatic, Turing};
 use contained::{cmp::Note, Resultant, State, States};
 
