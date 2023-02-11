@@ -2,11 +2,18 @@
     Appellation: transform <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
+        The neo-Riemannian theory introduces three primary means of transforming triad's, namely: 
+            (L) Leading
+            (P) Parallel
+            (R) Relative
+        These transformations can be chained and each preserve two of the original notes, only shifting one
+        More so, if the same transformation is applied back-to-back than the resulting triad is identical to the original.
+        
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
 use crate::neo::{
-    cmp::{is_minor_third, Note},
+    cmp::is_minor_third,
     Triad,
 };
 use serde::{Deserialize, Serialize};
@@ -38,9 +45,8 @@ pub enum LPR {
 impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
         let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
-
         let rt_interval = is_minor_third(r.clone(), t.clone());
-
+        // Apply the active transformat to the given triad
         match self {
             LPR::L => {
                 if rt_interval {
@@ -64,6 +70,7 @@ impl LPR {
                 }
             }
         }
+        // Double check to make sure all values are positive
         if r < 0 {
             r += 12;
         }
@@ -73,7 +80,7 @@ impl LPR {
         if f < 0 {
             f += 12;
         }
-        println!("{:?}", (r, t, f));
+        // All triadic transformations will result in another valid triad
         Triad::try_from((r, t, f)).unwrap()
     }
 }
@@ -92,12 +99,30 @@ mod tests {
     use crate::neo::{Triad, Triads};
 
     #[test]
-    fn test_lpr_transformation() {
+    fn test_leading() {
         let a = Triad::build(0.into(), Triads::Major);
         let b = LPR::default() * a.clone();
         let c = LPR::L * b.clone();
         assert_ne!(a.clone(), b.clone());
         assert_eq!(b.clone(), Triad::try_from((4, 7, 11)).unwrap());
         assert_eq!(a.clone(), c.clone());
+    }
+
+    #[test]
+    fn test_parallel() {
+        let a = Triad::build(0.into(), Triads::Major);
+        let b = LPR::P * a.clone();
+        assert_ne!(a.clone(), b.clone());
+        assert_eq!(b.clone(), Triad::try_from((0, 3, 7)).unwrap());
+        assert_eq!(LPR::P * b, a)
+    }
+
+    #[test]
+    fn test_relative() {
+        let a = Triad::build(0.into(), Triads::Major);
+        let b = LPR::R * a.clone();
+        assert_ne!(a.clone(), b.clone());
+        assert_eq!(b.clone(), Triad::try_from((0, 4, 9)).unwrap());
+        assert_eq!(LPR::R * b, a)
     }
 }

@@ -78,11 +78,11 @@ mod tests {
         let triad = Triad::build(0.into(), Triads::Major);
 
         let mut a = Tonnetz::new(triad.clone());
-        // Apply a single leading transformation to the scope
-        a.transform(LPR::L);
-        // assert_eq!(a.scope().clone(), Triad::try_from((0, 3, 6)).unwrap());
         // Apply three consecutive transformations to the scope
         a.walk(vec![LPR::L, LPR::P, LPR::R]);
-        // assert_eq!(a.scope().clone(), Triad::try_from((0, 4, 9)).unwrap())
+        assert_eq!(a.scope().clone(), Triad::try_from((1, 4, 8)).unwrap());
+        // Apply the same transformations in reverse to go back to the original
+        a.walk(vec![LPR::R, LPR::P, LPR::L]);
+        assert_eq!(a.scope().clone(), triad);
     }
 }
