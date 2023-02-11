@@ -204,7 +204,7 @@ impl Triad {
     }
     /// A method for establishing the validity of the given notes
     pub fn is_valid(&self) -> bool {
-        if classify_triad(&self).is_some() {
+        if Triads::try_from(self.clone()).is_ok() {
             return true;
         }
         false
