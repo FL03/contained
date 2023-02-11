@@ -12,13 +12,12 @@
 */
 use super::LPR;
 use crate::cmp::{
-    is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Note,
+    is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Chord, Note,
 };
 use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
 
 /// [create_triad] trys to create a triad from the given notes
 /// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
@@ -46,9 +45,13 @@ pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
 }
 
 pub trait Triadic: Clone {
-    /// Create a new [Configuration] with the [Triad] as its alphabet
+    /// [Triadic::chord] Creates a [Chord] from the vertices
+    fn chord(&self) -> Chord {
+        Chord::new(vec![self.root(), self.third(), self.fifth()])
+    }
+    /// [Triadic::config] Create a new [Configuration] with the [Triad] as its alphabet
     fn config(&self) -> Configuration<Note> {
-        Configuration::norm(Tape::new(vec![self.root(), self.third(), self.fifth()])).unwrap()
+        Configuration::norm(Tape::new(self.chord())).unwrap()
     }
     /// [Triadic::machine] Tries to create a [Machine] running the given [Program] with a default set to the triad's root
     fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
@@ -73,7 +76,7 @@ pub trait Triadic: Clone {
             Err("Failed to find the required relationships...".to_string())
         }
     }
-    /// A method for establishing the validity of the given notes
+    /// [Triadic::is_valid] A method for establishing the validity of the given notes
     fn is_valid(&self) -> bool {
         self.classify().is_ok()
     }
@@ -82,6 +85,20 @@ pub trait Triadic: Clone {
     fn third(&self) -> Note;
     fn triad(&self) -> (Note, Note, Note) {
         (self.root(), self.third(), self.fifth())
+    }
+}
+
+impl Triadic for (i64, i64, i64) {
+    fn fifth(&self) -> Note {
+        self.2.into()
+    }
+
+    fn root(&self) -> Note {
+        self.0.into()
+    }
+
+    fn third(&self) -> Note {
+        self.1.into()
     }
 }
 

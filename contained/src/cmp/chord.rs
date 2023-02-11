@@ -4,18 +4,18 @@
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 
 */
-use crate::cmp::{Note, Pitch};
+use crate::cmp::Note;
 use crate::ArrayLike;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
-/// [Chord] is a wrapper for a [Vec] of [Pitch]
+/// [Chord] is a wrapper for a [Vec] of [Note]
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Chord(Vec<Pitch>);
+pub struct Chord(Vec<Note>);
 
 impl Chord {
-    pub fn new(chord: impl IntoIterator<Item = Pitch>) -> Self {
+    pub fn new(chord: impl IntoIterator<Item = Note>) -> Self {
         Self(Vec::from_iter(chord))
     }
     pub fn chord(&self) -> &Self {
@@ -24,7 +24,7 @@ impl Chord {
 }
 
 impl ArrayLike for Chord {
-    type Data = Pitch;
+    type Data = Note;
 
     fn content(&self) -> &Vec<Self::Data> {
         &self.0
@@ -36,7 +36,7 @@ impl ArrayLike for Chord {
 }
 
 impl IntoIterator for Chord {
-    type Item = Pitch;
+    type Item = Note;
 
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
@@ -85,11 +85,10 @@ pub type Fifth = Note;
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::cmp::Pitch;
 
     #[test]
     fn test_chords() {
-        let a = vec![Pitch::from(0), Pitch::from(3), Pitch::from(8)];
+        let a = vec![0.into(), 3.into(), 8.into()];
         let mut b = Chord::default();
         assert!(b.is_empty());
         b.append(&mut a.clone());
