@@ -18,6 +18,12 @@ impl ASPN {
     pub fn new(pitch: PitchClass, octave: i64) -> Self {
         Self(pitch, octave)
     }
+    pub fn class(&self) -> &PitchClass {
+        &self.0
+    }
+    pub fn octave(&self) -> i64 {
+        self.1
+    }
 }
 
 /// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
@@ -28,8 +34,8 @@ impl Note {
     pub fn new(pitch: PitchClass, epoch: Option<Epoch>) -> Self {
         Self(pitch, epoch)
     }
-    pub fn pitch(&self) -> Pitch {
-        self.0.clone().into()
+    pub fn class(&self) -> &PitchClass {
+        &self.0
     }
     pub fn epoch(&self) -> &Option<Epoch> {
         &self.1
@@ -47,6 +53,25 @@ impl PartialEq for Note {
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
+    }
+}
+
+impl From<Note> for i64 {
+    fn from(data: Note) -> i64 {
+        let pitch: Pitch = data.into();
+        pitch.into()
+    }
+}
+
+impl From<Note> for Pitch {
+    fn from(data: Note) -> Pitch {
+        data.0.into()
+    }
+}
+
+impl From<Pitch> for Note {
+    fn from(data: Pitch) -> Note {
+        Note::new(data.into(), None)
     }
 }
 

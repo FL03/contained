@@ -5,11 +5,9 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use crate::neo::{Triad, is_third};
+use crate::neo::{cmp::{is_minor_third, Note}, Triad};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-use super::is_minor_third;
 
 #[derive(
     Clone,
@@ -38,33 +36,42 @@ impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
         let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
 
-        let (a, b) = (is_minor_third(r.clone(), t.clone()), is_minor_third(t.clone(), f.clone()));
+        let rt_interval= is_minor_third(r.clone(), t.clone());
         
-        match self.clone() as i64 {
-            0 => {
-                if a && !b {
-                    f -= 1;
+        match self {
+            LPR::L => {
+                if rt_interval {
+                    f += 1;
                 } else {
                     r -= 1;
                 }
             }
-            1 => {
-                if a {
+            LPR::P => {
+                if rt_interval {
                     t += 1;
                 } else {
                     t -= 1;
                 }
             }
-            2 => {
-                if a && !b {
-                    r += 1;
+            LPR::R => {
+                if rt_interval {
+                    r -= 2;
                 } else {
-                    f += 1;
+                    f += 2;
                 }
             }
-            _ => {}
         }
-        Triad::from((r, t, f))
+        if r < 0 {
+            r += 12;
+        }
+        if t < 0 {
+            r += 12;
+        }
+        if f < 0 {
+            f += 12;
+        }
+        println!("{:?}", (r, t, f));
+        Triad::try_from((r, t, f)).unwrap()
     }
 }
 
@@ -79,15 +86,14 @@ impl std::ops::Mul<Triad> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::neo::Triad;
+    use crate::neo::{Triad, Triads};
 
     #[test]
     fn test_lpr_transformation() {
-        let a = Triad::from((0, 1, 14));
-        let b = LPR::default().transform(&a.clone());
-        let c = LPR::default() * a.clone();
+        let a = Triad::build(0.into(), Triads::Major);
+        let b = LPR::default() * a.clone();
         assert_ne!(a.clone(), b.clone());
-        assert_eq!(b.clone(), Triad::from((0, 1, 3)));
-        assert_eq!(b.clone(), c)
+        // assert_eq!(b.clone(), Triad::try_from((0, 4, 9)).unwrap());
+        assert_eq!(b.clone(), Triad::try_from((4, 7, 11)).unwrap())
     }
 }

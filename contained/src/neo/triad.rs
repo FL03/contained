@@ -10,57 +10,56 @@
             a != c
             b != c
 */
-use crate::neo::{cmp::Note, LPR, SEMITONE};
+use crate::neo::{cmp::{Note, is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth}, LPR};
 use crate::turing::{Configuration, Symbolic, Tape};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
+
+pub fn classify_triad(triad: &Triad) -> Option<Triads> {
+    let (r, t, f) = triad.clone().into();
+
+    if perfect_fifth(r) == f {
+        if is_major_third(r, t) {
+            return Some(Triads::Major)
+        } else {
+            return Some(Triads::Minor)
+        }
+    } else {
+        if is_major_third(r, t) && is_major_third(t, f) {
+            return Some(Triads::Augmented)
+        } else if is_minor_third(r, t) && is_minor_third(t, f) {
+            return Some(Triads::Diminshed);
+        } 
+        return None
+    }
+}
+
+
+/// [create_triad] trys to create a triad from the given notes
+/// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
+/// Since we allow for augmented / diminshed triads, the root -> third && third -> fifth are required to be thirds
+/// rather than enforcing a 'perfect fifth' relationship between root -> fifth
+pub fn create_triad(notes: (Note, Note, Note)) -> Option<Triad> {
+    let args = vec![notes.0, notes.1, notes.2];
+    for i in 0..3 {
+        let tmp = [(i + 1) % 3, (i + 2) % 3];
+        println!("{:?}", tmp.clone());
+        for j in 0..tmp.len() {
+            let (a, b, c) = (args[i].clone(), args[j].clone(), args[(j + 1) % tmp.len()].clone());
+            println!("{:?}, {:?}, {:?}", a.clone(), b.clone(), c.clone());
+            // Creates a triad if the current root -> current third & current third -> current fifth are both thirds
+            if is_third(a.clone().into(), b.clone().into()) && is_third(b.clone().into(), c.clone().into()) {
+                return Some(Triad::new(a, b, c))
+            }
+        }
+    }
+    None
+}
 
 pub trait Triadic {
     fn fifth(&self) -> Note;
     fn root(&self) -> Note;
     fn third(&self) -> Note;
-    fn triad(&self) -> Triad;
-}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Thirds {
-    #[default]
-    Major = 0,
-    Minor = 1,
-}
-
-impl Thirds {
-    pub fn find_third(&self, note: Note) -> Note {
-        let a: i64 = note.pitch().into();
-        match self {
-            Self::Major => Note::from(major_third(a)),
-            Self::Minor => Note::from(minor_third(a)),
-        }
-    }
-}
-
-pub fn is_third(a: i64, b: i64) -> bool {
-    if is_major_third(a, b) || is_minor_third(a, b) {
-        return true;
-    }
-    false
 }
 
 #[derive(
@@ -89,48 +88,6 @@ pub enum Triads {
     Minor,     // If the root -> third is minor and if third -> fifth is major
 }
 
-pub fn is_major_third(a: i64, b: i64) -> bool {
-    if major_third(a) == b {
-        return true;
-    }
-    false
-}
-
-pub fn is_minor_third(a: i64, b: i64) -> bool {
-    if minor_third(a) == b {
-        return true;
-    }
-    false
-}
-
-pub fn major_third(pitch: i64) -> i64 {
-    (pitch + 4 * SEMITONE as i64) % 12
-}
-
-pub fn minor_third(pitch: i64) -> i64 {
-    (pitch + 3 * SEMITONE as i64) % 12
-}
-
-pub fn perfect_fifth(pitch: i64) -> i64 {
-    (pitch + 7) % 12
-}
-
-pub fn classify_triad(triad: &Triad) -> Option<Triads> {
-    let (r, t, f) = triad.clone().into();
-
-    if is_major_third(r, t) && is_minor_third(t, f) {
-        return Some(Triads::Major);
-    } else if is_minor_third(r, t) && is_major_third(t, f) {
-        return Some(Triads::Minor);
-    } else if is_major_third(r, t) && is_major_third(t, f) {
-        return Some(Triads::Augmented);
-    } else if is_minor_third(r, t) && is_minor_third(t, f) {
-        return Some(Triads::Diminshed);
-    } else {
-        return None;
-    }
-}
-
 /// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad(Note, Note, Note);
@@ -140,7 +97,7 @@ impl Triad {
         Self(root, third, fifth)
     }
     pub fn build(root: Note, class: Triads) -> Self {
-        let pitch: i64 = root.pitch().into();
+        let pitch: i64 = root.clone().into();
         let (third_maj, third_minor) = (major_third(pitch), minor_third(pitch));
         match class {
             Triads::Augmented => Self::new(
@@ -213,19 +170,41 @@ impl IntoIterator for Triad {
     }
 }
 
-impl From<Triad> for (i64, i64, i64) {
-    fn from(d: Triad) -> (i64, i64, i64) {
+impl TryFrom<(i64, i64, i64)> for Triad {
+    type Error = String;
+    fn try_from(data: (i64, i64, i64)) -> Result<Triad, Self::Error> {
+        let notes: (Note, Note, Note) = (data.0.into(), data.1.into(), data.2.into());
+        Triad::try_from(notes)
+    }
+}
+
+impl TryFrom<(Note, Note, Note)> for Triad {
+    type Error = String;
+    fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
+        if let Some(triad) = create_triad(data) {
+            return Ok(triad);
+        }
+        Err(format!("The provided notes don't contain the required relationships..."))
+    }
+}
+
+impl From<Triad> for (Note, Note, Note) {
+    fn from(d: Triad) -> (Note, Note, Note) {
         (
-            d.0.pitch().clone().into(),
-            d.1.pitch().clone().into(),
-            d.2.pitch().clone().into(),
+            d.0.clone(),
+            d.1.clone(),
+            d.2.clone(),
         )
     }
 }
 
-impl From<(i64, i64, i64)> for Triad {
-    fn from(d: (i64, i64, i64)) -> Triad {
-        Triad(d.0.into(), d.1.into(), d.2.into())
+impl From<Triad> for (i64, i64, i64) {
+    fn from(d: Triad) -> (i64, i64, i64) {
+        (
+            d.0.clone().into(),
+            d.1.clone().into(),
+            d.2.clone().into(),
+        )
     }
 }
 
@@ -235,13 +214,12 @@ mod tests {
 
     #[test]
     fn test_triad() {
-        let a = Triad::from((0, 3, 6));
-        let b = Triad::from((2, 6, 9));
-        assert!(a.is_valid());
-        assert_eq!(classify_triad(&a), Some(Triads::Diminshed));
-        assert_eq!(&a, &Triad::build(Note::from(0), Triads::Diminshed));
-        assert!(b.is_valid());
-        assert_eq!(classify_triad(&b), Some(Triads::Major));
-        assert_ne!(a, b)
+        let a = Triad::build(0.into(), Triads::Major);
+        let tmp: (i64, i64, i64) = a.clone().into();
+        assert_eq!(tmp, (0, 4, 7));
+        let b = Triad::try_from((11, 4, 7));
+
+        assert!(b.is_ok());
+        assert_ne!(a, b.unwrap())
     }
 }
