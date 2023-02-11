@@ -84,7 +84,7 @@ impl Fifths {
         match self {
             Fifths::Augmented => Note::from((pitch + 8) % 12),
             Fifths::Diminshed => Note::from((pitch + 6) % 12),
-            Fifths::Perfect => Note::from((pitch + 7) % 12)
+            Fifths::Perfect => Note::from((pitch + 7) % 12),
         }
     }
 }
@@ -111,7 +111,7 @@ impl std::ops::Mul<Note> for Fifths {
     PartialEq,
     PartialOrd,
     Serialize,
-    SmartDefault
+    SmartDefault,
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]

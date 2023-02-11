@@ -14,8 +14,6 @@ pub mod turing;
 
 use serde::{Deserialize, Serialize};
 
-
-
 /// [ArrayLike] describes the basic behaviors of array-like structures
 pub trait ArrayLike {
     type Data;

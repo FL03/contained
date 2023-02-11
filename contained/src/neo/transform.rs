@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn test_leading() {
-        let a = Triad::build(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let b = LPR::default() * a.clone();
         let c = LPR::L * b.clone();
         assert_ne!(a, b);
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_parallel() {
-        let a = Triad::build(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
         assert_ne!(a, b);
         assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_relative() {
-        let a = Triad::build(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
         assert_ne!(a, b);
         assert_eq!(b, Triad::try_from((0, 4, 9)).unwrap());

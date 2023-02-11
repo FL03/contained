@@ -14,27 +14,28 @@ use super::LPR;
 use crate::cmp::{
     is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Note,
 };
-use crate::turing::{Configuration, Symbolic, Tape};
+use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
+use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
 /// [classify_triad] detects if the given triad is augments, diminshed, major, or minor
-pub fn classify_triad(triad: &Triad) -> Option<Triads> {
+pub fn classify_triad(triad: &Triad) -> Resultant<Triads> {
     let (r, t, f) = triad.clone().into();
 
     if perfect_fifth(r) == f {
         if is_major_third(r, t) {
-            return Some(Triads::Major);
+            return Ok(Triads::Major);
         } else {
-            return Some(Triads::Minor);
+            return Ok(Triads::Minor);
         }
     } else {
         if is_major_third(r, t) && is_major_third(t, f) {
-            return Some(Triads::Augmented);
+            return Ok(Triads::Augmented);
         } else if is_minor_third(r, t) && is_minor_third(t, f) {
-            return Some(Triads::Diminshed);
+            return Ok(Triads::Diminshed);
         }
-        return None;
+        Err("Failed to find the required relationships...".to_string())
     }
 }
 
@@ -42,7 +43,7 @@ pub fn classify_triad(triad: &Triad) -> Option<Triads> {
 /// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
 /// Since we allow for augmented / diminshed triads, the root -> third && third -> fifth are required to be thirds
 /// rather than enforcing a 'perfect fifth' relationship between root -> fifth
-pub fn create_triad(notes: (Note, Note, Note)) -> Option<Triad> {
+pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
     let args = vec![notes.0, notes.1, notes.2];
     for i in 0..args.len() {
         let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
@@ -56,11 +57,11 @@ pub fn create_triad(notes: (Note, Note, Note)) -> Option<Triad> {
             if is_third(a.clone().into(), b.clone().into())
                 && is_third(b.clone().into(), c.clone().into())
             {
-                return Some(Triad::new(a, b, c));
+                return Ok(Triad(a, b, c));
             }
         }
     }
-    None
+    Err("Failed to find the required relationships within the given notes...".to_string())
 }
 
 pub trait Triadic {
@@ -109,58 +110,12 @@ pub enum Triads {
     Diminshed, // If the root -> third is minor and if third -> fifth is minor
     #[default]
     Major, // If the root -> third is major and if third -> fifth is minor
-    Minor, // If the root -> third is minor and if third -> fifth is major
+    Minor,     // If the root -> third is minor and if third -> fifth is major
 }
 
 impl Triads {
-    pub fn create(&self, root: Note) -> Triad {
-        let pitch: i64 = root.clone().into();
-        let (third_maj, third_minor) = (major_third(pitch), minor_third(pitch));
-        match self.clone() {
-            Triads::Augmented => Triad::new(
-                root,
-                Note::from(third_maj),
-                Note::from(major_third(third_maj)),
-            ),
-            Triads::Diminshed => Triad::new(
-                root,
-                Note::from(third_minor),
-                Note::from(minor_third(third_minor)),
-            ),
-            Triads::Major => Triad::new(
-                root,
-                Note::from(third_maj),
-                Note::from(minor_third(third_maj)),
-            ),
-            Triads::Minor => Triad::new(
-                root,
-                Note::from(third_minor),
-                Note::from(major_third(third_minor)),
-            ),
-        }
-    }
-}
-
-impl TryFrom<Triad> for Triads {
-    type Error = String;
-
-    fn try_from(data: Triad) -> Result<Triads, Self::Error> {
-        let (r, t, f) = data.clone().into();
-
-        if perfect_fifth(r) == f {
-            if is_major_third(r, t) {
-                return Ok(Triads::Major);
-            } else {
-                return Ok(Triads::Minor);
-            }
-        } else {
-            if is_major_third(r, t) && is_major_third(t, f) {
-                return Ok(Triads::Augmented);
-            } else if is_minor_third(r, t) && is_minor_third(t, f) {
-                return Ok(Triads::Diminshed);
-            }
-            return Err("".to_string());
-        }
+    pub fn classify(triad: &Triad) -> Resultant<Self> {
+        classify_triad(triad)
     }
 }
 
@@ -169,58 +124,63 @@ impl TryFrom<Triad> for Triads {
 pub struct Triad(Note, Note, Note);
 
 impl Triad {
-    pub fn new(root: Note, third: Note, fifth: Note) -> Self {
-        Self(root, third, fifth)
-    }
-    pub fn build(root: Note, class: Triads) -> Self {
+    pub fn new(root: Note, class: Triads) -> Self {
         let pitch: i64 = root.clone().into();
         let (third_maj, third_minor) = (major_third(pitch), minor_third(pitch));
         match class {
-            Triads::Augmented => Self::new(
+            Triads::Augmented => Self(
                 root,
                 Note::from(third_maj),
                 Note::from(major_third(third_maj)),
             ),
-            Triads::Diminshed => Self::new(
+            Triads::Diminshed => Self(
                 root,
                 Note::from(third_minor),
                 Note::from(minor_third(third_minor)),
             ),
-            Triads::Major => Self::new(
+            Triads::Major => Self(
                 root,
                 Note::from(third_maj),
                 Note::from(minor_third(third_maj)),
             ),
-            Triads::Minor => Self::new(
+            Triads::Minor => Self(
                 root,
                 Note::from(third_minor),
                 Note::from(major_third(third_minor)),
             ),
         }
     }
+    pub fn classify(&self) -> Resultant<Triads> {
+        classify_triad(self)
+    }
     /// Create a new [Configuration] with the [Triad] as its alphabet
     pub fn config(&self) -> Configuration<Note> {
         Configuration::norm(Tape::new(self.clone())).unwrap()
     }
+    pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
+        Machine::new(self.root(), program)
+    }
     /// A method for establishing the validity of the given notes
     pub fn is_valid(&self) -> bool {
-        if Triads::try_from(self.clone()).is_ok() {
-            return true;
-        }
-        false
-    }
-    pub fn fifth(&self) -> &Note {
-        &self.2
-    }
-    pub fn root(&self) -> &Note {
-        &self.0
-    }
-    pub fn third(&self) -> &Note {
-        &self.1
+        self.classify().is_ok()
     }
 }
 
 impl Symbolic for Triad {}
+
+impl Triadic for Triad {
+    fn fifth(&self) -> Note {
+        self.2.clone()
+    }
+
+    fn root(&self) -> Note {
+        self.0.clone()
+    }
+
+    fn third(&self) -> Note {
+        self.1.clone()
+    }
+}
 
 impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -263,10 +223,7 @@ impl From<Triad> for (i64, i64, i64) {
 impl TryFrom<(Note, Note, Note)> for Triad {
     type Error = String;
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
-        if let Some(triad) = create_triad(data) {
-            return Ok(triad);
-        }
-        Err("The provided notes don't contain the required relationships...".to_string())
+        create_triad(data)
     }
 }
 
@@ -276,15 +233,13 @@ impl From<Triad> for (Note, Note, Note) {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_triad() {
-        let a = Triads::Major.create(0.into());
+        let a = Triad::new(0.into(), Triads::Major);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));

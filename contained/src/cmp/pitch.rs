@@ -77,7 +77,9 @@ impl From<i64> for PitchClass {
 }
 
 /// [Pitch] describes the modular index of a given frequency
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct Pitch(i64);
 
 impl Pitch {

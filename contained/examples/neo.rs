@@ -5,13 +5,12 @@
 */
 extern crate contained;
 
-use contained::neo::{Tonnetz, Triad, Triads};
-use contained::turing::{Configuration, Machine, Move, Program, Programatic, Turing};
+use contained::neo::{Triad, Triads};
+use contained::turing::{Configuration, Program, Programatic, Turing};
 use contained::{cmp::Note, Resultant, State, States};
 
 fn main() -> Resultant {
-    let triad = Triad::build(0.into(), Triads::Diminshed);
-    let _tonnetz = Tonnetz::new(triad.clone());
+    let triad = Triad::new(0.into(), Triads::Diminshed);
 
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
     let mut cnf: Configuration<Note> = triad.config();
@@ -26,7 +25,7 @@ fn main() -> Resultant {
             0.into(),
             State::default(),
             6.into(),
-            Move::Right,
+            1.into(),
         )
             .into(),
     )?;
@@ -36,7 +35,7 @@ fn main() -> Resultant {
             3.into(),
             State::default(),
             3.into(),
-            Move::Right,
+            1.into(),
         )
             .into(),
     )?;
@@ -46,13 +45,12 @@ fn main() -> Resultant {
             6.into(),
             State::from(&States::invalid()),
             3.into(),
-            Move::Stay,
+            2.into(),
         )
             .into(),
     )?;
 
-    let a = Machine::new(0.into(), program.clone())?;
-    let res = a.execute(&mut cnf)?;
+    let res = triad.machine(program)?.execute(&mut cnf)?;
     println!("{:?}", res);
 
     Ok(())
