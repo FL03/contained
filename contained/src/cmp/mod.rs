@@ -13,7 +13,16 @@ pub(crate) mod notes;
 pub(crate) mod pitch;
 
 pub trait Notable: Clone + Default {
+    fn class(&self) -> PitchClass {
+        self.pitch().into()
+    }
     fn pitch(&self) -> Pitch;
+}
+
+impl Notable for Pitch {
+    fn pitch(&self) -> Pitch {
+        self.clone()
+    }
 }
 
 impl Notable for i64 {
