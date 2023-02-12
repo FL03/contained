@@ -5,7 +5,9 @@
 */
 extern crate contained;
 
-use contained::turing::{Configuration, Machine, Move, Program, Programatic, Tape, Turing};
+use contained::turing::{
+    Configurable, Configuration, Machine, Move, Program, Programatic, Tape, Turing,
+};
 use contained::{Resultant, State, States};
 
 fn main() -> Resultant {

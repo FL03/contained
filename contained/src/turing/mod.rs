@@ -15,13 +15,17 @@ use crate::{Resultant, States};
 use scsys::prelude::Stateful;
 
 /// Simple trait for compatible symbols
-pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString {}
+pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString + serde::Serialize {}
 
 impl Symbolic for char {}
 
 impl Symbolic for &str {}
 
 impl Symbolic for String {}
+
+pub trait Actor<S: Symbolic> {
+    fn init_symbol(&self) -> &S;
+}
 
 /// Describes the basic functionality of a Turing machine
 pub trait Turing {
@@ -33,14 +37,14 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state().state() == States::invalid())
+        self.execute_until(cnf, |cnf| cnf.state().clone().state() == States::invalid())
     }
     ///
     fn execute_once(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        let head = Head::new(cnf.state(), cnf.symbol().expect("").clone());
+        let head = Head::new(cnf.state().clone(), cnf.symbol().clone());
         let inst = self.program().get(head)?.clone();
         cnf.state = inst.tail.state().clone();
         cnf.set_symbol(inst.tail.symbol().clone());
@@ -54,7 +58,7 @@ pub trait Turing {
         until: impl Fn(&Configuration<Self::Symbol>) -> bool,
     ) -> Resultant<Configuration<Self::Symbol>> {
         while !until(cnf) {
-            let head = Head::new(cnf.state.clone(), cnf.symbol().expect("").clone());
+            let head = Head::new(cnf.state.clone(), cnf.symbol().clone());
             let inst = self.program().get(head)?.clone();
             cnf.state = inst.tail.state().clone();
             cnf.set_symbol(inst.tail.symbol().clone());
@@ -67,7 +71,7 @@ pub trait Turing {
     fn translate_std(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
         let mut conf = Configuration::std(tape)?;
         let exec = self.execute(&mut conf)?;
-        Ok(exec.tape())
+        Ok(exec.tape().clone())
     }
 
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
@@ -75,6 +79,6 @@ pub trait Turing {
     fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
         let mut conf = Configuration::norm(tape)?;
         let exec = self.execute(&mut conf)?;
-        Ok(exec.tape())
+        Ok(exec.tape().clone())
     }
 }

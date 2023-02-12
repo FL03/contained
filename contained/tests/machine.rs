@@ -1,4 +1,6 @@
-use contained::turing::{Configuration, Machine, Move, Program, Programatic, Tape, Turing};
+use contained::turing::{
+    Configurable, Configuration, Machine, Move, Program, Programatic, Tape, Turing,
+};
 #[cfg(test)]
 use contained::{State, States};
 

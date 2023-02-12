@@ -49,14 +49,6 @@ pub trait Triadic: Clone {
     fn chord(&self) -> Chord {
         Chord::new(vec![self.root(), self.third(), self.fifth()])
     }
-    /// [Triadic::config] Create a new [Configuration] with the [Triad] as its alphabet
-    fn config(&self) -> Configuration<Note> {
-        Configuration::norm(Tape::new(self.chord())).unwrap()
-    }
-    /// [Triadic::machine] Tries to create a [Machine] running the given [Program] with a default set to the triad's root
-    fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
-        Machine::new(self.root(), program)
-    }
     /// [Triadic::classify] tries to define the triad by searching for triadic relations
     fn classify(&self) -> Resultant<Triads> {
         let (r, t, f) = (self.root().into(), self.third().into(), self.fifth().into());
@@ -75,6 +67,14 @@ pub trait Triadic: Clone {
             }
             Err("Failed to find the required relationships...".to_string())
         }
+    }
+    /// [Triadic::config] Create a new [Configuration] with the [Triad] as its alphabet
+    fn config(&self) -> Configuration<Note> {
+        Configuration::norm(Tape::new(self.chord())).unwrap()
+    }
+    /// [Triadic::machine] Tries to create a [Machine] running the given [Program] with a default set to the triad's root
+    fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
+        Machine::new(self.root(), program)
     }
     /// [Triadic::is_valid] A method for establishing the validity of the given notes
     fn is_valid(&self) -> bool {
