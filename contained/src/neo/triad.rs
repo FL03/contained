@@ -11,9 +11,7 @@
             b != c
 */
 use super::LPR;
-use crate::cmp::{
-    is_major_third, is_minor_third, is_third, major_third, minor_third, perfect_fifth, Chord, Note,
-};
+use crate::cmp::{is_major_third, is_minor_third, is_third, Chord, Fifths, Note, Thirds};
 use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
@@ -53,7 +51,7 @@ pub trait Triadic: Clone {
     fn classify(&self) -> Resultant<Triads> {
         let (r, t, f) = (self.root().into(), self.third().into(), self.fifth().into());
 
-        if perfect_fifth(r) == f {
+        if Fifths::Perfect * r == f {
             if is_major_third(r, t) {
                 return Ok(Triads::Major);
             } else {
@@ -148,29 +146,12 @@ pub struct Triad(Note, Note, Note);
 
 impl Triad {
     pub fn new(root: Note, class: Triads) -> Self {
-        let pitch: i64 = root.clone().into();
-        let (third_maj, third_minor) = (major_third(pitch), minor_third(pitch));
+        let (a, b) = Thirds::compute_both(root.clone());
         match class {
-            Triads::Augmented => Self(
-                root,
-                Note::from(third_maj),
-                Note::from(major_third(third_maj)),
-            ),
-            Triads::Diminshed => Self(
-                root,
-                Note::from(third_minor),
-                Note::from(minor_third(third_minor)),
-            ),
-            Triads::Major => Self(
-                root,
-                Note::from(third_maj),
-                Note::from(minor_third(third_maj)),
-            ),
-            Triads::Minor => Self(
-                root,
-                Note::from(third_minor),
-                Note::from(major_third(third_minor)),
-            ),
+            Triads::Augmented => Self(root, a.clone(), Thirds::Major * a),
+            Triads::Diminshed => Self(root, b.clone(), Thirds::Minor * b),
+            Triads::Major => Self(root, a.clone(), Thirds::Minor * a),
+            Triads::Minor => Self(root, b.clone(), Thirds::Major * b),
         }
     }
 }

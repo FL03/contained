@@ -13,7 +13,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 
 /// [is_third] compares two notes to see if either a major or minor third interval exists
 pub fn is_third(a: i64, b: i64) -> bool {
-    if is_major_third(a, b) || is_minor_third(a, b) {
+    if Thirds::Major * a == b || Thirds::Minor * a == b {
         return true;
     }
     false
@@ -21,7 +21,7 @@ pub fn is_third(a: i64, b: i64) -> bool {
 
 /// [is_major_third] compares the given notes and determines if a major third exists
 pub fn is_major_third(a: i64, b: i64) -> bool {
-    if major_third(a) == b {
+    if Thirds::Major * a == b {
         return true;
     }
     false
@@ -29,25 +29,10 @@ pub fn is_major_third(a: i64, b: i64) -> bool {
 
 /// [is_minor_third]
 pub fn is_minor_third(a: i64, b: i64) -> bool {
-    if minor_third(a) == b {
+    if Thirds::Minor * a == b {
         return true;
     }
     false
-}
-
-///
-pub fn major_third(pitch: i64) -> i64 {
-    Thirds::Major * pitch
-}
-
-///
-pub fn minor_third(pitch: i64) -> i64 {
-    Thirds::Minor * pitch
-}
-
-///
-pub fn perfect_fifth(pitch: i64) -> i64 {
-    Fifths::Perfect * pitch
 }
 
 #[derive(
@@ -133,6 +118,9 @@ impl Thirds {
             Self::Major => Note::from((n + 4 * SEMITONE as i64) % 12),
             Self::Minor => Note::from((n + 3 * SEMITONE as i64) % 12),
         }
+    }
+    pub fn compute_both(note: Note) -> (Note, Note) {
+        (Self::Major * note.clone(), Self::Minor * note)
     }
     /// Functional method for creating a major third
     pub fn major() -> Self {
