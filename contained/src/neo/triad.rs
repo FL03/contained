@@ -5,6 +5,8 @@
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
         Generaically, triad's share two of its notes with three of its inversions.
 
+        The neo-Riemannian theory highlightes three transformations, each of which preserve two of the three notes.
+
         We express a triad as a ordered three tuple <a, b, c> where a, b, c are integers modulus of 12 and:
             a != b
             a != c

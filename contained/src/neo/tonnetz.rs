@@ -12,15 +12,20 @@
 */
 use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};
+use std::collections::LinkedList;
+
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tonnetz {
+    fabric: LinkedList<Triad>,
     scope: Triad,
 }
 
 impl Tonnetz {
     pub fn new(scope: Triad) -> Self {
-        Self { scope }
+        let mut fabric = LinkedList::new();
+        fabric.push_front(scope.clone());
+        Self { fabric, scope }
     }
     /// Returns an owned instance of the active [Triad]
     pub fn scope(&self) -> &Triad {
