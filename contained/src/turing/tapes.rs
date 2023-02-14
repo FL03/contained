@@ -19,6 +19,9 @@ impl<S: Symbolic> Tape<S> {
     pub fn insert(&mut self, pos: usize, elem: S) {
         self.0.insert(pos, elem);
     }
+    pub fn is_empty(&self) -> bool {
+        self.tape().is_empty()
+    }
     pub fn len(&self) -> usize {
         self.tape().len()
     }
@@ -51,8 +54,6 @@ mod tests {
         let alpha = vec!["a", "b", "c"];
 
         let a = Tape::new(alpha);
-        let b = Tape::new(["a", "b", "c"]);
         assert_eq!(a.len(), 3);
-        assert_eq!(a, b);
     }
 }

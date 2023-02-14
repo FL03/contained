@@ -3,43 +3,55 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use decanter::prelude::{hasher, Hashable};
-use scsys::prelude::{SerdeDisplay, StatePack};
+
+use decanter::prelude::{Hash, Hashable};
+use scsys::prelude::{Message, SerdeDisplay, StatePack, Stateful, Timestamp};
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, EnumVariantNames};
+use strum::{Display, EnumString, EnumVariantNames};
 
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    Deserialize,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    SerdeDisplay,
-    Serialize,
-)]
-pub struct State {
-    pub state: States,
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize, SerdeDisplay)]
+pub struct State<S: Clone + StatePack = States, T: Clone + Default + Serialize = String> {
+    msg: Message<T>,
+    state: S,
+    ts: i64,
 }
 
-impl State {
-    pub fn new(state: States) -> Self {
-        Self { state }
+impl<S: Clone + StatePack, T: Clone + Default + Serialize> State<S, T> {
+    pub fn new(msg: Option<Message<T>>, state: S) -> Self {
+        Self {
+            msg: msg.unwrap_or_default(),
+            state,
+            ts: Timestamp::default().into(),
+        }
+    }
+    pub fn update(&mut self, msg: Option<Message<T>>, state: S) {
+        if let Some(m) = msg {
+            self.msg = m;
+        }
+        self.state = state;
+        self.ts = Timestamp::default().into();
     }
 }
 
-impl From<i64> for State {
-    fn from(data: i64) -> State {
-        Self::new(data.into())
+impl<S: Clone + StatePack, T: Clone + Default + Serialize> Stateful<S> for State<S, T> {
+    type Data = T;
+
+    fn message(self) -> scsys::prelude::Message<Self::Data> {
+        self.msg
+    }
+
+    fn state(self) -> S {
+        self.state
+    }
+
+    fn timestamp(self) -> i64 {
+        self.ts
     }
 }
 
-impl From<State> for i64 {
-    fn from(data: State) -> i64 {
-        data.state.into()
+impl<S: Clone + StatePack, T: Clone + Default + Serialize> From<&S> for State<S, T> {
+    fn from(d: &S) -> Self {
+        Self::new(None, d.clone())
     }
 }
 
@@ -49,6 +61,7 @@ impl From<State> for i64 {
     Debug,
     Default,
     Deserialize,
+    Display,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -60,9 +73,9 @@ impl From<State> for i64 {
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum States {
-    Invalid = 0,
     #[default]
-    Valid = 1,
+    Valid = 0,
+    Invalid = 1,
 }
 
 impl States {
@@ -74,53 +87,43 @@ impl States {
     }
 }
 
-impl Hashable for States {
-    fn hash(&self) -> decanter::prelude::H256 {
-        hasher(&self).into()
-    }
-}
-
 impl StatePack for States {}
 
-impl std::fmt::Display for States {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let p = match self.clone() as i64 {
-            0 => "invalid",
-            _ => "valid",
-        };
-        write!(f, "{}", p)
+impl From<usize> for States {
+    fn from(d: usize) -> Self {
+        Self::from(d as i64)
     }
 }
 
 impl From<i64> for States {
-    fn from(val: i64) -> States {
-        match val {
-            0 => States::Invalid,
-            _ => States::Valid,
+    fn from(d: i64) -> Self {
+        match d {
+            0 => States::invalid(),
+            1 => States::valid(),
+            _ => States::invalid(),
         }
     }
 }
 
 impl From<States> for i64 {
-    fn from(val: States) -> i64 {
-        val as i64
+    fn from(d: States) -> i64 {
+        d as i64
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scsys::prelude::{State, Stateful, StatefulExt};
 
     #[test]
     fn test_default_state() {
-        let a = State::<States>::default();
-        let mut b = a.clone();
+        let mut a = State::<States, String>::default();
+        let b = a.clone();
+        assert_eq!(a.clone().state(), States::valid());
 
-        assert_eq!(&a, &b);
-        assert_eq!(a.state() as i64, 1);
+        a.update(None, States::invalid());
 
-        b.update_state(None, 10.into());
-        assert_eq!(b.state(), States::Valid)
+        assert_eq!(a.clone().state(), States::invalid());
+        assert_ne!(b.timestamp(), a.timestamp())
     }
 }
