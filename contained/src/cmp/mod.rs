@@ -12,11 +12,15 @@ pub(crate) mod intervals;
 pub(crate) mod notes;
 pub(crate) mod pitch;
 
-pub trait Notable: Clone + Default {
+/// [Notable] is used to designate a structure used to represent a note
+pub trait Notable: Clone + Default + ToString {
     fn class(&self) -> PitchClass {
         self.pitch().into()
     }
     fn pitch(&self) -> Pitch;
+    fn symbol(&self) -> String {
+        self.to_string()
+    }
 }
 
 impl Notable for Pitch {

@@ -31,7 +31,7 @@ pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
                 args[tmp[j]].clone(),
                 args[tmp[(j + 1) % tmp.len()]].clone(),
             );
-            // Creates a triad if the current root -> current third & current third -> current fifth are both thirds
+            // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
             if is_third(a.clone().into(), b.clone().into())
                 && is_third(b.clone().into(), c.clone().into())
             {
