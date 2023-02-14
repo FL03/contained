@@ -63,7 +63,7 @@ pub trait ArrayLike {
     }
 }
 
-/// [Appellation] is a novel naming schematic for relating two variations to a 'root' or base structure / type
+/// [Appellation] is a novel naming schematic based on a basis from linear-algebra
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Appellation<I, J, K>(I, J, K);
 

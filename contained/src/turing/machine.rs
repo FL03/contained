@@ -1,7 +1,7 @@
 /*
     Appellation: machine <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description: ... Summary ...
 */
 use crate::turing::{Program, Programatic, Symbolic, Turing};
 use crate::Resultant;
@@ -30,11 +30,11 @@ impl<S: Symbolic> Machine<S> {
 impl<S: Symbolic> Turing for Machine<S> {
     type Symbol = S;
 
-    fn program(&self) -> &Program<Self::Symbol> {
-        &self.program
-    }
-
     fn default_symbol(&self) -> &S {
         &self.ds
+    }
+
+    fn program(&self) -> &Program<Self::Symbol> {
+        &self.program
     }
 }

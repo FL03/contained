@@ -2,13 +2,13 @@
     Appellation: note <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        A note is a symbolic representation of the duration and pitch of a tone
-
-        For our purposes, let a pitch represent a unique behavior and a pitch-class be a system addressed by the behavior
-
-        If a note is simply a symbolic representation of a pitch than we can assume all pitches to be modulus of 12
+        A note is a symbolic representation of the duration and pitch of a tone;
+        The enharmonic nature of musical notation enables us to create a system entirely
+        dependent upon the modulus of the Pitch rather than the specific symbol.
+        That being said, we will also adopt a note representation similar to that of the
+        American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::cmp::{Epoch, Pitch, PitchClass};
+use crate::cmp::{Notable, Pitch, PitchClass};
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
@@ -28,17 +28,20 @@ impl ASPN {
 
 /// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
-pub struct Note(PitchClass, Option<Epoch>);
+pub struct Note(PitchClass, i64);
 
 impl Note {
-    pub fn new(pitch: PitchClass, epoch: Option<Epoch>) -> Self {
-        Self(pitch, epoch)
+    pub fn new(class: PitchClass, octave: Option<i64>) -> Self {
+        Self(class, octave.unwrap_or(1))
     }
-    pub fn class(&self) -> &PitchClass {
-        &self.0
+    pub fn octave(&self) -> i64 {
+        self.1
     }
-    pub fn epoch(&self) -> &Option<Epoch> {
-        &self.1
+}
+
+impl Notable for Note {
+    fn pitch(&self) -> Pitch {
+        self.0.clone().into()
     }
 }
 
@@ -78,5 +81,18 @@ impl From<Pitch> for Note {
 impl From<i64> for Note {
     fn from(d: i64) -> Note {
         Note::new(PitchClass::from(d), None)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cmp::{NaturalNote, Notable};
+
+    #[test]
+    fn test_notes() {
+        let a = Note::new(PitchClass::Natural(NaturalNote::C), None);
+        assert_eq!(a.pitch(), 0.into());
+        assert_eq!(a.octave(), 1);
     }
 }

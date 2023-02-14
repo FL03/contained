@@ -81,8 +81,11 @@ pub trait Triadic: Clone {
     fn fifth(&self) -> Note;
     fn root(&self) -> Note;
     fn third(&self) -> Note;
-    fn triad(&self) -> (Note, Note, Note) {
-        (self.root(), self.third(), self.fifth())
+    fn triad(&self) -> &Self
+    where
+        Self: Sized,
+    {
+        &self
     }
 }
 
