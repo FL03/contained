@@ -12,21 +12,8 @@ use crate::cmp::{Notable, Pitch, PitchClass};
 use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
-pub struct ASPN(PitchClass, i64);
-
-impl ASPN {
-    pub fn new(pitch: PitchClass, octave: i64) -> Self {
-        Self(pitch, octave)
-    }
-    pub fn class(&self) -> &PitchClass {
-        &self.0
-    }
-    pub fn octave(&self) -> i64 {
-        self.1
-    }
-}
-
-/// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
+/// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
+/// This type of musical notation is adopted from the American Scientific Pitch Notation
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
 pub struct Note(PitchClass, i64);
 
