@@ -19,31 +19,6 @@ use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-/// [create_triad] trys to create a triad from the given notes
-/// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
-/// Since we allow for augmented / diminshed triads, the root -> third && third -> fifth are required to be thirds
-/// rather than enforcing a 'perfect fifth' relationship between root -> fifth
-pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
-    let args = vec![notes.0, notes.1, notes.2];
-    for i in 0..args.len() {
-        let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
-        for j in 0..tmp.len() {
-            let (a, b, c) = (
-                args[i].clone(),
-                args[tmp[j]].clone(),
-                args[tmp[(j + 1) % tmp.len()]].clone(),
-            );
-            // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-            if is_third(a.clone().into(), b.clone().into())
-                && is_third(b.clone().into(), c.clone().into())
-            {
-                return Ok(Triad(a, b, c));
-            }
-        }
-    }
-    Err("Failed to find the required relationships within the given notes...".to_string())
-}
-
 pub trait Triadic: Clone {
     /// [Triadic::chord] Creates a [Chord] from the vertices
     fn chord(&self) -> Chord {
@@ -217,8 +192,26 @@ impl From<Triad> for (i64, i64, i64) {
 
 impl TryFrom<(Note, Note, Note)> for Triad {
     type Error = String;
+
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
-        create_triad(data)
+        let args = vec![data.0, data.1, data.2];
+        for i in 0..args.len() {
+            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
+            for j in 0..tmp.len() {
+                let (a, b, c) = (
+                    args[i].clone(),
+                    args[tmp[j]].clone(),
+                    args[tmp[(j + 1) % tmp.len()]].clone(),
+                );
+                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
+                if is_third(a.clone().into(), b.clone().into())
+                    && is_third(b.clone().into(), c.clone().into())
+                {
+                    return Ok(Triad(a, b, c));
+                }
+            }
+        }
+        Err("Failed to find the required relationships within the given notes...".to_string())
     }
 }
 

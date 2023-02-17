@@ -74,7 +74,7 @@ impl LPR {
             r += 12;
         }
         if t < 0 {
-            r += 12;
+            t += 12;
         }
         if f < 0 {
             f += 12;
@@ -100,11 +100,10 @@ mod tests {
     #[test]
     fn test_leading() {
         let a = Triad::new(0.into(), Triads::Major);
-        let b = LPR::default() * a.clone();
-        let c = LPR::L * b.clone();
+        let b = LPR::L * a.clone();
         assert_ne!(a, b);
         assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
-        assert_eq!(a, c);
+        assert_eq!(a, LPR::L * b);
     }
 
     #[test]
