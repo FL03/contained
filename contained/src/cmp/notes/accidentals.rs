@@ -32,12 +32,12 @@ pub enum Accidentals {
     Sharp(SharpNote),
 }
 
-impl TryFrom<i64> for Accidentals {
+impl TryFrom<Pitch> for Accidentals {
     type Error = String;
 
-    fn try_from(data: i64) -> Result<Accidentals, Self::Error> {
+    fn try_from(data: Pitch) -> Result<Accidentals, Self::Error> {
         if NaturalNote::try_from(data).is_err() {
-            let note = if data >= 0 {
+            let note = if data.pitch() >= 0 {
                 Accidentals::Sharp(SharpNote::try_from(data)?)
             } else {
                 Accidentals::Flat(FlatNote::try_from(data)?)
@@ -45,6 +45,14 @@ impl TryFrom<i64> for Accidentals {
             return Ok(note);
         }
         Err(String::from("Provided note is natural"))
+    }
+}
+
+impl TryFrom<i64> for Accidentals {
+    type Error = String;
+
+    fn try_from(data: i64) -> Result<Accidentals, Self::Error> {
+        Accidentals::try_from(Pitch::new(data))
     }
 }
 

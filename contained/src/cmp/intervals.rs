@@ -6,7 +6,8 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use crate::{cmp::Note, SEMITONE};
+use super::{Notable, Note};
+use crate::SEMITONE;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -62,11 +63,11 @@ pub enum Fifths {
 
 impl Fifths {
     pub fn compute(&self, note: Note) -> Note {
-        let pitch: i64 = note.into();
+        let pitch = note.pitch();
         match self {
-            Fifths::Augmented => Note::from((pitch + 8) % 12),
-            Fifths::Diminshed => Note::from((pitch + 6) % 12),
-            Fifths::Perfect => Note::from((pitch + 7) % 12),
+            Fifths::Augmented => Note::from(pitch + 8),
+            Fifths::Diminshed => Note::from(pitch + 6),
+            Fifths::Perfect => Note::from(pitch + 7),
         }
     }
 }
@@ -113,10 +114,10 @@ pub enum Thirds {
 
 impl Thirds {
     pub fn compute(&self, note: Note) -> Note {
-        let n: i64 = note.into();
+        let n = note.pitch();
         match self {
-            Self::Major => Note::from((n + 4 * SEMITONE as i64) % 12),
-            Self::Minor => Note::from((n + 3 * SEMITONE as i64) % 12),
+            Self::Major => Note::from(n + 4 * SEMITONE as i64),
+            Self::Minor => Note::from(n + 3 * SEMITONE as i64),
         }
     }
     pub fn compute_both(note: Note) -> (Note, Note) {

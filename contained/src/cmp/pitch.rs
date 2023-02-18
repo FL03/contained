@@ -67,7 +67,7 @@ impl From<Pitch> for PitchClass {
 
 impl From<i64> for PitchClass {
     fn from(value: i64) -> PitchClass {
-        let data = value % 12;
+        let data = Pitch::new(value);
         if let Ok(v) = Accidentals::try_from(data) {
             PitchClass::from(v)
         } else {
@@ -92,6 +92,38 @@ impl Pitch {
     /// Simple way to detect if the pitch is natural or not
     pub fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()
+    }
+}
+
+impl std::ops::Add<i64> for Pitch {
+    type Output = Pitch;
+
+    fn add(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 + rhs)
+    }
+}
+
+impl std::ops::Div<i64> for Pitch {
+    type Output = Pitch;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 / rhs)
+    }
+}
+
+impl std::ops::Mul<i64> for Pitch {
+    type Output = Pitch;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 * rhs)
+    }
+}
+
+impl std::ops::Sub<i64> for Pitch {
+    type Output = Pitch;
+
+    fn sub(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 - rhs)
     }
 }
 
@@ -135,6 +167,13 @@ mod tests {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
         assert_eq!(a, b);
-        assert!(a.is_natural())
+        assert!(a.is_natural());
+    }
+
+    #[test]
+    fn test_pitch_ops() {
+        let pitch = Pitch::new(3);
+        assert_eq!(pitch + 1, Pitch::new(4));
+        assert_eq!(Pitch::new(5) * 2, Pitch::new(10));
     }
 }
