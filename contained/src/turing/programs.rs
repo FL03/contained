@@ -36,7 +36,6 @@ pub trait Programatic<S: Symbolic> {
     }
     /// Insert a new [Instruction] set into the program
     fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
-        // TODO: Fix the state
         if inst.head.state() == &State::from(&States::invalid()) {
             return Err("Set error: Instruction cannot have 0 state in head...".to_string());
         }
