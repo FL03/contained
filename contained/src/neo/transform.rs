@@ -18,7 +18,6 @@ use crate::cmp::is_minor_third;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-
 /// [harmonic_transformation] is a transformative function for continuous musical space
 pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
     (b - a) * t + a

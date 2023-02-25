@@ -9,6 +9,8 @@
 
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         Another option being considered is the multiway turing machine
+
+        If we consider a single triad to be the scope of a single tonnetz, than we can
 */
 use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};
