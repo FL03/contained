@@ -18,6 +18,12 @@ use crate::cmp::is_minor_third;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
+
+/// [harmonic_transformation] is a transformative function for continuous musical space
+pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
+    (b - a) * t + a
+}
+
 #[derive(
     Clone,
     Copy,
@@ -45,7 +51,7 @@ impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
         let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
         let rt_interval = is_minor_third(r.clone(), t.clone());
-        // Apply the active transformat to the given triad
+        // Apply the active transformation to the given triad
         match self {
             LPR::L => {
                 if rt_interval {

@@ -9,6 +9,9 @@
         * All notes or pitches are of mod 12, giving us { 0, 1, ..., 10, 11 }
         * Sharp notes and flat notes are simply opposite; if sharp is up then flat is down
             For our purposes, sharp notes are represented with positive integers while flat notes are reserved for negatives
+
+        Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
+        More so, if we consider 1 to be a prime number
 */
 use super::{Accidentals, NaturalNote};
 use serde::{Deserialize, Serialize};
