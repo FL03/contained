@@ -13,8 +13,11 @@
             b != c
 */
 use super::LPR;
+use crate::actors::{
+    turing::{Configuration, Machine, Program, Tape},
+    Symbolic,
+};
 use crate::cmp::{is_major_third, is_minor_third, is_third, Chord, Fifths, Note, Thirds};
-use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};

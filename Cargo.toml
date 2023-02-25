@@ -15,7 +15,8 @@ exclude = [
     "xtask"
 ]
 members = [
-    "contained"
+    "contained",
+    "actors"
 ]
 
 [profile.dev]

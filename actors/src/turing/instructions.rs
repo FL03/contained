@@ -5,7 +5,7 @@
         Turing machines are given three degrees of freedom when considering possible movements
 
 */
-use crate::{turing::Symbolic, State, States};
+use crate::{State, States, Symbolic};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

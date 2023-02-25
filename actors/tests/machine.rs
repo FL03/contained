@@ -1,14 +1,16 @@
-use contained::turing::{
+#[cfg(test)]
+use contained_actors::turing::{
     Configurable, Configuration, Machine, Move, Program, Programatic, Tape, Turing,
 };
-#[cfg(test)]
-use contained::{State, States};
+use contained_actors::{State, States};
+
+pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 
 #[test]
 fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
-    let tape = Tape::new(alphabet.clone());
+    let tape = Tape::new(TEST_ALPHABET);
     let cnf = Configuration::norm(tape);
 
     // Setup the program

@@ -4,8 +4,8 @@
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 
 */
+use crate::actors::ArrayLike;
 use crate::cmp::Note;
-use crate::ArrayLike;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};

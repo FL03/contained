@@ -8,8 +8,8 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
+use crate::actors::Symbolic;
 use crate::cmp::{Notable, Pitch, PitchClass};
-use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])

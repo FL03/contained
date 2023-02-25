@@ -1,7 +1,7 @@
 [package]
 categories = []
 keywords = []
-name = "contained"
+name = "contained-actors"
 
 authors.workspace = true
 description.workspace = true
@@ -16,14 +16,10 @@ crate-type = ["cdylib", "rlib"]
 test = true
 
 [features]
-default = ["actors"]
-actors = ["contained-actors"]
 
 [build-dependencies]
 
 [dependencies]
-contained-actors = { features = [], optional = true, path = "../actors", version = "0.1.3" }
-
 # Custom crates
 decanter = { features = ["derive"], version = "0.1.3" }
 scsys = { features = ["derive"], version = "0.1.41" }

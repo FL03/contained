@@ -5,9 +5,12 @@
 */
 extern crate contained;
 
-use contained::neo::{Triad, Triadic, Triads};
-use contained::turing::{Configuration, Program, Programatic, Turing};
-use contained::{cmp::Note, Resultant, State, States};
+use contained::actors::turing::{Configuration, Program, Programatic, Turing};
+use contained::actors::{Resultant, State, States};
+use contained::{
+    cmp::Note,
+    neo::{Triad, Triadic, Triads},
+};
 
 fn main() -> Resultant {
     let triad = Triad::new(0.into(), Triads::Diminshed);

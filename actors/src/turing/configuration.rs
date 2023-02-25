@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Move, Symbolic, Tape};
-use crate::{State, States};
+use crate::turing::{Move, Tape};
+use crate::{State, States, Symbolic};
 
 use scsys::prelude::StatePack;
 use serde::{Deserialize, Serialize};
