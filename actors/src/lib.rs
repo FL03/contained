@@ -62,6 +62,15 @@ pub trait ArrayLike {
     }
 }
 
+/// [With] describes a simple means of concating several objects together
+pub trait With<T> {
+    /// [With::Output] must be a superposition of self and T
+    type Output;
+
+    /// [With::with] accepts an owned instance of the given type and returns a [With::Output] instance
+    fn with(&self, other: &T) -> Self::Output;
+}
+
 /// [Appellation] is a novel naming schematic based on a basis from linear-algebra
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Appellation<I, J, K>(I, J, K);

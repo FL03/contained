@@ -10,23 +10,27 @@
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         Another option being considered is the multiway turing machine
 
-        If we consider a single triad to be the scope of a single tonnetz, than we can
+        If we consider a single triad to be the scope of a single tonnetz, than we can consider a single tonnetz to be a persistant set of non-repeating traidic structures.
+        This provides that the software
 */
 use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};
-use std::collections::LinkedList;
+use smart_default::SmartDefault;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub trait Conduit {
+    type Destination;
+
+    fn address(&self) -> std::net::SocketAddr;
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SmartDefault)]
 pub struct Tonnetz {
-    fabric: LinkedList<Triad>,
     scope: Triad,
 }
 
 impl Tonnetz {
     pub fn new(scope: Triad) -> Self {
-        let mut fabric = LinkedList::new();
-        fabric.push_front(scope.clone());
-        Self { fabric, scope }
+        Self { scope }
     }
     /// Returns an owned instance of the active [Triad]
     pub fn scope(&self) -> &Triad {
@@ -39,8 +43,8 @@ impl Tonnetz {
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
-    pub fn walk(&mut self, shifts: Vec<LPR>) {
-        for s in shifts {
+    pub fn walk(&mut self, cycle: Vec<LPR>) {
+        for s in cycle {
             self.transform(s)
         }
     }

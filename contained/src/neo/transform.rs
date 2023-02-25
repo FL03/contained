@@ -19,10 +19,55 @@ use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
 /// [harmonic_transformation] is a transformative function for continuous musical space
+/// This is useful for describing the behavior between transitions as nothing is achieved instantly
 pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
     (b - a) * t + a
 }
 
+/// [absmod] is short for the absolute value of a modular number;
+fn absmod(a: i64, m: i64) -> i64 {
+    ((a + m) % m).abs()
+}
+
+pub fn leading(triad: &Triad) -> Triad {
+    let (mut r, t, mut f): (i64, i64, i64) = triad.clone().into();
+    if is_minor_third(r.clone(), t.clone()) {
+        f += 1;
+    } else {
+        r -= 1;
+    }
+    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    // All triadic transformations will result in another valid triad
+    Triad::try_from(triad).unwrap()
+}
+
+pub fn parallel(triad: &Triad) -> Triad {
+    let (r, mut t, f): (i64, i64, i64) = triad.clone().into();
+    if is_minor_third(r.clone(), t.clone()) {
+        t += 1;
+    } else {
+        t -= 1;
+    }
+    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    // All triadic transformations will result in another valid triad
+    Triad::try_from(triad).unwrap()
+}
+
+pub fn relative(triad: &Triad) -> Triad {
+    let (mut r, t, mut f): (i64, i64, i64) = triad.clone().into();
+    if is_minor_third(r.clone(), t.clone()) {
+        r -= 2;
+    } else {
+        f += 2;
+    }
+    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    // All triadic transformations will result in another valid triad
+    Triad::try_from(triad).unwrap()
+}
+
+/// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
+/// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
+/// [LPR::R] preserves the major third in the triad and moves the remaining note by whole tone.
 #[derive(
     Clone,
     Copy,
@@ -41,51 +86,18 @@ pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
 #[strum(serialize_all = "snake_case")]
 pub enum LPR {
     #[default]
-    L = 0, // Preserves the minor third; shifts the remaining note by a semitone
-    P = 1, // Preserves the perfect fifth; shifts the remaining note by a semitone
-    R = 2, // preserves the major third in the triad and moves the remaining note by whole tone.
+    L = 0, 
+    P = 1, 
+    R = 2, 
 }
 
 impl LPR {
     pub fn transform(&self, triad: &Triad) -> Triad {
-        let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
-        let rt_interval = is_minor_third(r.clone(), t.clone());
-        // Apply the active transformation to the given triad
         match self {
-            LPR::L => {
-                if rt_interval {
-                    f += 1;
-                } else {
-                    r -= 1;
-                }
-            }
-            LPR::P => {
-                if rt_interval {
-                    t += 1;
-                } else {
-                    t -= 1;
-                }
-            }
-            LPR::R => {
-                if rt_interval {
-                    r -= 2;
-                } else {
-                    f += 2;
-                }
-            }
+            LPR::L => leading(triad),
+            LPR::P => parallel(triad),
+            LPR::R => relative(triad),
         }
-        // Double check to make sure all values are positive
-        if r < 0 {
-            r += 12;
-        }
-        if t < 0 {
-            t += 12;
-        }
-        if f < 0 {
-            f += 12;
-        }
-        // All triadic transformations will result in another valid triad
-        Triad::try_from((r, t, f)).unwrap()
     }
 }
 
