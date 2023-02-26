@@ -86,9 +86,9 @@ pub fn relative(triad: &Triad) -> Triad {
 #[strum(serialize_all = "snake_case")]
 pub enum LPR {
     #[default]
-    L = 0, 
-    P = 1, 
-    R = 2, 
+    L = 0,
+    P = 1,
+    R = 2,
 }
 
 impl LPR {

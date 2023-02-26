@@ -12,6 +12,10 @@ pub(crate) mod constants {
 
 pub(crate) mod types {
     use futures::Stream;
+    use libp2p::core::{muxing::StreamMuxerBox, transport::Boxed};
+
+    /// Type alias for a boxed transport
+    pub type BoxedTransport = Boxed<(libp2p::PeerId, StreamMuxerBox)>;
 
     /// Dirac is a generic [Fn] which transforms one object into another
     pub type Dirac<S, T> = dyn Fn(S) -> T;

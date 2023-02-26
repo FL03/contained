@@ -8,24 +8,34 @@ pub use self::{cluster::*, conduit::*};
 pub(crate) mod cluster;
 pub(crate) mod conduit;
 
+use crate::BoxedTransport;
 use anyhow::Result;
-use libp2p::{core::upgrade, identity, mplex, noise, tcp, Multiaddr, PeerId};
+use libp2p::{core::upgrade, identity, mplex, noise, swarm::Swarm, tcp};
+use libp2p::{Multiaddr, PeerId, Transport};
 
-fn quickstart(addr: Multiaddr) -> Result<()> {
-    // Create a random PeerId
-    let id_keys = identity::Keypair::generate_ed25519();
-    let peer_id = PeerId::from(id_keys.public());
-    println!("Local peer id: {peer_id:?}");
+pub trait Network {
+    type Behaviour: libp2p::swarm::NetworkBehaviour;
 
-    // Create a tokio-based TCP transport use noise for authenticated
-    // encryption and Mplex for multiplexing of substreams on a TCP stream.
-    let transport = tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
+    fn keypair(&self) -> &identity::Keypair;
+    fn pid(&self) -> PeerId {
+        PeerId::from(self.keypair().public())
+    }
+    fn swarm(&self, behaviour: Self::Behaviour) -> Swarm<Self::Behaviour> {
+        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
+    }
+    fn transport(&self) -> BoxedTransport {
+        tokio_transport(self.keypair(), true)
+    }
+}
+
+pub fn tokio_transport(keypair: &identity::Keypair, nodelay: bool) -> BoxedTransport {
+    tcp::tokio::Transport::new(tcp::Config::default().nodelay(nodelay))
         .upgrade(upgrade::Version::V1)
         .authenticate(
-            noise::NoiseAuthenticated::xx(&id_keys)
+            noise::NoiseAuthenticated::xx(keypair)
                 .expect("Signing libp2p-noise static DH keypair failed."),
         )
         .multiplex(mplex::MplexConfig::new())
-        .boxed();
-    Ok(())
+        .boxed()
 }
+

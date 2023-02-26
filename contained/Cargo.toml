@@ -42,6 +42,7 @@ features = [
     "dns",
     "ecdsa",
     "identify",
+    "macros",
     "mdns",
     "mplex",
     "noise",
