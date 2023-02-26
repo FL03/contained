@@ -35,12 +35,6 @@ pub trait Triadic<N: Notable>: Clone {
     }
     /// [Triadic::classify] tries to define the triad by searching for triadic relations
     fn classify(&self) -> Resultant<Triads> {
-        let (r, t, f) = (
-            self.root().pitch(),
-            self.third().pitch(),
-            self.fifth().pitch(),
-        );
-
         if Fifths::Perfect * self.root() == self.fifth() {
             if is_major_third(self.root(), self.third()) {
                 return Ok(Triads::Major);

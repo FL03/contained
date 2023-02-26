@@ -14,10 +14,7 @@
         Shift by a tone: +/- 2
 */
 use super::{Triad, Triadic};
-use crate::{
-    absmod,
-    cmp::{is_minor_third, Gradient, Notable},
-};
+use crate::cmp::{is_minor_third, Gradient, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
