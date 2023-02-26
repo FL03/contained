@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Head, Instruction, Symbolic};
-use crate::{Resultant, State, States};
+use super::{Head, Instruction};
+use crate::{Resultant, State, States, Symbolic};
 
 use scsys::prelude::Stateful;
 use serde::{Deserialize, Serialize};
@@ -36,7 +36,6 @@ pub trait Programatic<S: Symbolic> {
     }
     /// Insert a new [Instruction] set into the program
     fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
-        // TODO: Fix the state
         if inst.head.state() == &State::from(&States::invalid()) {
             return Err("Set error: Instruction cannot have 0 state in head...".to_string());
         }

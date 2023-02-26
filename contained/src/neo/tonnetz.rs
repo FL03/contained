@@ -9,11 +9,15 @@
 
         This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
         Another option being considered is the multiway turing machine
+
+        If we consider a single triad to be the scope of a single tonnetz, than we can consider a single tonnetz to be a persistant set of non-repeating traidic structures.
+        Any two triads are connected if they share two notes or a single edge.
 */
 use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SmartDefault)]
 pub struct Tonnetz {
     scope: Triad,
 }
@@ -33,8 +37,8 @@ impl Tonnetz {
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
-    pub fn walk(&mut self, shifts: Vec<LPR>) {
-        for s in shifts {
+    pub fn walk(&mut self, cycle: Vec<LPR>) {
+        for s in cycle {
             self.transform(s)
         }
     }

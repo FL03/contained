@@ -9,8 +9,12 @@
         * All notes or pitches are of mod 12, giving us { 0, 1, ..., 10, 11 }
         * Sharp notes and flat notes are simply opposite; if sharp is up then flat is down
             For our purposes, sharp notes are represented with positive integers while flat notes are reserved for negatives
+
+        Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
+        More so, if we consider 1 to be a prime number
 */
-use super::{Accidentals, NaturalNote};
+use super::{Accidentals, Gradient, NaturalNote};
+use crate::absmod;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -36,6 +40,15 @@ pub enum PitchClass {
     Accidental(Accidentals),
     #[default]
     Natural(NaturalNote),
+}
+
+impl Gradient for PitchClass {
+    fn pitch(&self) -> i64 {
+        match *self {
+            PitchClass::Accidental(v) => v.into(),
+            PitchClass::Natural(v) => v.into(),
+        }
+    }
 }
 
 impl From<Accidentals> for PitchClass {
@@ -67,7 +80,7 @@ impl From<Pitch> for PitchClass {
 
 impl From<i64> for PitchClass {
     fn from(value: i64) -> PitchClass {
-        let data = value % 12;
+        let data = Pitch::new(value);
         if let Ok(v) = Accidentals::try_from(data) {
             PitchClass::from(v)
         } else {
@@ -84,14 +97,49 @@ pub struct Pitch(i64);
 
 impl Pitch {
     pub fn new(pitch: i64) -> Self {
-        Self(pitch % 12)
-    }
-    pub fn pitch(&self) -> i64 {
-        self.0
+        Self(pitch)
     }
     /// Simple way to detect if the pitch is natural or not
     pub fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()
+    }
+}
+
+impl Gradient for Pitch {
+    fn pitch(&self) -> i64 {
+        absmod(self.0, 12)
+    }
+}
+
+impl std::ops::Add<i64> for Pitch {
+    type Output = Pitch;
+
+    fn add(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 + rhs)
+    }
+}
+
+impl std::ops::Div<i64> for Pitch {
+    type Output = Pitch;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 / rhs)
+    }
+}
+
+impl std::ops::Mul<i64> for Pitch {
+    type Output = Pitch;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 * rhs)
+    }
+}
+
+impl std::ops::Sub<i64> for Pitch {
+    type Output = Pitch;
+
+    fn sub(self, rhs: i64) -> Self::Output {
+        Pitch::new(self.0 - rhs)
     }
 }
 
@@ -134,7 +182,15 @@ mod tests {
     fn test_pitch() {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
-        assert_eq!(a, b);
-        assert!(a.is_natural())
+        assert_ne!(a, b);
+        assert_eq!(a.pitch(), b.pitch());
+        assert!(a.is_natural());
+    }
+
+    #[test]
+    fn test_pitch_ops() {
+        let pitch = Pitch::new(3);
+        assert_eq!(pitch + 1, Pitch::new(4));
+        assert_eq!(Pitch::new(5) * 2, Pitch::new(10));
     }
 }

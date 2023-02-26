@@ -8,25 +8,13 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::cmp::{Notable, Pitch, PitchClass};
-use crate::turing::Symbolic;
+use crate::absmod;
+use crate::actors::Symbolic;
+use crate::cmp::{Gradient, Notable, Pitch, PitchClass};
 use serde::{Deserialize, Serialize};
 
-pub struct ASPN(PitchClass, i64);
-
-impl ASPN {
-    pub fn new(pitch: PitchClass, octave: i64) -> Self {
-        Self(pitch, octave)
-    }
-    pub fn class(&self) -> &PitchClass {
-        &self.0
-    }
-    pub fn octave(&self) -> i64 {
-        self.1
-    }
-}
-
-/// A [Note] consists of some [PitchClass] and an [Option<Epoch>] which indicates a start time and optionally signals a duration
+/// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
+/// This type of musical notation is adopted from the American Scientific Pitch Notation
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
 pub struct Note(PitchClass, i64);
 
@@ -39,11 +27,13 @@ impl Note {
     }
 }
 
-impl Notable for Note {
-    fn pitch(&self) -> Pitch {
-        self.0.clone().into()
+impl Gradient for Note {
+    fn pitch(&self) -> i64 {
+        absmod(self.0.pitch(), 12)
     }
 }
+
+impl Notable for Note {}
 
 impl Symbolic for Note {}
 
@@ -66,6 +56,18 @@ impl From<Note> for i64 {
     }
 }
 
+impl From<i64> for Note {
+    fn from(d: i64) -> Note {
+        Note::new(PitchClass::from(d), None)
+    }
+}
+
+impl From<&dyn Gradient> for Note {
+    fn from(d: &dyn Gradient) -> Note {
+        Note::new(d.class(), None)
+    }
+}
+
 impl From<Note> for Pitch {
     fn from(data: Note) -> Pitch {
         data.0.into()
@@ -78,21 +80,15 @@ impl From<Pitch> for Note {
     }
 }
 
-impl From<i64> for Note {
-    fn from(d: i64) -> Note {
-        Note::new(PitchClass::from(d), None)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::{NaturalNote, Notable};
+    use crate::cmp::{Gradient, NaturalNote};
 
     #[test]
     fn test_notes() {
         let a = Note::new(PitchClass::Natural(NaturalNote::C), None);
-        assert_eq!(a.pitch(), 0.into());
+        assert_eq!(a.pitch(), 0);
         assert_eq!(a.octave(), 1);
     }
 }

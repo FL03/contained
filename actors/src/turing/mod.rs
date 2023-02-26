@@ -11,26 +11,15 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Resultant, States};
+use crate::{Resultant, States, Symbolic};
 use scsys::prelude::Stateful;
-
-/// Simple trait for compatible symbols
-pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString + serde::Serialize {}
-
-impl Symbolic for char {}
-
-impl Symbolic for &str {}
-
-impl Symbolic for String {}
-
-pub trait Actor<S: Symbolic> {
-    fn init_symbol(&self) -> &S;
-}
 
 /// Describes the basic functionality of a Turing machine
 pub trait Turing {
     type Symbol: Symbolic;
+
     fn default_symbol(&self) -> &Self::Symbol;
+
     fn program(&self) -> &Program<Self::Symbol>;
     ///
     fn execute(

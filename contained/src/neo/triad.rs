@@ -5,62 +5,52 @@
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
         Generaically, triad's share two of its notes with three of its inversions.
 
+        The neo-Riemannian theory highlightes three transformations, each of which preserve two of the three notes.
+
         We express a triad as a ordered three tuple <a, b, c> where a, b, c are integers modulus of 12 and:
             a != b
             a != c
             b != c
 */
 use super::LPR;
+use crate::actors::{
+    turing::{Configuration, Machine, Program, Tape},
+    Symbolic,
+};
 use crate::cmp::{is_major_third, is_minor_third, is_third, Chord, Fifths, Note, Thirds};
-use crate::turing::{Configuration, Machine, Program, Symbolic, Tape};
+use crate::cmp::{Gradient, Notable};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-/// [create_triad] trys to create a triad from the given notes
-/// This is accomplished by 'discovering' which order of the notes satisfies the minimum relationships
-/// Since we allow for augmented / diminshed triads, the root -> third && third -> fifth are required to be thirds
-/// rather than enforcing a 'perfect fifth' relationship between root -> fifth
-pub fn create_triad(notes: (Note, Note, Note)) -> Resultant<Triad> {
-    let args = vec![notes.0, notes.1, notes.2];
-    for i in 0..args.len() {
-        let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
-        for j in 0..tmp.len() {
-            let (a, b, c) = (
-                args[i].clone(),
-                args[tmp[j]].clone(),
-                args[tmp[(j + 1) % tmp.len()]].clone(),
-            );
-            // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-            if is_third(a.clone().into(), b.clone().into())
-                && is_third(b.clone().into(), c.clone().into())
-            {
-                return Ok(Triad(a, b, c));
-            }
-        }
-    }
-    Err("Failed to find the required relationships within the given notes...".to_string())
-}
-
-pub trait Triadic: Clone {
+pub trait Triadic<N: Notable>: Clone {
+    fn create(root: N, class: Triads) -> Self;
     /// [Triadic::chord] Creates a [Chord] from the vertices
     fn chord(&self) -> Chord {
-        Chord::new(vec![self.root(), self.third(), self.fifth()])
+        Chord::new(vec![
+            self.root().pitch().into(),
+            self.third().pitch().into(),
+            self.fifth().pitch().into(),
+        ])
     }
     /// [Triadic::classify] tries to define the triad by searching for triadic relations
     fn classify(&self) -> Resultant<Triads> {
-        let (r, t, f) = (self.root().into(), self.third().into(), self.fifth().into());
+        let (r, t, f) = (
+            self.root().pitch(),
+            self.third().pitch(),
+            self.fifth().pitch(),
+        );
 
         if Fifths::Perfect * r == f {
-            if is_major_third(r, t) {
+            if is_major_third(r.pitch(), t.pitch()) {
                 return Ok(Triads::Major);
             } else {
                 return Ok(Triads::Minor);
             }
         } else {
-            if is_major_third(r, t) && is_major_third(t, f) {
+            if is_major_third(r.pitch(), t.pitch()) && is_major_third(t.pitch(), f.pitch()) {
                 return Ok(Triads::Augmented);
-            } else if is_minor_third(r, t) && is_minor_third(t, f) {
+            } else if is_minor_third(r.pitch(), t.pitch()) && is_minor_third(t.pitch(), f.pitch()) {
                 return Ok(Triads::Diminshed);
             }
             Err("Failed to find the required relationships...".to_string())
@@ -72,48 +62,20 @@ pub trait Triadic: Clone {
     }
     /// [Triadic::machine] Tries to create a [Machine] running the given [Program] with a default set to the triad's root
     fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
-        Machine::new(self.root(), program)
+        Machine::new(self.root().pitch().into(), program)
     }
     /// [Triadic::is_valid] A method for establishing the validity of the given notes
     fn is_valid(&self) -> bool {
         self.classify().is_ok()
     }
-    fn fifth(&self) -> Note;
-    fn root(&self) -> Note;
-    fn third(&self) -> Note;
+    fn fifth(&self) -> N;
+    fn root(&self) -> N;
+    fn third(&self) -> N;
     fn triad(&self) -> &Self
     where
         Self: Sized,
     {
         &self
-    }
-}
-
-impl Triadic for (i64, i64, i64) {
-    fn fifth(&self) -> Note {
-        self.2.into()
-    }
-
-    fn root(&self) -> Note {
-        self.0.into()
-    }
-
-    fn third(&self) -> Note {
-        self.1.into()
-    }
-}
-
-impl Triadic for (Note, Note, Note) {
-    fn fifth(&self) -> Note {
-        self.2.clone()
-    }
-
-    fn root(&self) -> Note {
-        self.0.clone()
-    }
-
-    fn third(&self) -> Note {
-        self.1.clone()
     }
 }
 
@@ -149,6 +111,14 @@ pub struct Triad(Note, Note, Note);
 
 impl Triad {
     pub fn new(root: Note, class: Triads) -> Self {
+        Self::create(root, class)
+    }
+}
+
+impl Symbolic for Triad {}
+
+impl Triadic<Note> for Triad {
+    fn create(root: Note, class: Triads) -> Self {
         let (a, b) = Thirds::compute_both(root.clone());
         match class {
             Triads::Augmented => Self(root, a.clone(), Thirds::Major * a),
@@ -157,11 +127,6 @@ impl Triad {
             Triads::Minor => Self(root, b.clone(), Thirds::Major * b),
         }
     }
-}
-
-impl Symbolic for Triad {}
-
-impl Triadic for Triad {
     fn fifth(&self) -> Note {
         self.2.clone()
     }
@@ -215,8 +180,24 @@ impl From<Triad> for (i64, i64, i64) {
 
 impl TryFrom<(Note, Note, Note)> for Triad {
     type Error = String;
+
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
-        create_triad(data)
+        let args = vec![data.0, data.1, data.2];
+        for i in 0..args.len() {
+            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
+            for j in 0..tmp.len() {
+                let (a, b, c) = (
+                    args[i].clone(),
+                    args[tmp[j]].clone(),
+                    args[tmp[(j + 1) % tmp.len()]].clone(),
+                );
+                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
+                if is_third(a.clone(), b.clone()) && is_third(b.clone(), c.clone()) {
+                    return Ok(Triad(a, b, c));
+                }
+            }
+        }
+        Err("Failed to find the required relationships within the given notes...".to_string())
     }
 }
 

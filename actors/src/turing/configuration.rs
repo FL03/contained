@@ -3,23 +3,27 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Move, Symbolic, Tape};
-use crate::{State, States};
+use crate::turing::{Move, Tape};
+use crate::{State, States, Symbolic};
 
 use scsys::prelude::StatePack;
 use serde::{Deserialize, Serialize};
 
-pub trait Configurable<S: Symbolic> {
+pub trait Configurable<S: Symbolic>: Clone {
     type State: Clone + StatePack;
-
+    /// [Configurable::is_empty] is a method for checking if the tape is empty
     fn is_empty(&self) -> bool {
         self.tape().is_empty()
     }
+    /// [Configurable::len] describes a method which returns the number of elements currently in the [Tape]
     fn len(&self) -> usize {
         self.tape().len()
     }
+    /// [Configurable::set_index] is a method for modifying the scope or positioning of the machine
     fn set_index(&mut self, pos: usize);
+    /// [Configurable::set_state] is a method for changing the current state of the machine
     fn set_state(&mut self, state: State<Self::State, S>);
+    /// [Configurable::set_symbol] is a method for changing the symbol at the current position
     fn set_symbol(&mut self, symbol: S);
     /// [Configurable::shift] Shifts the [`Tape`] to left or right if [`Move`] is [`Move::Left`]
     /// or [`Move::Right`], otherwise do nothing (when [`Move::None`]).
@@ -42,15 +46,19 @@ pub trait Configurable<S: Symbolic> {
             _ => {}
         };
     }
-
+    /// [Configurable::position] returns the current position of the machine
     fn position(&self) -> usize;
+    /// [Configurable::state] returns an owned instance of the machine [State]
     fn state(&self) -> &State<Self::State, S>;
+    /// [Configurable::symbol] returns an owned instance of the symbol at the current position of the machine
     fn symbol(&self) -> &S {
         self.tape()
             .get(self.position())
             .expect("The index is currently out of bounds...")
     }
+    /// [Configurable::tape] returns an owned instance of the machines [Tape]
     fn tape(&self) -> &Tape<S>;
+    /// [Configurable::mut_tape] returns an owned, mutable instance of the machines [Tape]
     fn mut_tape(&mut self) -> &mut Tape<S>;
 }
 
@@ -96,12 +104,12 @@ impl<S: Symbolic> Configurable<S> for Configuration<S> {
     }
 
     fn set_symbol(&mut self, symbol: S) {
-        self.tape.set(self.position(), symbol)
+        self.tape.set(self.position(), symbol);
     }
-
     fn position(&self) -> usize {
         self.index
     }
+
     fn state(&self) -> &State<Self::State, S> {
         &self.state
     }
@@ -109,6 +117,7 @@ impl<S: Symbolic> Configurable<S> for Configuration<S> {
     fn tape(&self) -> &Tape<S> {
         &self.tape
     }
+
     fn mut_tape(&mut self) -> &mut Tape<S> {
         &mut self.tape
     }

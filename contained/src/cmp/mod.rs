@@ -12,25 +12,33 @@ pub(crate) mod intervals;
 pub(crate) mod notes;
 pub(crate) mod pitch;
 
-/// [Notable] is used to designate a structure used to represent a note
-pub trait Notable: Clone + Default + ToString {
+pub trait Gradient {
     fn class(&self) -> PitchClass {
-        self.pitch().into()
+        PitchClass::from(self.pitch())
     }
-    fn pitch(&self) -> Pitch;
-    fn symbol(&self) -> String {
-        self.to_string()
-    }
-}
-
-impl Notable for Pitch {
-    fn pitch(&self) -> Pitch {
-        self.clone()
+    fn pitch(&self) -> i64;
+    /// Simple way to detect if the pitch is natural or not
+    fn is_natural(&self) -> bool {
+        NaturalNote::try_from(self.pitch()).is_ok()
     }
 }
 
-impl Notable for i64 {
-    fn pitch(&self) -> Pitch {
-        self.clone().into()
+impl Gradient for i64 {
+    fn pitch(&self) -> i64 {
+        // Adding twelve to the number accounts for negative modulo
+        // For example, if self is -1 than adding 12 gives us a result of 11.
+        (((self % 12) + 12) % 12).abs()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Gradient;
+
+    #[test]
+    fn test_gradient() {
+        let b = -13;
+        assert_eq!(144_i64.pitch(), 0);
+        assert_eq!(b.pitch(), 11)
     }
 }

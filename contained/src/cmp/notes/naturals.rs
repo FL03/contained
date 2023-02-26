@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::cmp::Pitch;
+use crate::cmp::{Gradient, Pitch};
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -36,6 +36,12 @@ pub enum NaturalNote {
     G = 7,
     A = 9,
     B = 11,
+}
+
+impl From<NaturalNote> for i64 {
+    fn from(note: NaturalNote) -> i64 {
+        note as i64
+    }
 }
 
 impl TryFrom<Pitch> for NaturalNote {

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
-use crate::turing::Symbolic;
+use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]

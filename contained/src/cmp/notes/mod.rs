@@ -11,6 +11,8 @@ pub(crate) mod accidentals;
 pub(crate) mod naturals;
 pub(crate) mod note;
 
+use super::Gradient;
+
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
 /// Given a [NaturalNote] find its optional sharp and flat variations
 pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64>) {
@@ -33,6 +35,9 @@ pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64
     // a sharp a semitone above and a flat a semitone below
     (note, Some(a), Some(b))
 }
+
+/// [Notable] is used to designate a structure used to represent a note
+pub trait Notable: Clone + Default + Gradient + ToString {}
 
 #[cfg(test)]
 mod tests {
