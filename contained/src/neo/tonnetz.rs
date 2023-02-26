@@ -14,20 +14,21 @@
         Any two triads are connected if they share two notes or a single edge.
 */
 use super::{Triad, LPR};
+use crate::cmp::{Notable, Note};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SmartDefault)]
-pub struct Tonnetz {
-    scope: Triad,
+pub struct Tonnetz<N: Notable = Note> {
+    scope: Triad<N>,
 }
 
-impl Tonnetz {
-    pub fn new(scope: Triad) -> Self {
+impl<N: Notable> Tonnetz<N> {
+    pub fn new(scope: Triad<N>) -> Self {
         Self { scope }
     }
     /// Returns an owned instance of the active [Triad]
-    pub fn scope(&self) -> &Triad {
+    pub fn scope(&self) -> &Triad<N> {
         &self.scope
     }
     /// Apply a single [LPR] transformation onto the active machine
@@ -47,11 +48,12 @@ impl Tonnetz {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cmp::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]
     fn test_tonnetz() {
-        let triad = Triad::new(0.into(), Triads::Major);
+        let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
         let mut a = Tonnetz::new(triad.clone());
         // Apply three consecutive transformations to the scope

@@ -16,55 +16,55 @@
 use super::{Triad, Triadic};
 use crate::{
     absmod,
-    cmp::{is_minor_third, Gradient},
+    cmp::{is_minor_third, Gradient, Notable},
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-pub fn leading(triad: &Triad) -> Triad {
+pub fn leading<N: Notable>(triad: &Triad<N>) -> Triad<N> {
     let (mut r, t, mut f): (i64, i64, i64) = (
         triad.root().pitch(),
         triad.third().pitch(),
         triad.fifth().pitch(),
     );
-    if is_minor_third(r.clone(), t.clone()) {
+    if is_minor_third(triad.root(), triad.third()) {
         f += 1;
     } else {
         r -= 1;
     }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    let triad = (r.pitch(), t.pitch(), f.pitch());
     // All triadic transformations will result in another valid triad
     Triad::try_from(triad).unwrap()
 }
 
-pub fn parallel(triad: &Triad) -> Triad {
+pub fn parallel<N: Notable>(triad: &Triad<N>) -> Triad<N> {
     let (r, mut t, f): (i64, i64, i64) = (
         triad.root().pitch(),
         triad.third().pitch(),
         triad.fifth().pitch(),
     );
-    if is_minor_third(r.clone(), t.clone()) {
+    if is_minor_third(triad.root(), triad.third()) {
         t += 1;
     } else {
         t -= 1;
     }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    let triad = (r.pitch(), t.pitch(), f.pitch());
     // All triadic transformations will result in another valid triad
     Triad::try_from(triad).unwrap()
 }
 
-pub fn relative(triad: &Triad) -> Triad {
+pub fn relative<N: Notable>(triad: &Triad<N>) -> Triad<N> {
     let (mut r, t, mut f): (i64, i64, i64) = (
         triad.root().pitch(),
         triad.third().pitch(),
         triad.fifth().pitch(),
     );
-    if is_minor_third(r.clone(), t.clone()) {
+    if is_minor_third(triad.root(), triad.third()) {
         r -= 2;
     } else {
         f += 2;
     }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
+    let triad = (r.pitch(), t.pitch(), f.pitch());
     // All triadic transformations will result in another valid triad
     Triad::try_from(triad).unwrap()
 }
@@ -96,7 +96,7 @@ pub enum LPR {
 }
 
 impl LPR {
-    pub fn transform(&self, triad: &Triad) -> Triad {
+    pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
         match self {
             LPR::L => leading(triad),
             LPR::P => parallel(triad),
@@ -105,10 +105,10 @@ impl LPR {
     }
 }
 
-impl std::ops::Mul<Triad> for LPR {
-    type Output = Triad;
+impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
+    type Output = Triad<N>;
 
-    fn mul(self, rhs: Triad) -> Self::Output {
+    fn mul(self, rhs: Triad<N>) -> Self::Output {
         self.transform(&mut rhs.clone())
     }
 }
@@ -116,32 +116,34 @@ impl std::ops::Mul<Triad> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cmp::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]
     fn test_leading() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::L * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((4, 7, 11)).unwrap());
         assert_eq!(a, LPR::L * b);
     }
 
     #[test]
     fn test_parallel() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((0, 3, 7)).unwrap());
         assert_eq!(LPR::P * b, a)
     }
 
     #[test]
     fn test_relative() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
+
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 4, 9)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((9, 0, 4)).unwrap());
         assert_eq!(LPR::R * b, a)
     }
 }

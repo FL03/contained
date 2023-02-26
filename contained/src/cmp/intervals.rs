@@ -6,30 +6,30 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::{Gradient, Note, Pitch};
+use super::{Gradient, Notable, Note, Pitch};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
 /// [is_third] compares two notes to see if either a major or minor third interval exists
-pub fn is_third(a: impl Gradient, b: impl Gradient) -> bool {
-    if Thirds::Major * a.pitch() == b.pitch() || Thirds::Minor * a.pitch() == b.pitch() {
+pub fn is_third<N: Notable>(a: N, b: N) -> bool {
+    if Thirds::Major * a.clone() == b || Thirds::Minor * a == b {
         return true;
     }
     false
 }
 
 /// [is_major_third] compares the given notes and determines if a major third exists
-pub fn is_major_third(a: impl Gradient, b: impl Gradient) -> bool {
-    if Thirds::Major * a.pitch() == b.pitch() {
+pub fn is_major_third<N: Notable>(a: N, b: N) -> bool {
+    if Thirds::Major * a == b {
         return true;
     }
     false
 }
 
 /// [is_minor_third]
-pub fn is_minor_third(a: impl Gradient, b: impl Gradient) -> bool {
-    if Thirds::Minor * a.pitch() == b.pitch() {
+pub fn is_minor_third<N: Notable>(a: N, b: N) -> bool {
+    if Thirds::Minor * a == b {
         return true;
     }
     false
@@ -85,31 +85,15 @@ pub enum Fifths {
 }
 
 impl Fifths {
-    pub fn compute(&self, note: impl Gradient) -> Note {
-        Note::from(note.pitch() + *self as i64)
+    pub fn compute<N: Notable>(&self, note: N) -> N {
+        (note.pitch() + *self as i64).into()
     }
 }
 
-impl std::ops::Mul<i64> for Fifths {
-    type Output = i64;
+impl<N: Notable> std::ops::Mul<N> for Fifths {
+    type Output = N;
 
-    fn mul(self, rhs: i64) -> Self::Output {
-        self.compute(rhs).into()
-    }
-}
-
-impl std::ops::Mul<Pitch> for Fifths {
-    type Output = Pitch;
-
-    fn mul(self, rhs: Pitch) -> Self::Output {
-        self.compute(rhs).into()
-    }
-}
-
-impl std::ops::Mul<Note> for Fifths {
-    type Output = Note;
-
-    fn mul(self, rhs: Note) -> Self::Output {
+    fn mul(self, rhs: N) -> Self::Output {
         self.compute(rhs)
     }
 }
@@ -139,10 +123,10 @@ pub enum Thirds {
 }
 
 impl Thirds {
-    pub fn compute(&self, note: impl Gradient) -> Note {
-        Note::from(note.pitch() + *self as i64)
+    pub fn compute<N: Notable>(&self, note: N) -> N {
+        (note.pitch() + *self as i64).into()
     }
-    pub fn compute_both(note: impl Gradient + Clone) -> (Note, Note) {
+    pub fn compute_both<N: Notable>(note: N) -> (N, N) {
         (Self::Major.compute(note.clone()), Self::Minor.compute(note))
     }
     /// Functional method for creating a major third
@@ -155,26 +139,10 @@ impl Thirds {
     }
 }
 
-impl std::ops::Mul<i64> for Thirds {
-    type Output = i64;
+impl<N: Notable> std::ops::Mul<N> for Thirds {
+    type Output = N;
 
-    fn mul(self, rhs: i64) -> Self::Output {
-        self.compute(rhs).into()
-    }
-}
-
-impl std::ops::Mul<Pitch> for Thirds {
-    type Output = Pitch;
-
-    fn mul(self, rhs: Pitch) -> Self::Output {
-        self.compute(rhs).into()
-    }
-}
-
-impl std::ops::Mul<Note> for Thirds {
-    type Output = Note;
-
-    fn mul(self, rhs: Note) -> Self::Output {
+    fn mul(self, rhs: N) -> Self::Output {
         self.compute(rhs)
     }
 }

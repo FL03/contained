@@ -37,7 +37,10 @@ pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64
 }
 
 /// [Notable] is used to designate a structure used to represent a note
-pub trait Notable: Clone + Default + Gradient + ToString {}
+pub trait Notable:
+    Clone + Default + Gradient + PartialEq + ToString + std::convert::From<i64>
+{
+}
 
 #[cfg(test)]
 mod tests {

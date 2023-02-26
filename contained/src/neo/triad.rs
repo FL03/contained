@@ -41,16 +41,20 @@ pub trait Triadic<N: Notable>: Clone {
             self.fifth().pitch(),
         );
 
-        if Fifths::Perfect * r == f {
-            if is_major_third(r.pitch(), t.pitch()) {
+        if Fifths::Perfect * self.root() == self.fifth() {
+            if is_major_third(self.root(), self.third()) {
                 return Ok(Triads::Major);
             } else {
                 return Ok(Triads::Minor);
             }
         } else {
-            if is_major_third(r.pitch(), t.pitch()) && is_major_third(t.pitch(), f.pitch()) {
+            if is_major_third(self.root(), self.third())
+                && is_major_third(self.third(), self.fifth())
+            {
                 return Ok(Triads::Augmented);
-            } else if is_minor_third(r.pitch(), t.pitch()) && is_minor_third(t.pitch(), f.pitch()) {
+            } else if is_minor_third(self.root(), self.third())
+                && is_minor_third(self.third(), self.fifth())
+            {
                 return Ok(Triads::Diminshed);
             }
             Err("Failed to find the required relationships...".to_string())
@@ -107,55 +111,63 @@ pub enum Triads {
 
 /// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Triad(Note, Note, Note);
+pub struct Triad<N: Notable>(N, N, N);
 
-impl Triad {
-    pub fn new(root: Note, class: Triads) -> Self {
+impl<N: Notable> Triad<N> {
+    pub fn new(root: N, class: Triads) -> Self {
         Self::create(root, class)
     }
 }
 
-impl Symbolic for Triad {}
+impl<N: Eq + Notable + Serialize> Symbolic for Triad<N> {}
 
-impl Triadic<Note> for Triad {
-    fn create(root: Note, class: Triads) -> Self {
+impl<N: Notable> Triadic<N> for Triad<N> {
+    fn create(root: N, class: Triads) -> Self {
         let (a, b) = Thirds::compute_both(root.clone());
-        match class {
-            Triads::Augmented => Self(root, a.clone(), Thirds::Major * a),
-            Triads::Diminshed => Self(root, b.clone(), Thirds::Minor * b),
-            Triads::Major => Self(root, a.clone(), Thirds::Minor * a),
-            Triads::Minor => Self(root, b.clone(), Thirds::Major * b),
-        }
+
+        let triad = match class {
+            Triads::Augmented => (root, a.clone(), Thirds::Major * a),
+            Triads::Diminshed => (root, b.clone(), Thirds::Minor * b),
+            Triads::Major => (root, a.clone(), Thirds::Minor * a),
+            Triads::Minor => (root, b.clone(), Thirds::Major * b),
+        };
+        Self::try_from(triad).unwrap()
     }
-    fn fifth(&self) -> Note {
+    fn fifth(&self) -> N {
         self.2.clone()
     }
 
-    fn root(&self) -> Note {
+    fn root(&self) -> N {
         self.0.clone()
     }
 
-    fn third(&self) -> Note {
+    fn third(&self) -> N {
         self.1.clone()
     }
 }
 
-impl std::fmt::Display for Triad {
+impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}{}{}", self.0, self.1, self.2)
+        write!(
+            f,
+            "{}{}{}",
+            self.0.to_string(),
+            self.1.to_string(),
+            self.2.to_string()
+        )
     }
 }
 
-impl std::ops::Mul<LPR> for Triad {
-    type Output = Triad;
+impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
+    type Output = Triad<N>;
 
     fn mul(self, rhs: LPR) -> Self::Output {
         rhs.transform(&mut self.clone())
     }
 }
 
-impl IntoIterator for Triad {
-    type Item = Note;
+impl<N: Notable> IntoIterator for Triad<N> {
+    type Item = N;
 
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
@@ -164,24 +176,28 @@ impl IntoIterator for Triad {
     }
 }
 
-impl TryFrom<(i64, i64, i64)> for Triad {
+impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
     type Error = String;
-    fn try_from(data: (i64, i64, i64)) -> Result<Triad, Self::Error> {
-        let notes: (Note, Note, Note) = (data.0.into(), data.1.into(), data.2.into());
+    fn try_from(data: (i64, i64, i64)) -> Result<Triad<N>, Self::Error> {
+        let notes: (N, N, N) = (
+            data.0.pitch().into(),
+            data.1.pitch().into(),
+            data.2.pitch().into(),
+        );
         Triad::try_from(notes)
     }
 }
 
-impl From<Triad> for (i64, i64, i64) {
-    fn from(d: Triad) -> (i64, i64, i64) {
-        (d.0.into(), d.1.into(), d.2.into())
+impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
+    fn from(d: Triad<N>) -> (i64, i64, i64) {
+        (d.0.pitch(), d.1.pitch(), d.2.pitch())
     }
 }
 
-impl TryFrom<(Note, Note, Note)> for Triad {
+impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
     type Error = String;
 
-    fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
+    fn try_from(data: (N, N, N)) -> Result<Triad<N>, Self::Error> {
         let args = vec![data.0, data.1, data.2];
         for i in 0..args.len() {
             let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
@@ -201,8 +217,8 @@ impl TryFrom<(Note, Note, Note)> for Triad {
     }
 }
 
-impl From<Triad> for (Note, Note, Note) {
-    fn from(d: Triad) -> (Note, Note, Note) {
+impl<N: Notable> From<Triad<N>> for (N, N, N) {
+    fn from(d: Triad<N>) -> (N, N, N) {
         (d.0.clone(), d.1.clone(), d.2.clone())
     }
 }
@@ -210,10 +226,11 @@ impl From<Triad> for (Note, Note, Note) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cmp::Note;
 
     #[test]
     fn test_triad() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));
