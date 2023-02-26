@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::{Gradient, Notable, Note, Pitch};
+use super::Notable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
