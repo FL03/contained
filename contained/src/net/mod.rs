@@ -9,23 +9,19 @@ pub(crate) mod cluster;
 pub(crate) mod conduit;
 
 use crate::BoxedTransport;
-use anyhow::Result;
+
 use libp2p::{core::upgrade, identity, mplex, noise, swarm::Swarm, tcp};
-use libp2p::{Multiaddr, PeerId, Transport};
+use libp2p::{PeerId, Transport};
 
-pub trait Network {
-    type Behaviour: libp2p::swarm::NetworkBehaviour;
-
-    fn keypair(&self) -> &identity::Keypair;
-    fn pid(&self) -> PeerId {
-        PeerId::from(self.keypair().public())
-    }
-    fn swarm(&self, behaviour: Self::Behaviour) -> Swarm<Self::Behaviour> {
-        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
-    }
-    fn transport(&self) -> BoxedTransport {
-        tokio_transport(self.keypair(), true)
-    }
+pub fn tokio_swarm<B: libp2p::swarm::NetworkBehaviour>(
+    behaviour: B,
+    keypair: &identity::Keypair,
+) -> Swarm<B> {
+    Swarm::with_tokio_executor(
+        tokio_transport(keypair, true),
+        behaviour,
+        PeerId::from(keypair.public()),
+    )
 }
 
 pub fn tokio_transport(keypair: &identity::Keypair, nodelay: bool) -> BoxedTransport {
@@ -38,4 +34,3 @@ pub fn tokio_transport(keypair: &identity::Keypair, nodelay: bool) -> BoxedTrans
         .multiplex(mplex::MplexConfig::new())
         .boxed()
 }
-

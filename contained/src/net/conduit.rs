@@ -5,7 +5,7 @@
         def. A conduit is defined as a means of transporting or distributing something.
 */
 use libp2p::ping;
-use libp2p::swarm::{keep_alive, NetworkBehaviour, Swarm, SwarmEvent};
+use libp2p::swarm::{keep_alive, NetworkBehaviour};
 use smart_default::SmartDefault;
 
 #[derive(NetworkBehaviour, SmartDefault)]
