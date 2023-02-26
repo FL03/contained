@@ -17,12 +17,6 @@ use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 
-pub trait Conduit {
-    type Destination;
-
-    fn address(&self) -> std::net::SocketAddr;
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SmartDefault)]
 pub struct Tonnetz {
     scope: Triad,

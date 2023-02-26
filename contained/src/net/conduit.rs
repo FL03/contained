@@ -6,22 +6,50 @@
 
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
-use crate::net::Peerable;
-use libp2p::{identity::{Keypair, PublicKey}, Multiaddr, PeerId,};
+use crate::{
+    net::{tokio_transport, Peerable},
+    BoxedTransport,
+};
+use libp2p::{
+    identity::{ed25519, Keypair, PublicKey},
+    swarm::{NetworkBehaviour, Swarm},
+    Multiaddr, PeerId,
+};
 
 #[derive(Clone, Debug)]
 pub struct Conduit {
-    addr: Multiaddr,
-    kp: Keypair
+    kp: Keypair,
 }
 
 impl Conduit {
-    pub fn new(addr: Multiaddr, kp: Keypair) -> Self {
-        Self { addr, kp }
+    pub fn new() -> Self {
+        let kp = Keypair::generate_ed25519();
+        Self::from(kp)
     }
-    
-    pub fn address(&self) -> Multiaddr {
-        self.addr.clone()
+
+    pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
+        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
+    }
+
+    pub fn transport(&self) -> BoxedTransport {
+        tokio_transport(&self.kp, true)
+    }
+}
+
+impl From<Keypair> for Conduit {
+    fn from(kp: Keypair) -> Self {
+        Self { kp }
+    }
+}
+
+impl TryFrom<u8> for Conduit {
+    type Error = libp2p::identity::error::DecodingError;
+
+    fn try_from(seed: u8) -> Result<Self, Self::Error> {
+        let mut bytes = [0u8; 32];
+        bytes[0] = seed;
+        let secret_key = ed25519::SecretKey::from_bytes(&mut bytes)?;
+        Ok(Self::from(Keypair::Ed25519(secret_key.into())))
     }
 }
 
@@ -36,6 +64,6 @@ impl Peerable for Conduit {
 
 impl Default for Conduit {
     fn default() -> Self {
-        Self::new("/ip4/0.0.0.0/tcp/0".parse().unwrap(), Keypair::generate_ed25519())
+        Self::new()
     }
 }

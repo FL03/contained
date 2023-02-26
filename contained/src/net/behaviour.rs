@@ -7,16 +7,15 @@ use libp2p::ping;
 use libp2p::swarm::NetworkBehaviour;
 use smart_default::SmartDefault;
 
-
 #[derive(NetworkBehaviour, SmartDefault)]
 #[behaviour(out_event = "Events")]
-pub struct ConduitBehaviour {
+pub struct Mainnet {
     ping: ping::Behaviour,
 }
 
 #[allow(clippy::large_enum_variant)]
 pub enum Events {
-    Ping(ping::Event)
+    Ping(ping::Event),
 }
 
 impl From<ping::Event> for Events {

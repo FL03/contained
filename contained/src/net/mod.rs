@@ -11,7 +11,13 @@ pub(crate) mod conduit;
 
 use crate::BoxedTransport;
 
-use libp2p::{core::upgrade, identity::{Keypair, PublicKey}, mplex, noise, swarm::{NetworkBehaviour, Swarm}, tcp};
+use libp2p::{
+    core::upgrade,
+    identity::{Keypair, PublicKey},
+    mplex, noise,
+    swarm::{NetworkBehaviour, Swarm},
+    tcp,
+};
 use libp2p::{PeerId, Transport};
 
 pub trait Peerable {
@@ -21,12 +27,7 @@ pub trait Peerable {
     }
 }
 
-
-
-pub fn tokio_swarm<B: NetworkBehaviour>(
-    behaviour: B,
-    keypair: &Keypair,
-) -> Swarm<B> {
+pub fn tokio_swarm<B: NetworkBehaviour>(behaviour: B, keypair: &Keypair) -> Swarm<B> {
     Swarm::with_tokio_executor(
         tokio_transport(keypair, true),
         behaviour,
