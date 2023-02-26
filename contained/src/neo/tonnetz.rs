@@ -11,7 +11,7 @@
         Another option being considered is the multiway turing machine
 
         If we consider a single triad to be the scope of a single tonnetz, than we can consider a single tonnetz to be a persistant set of non-repeating traidic structures.
-        This provides that the software
+        Any two triads are connected if they share two notes or a single edge.
 */
 use super::{Triad, LPR};
 use serde::{Deserialize, Serialize};

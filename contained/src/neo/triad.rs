@@ -192,9 +192,7 @@ impl TryFrom<(Note, Note, Note)> for Triad {
                     args[tmp[(j + 1) % tmp.len()]].clone(),
                 );
                 // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-                if is_third(a.clone().into(), b.clone().into())
-                    && is_third(b.clone().into(), c.clone().into())
-                {
+                if is_third(a.clone(), b.clone()) && is_third(b.clone(), c.clone()) {
                     return Ok(Triad(a, b, c));
                 }
             }

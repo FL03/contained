@@ -13,13 +13,20 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use super::Triad;
-use crate::{absmod, cmp::is_minor_third};
+use super::{Triad, Triadic};
+use crate::{
+    absmod,
+    cmp::{is_minor_third, Gradient},
+};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
 pub fn leading(triad: &Triad) -> Triad {
-    let (mut r, t, mut f): (i64, i64, i64) = triad.clone().into();
+    let (mut r, t, mut f): (i64, i64, i64) = (
+        triad.root().pitch(),
+        triad.third().pitch(),
+        triad.fifth().pitch(),
+    );
     if is_minor_third(r.clone(), t.clone()) {
         f += 1;
     } else {
@@ -31,7 +38,11 @@ pub fn leading(triad: &Triad) -> Triad {
 }
 
 pub fn parallel(triad: &Triad) -> Triad {
-    let (r, mut t, f): (i64, i64, i64) = triad.clone().into();
+    let (r, mut t, f): (i64, i64, i64) = (
+        triad.root().pitch(),
+        triad.third().pitch(),
+        triad.fifth().pitch(),
+    );
     if is_minor_third(r.clone(), t.clone()) {
         t += 1;
     } else {
@@ -43,7 +54,11 @@ pub fn parallel(triad: &Triad) -> Triad {
 }
 
 pub fn relative(triad: &Triad) -> Triad {
-    let (mut r, t, mut f): (i64, i64, i64) = triad.clone().into();
+    let (mut r, t, mut f): (i64, i64, i64) = (
+        triad.root().pitch(),
+        triad.third().pitch(),
+        triad.fifth().pitch(),
+    );
     if is_minor_third(r.clone(), t.clone()) {
         r -= 2;
     } else {
