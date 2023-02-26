@@ -13,6 +13,9 @@ pub(crate) mod notes;
 pub(crate) mod pitch;
 
 pub trait Gradient {
+    fn class(&self) -> PitchClass {
+        PitchClass::from(self.pitch())
+    }
     fn pitch(&self) -> i64;
     /// Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {

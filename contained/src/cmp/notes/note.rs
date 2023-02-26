@@ -56,6 +56,18 @@ impl From<Note> for i64 {
     }
 }
 
+impl From<i64> for Note {
+    fn from(d: i64) -> Note {
+        Note::new(PitchClass::from(d), None)
+    }
+}
+
+impl From<&dyn Gradient> for Note {
+    fn from(d: &dyn Gradient) -> Note {
+        Note::new(d.class(), None)
+    }
+}
+
 impl From<Note> for Pitch {
     fn from(data: Note) -> Pitch {
         data.0.into()
@@ -65,12 +77,6 @@ impl From<Note> for Pitch {
 impl From<Pitch> for Note {
     fn from(data: Pitch) -> Note {
         Note::new(data.into(), None)
-    }
-}
-
-impl From<i64> for Note {
-    fn from(d: i64) -> Note {
-        Note::new(PitchClass::from(d), None)
     }
 }
 
