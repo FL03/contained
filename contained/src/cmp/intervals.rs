@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::{Notable, Note};
+use super::{Gradient, Notable, Note, Pitch};
 use crate::SEMITONE;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -54,6 +54,30 @@ pub fn is_minor_third(a: i64, b: i64) -> bool {
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
+pub enum Interval {
+    Fifth(Fifths),
+    #[default]
+    Third(Thirds),
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    SmartDefault,
+)]
+#[repr(i64)]
+#[strum(serialize_all = "snake_case")]
 pub enum Fifths {
     Augmented = 1,
     Diminshed = 2,
@@ -76,6 +100,14 @@ impl std::ops::Mul<i64> for Fifths {
     type Output = i64;
 
     fn mul(self, rhs: i64) -> Self::Output {
+        self.compute(rhs.into()).into()
+    }
+}
+
+impl std::ops::Mul<Pitch> for Fifths {
+    type Output = Pitch;
+
+    fn mul(self, rhs: Pitch) -> Self::Output {
         self.compute(rhs.into()).into()
     }
 }
@@ -137,6 +169,14 @@ impl std::ops::Mul<i64> for Thirds {
     type Output = i64;
 
     fn mul(self, rhs: i64) -> Self::Output {
+        self.compute(rhs.into()).into()
+    }
+}
+
+impl std::ops::Mul<Pitch> for Thirds {
+    type Output = Pitch;
+
+    fn mul(self, rhs: Pitch) -> Self::Output {
         self.compute(rhs.into()).into()
     }
 }

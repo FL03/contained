@@ -6,9 +6,10 @@
 #[cfg(feature = "actors")]
 pub use contained_actors as actors;
 
-pub use self::primitives::*;
+pub use self::{primitives::*, utils::*};
 
 pub(crate) mod primitives;
+pub(crate) mod utils;
 
 pub mod cmp;
 pub mod neo;

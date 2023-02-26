@@ -13,7 +13,8 @@
         Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
         More so, if we consider 1 to be a prime number
 */
-use super::{Accidentals, NaturalNote};
+use super::{Accidentals, Gradient, NaturalNote};
+use crate::absmod;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -79,6 +80,15 @@ impl From<i64> for PitchClass {
     }
 }
 
+impl From<PitchClass> for i64 {
+    fn from(value: PitchClass) -> i64 {
+        match value {
+            PitchClass::Accidental(v) => v.into(),
+            PitchClass::Natural(v) => v.into(),
+        }
+    }
+}
+
 /// [Pitch] describes the modular index of a given frequency
 #[derive(
     Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
@@ -87,14 +97,17 @@ pub struct Pitch(i64);
 
 impl Pitch {
     pub fn new(pitch: i64) -> Self {
-        Self(pitch % 12)
-    }
-    pub fn pitch(&self) -> i64 {
-        self.0
+        Self(pitch)
     }
     /// Simple way to detect if the pitch is natural or not
     pub fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()
+    }
+}
+
+impl Gradient for Pitch {
+    fn pitch(&self) -> i64 {
+        absmod(self.0, 12)
     }
 }
 
@@ -169,7 +182,8 @@ mod tests {
     fn test_pitch() {
         let a = Pitch::from(144);
         let b = Pitch::from(12);
-        assert_eq!(a, b);
+        assert_ne!(a, b);
+        assert_eq!(a.pitch(), b.pitch());
         assert!(a.is_natural());
     }
 

@@ -4,7 +4,7 @@
     Description:
         Accidental notes are either sharp or flat
 */
-use crate::cmp::{NaturalNote, Pitch};
+use crate::cmp::{Gradient, NaturalNote, Pitch};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -30,6 +30,15 @@ pub enum Accidentals {
     Flat(FlatNote),
     #[default]
     Sharp(SharpNote),
+}
+
+impl From<Accidentals> for i64 {
+    fn from(note: Accidentals) -> i64 {
+        match note {
+            Accidentals::Sharp(s) => s.into(),
+            Accidentals::Flat(f) => f.into(),
+        }
+    }
 }
 
 impl TryFrom<Pitch> for Accidentals {
@@ -105,6 +114,12 @@ pub enum FlatNote {
     G = 6,
 }
 
+impl From<FlatNote> for i64 {
+    fn from(note: FlatNote) -> i64 {
+        note as i64
+    }
+}
+
 impl TryFrom<i64> for FlatNote {
     type Error = String;
 
@@ -154,6 +169,12 @@ pub enum SharpNote {
     D = 3,
     F = 6,
     G = 8,
+}
+
+impl From<SharpNote> for i64 {
+    fn from(note: SharpNote) -> i64 {
+        note as i64
+    }
 }
 
 impl TryFrom<Pitch> for SharpNote {

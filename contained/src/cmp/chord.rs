@@ -21,6 +21,12 @@ impl Chord {
     pub fn chord(&self) -> &Self {
         self
     }
+    pub fn is_triadic(&self) -> bool {
+        if self.len() == 3 {
+            return true;
+        }
+        false
+    }
 }
 
 impl ArrayLike for Chord {

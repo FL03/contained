@@ -3,16 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use libp2p::{mdns, ping};
 use libp2p::swarm::NetworkBehaviour;
-
+use libp2p::{mdns, ping};
 
 /// [Conduct] describes the behavior of our network
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "Events")]
 pub struct Conduct {
     freq: ping::Behaviour,
-    mdns: mdns::tokio::Behaviour
+    mdns: mdns::tokio::Behaviour,
 }
 
 impl Conduct {
