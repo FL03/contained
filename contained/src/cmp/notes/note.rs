@@ -29,8 +29,7 @@ impl Note {
 
 impl Gradient for Note {
     fn pitch(&self) -> i64 {
-        let pitch: i64 = self.0.into();
-        absmod(pitch, 12)
+        absmod(self.0.pitch(), 12)
     }
 }
 

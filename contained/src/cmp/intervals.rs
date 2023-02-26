@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::{Gradient, Notable, Note, Pitch};
+use super::{Gradient, Note, Pitch};
 use crate::SEMITONE;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;

@@ -13,7 +13,7 @@ use crate::{
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
     swarm::{NetworkBehaviour, Swarm},
-    Multiaddr, PeerId,
+    PeerId,
 };
 
 #[derive(Clone, Debug)]

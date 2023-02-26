@@ -42,6 +42,15 @@ pub enum PitchClass {
     Natural(NaturalNote),
 }
 
+impl Gradient for PitchClass {
+    fn pitch(&self) -> i64 {
+        match *self {
+            PitchClass::Accidental(v) => v.into(),
+            PitchClass::Natural(v) => v.into(),
+        }
+    }
+}
+
 impl From<Accidentals> for PitchClass {
     fn from(data: Accidentals) -> PitchClass {
         PitchClass::Accidental(data)
@@ -76,15 +85,6 @@ impl From<i64> for PitchClass {
             PitchClass::from(v)
         } else {
             PitchClass::from(NaturalNote::try_from(data).expect(""))
-        }
-    }
-}
-
-impl From<PitchClass> for i64 {
-    fn from(value: PitchClass) -> i64 {
-        match value {
-            PitchClass::Accidental(v) => v.into(),
-            PitchClass::Natural(v) => v.into(),
         }
     }
 }
