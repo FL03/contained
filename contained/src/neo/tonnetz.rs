@@ -14,7 +14,7 @@
         Any two triads are connected if they share two notes or a single edge.
 */
 use super::{Triad, LPR};
-use crate::cmp::{Notable, Note};
+use crate::core::{Notable, Note};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 
@@ -48,7 +48,7 @@ impl<N: Notable> Tonnetz<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::Note;
+    use crate::core::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]

@@ -5,7 +5,7 @@
 
 */
 use crate::actors::ArrayLike;
-use crate::cmp::Note;
+use crate::core::Note;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};

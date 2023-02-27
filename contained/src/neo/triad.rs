@@ -17,8 +17,8 @@ use crate::actors::{
     turing::{Configuration, Machine, Program, Tape},
     Symbolic,
 };
-use crate::cmp::{is_major_third, is_minor_third, is_third, Chord, Fifths, Note, Thirds};
-use crate::cmp::{Gradient, Notable};
+use crate::core::{is_major_third, is_minor_third, is_third, Chord, Fifths, Note, Thirds};
+use crate::core::{Gradient, Notable};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -220,7 +220,7 @@ impl<N: Notable> From<Triad<N>> for (N, N, N) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::Note;
+    use crate::core::Note;
 
     #[test]
     fn test_triad() {

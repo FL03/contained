@@ -3,34 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{actor::*, primitives::*, states::*};
+pub use self::{actor::*, primitives::*, states::*, utils::*};
 
 pub(crate) mod actor;
 pub(crate) mod primitives;
 pub(crate) mod states;
+pub(crate) mod utils;
 
 pub mod turing;
 
 use serde::{Deserialize, Serialize};
-
-pub fn ordered_sets<T: Clone>(args: Vec<T>, size: usize) -> Vec<Vec<T>> {
-    let mut res = Vec::<Vec<T>>::new();
-    for i in 0..args.len() {
-        let tmp = (1..size)
-            .map(|z: usize| (i + z) % size)
-            .collect::<Vec<usize>>();
-        for j in 0..tmp.len() {
-            let mut subset = vec![args[i].clone()];
-            subset.append(
-                &mut (0..tmp.len())
-                    .map(|k: usize| args[tmp[(j + k) % tmp.len()]].clone())
-                    .collect(),
-            );
-            res.push(subset.clone());
-        }
-    }
-    res
-}
 
 /// [ArrayLike] describes the basic behaviors of array-like structures
 pub trait ArrayLike {
@@ -60,15 +42,6 @@ pub trait ArrayLike {
     fn len(&self) -> usize {
         self.content().len()
     }
-}
-
-/// [With] describes a simple means of concating several objects together
-pub trait With<T> {
-    /// [With::Output] must be a superposition of self and T
-    type Output;
-
-    /// [With::with] accepts an owned instance of the given type and returns a [With::Output] instance
-    fn with(&self, other: &T) -> Self::Output;
 }
 
 /// [Appellation] is a novel naming schematic based on a basis from linear-algebra

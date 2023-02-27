@@ -10,7 +10,7 @@
 */
 use crate::absmod;
 use crate::actors::Symbolic;
-use crate::cmp::{Gradient, Notable, Pitch, PitchClass};
+use crate::core::{Gradient, Notable, Pitch, PitchClass};
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -83,7 +83,7 @@ impl From<Pitch> for Note {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::{Gradient, NaturalNote};
+    use crate::core::{Gradient, NaturalNote};
 
     #[test]
     fn test_notes() {

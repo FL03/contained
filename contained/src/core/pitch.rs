@@ -164,7 +164,7 @@ impl From<Pitch> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::Accidentals;
+    use crate::core::Accidentals;
 
     #[test]
     fn test_pitch_class() {

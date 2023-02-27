@@ -14,6 +14,15 @@ pub(crate) mod tapes;
 use crate::{Resultant, States, Symbolic};
 use scsys::prelude::Stateful;
 
+pub trait Executable<T> {
+    type Error;
+    type Output;
+
+    fn execute(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
+    fn execute_once(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
+    fn execute_until(&self, exe: &mut T, until: impl Fn(&T) -> bool) -> Result<Self::Output, Self::Error>;
+}
+
 /// Describes the basic functionality of a Turing machine
 pub trait Turing {
     type Symbol: Symbolic;
@@ -70,4 +79,13 @@ pub trait Turing {
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape().clone())
     }
+}
+
+/// [With] describes a simple means of concating several objects together
+pub trait With<T> {
+    /// [With::Output] must be a superposition of self and T
+    type Output;
+
+    /// [With::with] accepts an owned instance of the given type and returns a [With::Output] instance
+    fn with(&self, other: &T) -> Self::Output;
 }

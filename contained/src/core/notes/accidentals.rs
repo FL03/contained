@@ -4,7 +4,7 @@
     Description:
         Accidental notes are either sharp or flat
 */
-use crate::cmp::{Gradient, NaturalNote, Pitch};
+use crate::core::{Gradient, NaturalNote, Pitch};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
