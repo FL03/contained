@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Head, Instruction};
+use super::{Head, Instruction, With};
 use crate::{Resultant, State, States, Symbolic};
 
 use scsys::prelude::Stateful;

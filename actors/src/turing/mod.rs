@@ -20,7 +20,11 @@ pub trait Executable<T> {
 
     fn execute(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
     fn execute_once(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
-    fn execute_until(&self, exe: &mut T, until: impl Fn(&T) -> bool) -> Result<Self::Output, Self::Error>;
+    fn execute_until(
+        &self,
+        exe: &mut T,
+        until: impl Fn(&T) -> bool,
+    ) -> Result<Self::Output, Self::Error>;
 }
 
 /// Describes the basic functionality of a Turing machine

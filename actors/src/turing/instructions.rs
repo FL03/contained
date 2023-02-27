@@ -64,6 +64,12 @@ impl<S: Symbolic> Instruction<S> {
     pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
         Self { head, tail }
     }
+    pub fn head(&self) -> &Head<S> {
+        &self.head
+    }
+    pub fn tail(&self) -> &Tail<S> {
+        &self.tail
+    }
 }
 
 impl<S: Symbolic> From<(State<States, S>, S, State<States, S>, S, Move)> for Instruction<S> {

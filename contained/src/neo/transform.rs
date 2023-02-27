@@ -14,57 +14,9 @@
         Shift by a tone: +/- 2
 */
 use super::{Triad, Triadic};
-use crate::core::{is_minor_third, Gradient, Notable};
+use crate::core::{is_minor_third, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub fn leading<N: Notable>(triad: &Triad<N>) -> Triad<N> {
-    let (mut r, t, mut f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(triad.root(), triad.third()) {
-        f += 1;
-    } else {
-        r -= 1;
-    }
-    let triad = (r.pitch(), t.pitch(), f.pitch());
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
-
-pub fn parallel<N: Notable>(triad: &Triad<N>) -> Triad<N> {
-    let (r, mut t, f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(triad.root(), triad.third()) {
-        t += 1;
-    } else {
-        t -= 1;
-    }
-    let triad = (r.pitch(), t.pitch(), f.pitch());
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
-
-pub fn relative<N: Notable>(triad: &Triad<N>) -> Triad<N> {
-    let (mut r, t, mut f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(triad.root(), triad.third()) {
-        r -= 2;
-    } else {
-        f += 2;
-    }
-    let triad = (r.pitch(), t.pitch(), f.pitch());
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -94,11 +46,36 @@ pub enum LPR {
 
 impl LPR {
     pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
+        let (mut r, mut t, mut f): (i64, i64, i64) = (
+            triad.root().pitch(),
+            triad.third().pitch(),
+            triad.fifth().pitch(),
+        );
         match self {
-            LPR::L => leading(triad),
-            LPR::P => parallel(triad),
-            LPR::R => relative(triad),
-        }
+            LPR::L => {
+                if is_minor_third(triad.root(), triad.third()) {
+                    f += 1;
+                } else {
+                    r -= 1;
+                }
+            }
+            LPR::P => {
+                if is_minor_third(triad.root(), triad.third()) {
+                    t += 1;
+                } else {
+                    t -= 1;
+                }
+            }
+            LPR::R => {
+                if is_minor_third(triad.root(), triad.third()) {
+                    r -= 2;
+                } else {
+                    f += 2;
+                }
+            }
+        };
+        // All triadic transformations will result in another valid triad
+        Triad::try_from((r, t, f)).unwrap()
     }
 }
 
