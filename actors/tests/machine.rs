@@ -12,7 +12,7 @@ fn test_machine() {
     let cnf = Configuration::norm(tape);
 
     // Setup the program
-    let final_state = State::from(&States::invalid());
+    let final_state = State::from(States::invalid());
     let mut program = Program::new(alphabet, final_state);
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program
@@ -26,7 +26,7 @@ fn test_machine() {
             (
                 State::default(),
                 "c",
-                State::from(&States::invalid()),
+                State::from(States::invalid()),
                 "a",
                 Move::Left,
             )

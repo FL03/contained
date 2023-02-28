@@ -4,9 +4,7 @@
     Description: ... summary ...
 */
 use super::{Head, Instruction};
-use crate::{Resultant, State, States, Symbolic};
-
-use scsys::prelude::Stateful;
+use crate::{Resultant, State, Stateful, States, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
@@ -14,12 +12,12 @@ use std::mem::replace;
 pub struct Program<S: Symbolic> {
     alphabet: Vec<S>,
     instructions: Vec<Instruction<S>>,
-    final_state: State,
+    final_state: State<States>,
 }
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = final_state.clone().state().into();
+        let s: i64 = final_state.state().clone().into();
         let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);
 
@@ -57,7 +55,7 @@ impl<S: Symbolic> Program<S> {
     }
     /// Insert a new [Instruction] set into the program
     pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
-        if inst.head.state() == &State::from(&States::invalid()) {
+        if inst.head.state() == &State::from(States::invalid()) {
             return Err("Set error: Instruction cannot have 0 state in head...".to_string());
         }
         if !self.alphabet().contains(inst.head.symbol())
@@ -97,14 +95,14 @@ mod test {
     #[test]
     fn test_program() {
         let inst = Instruction::from((
-            State::from(&States::valid()),
+            State::from(States::valid()),
             "a",
-            State::from(&States::valid()),
+            State::from(States::valid()),
             "b",
             Move::Right,
         ));
         let alphabet = vec!["a", "b", "c"];
-        let mut program = Program::new(alphabet, State::from(&States::invalid()));
+        let mut program = Program::new(alphabet, State::from(States::invalid()));
 
         assert!(program.insert(inst.clone()).is_ok());
         assert!(program.get(inst.head).is_ok())

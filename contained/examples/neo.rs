@@ -19,7 +19,7 @@ fn main() -> Resultant {
     let mut cnf: Configuration<Note> = triad.config();
 
     // Setup the program
-    let final_state = State::from(&States::invalid());
+    let final_state = State::from(States::invalid());
     let mut program = Program::new(alphabet, final_state);
     // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
     program.insert(
@@ -46,7 +46,7 @@ fn main() -> Resultant {
         (
             State::default(),
             6.into(),
-            State::from(&States::invalid()),
+            State::from(States::invalid()),
             3.into(),
             2.into(),
         )

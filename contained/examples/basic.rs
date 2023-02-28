@@ -17,7 +17,7 @@ fn main() -> Resultant {
     let mut cnf = Configuration::norm(tape)?;
 
     // Setup the program
-    let final_state = State::from(&States::invalid());
+    let final_state = State::from(States::invalid());
     let mut program = Program::new(alphabet, final_state);
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.insert((State::default(), "a", State::default(), "c", Move::Right).into())?;
@@ -26,7 +26,7 @@ fn main() -> Resultant {
         (
             State::default(),
             "c",
-            State::from(&States::invalid()),
+            State::from(States::invalid()),
             "a",
             Move::Left,
         )

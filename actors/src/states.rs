@@ -5,53 +5,63 @@
 */
 
 use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::{Message, SerdeDisplay, StatePack, Stateful, Timestamp};
+use scsys::prelude::{Message, SerdeDisplay, Timestamp};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize, SerdeDisplay)]
-pub struct State<S: Clone + StatePack = States, T: Clone + Default + Serialize = String> {
-    msg: Message<T>,
+pub trait Stateful: Clone + Eq + Ord + PartialEq + PartialOrd + ToString {
+    type State: StateSpec;
+
+    fn state(&self) -> &Self::State;
+}
+
+pub trait StateSpec:
+    Clone
+    + Copy
+    + Eq
+    + Ord
+    + PartialEq
+    + PartialOrd
+    + ToString
+    + std::convert::From<i64>
+    + std::convert::Into<i64>
+{
+    fn state(&self) -> &Self {
+        &self
+    }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct State<S: StateSpec = States> {
     state: S,
-    ts: i64,
 }
 
-impl<S: Clone + StatePack, T: Clone + Default + Serialize> State<S, T> {
-    pub fn new(msg: Option<Message<T>>, state: S) -> Self {
-        Self {
-            msg: msg.unwrap_or_default(),
-            state,
-            ts: Timestamp::default().into(),
-        }
+impl<S: StateSpec> State<S> {
+    pub fn new(state: S) -> Self {
+        Self { state }
     }
-    pub fn update(&mut self, msg: Option<Message<T>>, state: S) {
-        if let Some(m) = msg {
-            self.msg = m;
-        }
+    pub fn update(&mut self, state: S) {
         self.state = state;
-        self.ts = Timestamp::default().into();
     }
 }
 
-impl<S: Clone + StatePack, T: Clone + Default + Serialize> Stateful<S> for State<S, T> {
-    type Data = T;
-
-    fn message(self) -> scsys::prelude::Message<Self::Data> {
-        self.msg
-    }
-
-    fn state(self) -> S {
-        self.state
-    }
-
-    fn timestamp(self) -> i64 {
-        self.ts
+impl<S: StateSpec> std::fmt::Display for State<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.state().to_string())
     }
 }
 
-impl<S: Clone + StatePack, T: Clone + Default + Serialize> From<&S> for State<S, T> {
-    fn from(d: &S) -> Self {
-        Self::new(None, d.clone())
+impl<S: StateSpec> Stateful for State<S> {
+    type State = S;
+
+    fn state(&self) -> &Self::State {
+        &self.state
+    }
+}
+
+impl<S: StateSpec> From<S> for State<S> {
+    fn from(data: S) -> Self {
+        Self::new(data)
     }
 }
 
@@ -71,6 +81,7 @@ impl<S: Clone + StatePack, T: Clone + Default + Serialize> From<&S> for State<S,
     PartialOrd,
     Serialize,
 )]
+#[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum States {
     #[default]
@@ -87,7 +98,7 @@ impl States {
     }
 }
 
-impl StatePack for States {}
+impl StateSpec for States {}
 
 impl From<usize> for States {
     fn from(d: usize) -> Self {
@@ -117,13 +128,13 @@ mod tests {
 
     #[test]
     fn test_default_state() {
-        let mut a = State::<States, String>::default();
+        let mut a = State::<States>::default();
         let b = a.clone();
-        assert_eq!(a.clone().state(), States::valid());
+        assert_eq!(a.state().clone(), States::valid());
 
-        a.update(None, States::invalid());
+        a.update(States::invalid());
 
-        assert_eq!(a.clone().state(), States::invalid());
-        assert_ne!(b.timestamp(), a.timestamp())
+        assert_eq!(a.state().clone(), States::invalid());
+        // assert_ne!(b.timestamp(), a.timestamp())
     }
 }

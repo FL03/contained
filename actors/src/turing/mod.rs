@@ -11,8 +11,7 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Resultant, States, Symbolic};
-use scsys::prelude::Stateful;
+use crate::{Resultant, Stateful, States, Symbolic};
 
 pub trait Executable<T> {
     type Error;
@@ -39,7 +38,7 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state().clone().state() == States::invalid())
+        self.execute_until(cnf, |cnf| cnf.state().state().clone() == States::invalid())
     }
     ///
     fn execute_once(
