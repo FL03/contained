@@ -63,7 +63,7 @@ impl<N: Notable> Triad<N> {
             Triads::Major => (root, a.clone(), Thirds::Minor * a),
             Triads::Minor => (root, b.clone(), Thirds::Major * b),
         };
-        Self::try_from(triad).unwrap()
+        Self(triad.0, triad.1, triad.2)
     }
 
     pub fn classify(&self) -> Resultant<Triads> {
