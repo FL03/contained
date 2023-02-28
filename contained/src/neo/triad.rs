@@ -88,7 +88,11 @@ impl<N: Notable> Triad<N> {
     }
     /// [Triadic::config] Create a new [Configuration] with the [Triad] as its alphabet
     pub fn config(&self) -> Configuration<Note> {
-        let a = self.clone().into_iter().map(|v| v.pitch().into()).collect::<Vec<Note>>();
+        let a = self
+            .clone()
+            .into_iter()
+            .map(|v| v.pitch().into())
+            .collect::<Vec<Note>>();
         Configuration::norm(Tape::new(a)).unwrap()
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
@@ -110,7 +114,6 @@ impl<N: Notable> Triad<N> {
     pub fn third(&self) -> N {
         self.1.clone()
     }
-
 }
 
 impl<N: Eq + Notable + Serialize> Symbolic for Triad<N> {}

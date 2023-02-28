@@ -51,6 +51,14 @@ impl Gradient for PitchClass {
     }
 }
 
+impl From<PitchClass> for i64 {
+    fn from(data: PitchClass) -> i64 {
+        match data {
+            PitchClass::Accidental(note) => note.into(),
+            PitchClass::Natural(note) => note.into(),
+        }
+    }
+}
 impl From<Accidentals> for PitchClass {
     fn from(data: Accidentals) -> PitchClass {
         PitchClass::Accidental(data)

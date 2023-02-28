@@ -12,10 +12,7 @@ pub(crate) mod triad;
 
 use crate::Dirac;
 
-pub trait Transformable {
-
-    
-}
+pub trait Transformable {}
 
 pub trait Transformation<S: Clone> {
     type Error;

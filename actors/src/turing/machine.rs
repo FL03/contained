@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::turing::{Program, Programatic, Turing, With};
+use crate::turing::{Program, Turing};
 use crate::{Resultant, Symbolic};
 
 use serde::{Deserialize, Serialize};

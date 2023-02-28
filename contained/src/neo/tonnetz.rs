@@ -13,8 +13,8 @@
         If we consider a single triad to be the scope of a single tonnetz, than we can consider a single tonnetz to be a persistant set of non-repeating traidic structures.
         Any two triads are connected if they share two notes or a single edge.
 
-        While one instance can only occupy a single configuration at a time, the tonnetz can break down the program into executable pieces 
-        injecting in LPR transformations to gaurentee execution. This process can be scaled as having multiple persistent instances allows 
+        While one instance can only occupy a single configuration at a time, the tonnetz can break down the program into executable pieces
+        injecting in LPR transformations to gaurentee execution. This process can be scaled as having multiple persistent instances allows
         the system to offload certain workloads without disrupting the overall experience.
 */
 use super::{Triad, LPR};

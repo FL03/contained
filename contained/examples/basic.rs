@@ -6,7 +6,7 @@
 extern crate contained;
 
 use contained::actors::turing::{
-    Configurable, Configuration, Machine, Move, Program, Programatic, Tape, Turing,
+    Configurable, Configuration, Machine, Move, Program, Tape, Turing,
 };
 use contained::actors::{Resultant, State, States};
 

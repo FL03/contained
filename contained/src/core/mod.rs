@@ -12,11 +12,13 @@ pub(crate) mod intervals;
 pub(crate) mod notes;
 pub(crate) mod pitch;
 
-pub trait Gradient {
+pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {
         PitchClass::from(self.pitch())
     }
-    fn pitch(&self) -> i64;
+    fn pitch(&self) -> i64 {
+        crate::absmod(self.clone().into(), 12)
+    }
     /// Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()

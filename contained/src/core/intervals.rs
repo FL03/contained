@@ -139,12 +139,12 @@ impl<N: Notable> TryFrom<(N, N)> for Thirds {
 
     fn try_from(data: (N, N)) -> Result<Self, Self::Error> {
         // An interval is the difference in pitch between an two notes
-        // We take the pitch of the result to account for its modularity;
+        // We take the pitch of the result to account for its modularity; (0, 11) -> 11 but (11, 0) -> 1
         let interval: i64 = (data.1.pitch() - data.0.pitch()).pitch();
         match interval {
             3 => Ok(Self::Minor),
             4 => Ok(Self::Major),
-            _ => Err("Interval is not a third...".to_string())
+            _ => Err("Interval is not a third...".to_string()),
         }
     }
 }

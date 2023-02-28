@@ -3,24 +3,45 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Head, Instruction, With};
+use super::{Head, Instruction};
 use crate::{Resultant, State, States, Symbolic};
 
 use scsys::prelude::Stateful;
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
-pub trait Programatic<S: Symbolic> {
-    ///
-    fn alphabet(&self) -> &Vec<S>;
-    ///
-    fn instructions(&self) -> &Vec<Instruction<S>>;
-    ///
-    fn mut_instructions(&mut self) -> &mut Vec<Instruction<S>>;
-    ///
-    fn final_state(&self) -> &State;
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Program<S: Symbolic> {
+    alphabet: Vec<S>,
+    instructions: Vec<Instruction<S>>,
+    final_state: State,
+}
+
+impl<S: Symbolic> Program<S> {
+    pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
+        let s: i64 = final_state.clone().state().into();
+        let capacity = alphabet.len() * s as usize;
+        let instructions = Vec::with_capacity(capacity);
+
+        Self {
+            alphabet,
+            instructions,
+            final_state,
+        }
+    }
+    pub fn alphabet(&self) -> &Vec<S> {
+        &self.alphabet
+    }
+
+    pub fn instructions(&self) -> &Vec<Instruction<S>> {
+        &self.instructions
+    }
+
+    pub fn final_state(&self) -> &State {
+        &self.final_state
+    }
     /// Given some [Head], find the coresponding [Instruction]
-    fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
+    pub fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
         if self.final_state().clone().state() < head.state().clone().state() {
             Err("The provided head is greater than the final state...".to_string())
         } else {
@@ -35,7 +56,7 @@ pub trait Programatic<S: Symbolic> {
         }
     }
     /// Insert a new [Instruction] set into the program
-    fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
+    pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
         if inst.head.state() == &State::from(&States::invalid()) {
             return Err("Set error: Instruction cannot have 0 state in head...".to_string());
         }
@@ -58,51 +79,12 @@ pub trait Programatic<S: Symbolic> {
             .position(|cand: &Instruction<S>| cand.head == inst.head);
 
         match position {
-            Some(index) => Ok(Some(replace(&mut self.mut_instructions()[index], inst))),
+            Some(index) => Ok(Some(replace(&mut self.instructions[index], inst))),
             None => {
-                self.mut_instructions().push(inst);
+                self.instructions.push(inst);
                 Ok(None)
             }
         }
-    }
-}
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Program<S: Symbolic> {
-    pub alphabet: Vec<S>,
-    pub instructions: Vec<Instruction<S>>,
-    pub final_state: State,
-}
-
-impl<S: Symbolic> Program<S> {
-    pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = final_state.clone().state().into();
-        let capacity = alphabet.len() * s as usize;
-        let instructions = Vec::with_capacity(capacity);
-
-        Self {
-            alphabet,
-            instructions,
-            final_state,
-        }
-    }
-}
-
-impl<S: Symbolic> Programatic<S> for Program<S> {
-    fn alphabet(&self) -> &Vec<S> {
-        &self.alphabet
-    }
-
-    fn instructions(&self) -> &Vec<Instruction<S>> {
-        &self.instructions
-    }
-
-    fn mut_instructions(&mut self) -> &mut Vec<Instruction<S>> {
-        &mut self.instructions
-    }
-
-    fn final_state(&self) -> &State {
-        &self.final_state
     }
 }
 
