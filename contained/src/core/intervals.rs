@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::Notable;
+use super::{Gradient, Notable};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -84,17 +84,11 @@ pub enum Fifths {
     Perfect = 7,
 }
 
-impl Fifths {
-    pub fn compute<N: Notable>(&self, note: N) -> N {
-        (note.pitch() + *self as i64).into()
-    }
-}
-
 impl<N: Notable> std::ops::Mul<N> for Fifths {
     type Output = N;
 
     fn mul(self, rhs: N) -> Self::Output {
-        self.compute(rhs)
+        (rhs.pitch() + self as i64).into()
     }
 }
 
@@ -123,11 +117,12 @@ pub enum Thirds {
 }
 
 impl Thirds {
-    pub fn compute<N: Notable>(&self, note: N) -> N {
-        (note.pitch() + *self as i64).into()
+    /// [is_third] compares two notes to see if either a major or minor third interval exists
+    pub fn is_third<N: Notable>(a: N, b: N) -> bool {
+        Self::try_from((a, b)).is_ok()
     }
     pub fn compute_both<N: Notable>(note: N) -> (N, N) {
-        (Self::Major.compute(note.clone()), Self::Minor.compute(note))
+        (Self::Major * note.clone(), Self::Minor * note)
     }
     /// Functional method for creating a major third
     pub fn major() -> Self {
@@ -139,10 +134,25 @@ impl Thirds {
     }
 }
 
+impl<N: Notable> TryFrom<(N, N)> for Thirds {
+    type Error = String;
+
+    fn try_from(data: (N, N)) -> Result<Self, Self::Error> {
+        // An interval is the difference in pitch between an two notes
+        // We take the pitch of the result to account for its modularity;
+        let interval: i64 = (data.1.pitch() - data.0.pitch()).pitch();
+        match interval {
+            3 => Ok(Self::Minor),
+            4 => Ok(Self::Major),
+            _ => Err("Interval is not a third...".to_string())
+        }
+    }
+}
+
 impl<N: Notable> std::ops::Mul<N> for Thirds {
     type Output = N;
 
     fn mul(self, rhs: N) -> Self::Output {
-        self.compute(rhs)
+        (rhs.pitch() + self.clone() as i64).into()
     }
 }

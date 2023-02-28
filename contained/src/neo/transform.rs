@@ -13,7 +13,7 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use super::{Triad, Triadic};
+use super::Triad;
 use crate::core::{is_minor_third, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};

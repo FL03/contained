@@ -9,7 +9,7 @@ use contained::actors::turing::{Configuration, Program, Programatic, Turing};
 use contained::actors::{Resultant, State, States};
 use contained::{
     core::Note,
-    neo::{Triad, Triadic, Triads},
+    neo::{Triad, Triads},
 };
 
 fn main() -> Resultant {
