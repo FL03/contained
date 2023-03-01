@@ -12,11 +12,10 @@ fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(alphabet.clone());
-    let mut cnf = Configuration::norm(tape)?;
+    let mut cnf = Configuration::build(tape, None)?;
 
     // Setup the program
-    let final_state = State::from(States::invalid());
-    let mut program = Program::new(alphabet, final_state);
+    let mut program = Program::new(alphabet, States::invalid().into());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.insert((State::default(), "a", State::default(), "c", Move::Right).into())?;
     program.insert((State::default(), "b", State::default(), "a", Move::Right).into())?;

@@ -27,31 +27,31 @@ impl<S: Symbolic> Program<S> {
             final_state,
         }
     }
+    /// Returns an owned instance of the current program's alphabet
     pub fn alphabet(&self) -> &Vec<S> {
         &self.alphabet
     }
-
+    /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
         &self.instructions
     }
-
+    /// Returns an owned instance of the final state
     pub fn final_state(&self) -> &State {
         &self.final_state
     }
     /// Given some [Head], find the coresponding [Instruction]
     pub fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
         if self.final_state().clone().state() < head.state().clone().state() {
-            Err("The provided head is greater than the final state...".to_string())
-        } else {
-            match self
-                .instructions()
-                .iter()
-                .find(|inst: &&Instruction<S>| inst.head == head)
-            {
-                None => Err("Failed to find instructions for the provided head...".to_string()),
-                Some(v) => Ok(v),
-            }
+            return Err("The provided head is greater than the final state...".to_string());
         }
+        if let Some(v) = self
+            .instructions()
+            .iter()
+            .find(|inst: &&Instruction<S>| inst.head == head)
+        {
+            return Ok(v);
+        }
+        Err("Failed to find instructions for the provided head...".to_string())
     }
     /// Insert a new [Instruction] set into the program
     pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {

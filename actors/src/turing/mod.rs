@@ -70,7 +70,7 @@ pub trait Turing {
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_std`].
     fn translate_std(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
-        let mut conf = Configuration::std(tape)?;
+        let mut conf = Configuration::build(tape, Some(Config::Standard))?;
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape().clone())
     }
@@ -78,7 +78,7 @@ pub trait Turing {
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_nrm`].
     fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
-        let mut conf = Configuration::norm(tape)?;
+        let mut conf = Configuration::build(tape, Some(Config::Normal))?;
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape().clone())
     }

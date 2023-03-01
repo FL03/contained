@@ -44,18 +44,12 @@ impl<S: Symbolic> Configuration<S> {
     pub fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
     }
-    pub fn create(tape: Tape<S>, config: Option<Config>) -> Result<Self, String> {
+    pub fn build(tape: Tape<S>, config: Option<Config>) -> Result<Self, String> {
         let cnf = match config.unwrap_or_default() {
             Config::Normal => (0, Default::default(), tape),
             Config::Standard => (tape.len() - 1, Default::default(), tape),
         };
         Self::try_from(cnf)
-    }
-    pub fn norm(tape: Tape<S>) -> Result<Self, String> {
-        Self::create(tape, Some(Config::Normal))
-    }
-    pub fn std(tape: Tape<S>) -> Result<Self, String> {
-        Self::create(tape, Some(Config::Standard))
     }
     /// [Configuration::is_empty]
     pub fn is_empty(&self) -> bool {
@@ -70,7 +64,6 @@ impl<S: Symbolic> Configuration<S> {
         self.tape.set(self.position(), symbol);
     }
 
-    
     pub fn position(&self) -> usize {
         self.index
     }
@@ -143,8 +136,8 @@ mod tests {
     #[test]
     fn test_configuration() {
         let tape = Tape::new(["a", "b", "c"]);
-        let a = Configuration::norm(tape.clone());
-        let b = Configuration::std(tape);
+        let a = Configuration::build(tape.clone(), None);
+        let b = Configuration::build(tape, Some(Config::Standard));
         assert!(a.is_ok());
         assert!(b.is_ok());
         assert_ne!(a.unwrap(), b.unwrap())

@@ -16,7 +16,6 @@ pub trait Stateful<S: StateSpec>:
 }
 
 impl Stateful<i64> for i64 {
-
     fn state(&self) -> &i64 {
         &self
     }

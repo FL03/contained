@@ -9,7 +9,7 @@ fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(TEST_ALPHABET);
-    let cnf = Configuration::norm(tape);
+    let cnf = Configuration::build(tape, None);
 
     // Setup the program
     let final_state = State::from(States::invalid());
