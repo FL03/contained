@@ -38,7 +38,7 @@ impl<N: Notable> Tonnetz<N> {
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, shift: LPR) {
-        self.scope = shift * self.scope().clone();
+        self.scope *= shift;
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope

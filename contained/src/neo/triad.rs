@@ -138,6 +138,13 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
     }
 }
 
+impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
+
+    fn mul_assign(&mut self, rhs: LPR) {
+        *self = self.clone() * rhs;
+    }
+}
+
 impl<N: Notable> IntoIterator for Triad<N> {
     type Item = N;
 
@@ -206,7 +213,6 @@ mod tests {
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));
-
         assert!(b.is_ok());
         assert_ne!(a, b.unwrap())
     }

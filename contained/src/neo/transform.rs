@@ -96,10 +96,11 @@ mod tests {
     #[test]
     fn test_leading() {
         let a = Triad::<Note>::new(0.into(), Triads::Major);
-        let b = LPR::L * a.clone();
+        let mut b = LPR::L * a.clone();
         assert_ne!(a, b);
         assert_eq!(b, Triad::<Note>::try_from((4, 7, 11)).unwrap());
-        assert_eq!(a, LPR::L * b);
+        b *= LPR::L;
+        assert_eq!(a, b);
     }
 
     #[test]
