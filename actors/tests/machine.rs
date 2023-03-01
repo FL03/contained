@@ -1,5 +1,5 @@
 #[cfg(test)]
-use contained_actors::turing::{Configurable, Configuration, Machine, Move, Program, Tape, Turing};
+use contained_actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
 use contained_actors::{State, States};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];

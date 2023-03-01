@@ -8,7 +8,7 @@ use crate::{Resultant, State, Stateful, States, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Program<S: Symbolic> {
     alphabet: Vec<S>,
     instructions: Vec<Instruction<S>>,

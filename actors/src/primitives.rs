@@ -6,7 +6,18 @@
 pub use self::{constants::*, types::*};
 
 /// Simple trait for compatible symbols
-pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString + serde::Serialize {}
+pub trait Symbolic:
+    Clone
+    + Default
+    + Eq
+    + Ord
+    + PartialEq
+    + PartialOrd
+    + std::fmt::Debug
+    + std::fmt::Display
+    + serde::Serialize
+{
+}
 
 impl Symbolic for char {}
 

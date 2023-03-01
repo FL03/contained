@@ -116,7 +116,7 @@ impl<N: Notable> Triad<N> {
     }
 }
 
-impl<N: Eq + Notable + Serialize> Symbolic for Triad<N> {}
+impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> {}
 
 impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

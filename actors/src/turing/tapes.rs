@@ -6,7 +6,7 @@
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tape<S: Symbolic>(Vec<S>);
 
 impl<S: Symbolic> Tape<S> {

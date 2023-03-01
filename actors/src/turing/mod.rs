@@ -38,14 +38,14 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state().state().clone() == States::invalid())
+        self.execute_until(cnf, |cnf| cnf.state().clone() == States::invalid())
     }
     ///
     fn execute_once(
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        let head = Head::new(cnf.state().clone(), cnf.symbol().clone());
+        let head = Head::new(cnf.state().clone().into(), cnf.symbol().clone());
         let inst = self.program().get(head)?.clone();
         cnf.state = inst.tail.state().clone();
         cnf.set_symbol(inst.tail.symbol().clone());

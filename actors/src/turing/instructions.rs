@@ -9,7 +9,7 @@ use crate::{State, States, Symbolic};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Head<S: Symbolic>(State<States>, S);
 
 impl<S: Symbolic> Head<S> {
@@ -36,7 +36,7 @@ impl<S: Symbolic> From<(State<States>, S)> for Head<S> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tail<S: Symbolic>(State<States>, S, Move);
 
 impl<S: Symbolic> Tail<S> {
@@ -54,7 +54,7 @@ impl<S: Symbolic> Tail<S> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instruction<S: Symbolic> {
     pub head: Head<S>,
     pub tail: Tail<S>,
@@ -91,6 +91,7 @@ impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instructi
     EnumVariantNames,
     Eq,
     Hash,
+    Ord,
     PartialEq,
     PartialOrd,
     Serialize,
