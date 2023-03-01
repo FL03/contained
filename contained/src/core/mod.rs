@@ -12,6 +12,10 @@ pub(crate) mod intervals;
 pub(crate) mod notes;
 pub(crate) mod pitch;
 
+pub trait Classifiable<Cls>: Clone + std::convert::From<i64> {
+    fn class(&self) -> Cls;
+}
+
 pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {
         PitchClass::from(self.pitch())

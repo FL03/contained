@@ -3,29 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-
+use crate::states::{StateSpec, Stateful};
 use decanter::prelude::{hasher, Hashable, H256};
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub trait Stateful<S: StateSpec>: Clone + Eq + Ord + PartialEq + PartialOrd + ToString {
-    fn state(&self) -> &S;
-}
-
-pub trait StateSpec:
-    Clone
-    + Copy
-    + Eq
-    + Ord
-    + PartialEq
-    + PartialOrd
-    + ToString
-    + serde::Serialize
-    + std::convert::From<i64>
-    + std::convert::Into<i64>
-{
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct State<S: StateSpec = States> {
@@ -58,6 +40,28 @@ impl<S: StateSpec> Hashable for State<S> {
 impl<S: StateSpec> std::fmt::Display for State<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+impl<S: StateSpec> std::ops::Add for State<S> {
+    type Output = State<S>;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self + rhs.state().clone()
+    }
+}
+
+impl<S: StateSpec> std::ops::AddAssign for State<S> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.state = self.state().clone() + rhs.state().clone();
+    }
+}
+
+impl<S: StateSpec> std::ops::Add<S> for State<S> {
+    type Output = State<S>;
+
+    fn add(self, rhs: S) -> Self::Output {
+        State::new(self.state().clone() + rhs)
     }
 }
 
@@ -107,6 +111,14 @@ impl States {
 }
 
 impl StateSpec for States {}
+
+impl std::ops::Add for States {
+    type Output = States;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        (self as i64 + rhs as i64).into()
+    }
+}
 
 impl From<usize> for States {
     fn from(d: usize) -> Self {

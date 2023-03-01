@@ -38,7 +38,7 @@ pub trait Turing {
         &self,
         cnf: &mut Configuration<Self::Symbol>,
     ) -> Resultant<Configuration<Self::Symbol>> {
-        self.execute_until(cnf, |cnf| cnf.state().clone() == States::invalid())
+        self.execute_until(cnf, |cnf| cnf.state().state().clone() == States::invalid())
     }
     ///
     fn execute_once(

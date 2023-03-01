@@ -4,13 +4,33 @@
     Description: ... summary ...
 */
 use crate::turing::{Move, Tape};
-use crate::{State, Stateful, States, Symbolic};
+use crate::{State, States, Symbolic};
 
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
+use strum::{Display, EnumString, EnumVariantNames};
 
-pub enum Configurations<S: Symbolic> {
-    Normal(Configuration<S>),
-    Standard(Configuration<S>),
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    SmartDefault,
+)]
+#[repr(i64)]
+#[strum(serialize_all = "snake_case")]
+pub enum Config {
+    #[default]
+    Normal = 0,
+    Standard = 1,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -21,6 +41,16 @@ pub struct Configuration<S: Symbolic = String> {
 }
 
 impl<S: Symbolic> Configuration<S> {
+    pub fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
+        Self { index, state, tape }
+    }
+    pub fn create(tape: Tape<S>, config: Option<Config>) -> Result<Self, String> {
+        let cnf = match config.unwrap_or_default() {
+            Config::Normal => (0, Default::default(), tape),
+            Config::Standard => (tape.len() - 1, Default::default(), tape),
+        };
+        Self::try_from(cnf)
+    }
     pub fn build(index: usize, state: State<States>, tape: Tape<S>) -> Result<Self, String> {
         if index > tape.len() {
             return Err(format!(
@@ -31,12 +61,12 @@ impl<S: Symbolic> Configuration<S> {
         Ok(Self { index, state, tape })
     }
     pub fn norm(tape: Tape<S>) -> Result<Self, String> {
-        Self::build(0, Default::default(), tape)
+        Self::create(tape, Some(Config::Normal))
     }
     pub fn std(tape: Tape<S>) -> Result<Self, String> {
-        Self::build(tape.len() - 1, Default::default(), tape)
+        Self::create(tape, Some(Config::Standard))
     }
-    /// [Configurable::is_empty] is a method for checking if the tape is empty
+    /// [Configuration::is_empty]
     pub fn is_empty(&self) -> bool {
         self.tape().is_empty()
     }
@@ -73,6 +103,9 @@ impl<S: Symbolic> Configuration<S> {
     pub fn position(&self) -> usize {
         self.index
     }
+    pub fn state(&self) -> &State<States> {
+        &self.state
+    }
     pub fn symbol(&self) -> &S {
         self.tape
             .get(self.position())
@@ -95,30 +128,25 @@ impl<S: Ord + Symbolic> std::fmt::Display for Configuration<S> {
     }
 }
 
-impl<S: Ord + Symbolic> Stateful<States> for Configuration<S> {
-    fn state(&self) -> &States {
-        self.state.state()
+// impl<S: Ord + Symbolic> Stateful<States> for Configuration<S> {
+//     fn state(&self) -> &States {
+//         self.state.state()
+//     }
+// }
+
+impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Configuration<S> {
+    type Error = String;
+    fn try_from(d: (usize, State<States>, Tape<S>)) -> Result<Self, Self::Error> {
+        if d.0 > d.2.len() {
+            return Err("Starting index is out of bounds...".to_string());
+        }
+        Ok(Self::new(d.0, d.1, d.2))
     }
 }
 
 impl<S: Symbolic> From<Configuration<S>> for (usize, State<States>, Tape<S>) {
     fn from(d: Configuration<S>) -> Self {
         (d.index, d.state, d.tape)
-    }
-}
-
-impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Configuration<S> {
-    type Error = String;
-
-    fn try_from(d: (usize, State<States>, Tape<S>)) -> Result<Self, Self::Error> {
-        if d.0 > d.2.len() {
-            return Err(format!("The starting position ({}) is out of bounds", d.0));
-        }
-        Ok(Self {
-            index: d.0,
-            state: d.1,
-            tape: d.2,
-        })
     }
 }
 
