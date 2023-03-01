@@ -51,15 +51,6 @@ impl<S: Symbolic> Configuration<S> {
         };
         Self::try_from(cnf)
     }
-    pub fn build(index: usize, state: State<States>, tape: Tape<S>) -> Result<Self, String> {
-        if index > tape.len() {
-            return Err(format!(
-                "The starting position ({}) is out of bounds",
-                index
-            ));
-        }
-        Ok(Self { index, state, tape })
-    }
     pub fn norm(tape: Tape<S>) -> Result<Self, String> {
         Self::create(tape, Some(Config::Normal))
     }
@@ -79,6 +70,10 @@ impl<S: Symbolic> Configuration<S> {
         self.tape.set(self.position(), symbol);
     }
 
+    
+    pub fn position(&self) -> usize {
+        self.index
+    }
     /// [Configurable::shift] Shifts the [`Tape`] to left or right if [`Move`] is [`Move::Left`]
     /// or [`Move::Right`], otherwise do nothing (when [`Move::None`]).
     /// If [`Configuration`] reachs the begin or the end of the [`Tape`]
@@ -99,9 +94,6 @@ impl<S: Symbolic> Configuration<S> {
             // Stay
             _ => {}
         };
-    }
-    pub fn position(&self) -> usize {
-        self.index
     }
     pub fn state(&self) -> &State<States> {
         &self.state

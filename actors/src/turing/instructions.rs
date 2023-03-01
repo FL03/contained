@@ -106,7 +106,7 @@ pub enum Move {
 
 impl From<i64> for Move {
     fn from(d: i64) -> Self {
-        match d {
+        match (d % 3).abs() {
             0 => Self::Left,
             1 => Self::Right,
             _ => Self::Stay,
