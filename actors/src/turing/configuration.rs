@@ -128,12 +128,6 @@ impl<S: Ord + Symbolic> std::fmt::Display for Configuration<S> {
     }
 }
 
-// impl<S: Ord + Symbolic> Stateful<States> for Configuration<S> {
-//     fn state(&self) -> &States {
-//         self.state.state()
-//     }
-// }
-
 impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Configuration<S> {
     type Error = String;
     fn try_from(d: (usize, State<States>, Tape<S>)) -> Result<Self, Self::Error> {

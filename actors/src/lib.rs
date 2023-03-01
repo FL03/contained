@@ -14,6 +14,26 @@ pub mod turing;
 
 use serde::{Deserialize, Serialize};
 
+/// Simple trait for compatible symbols
+pub trait Symbolic:
+    Clone
+    + Default
+    + Eq
+    + Ord
+    + PartialEq
+    + PartialOrd
+    + std::fmt::Debug
+    + std::fmt::Display
+    + serde::Serialize
+{
+}
+
+impl Symbolic for char {}
+
+impl Symbolic for &str {}
+
+impl Symbolic for String {}
+
 /// [Appellation] is a novel naming schematic based on a basis from linear-algebra
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Appellation<I, J, K>(I, J, K);
