@@ -19,25 +19,25 @@
 */
 use super::{Triad, LPR};
 use crate::core::{Notable, Note};
-use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Tonnetz<N: Notable = Note> {
-    scope: Triad<N>,
+    scope: Arc<Triad<N>>,
 }
 
 impl<N: Notable> Tonnetz<N> {
-    pub fn new(scope: Triad<N>) -> Self {
+    pub fn new(scope: Arc<Triad<N>>) -> Self {
         Self { scope }
     }
     /// Returns an owned instance of the active [Triad]
     pub fn scope(&self) -> &Triad<N> {
-        &self.scope
+        self.scope.as_ref()
     }
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, shift: LPR) {
-        self.scope *= shift;
+        self.scope = Arc::new(self.scope().clone() * shift);
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
@@ -56,7 +56,7 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
     fn from(triad: Triad<N>) -> Tonnetz<N> {
-        Tonnetz::<N>::new(triad)
+        Tonnetz::<N>::new(Arc::new(triad))
     }
 }
 
@@ -70,7 +70,7 @@ mod tests {
     fn test_tonnetz() {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
-        let mut a = Tonnetz::new(triad.clone());
+        let mut a = Tonnetz::from(triad.clone());
         // Apply three consecutive transformations to the scope
         a.walk(vec![LPR::L, LPR::P, LPR::R]);
         assert_eq!(a.scope().clone(), Triad::try_from((1, 4, 8)).unwrap());

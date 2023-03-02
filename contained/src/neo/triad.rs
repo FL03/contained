@@ -88,7 +88,7 @@ impl<N: Notable> Triad<N> {
             .into_iter()
             .map(|v| v.pitch().into())
             .collect::<Vec<Note>>();
-        Configuration::build(Tape::new(a), None).unwrap()
+        Configuration::build(Tape::new(a), None)
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
     pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {

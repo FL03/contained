@@ -12,7 +12,7 @@ fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(alphabet.clone());
-    let mut cnf = Configuration::build(tape, None)?;
+    let mut cnf = Configuration::build(tape, None);
 
     // Setup the program
     let mut program = Program::new(alphabet, States::invalid().into());

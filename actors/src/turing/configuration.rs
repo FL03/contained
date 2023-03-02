@@ -44,12 +44,13 @@ impl<S: Symbolic> Configuration<S> {
     pub fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
     }
-    pub fn build(tape: Tape<S>, config: Option<Config>) -> Result<Self, String> {
+    pub fn build(tape: Tape<S>, config: Option<Config>) -> Self {
         let cnf = match config.unwrap_or_default() {
             Config::Normal => (0, Default::default(), tape),
             Config::Standard => (tape.len() - 1, Default::default(), tape),
         };
-        Self::try_from(cnf)
+        // All descirbed
+        Self::try_from(cnf).unwrap()
     }
     /// [Configuration::is_empty]
     pub fn is_empty(&self) -> bool {
@@ -59,7 +60,7 @@ impl<S: Symbolic> Configuration<S> {
     pub fn len(&self) -> usize {
         self.tape().len()
     }
-    /// 
+    ///
     pub fn position(&self) -> usize {
         self.index
     }
@@ -137,8 +138,6 @@ mod tests {
         let tape = Tape::new(["a", "b", "c"]);
         let a = Configuration::build(tape.clone(), None);
         let b = Configuration::build(tape, Some(Config::Standard));
-        assert!(a.is_ok());
-        assert!(b.is_ok());
-        assert_ne!(a.unwrap(), b.unwrap())
+        assert_ne!(a, b);
     }
 }

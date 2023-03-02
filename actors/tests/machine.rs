@@ -9,7 +9,7 @@ fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(TEST_ALPHABET);
-    let cnf = Configuration::build(tape, None);
+    let mut cnf = Configuration::build(tape, None);
 
     // Setup the program
     let final_state = State::from(States::invalid());
@@ -37,7 +37,7 @@ fn test_machine() {
     assert!(a.is_ok());
 
     assert!(Machine::new("", program.clone()).is_err());
-    let res = a.unwrap().execute(&mut cnf.unwrap());
+    let res = a.unwrap().execute(&mut cnf);
     assert!(res.is_ok());
     assert_eq!(res.unwrap().tape().tape().clone(), vec!["c", "a", "a"]);
 }
