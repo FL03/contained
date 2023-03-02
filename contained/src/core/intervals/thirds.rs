@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use super::{Gradient, Notable};
+use crate::core::{Gradient, Notable};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -33,63 +33,6 @@ pub fn is_minor_third<N: Notable>(a: N, b: N) -> bool {
         return true;
     }
     false
-}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Interval {
-    Fifth(Fifths),
-    #[default]
-    Third(Thirds),
-}
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Fifths {
-    Augmented = 8,
-    Diminshed = 6,
-    #[default]
-    Perfect = 7,
-}
-
-impl<N: Notable> std::ops::Mul<N> for Fifths {
-    type Output = N;
-
-    fn mul(self, rhs: N) -> Self::Output {
-        (rhs.pitch() + self as i64).into()
-    }
 }
 
 #[derive(
@@ -154,5 +97,18 @@ impl<N: Notable> std::ops::Mul<N> for Thirds {
 
     fn mul(self, rhs: N) -> Self::Output {
         (rhs.pitch() + self.clone() as i64).into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::Note;
+
+    #[test]
+    fn test_thirds() {
+        let a: Note = 0.into();
+        let b = Thirds::Major * a;
+        assert_eq!(b, Note::from(4))
     }
 }

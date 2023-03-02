@@ -40,6 +40,10 @@ pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64
 pub trait Notable:
     Clone + Default + Gradient + PartialEq + ToString + std::convert::From<i64>
 {
+    /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
+    fn is_natural(&self) -> bool {
+        NaturalNote::try_from(self.pitch()).is_ok()
+    }
 }
 
 #[cfg(test)]

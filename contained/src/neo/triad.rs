@@ -5,12 +5,7 @@
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
         Generaically, triad's share two of its notes with three of its inversions.
 
-        The neo-Riemannian theory highlightes three transformations, each of which preserve two of the three notes.
-
-        We express a triad as a ordered three tuple <a, b, c> where a, b, c are integers modulus of 12 and:
-            a != b
-            a != c
-            b != c
+        For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
 */
 use super::LPR;
 use crate::actors::{
@@ -139,7 +134,6 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
 }
 
 impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
-
     fn mul_assign(&mut self, rhs: LPR) {
         *self = self.clone() * rhs;
     }

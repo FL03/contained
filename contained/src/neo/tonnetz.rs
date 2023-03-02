@@ -20,9 +20,8 @@
 use super::{Triad, LPR};
 use crate::core::{Notable, Note};
 use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SmartDefault)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tonnetz<N: Notable = Note> {
     scope: Triad<N>,
 }
@@ -46,6 +45,12 @@ impl<N: Notable> Tonnetz<N> {
         for s in cycle {
             self.transform(s)
         }
+    }
+}
+
+impl<N: Notable> std::fmt::Display for Tonnetz<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.scope())
     }
 }
 
