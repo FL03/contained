@@ -13,10 +13,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 
 /// [is_third] compares two notes to see if either a major or minor third interval exists
 pub fn is_third<N: Notable>(a: N, b: N) -> bool {
-    if Thirds::Major * a.clone() == b || Thirds::Minor * a == b {
-        return true;
-    }
-    false
+    Thirds::try_from((a, b)).is_ok()
 }
 
 /// [is_major_third] compares the given notes and determines if a major third exists
@@ -61,8 +58,8 @@ pub enum Thirds {
 
 impl Thirds {
     /// [is_third] compares two notes to see if either a major or minor third interval exists
-    pub fn is_third<N: Notable>(a: N, b: N) -> bool {
-        Self::try_from((a, b)).is_ok()
+    pub fn is_third<N: Notable>(a: N, b: N) -> Result<Self, String> {
+        Self::try_from((a, b))
     }
     pub fn compute_both<N: Notable>(note: N) -> (N, N) {
         (Self::Major * note.clone(), Self::Minor * note)
