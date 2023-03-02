@@ -135,7 +135,7 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
 
 impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
     fn mul_assign(&mut self, rhs: LPR) {
-        *self = self.clone() * rhs;
+        *self = rhs.transform(&mut self.clone());
     }
 }
 

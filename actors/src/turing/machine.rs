@@ -25,6 +25,12 @@ impl<S: Symbolic> Machine<S> {
             ));
         }
     }
+    pub fn is_valid(&self) -> bool {
+        if self.program.alphabet().contains(&self.ds) {
+            return true;
+        }
+        false
+    }
 }
 
 impl<S: Symbolic> Turing for Machine<S> {

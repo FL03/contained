@@ -1,9 +1,9 @@
 /*
-    Appellation: reactions <module>
+    Appellation: instructions <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        Turing machines are given three degrees of freedom when considering possible movements
-
+        Turing machines accept instructions in the form of a five-tuple:
+            (State, Symbol, State, Symbol, Move)
 */
 use crate::{State, States, Symbolic};
 use serde::{Deserialize, Serialize};

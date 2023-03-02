@@ -59,13 +59,12 @@ impl<S: Symbolic> Configuration<S> {
     pub fn len(&self) -> usize {
         self.tape().len()
     }
-
-    pub fn set_symbol(&mut self, symbol: S) {
-        self.tape.set(self.position(), symbol);
-    }
-
+    /// 
     pub fn position(&self) -> usize {
         self.index
+    }
+    pub fn set_symbol(&mut self, elem: S) {
+        self.tape.set(self.position(), elem)
     }
     /// [Configurable::shift] Shifts the [`Tape`] to left or right if [`Move`] is [`Move::Left`]
     /// or [`Move::Right`], otherwise do nothing (when [`Move::None`]).
