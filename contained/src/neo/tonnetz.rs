@@ -21,6 +21,14 @@ use super::{Triad, LPR};
 use crate::core::{Notable, Note};
 use std::sync::Arc;
 
+pub struct Scope<N: Notable>(Triad<N>);
+
+impl<N: Notable> Scope<N> {
+    pub fn transform(&mut self, dirac: LPR) {
+        self.0 *= dirac;
+    }
+}
+
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Tonnetz<N: Notable = Note> {
     scope: Arc<Triad<N>>,

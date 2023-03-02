@@ -60,7 +60,7 @@ impl<N: Notable> Triad<N> {
         };
         Self(triad.0, triad.1, triad.2)
     }
-
+    ///
     pub fn classify(&self) -> Resultant<Triads> {
         if Fifths::Perfect * self.root() == self.fifth() {
             if is_major_third(self.root(), self.third()) {
@@ -98,17 +98,29 @@ impl<N: Notable> Triad<N> {
     pub fn is_valid(&self) -> bool {
         self.classify().is_ok()
     }
+    ///
     pub fn fifth(&self) -> N {
         self.2.clone()
     }
-
+    ///
     pub fn root(&self) -> N {
         self.0.clone()
     }
-
+    ///
     pub fn third(&self) -> N {
         self.1.clone()
     }
+    ///
+    pub fn transform(&mut self, dirac: LPR) {
+        *self = dirac.transform(self);
+    }
+    ///
+    pub fn walk(&mut self, to: Vec<LPR>) {
+        for dirac in to {
+            self.transform(dirac);
+        }
+    }
+    
 }
 
 impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> {}
@@ -135,7 +147,7 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
 
 impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
     fn mul_assign(&mut self, rhs: LPR) {
-        *self = rhs.transform(&mut self.clone());
+        self.transform(rhs);
     }
 }
 

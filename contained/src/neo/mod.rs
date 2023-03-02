@@ -15,7 +15,6 @@ use crate::Dirac;
 pub trait Transformable {}
 
 pub trait Transformation<S: Clone> {
-    type Error;
     type Output;
 
     /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
