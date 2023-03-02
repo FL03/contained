@@ -54,6 +54,12 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
     }
 }
 
+impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
+    fn from(triad: Triad<N>) -> Tonnetz<N> {
+        Tonnetz::<N>::new(triad)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
