@@ -115,12 +115,11 @@ impl<N: Notable> Triad<N> {
         *self = dirac.transform(self);
     }
     ///
-    pub fn walk(&mut self, to: Vec<LPR>) {
-        for dirac in to {
+    pub fn walk(&mut self, chain: impl IntoIterator<Item = LPR>) {
+        for dirac in chain {
             self.transform(dirac);
         }
     }
-    
 }
 
 impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> {}
@@ -221,5 +220,17 @@ mod tests {
         let b = Triad::try_from((11, 4, 7));
         assert!(b.is_ok());
         assert_ne!(a, b.unwrap())
+    }
+
+    #[test]
+    fn test_cycles() {
+        let triad = Triad::<Note>::new(0.into(), Triads::Major);
+        let mut a = triad.clone();
+        a *= LPR::L;
+        assert_eq!(a.clone(), Triad::try_from((11, 4, 7)).unwrap());
+        a *= LPR::L;
+        assert_eq!(a.clone(), triad.clone());
+        a.walk(vec![LPR::L, LPR::L]);
+        assert_eq!(a.clone(), triad)
     }
 }
