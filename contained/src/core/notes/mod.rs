@@ -38,7 +38,7 @@ pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64
 
 /// [Notable] is used to designate a structure used to represent a note
 pub trait Notable:
-    Clone + Default + Gradient + PartialEq + ToString + std::convert::From<i64>
+    Clone + Default + Gradient + PartialEq + Send + Sync + ToString + std::convert::From<i64>
 {
     /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {
