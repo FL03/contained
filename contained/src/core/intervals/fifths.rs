@@ -34,9 +34,15 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[strum(serialize_all = "snake_case")]
 pub enum Fifths {
     Augmented = 8,
-    Diminshed = 6,
+    Diminished = 6,
     #[default]
     Perfect = 7,
+}
+
+impl Fifths {
+    pub fn compute<N: Notable>(note: N) -> (N, N, N) {
+        (Self::Augmented * note.clone(), Self::Perfect * note.clone(), Self::Diminished * note)
+    }
 }
 
 impl<N: Notable> std::ops::Mul<N> for Fifths {

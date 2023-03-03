@@ -34,13 +34,10 @@ impl<N: Notable> Tonnetz<N> {
     pub fn scope(&self) -> &Triad<N> {
         self.scope.as_ref()
     }
-    /// Apply a single [LPR] transformation onto the active machine
-    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, shift: LPR) {
         self.scope = Arc::new(self.scope().clone() * shift);
     }
-    /// Applies multiple [LPR] transformations onto the scoped [Triad]
-    /// The goal here is to allow the machine to work on and in the scope
+
     pub fn walk(&mut self, cycle: Vec<LPR>) {
         for s in cycle {
             self.transform(s)

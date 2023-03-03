@@ -14,7 +14,7 @@
         Shift by a tone: +/- 2
 */
 use super::Triad;
-use crate::core::{is_minor_third, Notable};
+use crate::core::{Notable, Thirds};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -46,33 +46,28 @@ pub enum LPR {
 
 impl LPR {
     pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
+        let ab =
+            Thirds::try_from((triad.root(), triad.third())).expect("Invalid triadic structure...");
         let (mut r, mut t, mut f): (i64, i64, i64) = (
             triad.root().pitch(),
             triad.third().pitch(),
             triad.fifth().pitch(),
         );
         match self {
-            LPR::L => {
-                if is_minor_third(triad.root(), triad.third()) {
-                    f += 1;
-                } else {
-                    r -= 1;
-                }
-            }
-            LPR::P => {
-                if is_minor_third(triad.root(), triad.third()) {
-                    t += 1;
-                } else {
-                    t -= 1;
-                }
-            }
-            LPR::R => {
-                if is_minor_third(triad.root(), triad.third()) {
+            LPR::L => match ab {
+                Thirds::Major => r -= 1,
+                Thirds::Minor => f += 1,
+            },
+            LPR::P => match ab {
+                Thirds::Major => t -= 1,
+                Thirds::Minor => t += 1,
+            },
+            LPR::R => match ab {
+                Thirds::Major => f += 2,
+                Thirds::Minor => {
                     r -= 2;
-                } else {
-                    f += 2;
                 }
-            }
+            },
         };
         // All triadic transformations will result in another valid triad
         Triad::try_from((r, t, f)).unwrap()

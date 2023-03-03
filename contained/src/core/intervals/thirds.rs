@@ -11,27 +11,6 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
-/// [is_third] compares two notes to see if either a major or minor third interval exists
-pub fn is_third<N: Notable>(a: N, b: N) -> bool {
-    Thirds::try_from((a, b)).is_ok()
-}
-
-/// [is_major_third] compares the given notes and determines if a major third exists
-pub fn is_major_third<N: Notable>(a: N, b: N) -> bool {
-    if Thirds::Major * a == b {
-        return true;
-    }
-    false
-}
-
-/// [is_minor_third]
-pub fn is_minor_third<N: Notable>(a: N, b: N) -> bool {
-    if Thirds::Minor * a == b {
-        return true;
-    }
-    false
-}
-
 #[derive(
     Clone,
     Copy,
@@ -61,7 +40,7 @@ impl Thirds {
     pub fn is_third<N: Notable>(a: N, b: N) -> Result<Self, String> {
         Self::try_from((a, b))
     }
-    pub fn compute_both<N: Notable>(note: N) -> (N, N) {
+    pub fn compute<N: Notable>(note: N) -> (N, N) {
         (Self::Major * note.clone(), Self::Minor * note)
     }
     /// Functional method for creating a major third

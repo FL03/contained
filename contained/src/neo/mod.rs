@@ -24,3 +24,7 @@ pub trait Transformation<S: Clone> {
         self.dirac()(args)
     }
 }
+
+pub trait Validity {
+    fn is_valid(&self) -> bool;
+}

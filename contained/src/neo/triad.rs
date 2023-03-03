@@ -12,7 +12,7 @@ use crate::actors::{
     turing::{Configuration, Machine, Program, Tape},
     Symbolic,
 };
-use crate::core::{is_major_third, is_minor_third, is_third, Fifths, Note, Thirds};
+use crate::core::{Fifths, Note, Thirds};
 use crate::core::{Gradient, Notable};
 use crate::Resultant;
 use serde::{Deserialize, Serialize};
@@ -44,13 +44,36 @@ pub enum Triads {
     Minor,     // If the root -> third is minor and if third -> fifth is major
 }
 
+impl<N: Notable> TryFrom<Triad<N>> for Triads {
+    type Error = String;
+
+    fn try_from(triad: Triad<N>) -> Result<Self, Self::Error> {
+        let ab = Thirds::try_from((triad.root(), triad.third()))?;
+
+        if Fifths::Perfect * triad.root() == triad.fifth() {
+            let res = match ab {
+                Thirds::Major => Self::Major,
+                Thirds::Minor => Self::Minor,
+            };
+            return Ok(res);
+        } else {
+            if Fifths::Augmented * triad.root() == triad.fifth() && ab == Thirds::Major {
+                return Ok(Self::Augmented);
+            } else if Fifths::Diminished * triad.root() == triad.fifth() && ab == Thirds::Minor {
+                return Ok(Self::Diminshed);
+            }
+            Err("Failed to find the required relationships...".to_string())
+        }
+    }
+}
+
 /// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad<N: Notable>(N, N, N);
 
 impl<N: Notable> Triad<N> {
     pub fn new(root: N, class: Triads) -> Self {
-        let (a, b) = Thirds::compute_both(root.clone());
+        let (a, b) = Thirds::compute(root.clone());
 
         let triad = match class {
             Triads::Augmented => (root, a.clone(), Thirds::Major * a),
@@ -62,26 +85,9 @@ impl<N: Notable> Triad<N> {
     }
     ///
     pub fn classify(&self) -> Resultant<Triads> {
-        if Fifths::Perfect * self.root() == self.fifth() {
-            if is_major_third(self.root(), self.third()) {
-                return Ok(Triads::Major);
-            } else {
-                return Ok(Triads::Minor);
-            }
-        } else {
-            if is_major_third(self.root(), self.third())
-                && is_major_third(self.third(), self.fifth())
-            {
-                return Ok(Triads::Augmented);
-            } else if is_minor_third(self.root(), self.third())
-                && is_minor_third(self.third(), self.fifth())
-            {
-                return Ok(Triads::Diminshed);
-            }
-            Err("Failed to find the required relationships...".to_string())
-        }
+        Triads::try_from(self.clone())
     }
-    /// [Triadic::config] Create a new [Configuration] with the [Triad] as its alphabet
+    /// Create a new [Configuration] with the [Triad] as its alphabet
     pub fn config(&self) -> Configuration<Note> {
         let a = self
             .clone()
@@ -89,6 +95,12 @@ impl<N: Notable> Triad<N> {
             .map(|v| v.pitch().into())
             .collect::<Vec<Note>>();
         Configuration::build(Tape::new(a), None)
+    }
+    /// Repeatedly applies a chain of transformations to the [Triad]
+    pub fn cycle(&mut self, cycle: impl IntoIterator<Item = LPR> + Clone) {
+        loop {
+            self.walk(Vec::from_iter(cycle.clone()));
+        }
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
     pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
@@ -110,11 +122,13 @@ impl<N: Notable> Triad<N> {
     pub fn third(&self) -> N {
         self.1.clone()
     }
-    ///
+    /// Apply a single [LPR] transformation onto the active machine
+    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, dirac: LPR) {
         *self = dirac.transform(self);
     }
-    ///
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow the machine to work on and in the scope
     pub fn walk(&mut self, chain: impl IntoIterator<Item = LPR>) {
         for dirac in chain {
             self.transform(dirac);
@@ -174,7 +188,9 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
                     args[tmp[(j + 1) % tmp.len()]].clone(),
                 );
                 // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-                if is_third(a.clone(), b.clone()) && is_third(b.clone(), c.clone()) {
+                if Thirds::try_from((a.clone(), b.clone())).is_ok()
+                    && Thirds::try_from((b.clone(), c.clone())).is_ok()
+                {
                     return Ok(Triad(a, b, c));
                 }
             }
