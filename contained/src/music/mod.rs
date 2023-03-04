@@ -13,13 +13,14 @@ pub mod intervals;
 pub(crate) mod notes;
 pub(crate) mod pitch;
 
+use crate::absmod;
 pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {
-        PitchClass::from(self.pitch())
+        PitchClass::from(&self.pitch())
     }
     /// [Gradient::pitch] is a method for numerically representing the structure
     fn pitch(&self) -> i64 {
-        crate::absmod(self.clone().into(), 12)
+        absmod(self.clone().into(), 12)
     }
 }
 

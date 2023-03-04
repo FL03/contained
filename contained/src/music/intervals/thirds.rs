@@ -83,8 +83,6 @@ mod tests {
 
     #[test]
     fn test_thirds() {
-        let a: Note = 0.into();
-        let b = Thirds::Major * a;
-        assert_eq!(b, Note::from(4))
+        assert_eq!(Thirds::Major * Note::from(0), Note::from(4))
     }
 }

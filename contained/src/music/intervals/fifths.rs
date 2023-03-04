@@ -64,8 +64,6 @@ mod tests {
 
     #[test]
     fn test_fifths() {
-        let a: Note = 0.into();
-        let b = Fifths::Perfect * a;
-        assert_eq!(b, Note::from(7))
+        assert_eq!(Fifths::Perfect * Note::from(0), Note::from(7))
     }
 }

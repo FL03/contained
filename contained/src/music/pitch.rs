@@ -41,7 +41,7 @@ pub enum PitchClass {
     Natural(NaturalNote),
 }
 
-impl Gradient for PitchClass { }
+impl Gradient for PitchClass {}
 
 impl From<PitchClass> for i64 {
     fn from(data: PitchClass) -> i64 {
@@ -72,19 +72,18 @@ impl From<PitchClass> for Pitch {
     }
 }
 
-impl From<Pitch> for PitchClass {
-    fn from(value: Pitch) -> PitchClass {
-        PitchClass::from(value.pitch())
+impl From<i64> for PitchClass {
+    fn from(value: i64) -> PitchClass {
+        PitchClass::from(&Pitch::new(value))
     }
 }
 
-impl From<i64> for PitchClass {
-    fn from(value: i64) -> PitchClass {
-        let data = Pitch::new(value);
-        if let Ok(v) = Accidentals::try_from(data) {
+impl<G: Gradient> From<&G> for PitchClass {
+    fn from(value: &G) -> PitchClass {
+        if let Ok(v) = Accidentals::try_from(value.pitch()) {
             PitchClass::from(v)
         } else {
-            PitchClass::from(NaturalNote::try_from(data).expect(""))
+            PitchClass::from(NaturalNote::try_from(value.pitch()).expect(""))
         }
     }
 }
@@ -105,7 +104,11 @@ impl Pitch {
     }
 }
 
-impl Gradient for Pitch { }
+impl Gradient for Pitch {
+    fn pitch(&self) -> i64 {
+        crate::absmod(self.0, 12)
+    }
+}
 
 impl std::ops::Add<i64> for Pitch {
     type Output = Pitch;
@@ -165,7 +168,7 @@ mod tests {
     #[test]
     fn test_pitch_class() {
         let a = PitchClass::default();
-        let b = PitchClass::Accidental(Accidentals::default());
+        let b = PitchClass::Accidental(Default::default());
         assert_ne!(a.clone(), b.clone());
         assert_eq!(a, PitchClass::Natural(Default::default()));
         assert_eq!(

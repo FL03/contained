@@ -25,12 +25,16 @@ impl Note {
         self.1
     }
 }
-impl Gradient for Note {}
+
+impl Gradient for Note {
+    fn class(&self) -> PitchClass {
+        self.0.clone()
+    }
+}
 
 impl Notable for Note {}
 
 impl Symbolic for Note {}
-
 
 impl PartialEq for Note {
     fn eq(&self, other: &Self) -> bool {
@@ -52,7 +56,7 @@ impl From<i64> for Note {
 
 impl From<Note> for i64 {
     fn from(data: Note) -> i64 {
-        data.pitch()
+        data.class().into()
     }
 }
 

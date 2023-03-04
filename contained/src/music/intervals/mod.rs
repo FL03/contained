@@ -68,8 +68,6 @@ mod tests {
 
     #[test]
     fn test_interval() {
-        let a: Note = 0.into();
-        let b = Interval::from(Thirds::Major) * a;
-        assert_eq!(b, Note::from(4))
+        assert_eq!(Interval::from(Thirds::Major) * Note::from(0), Note::from(4))
     }
 }
