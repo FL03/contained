@@ -56,6 +56,9 @@ impl<S: Symbolic> Tape<S> {
     pub fn len(&self) -> usize {
         self.tape().len()
     }
+    pub fn push(&mut self, elem: S) {
+        self.0.push(elem);
+    }
     pub fn set(&mut self, index: usize, elem: S) {
         self.0[index] = elem;
     }
