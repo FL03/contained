@@ -13,19 +13,6 @@ pub(crate) mod tapes;
 
 use crate::{Resultant, Stateful, States, Symbolic};
 
-pub trait Executable<T> {
-    type Error;
-    type Output;
-
-    fn execute(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
-    fn execute_once(&self, exe: &mut T) -> Result<Self::Output, Self::Error>;
-    fn execute_until(
-        &self,
-        exe: &mut T,
-        until: impl Fn(&T) -> bool,
-    ) -> Result<Self::Output, Self::Error>;
-}
-
 /// Describes the basic functionality of a Turing machine
 pub trait Turing {
     type Symbol: Symbolic;
@@ -47,9 +34,9 @@ pub trait Turing {
     ) -> Resultant<Configuration<Self::Symbol>> {
         let head = Head::new(cnf.state().clone().into(), cnf.symbol().clone());
         let inst = self.program().get(head)?.clone();
-        cnf.state = inst.tail.state().clone();
-        cnf.set_symbol(inst.tail.symbol().clone());
-        cnf.shift(*inst.tail.action(), self.default_symbol().clone());
+        cnf.state = inst.tail().state().clone();
+        cnf.set_symbol(inst.tail().symbol().clone());
+        cnf.shift(*inst.tail().action(), self.default_symbol().clone());
         Ok(cnf.clone())
     }
     ///
@@ -61,9 +48,9 @@ pub trait Turing {
         while !until(cnf) {
             let head = Head::new(cnf.state.clone(), cnf.symbol().clone());
             let inst = self.program().get(head)?.clone();
-            cnf.state = inst.tail.state().clone();
-            cnf.set_symbol(inst.tail.symbol().clone());
-            cnf.shift(*inst.tail.action(), self.default_symbol().clone());
+            cnf.state = inst.tail().state().clone();
+            cnf.set_symbol(inst.tail().symbol().clone());
+            cnf.shift(*inst.tail().action(), self.default_symbol().clone());
         }
         Ok(cnf.clone())
     }

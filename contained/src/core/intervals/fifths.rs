@@ -41,7 +41,11 @@ pub enum Fifths {
 
 impl Fifths {
     pub fn compute<N: Notable>(note: N) -> (N, N, N) {
-        (Self::Augmented * note.clone(), Self::Perfect * note.clone(), Self::Diminished * note)
+        (
+            Self::Augmented * note.clone(),
+            Self::Perfect * note.clone(),
+            Self::Diminished * note,
+        )
     }
 }
 

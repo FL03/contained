@@ -64,9 +64,7 @@ impl LPR {
             },
             LPR::R => match ab {
                 Thirds::Major => f += 2,
-                Thirds::Minor => {
-                    r -= 2;
-                }
+                Thirds::Minor => r -= 2,
             },
         };
         // All triadic transformations will result in another valid triad

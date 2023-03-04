@@ -55,20 +55,17 @@ impl<S: Symbolic> Tail<S> {
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Instruction<S: Symbolic> {
-    pub head: Head<S>,
-    pub tail: Tail<S>,
-}
+pub struct Instruction<S: Symbolic>(Head<S>, Tail<S>);
 
 impl<S: Symbolic> Instruction<S> {
     pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
-        Self { head, tail }
+        Self(head, tail)
     }
     pub fn head(&self) -> &Head<S> {
-        &self.head
+        &self.0
     }
     pub fn tail(&self) -> &Tail<S> {
-        &self.tail
+        &self.1
     }
 }
 
@@ -130,7 +127,7 @@ mod tests {
         let head = Head::new(State::new(States::invalid()), "b");
         let tail = Tail::new(State::new(States::invalid()), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
-        assert_eq!(instructions.tail.action(), &Move::Right)
+        assert_eq!(instructions.tail().action(), &Move::Right)
     }
 
     #[test]
