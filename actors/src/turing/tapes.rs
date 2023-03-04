@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
-use crate::Symbolic;
+use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -44,6 +44,8 @@ impl<S: Symbolic> From<Tape<S>> for Vec<S> {
         d.tape().clone()
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {

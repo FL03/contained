@@ -8,7 +8,7 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::actors::Symbolic;
+use crate::actors::turing::Symbolic;
 use crate::music::{Gradient, Notable, PitchClass};
 use serde::{Deserialize, Serialize};
 

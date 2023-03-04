@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Head, Instruction};
-use crate::{Resultant, State, Stateful, States, Symbolic};
+use super::{Head, Instruction, Symbolic};
+use crate::{Resultant, State, Stateful, States};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 

@@ -8,10 +8,7 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
 */
 use super::LPR;
-use crate::actors::{
-    turing::{Configuration, Machine, Program, Tape},
-    Symbolic,
-};
+use crate::actors::turing::{Configuration, Machine, Program, Symbolic, Tape};
 use crate::music::{
     intervals::{Fifths, Thirds},
     Gradient, Notable, Note,
@@ -242,14 +239,15 @@ mod tests {
     }
 
     #[test]
-    fn test_cycles() {
+    fn test_walking() {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
+
         let mut a = triad.clone();
-        a *= LPR::L;
-        assert_eq!(a.clone(), Triad::try_from((11, 4, 7)).unwrap());
-        a *= LPR::L;
-        assert_eq!(a.clone(), triad.clone());
-        a.walk(vec![LPR::L, LPR::L]);
-        assert_eq!(a.clone(), triad)
+        // Apply three consecutive transformations to the scope
+        a.walk(vec![LPR::L, LPR::P, LPR::R]);
+        assert_eq!(a.clone(), Triad::try_from((1, 4, 8)).unwrap());
+        // Apply the same transformations in reverse to go back to the original
+        a.walk(vec![LPR::R, LPR::P, LPR::L]);
+        assert_eq!(a.clone(), triad);
     }
 }

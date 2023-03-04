@@ -14,3 +14,15 @@ pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
 pub fn absmod(a: i64, m: i64) -> i64 {
     (((a % m) + m) % m).abs()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_absmod() {
+        let a: i64 = -1 % 12;
+        assert_ne!(a.abs(), absmod(-1, 12));
+        assert_eq!(absmod(-1, 12), 11);
+    }
+}

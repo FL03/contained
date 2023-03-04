@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Move, Tape};
-use crate::{State, States, Symbolic};
+use crate::turing::{Move, Symbolic, Tape};
+use crate::{State, States};
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -67,26 +67,26 @@ impl<S: Symbolic> Configuration<S> {
     pub fn set_symbol(&mut self, elem: S) {
         self.tape.set(self.position(), elem)
     }
-    /// [Configurable::shift] Shifts the [`Tape`] to left or right if [`Move`] is [`Move::Left`]
-    /// or [`Move::Right`], otherwise do nothing (when [`Move::None`]).
-    /// If [`Configuration`] reachs the begin or the end of the [`Tape`]
-    /// then [`Tape`] extends by [`Tape::insert`] method, otherwise only
-    /// changes self index.
-    pub fn shift(&mut self, movement: Move, default: S) {
-        match movement as i64 {
-            // Left
-            0 if self.position() == 0 => self.tape.insert(0, default),
-            0 => self.index -= 1,
-            // Right
-            1 => {
-                self.index += 1;
-                if self.position() == self.tape.len() {
-                    self.set_symbol(default);
-                }
+    /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
+    /// [Move::Right] inserts a new element at the end of the tape if the current position is the length of the tape
+    pub fn shift(&mut self, shift: Move, elem: S) {
+        match shift {
+            // If the current position is 0, insert a new element at the top of the vector
+            Move::Left if self.position() == 0 => {
+                self.tape.insert(self.position(), elem);
             }
-            // Stay
-            _ => {}
-        };
+            Move::Left => {
+                self.index -= 1;
+            },
+            Move::Right => {
+                self.index += 1;
+
+                if self.position() == self.tape().len() {
+                    self.tape.insert(self.position(), elem);
+                }
+            },
+            Move::Stay => {}
+        }
     }
     pub fn state(&self) -> &State<States> {
         &self.state

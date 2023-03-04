@@ -11,7 +11,29 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Resultant, Stateful, States, Symbolic};
+use crate::{Resultant, Stateful, States};
+
+/// Simple trait for compatible symbols
+pub trait Symbolic:
+    Clone
+    + Default
+    + Eq
+    + Ord
+    + PartialEq
+    + PartialOrd
+    + std::fmt::Debug
+    + std::fmt::Display
+    + serde::Serialize
+{
+}
+
+impl Symbolic for char {}
+
+impl Symbolic for &str {}
+
+impl Symbolic for String {}
+
+pub trait Alphabet<S: Symbolic>: std::iter::Iterator<Item = S> {}
 
 /// Describes the basic functionality of a Turing machine
 pub trait Turing {

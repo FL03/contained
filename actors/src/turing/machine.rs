@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::turing::{Program, Turing};
-use crate::{Resultant, Symbolic};
+use crate::turing::{Program, Symbolic, Turing};
+use crate::Resultant;
 
 use serde::{Deserialize, Serialize};
 
