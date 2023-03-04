@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{actor::*, primitives::*, states::*, utils::*};
+pub use self::{primitives::*, scope::*, states::*, utils::*};
 
-pub(crate) mod actor;
 pub(crate) mod primitives;
+pub(crate) mod scope;
 pub(crate) mod states;
 pub(crate) mod utils;
 
@@ -22,13 +22,13 @@ impl<I, J, K> Appellation<I, J, K> {
     pub fn new(a: I, b: J, c: K) -> Self {
         Self(a, b, c)
     }
-    pub fn primary(&self) -> &J {
+    pub fn mid(&self) -> &J {
         &self.1
     }
-    pub fn root(&self) -> &I {
+    pub fn first(&self) -> &I {
         &self.0
     }
-    pub fn secondary(&self) -> &K {
+    pub fn last(&self) -> &K {
         &self.2
     }
 }

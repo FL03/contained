@@ -3,12 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::{clients::actions::Action, events::{Event, Events, EventLoop}, proto::Conduct};
+use crate::{
+    clients::actions::Action,
+    events::{Event, EventLoop, Events},
+    proto::Conduct,
+};
 use either::Either;
 use futures::{Stream, StreamExt};
-use libp2p::{swarm::{SwarmEvent, ConnectionHandlerUpgrErr}, Swarm};
+use libp2p::{
+    swarm::{ConnectionHandlerUpgrErr, SwarmEvent},
+    Swarm,
+};
 use tokio::sync::mpsc;
-
 
 pub struct Runtime {
     action: mpsc::Receiver<Action>,
@@ -36,12 +42,12 @@ impl Runtime {
     pub fn event(self) -> mpsc::Sender<Event> {
         self.event
     }
-    pub async fn handle_event(&mut self, event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<std::io::Error>, std::io::Error>> ) {
-
+    pub async fn handle_event(
+        &mut self,
+        event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<std::io::Error>, std::io::Error>>,
+    ) {
     }
-    pub async fn handle_command(&mut self, action: Action) {
-        
-    }
+    pub async fn handle_command(&mut self, action: Action) {}
     // pub async fn run(mut self) {
     //     loop {
     //         tokio::select! {

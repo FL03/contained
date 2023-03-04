@@ -42,7 +42,7 @@ pub trait Turing<S: Symbolic> {
     fn driver(&mut self) -> &mut Self::Scope;
     /// [Turing::execute]
     fn execute(&mut self, program: Program<S>) -> Result<Self::Scope, String> {
-        let until = |actor: &Self::Scope| actor.state().state().clone() == States::Invalid;
+        let until = |actor: &Self::Scope| actor.clone().state().state().clone() == States::Invalid;
         self.execute_until(program, until)
     }
     /// [Turing::execute_once]

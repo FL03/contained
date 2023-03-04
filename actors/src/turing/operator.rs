@@ -15,15 +15,6 @@ pub struct Operator<S: Symbolic = String> {
     tape: Tape<S>,
 }
 
-impl<S: Symbolic> Operator<S> {
-    pub fn is_empty(&self) -> bool {
-        self.tape().is_empty()
-    }
-    pub fn len(&self) -> usize {
-        self.tape().len()
-    }
-}
-
 impl<S: Symbolic> Scope<S> for Operator<S> {
     fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
@@ -62,8 +53,8 @@ impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
             f,
             "{}, {}, {:?}",
             self.index,
-            self.state().to_string(),
-            self.tape()
+            self.state.to_string(),
+            self.tape
         )
     }
 }
@@ -102,10 +93,10 @@ mod tests {
         let tape = Tape::new(["a", "b", "c"]);
         let mut actor = Operator::new(0, State::from(States::Valid), tape);
         actor.shift(Move::Left, "b");
-        assert_eq!(actor.tape().clone(), Tape::new(["b", "a", "b", "c"]));
+        assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));
         for _ in 0..actor.tape().len() {
             actor.shift(Move::Right, "b");
         }
-        assert_eq!(actor.tape().clone(), Tape::new(["b", "a", "b", "c", "b"]));
+        assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c", "b"]));
     }
 }
