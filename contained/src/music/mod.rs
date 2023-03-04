@@ -16,7 +16,7 @@ pub(crate) mod pitch;
 use crate::absmod;
 pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {
-        PitchClass::from(&self.pitch())
+        self.pitch().into()
     }
     /// [Gradient::pitch] is a method for numerically representing the structure
     fn pitch(&self) -> i64 {
