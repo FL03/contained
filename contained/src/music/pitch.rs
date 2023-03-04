@@ -13,10 +13,7 @@
         Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
         More so, if we consider 1 to be a prime number
 */
-use crate::{
-    absmod,
-    music::{Accidentals, Gradient, NaturalNote},
-};
+use crate::music::{Accidentals, Gradient, NaturalNote};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -44,14 +41,7 @@ pub enum PitchClass {
     Natural(NaturalNote),
 }
 
-impl Gradient for PitchClass {
-    fn pitch(&self) -> i64 {
-        match *self {
-            PitchClass::Accidental(v) => v.into(),
-            PitchClass::Natural(v) => v.into(),
-        }
-    }
-}
+impl Gradient for PitchClass { }
 
 impl From<PitchClass> for i64 {
     fn from(data: PitchClass) -> i64 {
@@ -115,11 +105,7 @@ impl Pitch {
     }
 }
 
-impl Gradient for Pitch {
-    fn pitch(&self) -> i64 {
-        absmod(self.0, 12)
-    }
-}
+impl Gradient for Pitch { }
 
 impl std::ops::Add<i64> for Pitch {
     type Output = Pitch;
@@ -174,7 +160,7 @@ impl From<Pitch> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::Accidentals;
+    use crate::music::{Accidentals, Gradient};
 
     #[test]
     fn test_pitch_class() {

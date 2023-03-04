@@ -1,5 +1,5 @@
 #[cfg(test)]
-use contained::Gradient;
+use contained::music::Gradient;
 
 #[test]
 fn test_gradient() {

@@ -9,10 +9,7 @@
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
 use crate::actors::Symbolic;
-use crate::{
-    absmod,
-    music::{Gradient, Notable, PitchClass},
-};
+use crate::music::{Gradient, Notable, PitchClass};
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -28,16 +25,12 @@ impl Note {
         self.1
     }
 }
+impl Gradient for Note {}
 
-impl Gradient for Note {
-    fn pitch(&self) -> i64 {
-        absmod(self.0.pitch(), 12)
-    }
-}
+impl Notable for Note {}
 
 impl Symbolic for Note {}
 
-impl Notable for Note {}
 
 impl PartialEq for Note {
     fn eq(&self, other: &Self) -> bool {
@@ -72,7 +65,7 @@ impl<P: Gradient> From<&P> for Note {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{music::NaturalNote, Gradient};
+    use crate::music::{Gradient, NaturalNote};
 
     #[test]
     fn test_notes() {

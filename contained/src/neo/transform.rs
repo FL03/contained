@@ -14,7 +14,7 @@
         Shift by a tone: +/- 2
 */
 use super::Triad;
-use crate::music::{Notable, Thirds};
+use crate::music::{intervals::Thirds, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

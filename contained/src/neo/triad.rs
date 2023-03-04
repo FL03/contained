@@ -12,7 +12,10 @@ use crate::actors::{
     turing::{Configuration, Machine, Program, Tape},
     Symbolic,
 };
-use crate::music::{Fifths, Gradient, Notable, Note, Thirds};
+use crate::music::{
+    intervals::{Fifths, Thirds},
+    Gradient, Notable, Note,
+};
 use crate::Resultant;
 
 use serde::{Deserialize, Serialize};

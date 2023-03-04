@@ -11,8 +11,6 @@ pub(crate) mod accidentals;
 pub(crate) mod naturals;
 pub(crate) mod note;
 
-use crate::music::Gradient;
-
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
 /// Given a [NaturalNote] find its optional sharp and flat variations
 pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64>) {
@@ -34,16 +32,6 @@ pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64
     // If a natural note doesn't exists a semitone above or below the entry, than it has two possible variations
     // a sharp a semitone above and a flat a semitone below
     (note, Some(a), Some(b))
-}
-
-/// [Notable] is used to designate a structure used to represent a note
-pub trait Notable:
-    Clone + Default + Gradient + PartialEq + Send + Sync + ToString + std::convert::From<i64>
-{
-    /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
-    fn is_natural(&self) -> bool {
-        NaturalNote::try_from(self.pitch()).is_ok()
-    }
 }
 
 #[cfg(test)]

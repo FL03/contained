@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use crate::{music::Notable, Gradient};
+use crate::music::{Gradient, Notable};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
