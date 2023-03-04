@@ -1,6 +1,6 @@
 #[cfg(test)]
 use contained_actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
-use contained_actors::{State, States};
+use contained_actors::{Scope, State, States};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 
@@ -39,5 +39,5 @@ fn test_machine() {
     assert!(Machine::new("", program.clone()).is_err());
     let res = a.unwrap().execute(&mut cnf);
     assert!(res.is_ok());
-    assert_eq!(res.unwrap().tape().tape().clone(), vec!["c", "a", "a"]);
+    assert_eq!(res.unwrap().tape().clone(), Tape::new(vec!["c", "a", "a"]));
 }

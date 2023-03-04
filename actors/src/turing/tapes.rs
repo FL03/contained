@@ -7,7 +7,7 @@ use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Tape<S: Symbolic>(Vec<S>);
+pub struct Tape<S: Symbolic = String>(Vec<S>);
 
 impl<S: Symbolic> Tape<S> {
     pub fn new(symbols: impl IntoIterator<Item = S>) -> Self {
@@ -44,8 +44,6 @@ impl<S: Symbolic> From<Tape<S>> for Vec<S> {
         d.tape().clone()
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {

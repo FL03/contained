@@ -11,7 +11,7 @@ pub(crate) mod machine;
 pub(crate) mod programs;
 pub(crate) mod tapes;
 
-use crate::{Resultant, Stateful, States};
+use crate::{Operator, Resultant, Scope, Stateful, States};
 
 /// Simple trait for compatible symbols
 pub trait Symbolic:
@@ -33,30 +33,66 @@ impl Symbolic for &str {}
 
 impl Symbolic for String {}
 
-pub trait Alphabet<S: Symbolic>: std::iter::Iterator<Item = S> {}
+pub trait Alphabet<S: Symbolic>: Clone + std::iter::IntoIterator<Item = S> {
+    fn alphabet(&self) -> Vec<S> {
+        Vec::from_iter(self.clone())
+    }
+}
+
+impl<S: Symbolic> Alphabet<S> for Vec<S> {}
+
+pub trait Execute<S: Symbolic> {
+    type Scope: Clone + Scope<S>;
+    type Error;
+
+    fn driver(&mut self) -> &mut Self::Scope;
+    ///
+    fn execute(&mut self, program: Program<S>) -> Result<Self::Scope, String> {
+        let until = | actor: &Self::Scope | actor.state().state().clone() == States::Invalid;
+        self.execute_until( program, until)
+    }
+    ///
+    fn execute_once(&mut self, program: Program<S>) -> Result<Self::Scope, String> {
+        let head = Head::new(self.driver().state().clone().into(), self.driver().scope().clone());
+        let inst = program.get(head)?.clone();
+        self.driver().set_state(inst.tail().state().clone());
+        self.driver().set_symbol(inst.tail().symbol().clone());
+        self.driver().shift(*inst.tail().action(), program.default_symbol().clone());
+        Ok(self.driver().clone())
+    }
+    ///
+    fn execute_until(
+        &mut self,
+        program: Program<S>,
+        until: impl Fn(&Self::Scope) -> bool,
+    ) -> Result<Self::Scope, String> {
+        while !until(self.driver()) {
+            let head = Head::new(self.driver().state().clone().into(), self.driver().scope().clone());
+            let inst = program.get(head)?.clone();
+            self.driver().set_state(inst.tail().state().clone());
+            self.driver().set_symbol(inst.tail().symbol().clone());
+            self.driver().shift(*inst.tail().action(), program.default_symbol().clone());
+        }
+        Ok(self.driver().clone())
+    }
+}
 
 /// Describes the basic functionality of a Turing machine
-pub trait Turing {
-    type Symbol: Symbolic;
+pub trait Turing<S: Symbolic> {
+    fn default_symbol(&self) -> &S {
+        self.program().default_symbol()
+    }
 
-    fn default_symbol(&self) -> &Self::Symbol;
-
-    fn program(&self) -> &Program<Self::Symbol>;
+    fn program(&self) -> &Program<S>;
     ///
-    fn execute(
-        &self,
-        cnf: &mut Configuration<Self::Symbol>,
-    ) -> Resultant<Configuration<Self::Symbol>> {
+    fn execute(&self, cnf: &mut Configuration<S>) -> Resultant<Configuration<S>> {
         self.execute_until(cnf, |cnf| cnf.state().state().clone() == States::invalid())
     }
     ///
-    fn execute_once(
-        &self,
-        cnf: &mut Configuration<Self::Symbol>,
-    ) -> Resultant<Configuration<Self::Symbol>> {
-        let head = Head::new(cnf.state().clone().into(), cnf.symbol().clone());
+    fn execute_once(&self, cnf: &mut Configuration<S>) -> Resultant<Configuration<S>> {
+        let head = Head::new(cnf.state().clone().into(), cnf.scope().clone());
         let inst = self.program().get(head)?.clone();
-        cnf.state = inst.tail().state().clone();
+        cnf.set_state(inst.tail().state().clone());
         cnf.set_symbol(inst.tail().symbol().clone());
         cnf.shift(*inst.tail().action(), self.default_symbol().clone());
         Ok(cnf.clone())
@@ -64,13 +100,13 @@ pub trait Turing {
     ///
     fn execute_until(
         &self,
-        cnf: &mut Configuration<Self::Symbol>,
-        until: impl Fn(&Configuration<Self::Symbol>) -> bool,
-    ) -> Resultant<Configuration<Self::Symbol>> {
+        cnf: &mut Configuration<S>,
+        until: impl Fn(&Configuration<S>) -> bool,
+    ) -> Resultant<Configuration<S>> {
         while !until(cnf) {
-            let head = Head::new(cnf.state.clone(), cnf.symbol().clone());
+            let head = Head::new(cnf.state.clone(), cnf.scope().clone());
             let inst = self.program().get(head)?.clone();
-            cnf.state = inst.tail().state().clone();
+            cnf.set_state(inst.tail().state().clone());
             cnf.set_symbol(inst.tail().symbol().clone());
             cnf.shift(*inst.tail().action(), self.default_symbol().clone());
         }
@@ -78,7 +114,7 @@ pub trait Turing {
     }
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_std`].
-    fn translate_std(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
+    fn translate_std(&self, tape: Tape<S>) -> Resultant<Tape<S>> {
         let mut conf = Configuration::build(tape, Some(Config::Standard));
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape().clone())
@@ -86,7 +122,7 @@ pub trait Turing {
 
     /// Translates and returns a mutated [`Tape`] using the [`TuringMachine::execute`]
     /// method as the [`Configuration::new_nrm`].
-    fn translate_nrm(&self, tape: Tape<Self::Symbol>) -> Resultant<Tape<Self::Symbol>> {
+    fn translate_nrm(&self, tape: Tape<S>) -> Resultant<Tape<S>> {
         let mut conf = Configuration::build(tape, Some(Config::Normal));
         let exec = self.execute(&mut conf)?;
         Ok(exec.tape().clone())

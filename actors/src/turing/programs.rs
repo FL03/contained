@@ -31,6 +31,9 @@ impl<S: Symbolic> Program<S> {
     pub fn alphabet(&self) -> &Vec<S> {
         &self.alphabet
     }
+    pub fn default_symbol(&self) -> &S {
+        self.alphabet().first().unwrap()
+    }
     /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
         &self.instructions

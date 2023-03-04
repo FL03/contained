@@ -5,7 +5,7 @@
         Turing machines accept instructions in the form of a five-tuple:
             (State, Symbol, State, Symbol, Move)
 */
-use crate::{State, States, turing::Symbolic};
+use crate::{turing::Symbolic, State, States};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Move, Symbolic, Tape};
-use crate::{State, States};
+use crate::turing::{Symbolic, Tape};
+use crate::{Scope, State, States};
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -60,43 +60,32 @@ impl<S: Symbolic> Configuration<S> {
     pub fn len(&self) -> usize {
         self.tape().len()
     }
-    ///
-    pub fn position(&self) -> usize {
+}
+
+impl<S: Symbolic> Scope<S> for Configuration<S> {
+    fn insert(&mut self, elem: S) {
+        self.tape.insert(self.position(), elem);
+    }
+
+    fn position(&self) -> usize {
         self.index
     }
-    pub fn set_symbol(&mut self, elem: S) {
-        self.tape.set(self.position(), elem)
-    }
-    /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
-    /// [Move::Right] inserts a new element at the end of the tape if the current position is the length of the tape
-    pub fn shift(&mut self, shift: Move, elem: S) {
-        match shift {
-            // If the current position is 0, insert a new element at the top of the vector
-            Move::Left if self.position() == 0 => {
-                self.tape.insert(self.position(), elem);
-            }
-            Move::Left => {
-                self.index -= 1;
-            },
-            Move::Right => {
-                self.index += 1;
 
-                if self.position() == self.tape().len() {
-                    self.tape.insert(self.position(), elem);
-                }
-            },
-            Move::Stay => {}
-        }
+    fn set_position(&mut self, index: usize) {
+        self.index = index;
     }
-    pub fn state(&self) -> &State<States> {
+    fn set_state(&mut self, state: State<States>) {
+        self.state = state;
+    }
+    fn set_symbol(&mut self, elem: S) {
+        self.tape.set(self.position(), elem);
+    }
+
+    fn state(&self) -> &State<States> {
         &self.state
     }
-    pub fn symbol(&self) -> &S {
-        self.tape
-            .get(self.position())
-            .expect("index is out of bounds...")
-    }
-    pub fn tape(&self) -> &Tape<S> {
+
+    fn tape(&self) -> &Tape<S> {
         &self.tape
     }
 }

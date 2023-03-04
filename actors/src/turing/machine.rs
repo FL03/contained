@@ -33,14 +33,8 @@ impl<S: Symbolic> Machine<S> {
     }
 }
 
-impl<S: Symbolic> Turing for Machine<S> {
-    type Symbol = S;
-
-    fn default_symbol(&self) -> &S {
-        &self.ds
-    }
-
-    fn program(&self) -> &Program<Self::Symbol> {
+impl<S: Symbolic> Turing<S> for Machine<S> {
+    fn program(&self) -> &Program<S> {
         &self.program
     }
 }

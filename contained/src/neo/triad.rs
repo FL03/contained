@@ -8,7 +8,7 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
 */
 use super::LPR;
-use crate::actors::turing::{Configuration, Machine, Program, Symbolic, Tape};
+use crate::actors::turing::{Configuration, Execute, Machine, Program, Symbolic, Tape};
 use crate::music::{
     intervals::{Fifths, Thirds},
     Gradient, Notable, Note,

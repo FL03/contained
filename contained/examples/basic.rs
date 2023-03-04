@@ -6,7 +6,7 @@
 extern crate contained;
 
 use contained::actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
-use contained::actors::{Resultant, State, States};
+use contained::actors::{Resultant, Scope, State, States};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
@@ -32,7 +32,7 @@ fn main() -> Resultant {
 
     let a = Machine::new("a", program.clone())?;
     let res = a.execute(&mut cnf)?;
-    assert_eq!(res.tape().tape().clone(), vec!["c", "a", "a"]);
+    assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
     println!("{:?}", res);
 
     Ok(())

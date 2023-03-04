@@ -69,6 +69,10 @@ impl<S: StateSpec> Stateful<S> for State<S> {
     fn state(&self) -> &S {
         &self.state
     }
+    fn update_state(&mut self, state: S) {
+        self.state = state;
+        self.ts = Timestamp::default().into();
+    }
 }
 
 impl<S: StateSpec> From<S> for State<S> {
