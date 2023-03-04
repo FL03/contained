@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
 /// This type of musical notation is adopted from the American Scientific Pitch Notation
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Note(PitchClass, i64);
 
 impl Note {
@@ -36,15 +36,9 @@ impl Notable for Note {}
 
 impl Symbolic for Note {}
 
-impl PartialEq for Note {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
-
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}.{}", self.0, self.1)
     }
 }
 

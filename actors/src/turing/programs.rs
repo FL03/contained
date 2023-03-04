@@ -3,10 +3,14 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Head, Instruction, Symbolic};
+use crate::turing::{Head, Instruction, Symbolic};
 use crate::{Resultant, State, Stateful, States};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
+
+pub trait Extend<A> {
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Result<(), String>;
+}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Program<S: Symbolic> {
@@ -86,6 +90,15 @@ impl<S: Symbolic> Program<S> {
                 Ok(None)
             }
         }
+    }
+}
+
+impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
+    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) -> Result<(), String> {
+        for i in iter {
+            self.insert(i)?;
+        }
+        Ok(())
     }
 }
 

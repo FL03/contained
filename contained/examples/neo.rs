@@ -5,7 +5,7 @@
 */
 extern crate contained;
 
-use contained::actors::turing::{Program, Turing};
+use contained::actors::turing::{Extend, Instruction, Program, Turing};
 use contained::actors::{Resultant, State, States};
 use contained::{
     music::Note,
@@ -16,10 +16,7 @@ fn main() -> Resultant {
     let triad = Triad::new(0.into(), Triads::Diminshed);
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
 
-    // Setup the program
-    let mut program = Program::new(alphabet, States::Invalid.into());
-    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
-    program.insert(
+    let instructions: Vec<Instruction<Note>> = vec![
         (
             State::default(),
             0.into(),
@@ -28,8 +25,6 @@ fn main() -> Resultant {
             1.into(),
         )
             .into(),
-    )?;
-    program.insert(
         (
             State::default(),
             3.into(),
@@ -38,8 +33,6 @@ fn main() -> Resultant {
             1.into(),
         )
             .into(),
-    )?;
-    program.insert(
         (
             State::default(),
             6.into(),
@@ -48,7 +41,13 @@ fn main() -> Resultant {
             2.into(),
         )
             .into(),
-    )?;
+    ];
+
+    // Setup the program
+    let mut program = Program::new(alphabet, States::Invalid.into());
+
+    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
+    program.extend(instructions)?;
 
     let res = triad.machine().execute(program)?;
     println!("{:?}", res);

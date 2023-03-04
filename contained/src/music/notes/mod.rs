@@ -11,27 +11,26 @@ pub(crate) mod accidentals;
 pub(crate) mod naturals;
 pub(crate) mod note;
 
+use crate::music::Gradient;
+
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
 /// Given a [NaturalNote] find its optional sharp and flat variations
 pub fn detect_accidentals(natural: NaturalNote) -> (i64, Option<i64>, Option<i64>) {
     let note = natural as i64;
     // Calculate the modulus of the next (a) and prev (b) position
-    let (a, b) = if note == 0 {
-        (1, 11)
+    let ab = ((note + 1).pitch(), (note.pitch() - 1).pitch());
+
+    if NaturalNote::try_from(ab.0).is_ok() {
+        // If a natural note exists with a modulus a semitone above the entry, than it only has one option at -1 (flat)
+        (note, None, Some(ab.1))
+    } else if NaturalNote::try_from(ab.1).is_ok() {
+        // If a natural note exists with a modulus a semitone below the entry, than it only has one option at +1 (sharp)
+        (note, Some(ab.0), None)
     } else {
-        ((note + 1) % 12, (note - 1) % 12)
-    };
-    // If a natural note exists with a modulus a semitone above the entry, than it only has one option at -1 (flat)
-    if NaturalNote::try_from(a).is_ok() {
-        return (note, None, Some(b));
+        // If a natural note doesn't exists a semitone above or below the entry, than it has two possible variations
+        // a sharp a semitone above and a flat a semitone below
+        (note, Some(ab.0), Some(ab.1))
     }
-    // If a natural note exists with a modulus a semitone below the entry, than it only has one option at +1 (sharp)
-    if NaturalNote::try_from(b).is_ok() {
-        return (note, Some(a), None);
-    }
-    // If a natural note doesn't exists a semitone above or below the entry, than it has two possible variations
-    // a sharp a semitone above and a flat a semitone below
-    (note, Some(a), Some(b))
 }
 
 #[cfg(test)]

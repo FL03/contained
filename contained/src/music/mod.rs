@@ -14,6 +14,8 @@ pub(crate) mod notes;
 pub(crate) mod pitch;
 
 use crate::absmod;
+use crate::actors::turing::Symbolic;
+
 pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {
         self.pitch().into()
@@ -27,9 +29,7 @@ pub trait Gradient: Clone + std::convert::Into<i64> {
 impl Gradient for i64 {}
 
 /// [Notable] is used to designate a structure used to represent a note
-pub trait Notable:
-    Clone + Default + Gradient + PartialEq + Send + Sync + ToString + std::convert::From<i64>
-{
+pub trait Notable: Gradient + Send + Symbolic + Sync + std::convert::From<i64> {
     /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()

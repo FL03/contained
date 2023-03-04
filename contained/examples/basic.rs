@@ -5,32 +5,36 @@
 */
 extern crate contained;
 
-use contained::actors::turing::{Operator, Machine, Move, Program, Tape, Tapes, Turing};
+use contained::actors::turing::{
+    Extend, Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
+};
 use contained::actors::{Resultant, Scope, State, States};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(alphabet.clone());
-    let cnf = Operator::build(Tapes::normal(tape));
+    let scope = Operator::build(Tapes::normal(tape));
+
+    let instructions: Vec<Instruction<&str>> = vec![
+        (State::default(), "c", State::default(), "a", Move::Right).into(),
+        (State::default(), "b", State::default(), "a", Move::Right).into(),
+        (
+            State::default(),
+            "c",
+            States::invalid().into(),
+            "a",
+            Move::Stay,
+        )
+            .into(),
+    ];
 
     // Setup the program
     let mut program = Program::new(alphabet, States::invalid().into());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
-    program.insert((State::default(), "a", State::default(), "c", Move::Right).into())?;
-    program.insert((State::default(), "b", State::default(), "a", Move::Right).into())?;
-    program.insert(
-        (
-            State::default(),
-            "c",
-            State::from(States::invalid()),
-            "a",
-            Move::Left,
-        )
-            .into(),
-    )?;
+    program.extend(instructions)?;
 
-    let res = Machine::new(cnf).execute(program.clone())?;
+    let res = Machine::new(scope).execute(program.clone())?;
     assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
     println!("{:?}", res);
 

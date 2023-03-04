@@ -9,7 +9,7 @@
 */
 use super::LPR;
 use crate::actors::{
-    turing::{Operator, Machine, Symbolic, Tapes},
+    turing::{Machine, Operator, Symbolic, Tapes},
     Scope,
 };
 use crate::music::{
