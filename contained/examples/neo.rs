@@ -5,7 +5,7 @@
 */
 extern crate contained;
 
-use contained::actors::turing::{Configuration, Program, Turing};
+use contained::actors::turing::{Program, Turing};
 use contained::actors::{Resultant, State, States};
 use contained::{
     music::Note,
@@ -14,9 +14,7 @@ use contained::{
 
 fn main() -> Resultant {
     let triad = Triad::new(0.into(), Triads::Diminshed);
-
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
-    let mut cnf: Configuration<Note> = triad.config();
 
     // Setup the program
     let mut program = Program::new(alphabet, States::Invalid.into());
@@ -52,7 +50,7 @@ fn main() -> Resultant {
             .into(),
     )?;
 
-    let res = triad.machine(program)?.execute(&mut cnf)?;
+    let res = triad.machine().execute(program)?;
     println!("{:?}", res);
 
     Ok(())

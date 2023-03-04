@@ -1,68 +1,34 @@
 /*
-    Appellation: config <module>
+    Appellation: operator <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description: ... Summary ...
 */
 use crate::turing::{Symbolic, Tape};
 use crate::{Scope, State, States};
 
 use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
-
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Config {
-    #[default]
-    Normal = 0,
-    Standard = 1,
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Configuration<S: Symbolic = String> {
+pub struct Operator<S: Symbolic = String> {
     index: usize,
     pub(crate) state: State<States>,
     tape: Tape<S>,
 }
 
-impl<S: Symbolic> Configuration<S> {
-    pub fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
-        Self { index, state, tape }
-    }
-    pub fn build(tape: Tape<S>, config: Option<Config>) -> Self {
-        let cnf = match config.unwrap_or_default() {
-            Config::Normal => (0, Default::default(), tape),
-            Config::Standard => (tape.len() - 1, Default::default(), tape),
-        };
-        // All descirbed
-        Self::try_from(cnf).unwrap()
-    }
-    /// [Configuration::is_empty]
+impl<S: Symbolic> Operator<S> {
     pub fn is_empty(&self) -> bool {
         self.tape().is_empty()
     }
-    /// [Configurable::len] describes a method which returns the number of elements currently in the [Tape]
     pub fn len(&self) -> usize {
         self.tape().len()
     }
 }
 
-impl<S: Symbolic> Scope<S> for Configuration<S> {
+impl<S: Symbolic> Scope<S> for Operator<S> {
+    fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
+        Self { index, state, tape }
+    }
+
     fn insert(&mut self, elem: S) {
         self.tape.insert(self.position(), elem);
     }
@@ -90,7 +56,7 @@ impl<S: Symbolic> Scope<S> for Configuration<S> {
     }
 }
 
-impl<S: Ord + Symbolic> std::fmt::Display for Configuration<S> {
+impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -102,7 +68,7 @@ impl<S: Ord + Symbolic> std::fmt::Display for Configuration<S> {
     }
 }
 
-impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Configuration<S> {
+impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Operator<S> {
     type Error = String;
     fn try_from(d: (usize, State<States>, Tape<S>)) -> Result<Self, Self::Error> {
         if d.0 > d.2.len() {
@@ -112,8 +78,8 @@ impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Configuration<S> 
     }
 }
 
-impl<S: Symbolic> From<Configuration<S>> for (usize, State<States>, Tape<S>) {
-    fn from(d: Configuration<S>) -> Self {
+impl<S: Symbolic> From<Operator<S>> for (usize, State<States>, Tape<S>) {
+    fn from(d: Operator<S>) -> Self {
         (d.index, d.state, d.tape)
     }
 }
@@ -121,12 +87,25 @@ impl<S: Symbolic> From<Configuration<S>> for (usize, State<States>, Tape<S>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::turing::{Move, Tapes};
 
     #[test]
-    fn test_configuration() {
+    fn test_builder() {
         let tape = Tape::new(["a", "b", "c"]);
-        let a = Configuration::build(tape.clone(), None);
-        let b = Configuration::build(tape, Some(Config::Standard));
+        let a = Operator::build(Tapes::normal(tape.clone()));
+        let b = Operator::build(Tapes::standard(tape));
         assert_ne!(a, b);
+    }
+
+    #[test]
+    fn test_operations() {
+        let tape = Tape::new(["a", "b", "c"]);
+        let mut actor = Operator::new(0, State::from(States::Valid), tape);
+        actor.shift(Move::Left, "b");
+        assert_eq!(actor.tape().clone(), Tape::new(["b", "a", "b", "c"]));
+        for _ in 0..actor.tape().len() {
+            actor.shift(Move::Right, "b");
+        }
+        assert_eq!(actor.tape().clone(), Tape::new(["b", "a", "b", "c", "b"]));
     }
 }

@@ -1,5 +1,5 @@
 #[cfg(test)]
-use contained_actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
+use contained_actors::turing::{Operator, Machine, Move, Program, Tape, Tapes, Turing};
 use contained_actors::{Scope, State, States};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
@@ -9,7 +9,7 @@ fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(TEST_ALPHABET);
-    let mut cnf = Configuration::build(tape, None);
+    let cnf = Operator::build(Tapes::normal(tape));
 
     // Setup the program
     let final_state = State::from(States::invalid());
@@ -33,11 +33,9 @@ fn test_machine() {
                 .into(),
         )
         .unwrap();
-    let a = Machine::new("a", program.clone());
-    assert!(a.is_ok());
+    let mut a = Machine::new(cnf.clone());
 
-    assert!(Machine::new("", program.clone()).is_err());
-    let res = a.unwrap().execute(&mut cnf);
+    let res = a.execute(program.clone());
     assert!(res.is_ok());
-    assert_eq!(res.unwrap().tape().clone(), Tape::new(vec!["c", "a", "a"]));
+    assert_eq!(res.unwrap().tape().clone(), Tape::new(["c", "a", "a"]));
 }

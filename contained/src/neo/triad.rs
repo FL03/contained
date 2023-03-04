@@ -8,7 +8,10 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
 */
 use super::LPR;
-use crate::actors::turing::{Configuration, Execute, Machine, Program, Symbolic, Tape};
+use crate::actors::{
+    turing::{Operator, Machine, Symbolic, Tapes},
+    Scope,
+};
 use crate::music::{
     intervals::{Fifths, Thirds},
     Gradient, Notable, Note,
@@ -88,23 +91,23 @@ impl<N: Notable> Triad<N> {
         Triads::try_from(self.clone())
     }
     /// Create a new [Configuration] with the [Triad] as its alphabet
-    pub fn config(&self) -> Configuration<Note> {
+    pub fn config(&self) -> Operator<Note> {
         let a = self
             .clone()
             .into_iter()
             .map(|v| v.pitch().into())
             .collect::<Vec<Note>>();
-        Configuration::build(Tape::new(a), None)
+        Operator::build(Tapes::normal(a.into()))
     }
-    /// Repeatedly applies a chain of transformations to the [Triad]
+    /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, cycle: impl IntoIterator<Item = LPR> + Clone) {
-        loop {
-            self.walk(Vec::from_iter(cycle.clone()));
+        for i in Vec::from_iter(cycle).iter().cycle() {
+            self.transform(i.clone());
         }
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
-    pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
-        Machine::new(self.root().pitch().into(), program)
+    pub fn machine(&self) -> Machine<Note> {
+        Machine::new(self.config())
     }
     /// Check and see if the given notes are classified by the defined relationships
     pub fn is_valid(&self) -> bool {
