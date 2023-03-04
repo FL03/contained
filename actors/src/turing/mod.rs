@@ -21,6 +21,10 @@ pub trait Alphabet<S: Symbolic>: Clone + std::iter::IntoIterator<Item = S> {
 
 impl<S: Symbolic> Alphabet<S> for Vec<S> {}
 
+pub trait Extend<A> {
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Result<(), String>;
+}
+
 /// Simple trait for compatible symbols
 pub trait Symbolic: Clone + Default + PartialEq + std::fmt::Debug + std::fmt::Display {}
 

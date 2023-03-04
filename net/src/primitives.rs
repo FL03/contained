@@ -14,5 +14,7 @@ pub(crate) mod types {
     pub type BoxedTransport = Boxed<(libp2p::PeerId, StreamMuxerBox)>;
 
     /// Type alias for a [Result]
-    pub type Resultant<T = (), E = String> = Result<T, E>;
+    pub type NetError = Box<dyn std::error::Error + Send + Sync>;
+
+    pub type NetResult<T = ()> = Result<T, NetError>;
 }

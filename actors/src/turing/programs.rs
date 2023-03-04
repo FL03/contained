@@ -3,14 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Head, Instruction, Symbolic};
+use crate::turing::{Extend, Head, Instruction, Symbolic};
 use crate::{Resultant, State, Stateful, States};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
-
-pub trait Extend<A> {
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Result<(), String>;
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Program<S: Symbolic> {

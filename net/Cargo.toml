@@ -22,6 +22,7 @@ default = []
 
 [dependencies]
 anyhow.workspace = true
+async-trait.workspace = true
 decanter.workspace = true
 futures.workspace = true
 scsys.workspace = true
@@ -38,6 +39,7 @@ features = [
     "dns",
     "ecdsa",
     "identify",
+    "kad",
     "macros",
     "mdns",
     "mplex",

@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use crate::events::Events;
 use libp2p::swarm::NetworkBehaviour;
 use libp2p::{mdns, ping};
 
@@ -23,24 +24,5 @@ impl Conduct {
 impl From<mdns::tokio::Behaviour> for Conduct {
     fn from(b: mdns::tokio::Behaviour) -> Self {
         Self::new(Default::default(), b)
-    }
-}
-
-/// [Events] describes how the [Conduct] responds to different events
-#[allow(clippy::large_enum_variant)]
-pub enum Events {
-    Mdns(mdns::Event),
-    Ping(ping::Event),
-}
-
-impl From<mdns::Event> for Events {
-    fn from(event: mdns::Event) -> Self {
-        Events::Mdns(event)
-    }
-}
-
-impl From<ping::Event> for Events {
-    fn from(event: ping::Event) -> Self {
-        Events::Ping(event)
     }
 }

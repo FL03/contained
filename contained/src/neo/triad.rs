@@ -111,7 +111,8 @@ impl<N: Notable> Triad<N> {
     }
     /// Checks to see if the first interval is a third and the second interval is a fifth
     pub fn is_valid(&self) -> bool {
-        Thirds::try_from((self.root(), self.third())).is_ok() && Fifths::try_from((self.root(), self.fifth())).is_ok()
+        Thirds::try_from((self.root(), self.third())).is_ok()
+            && Fifths::try_from((self.root(), self.fifth())).is_ok()
     }
     ///
     pub fn fifth(&self) -> N {
