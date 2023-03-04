@@ -6,7 +6,7 @@
         Thirds: Major / Minor
         Fifth: Augmented, Dimenished, Perfect
 */
-use crate::core::{Gradient, Notable};
+use crate::{music::Notable, Gradient};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -79,7 +79,7 @@ impl<N: Notable> std::ops::Mul<N> for Thirds {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
 
     #[test]
     fn test_thirds() {

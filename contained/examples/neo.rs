@@ -8,7 +8,7 @@ extern crate contained;
 use contained::actors::turing::{Configuration, Program, Turing};
 use contained::actors::{Resultant, State, States};
 use contained::{
-    core::Note,
+    music::Note,
     neo::{Triad, Triads},
 };
 

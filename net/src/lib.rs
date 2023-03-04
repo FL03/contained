@@ -3,12 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::{behaviour::*, cluster::*, conduit::*};
+pub use self::{behaviour::*, cluster::*, conduit::*, primitives::*, utils::*};
 
 pub(crate) mod behaviour;
 pub(crate) mod cluster;
 pub(crate) mod conduit;
-
+pub(crate) mod primitives;
+pub(crate) mod utils;
 use crate::BoxedTransport;
 
 use libp2p::{

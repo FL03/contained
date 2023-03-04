@@ -18,7 +18,7 @@
         the system to offload certain workloads without disrupting the overall experience.
 */
 use super::{Triad, LPR};
-use crate::core::{Notable, Note};
+use crate::music::{Notable, Note};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -60,7 +60,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]

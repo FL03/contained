@@ -8,7 +8,7 @@
             Perfect (7)
             Diminished (9)
 */
-use crate::core::Notable;
+use crate::music::Notable;
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -60,7 +60,7 @@ impl<N: Notable> std::ops::Mul<N> for Fifths {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
 
     #[test]
     fn test_fifths() {

@@ -13,8 +13,10 @@
         Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
         More so, if we consider 1 to be a prime number
 */
-use super::{Accidentals, Gradient, NaturalNote};
-use crate::absmod;
+use crate::{
+    absmod,
+    music::{Accidentals, Gradient, NaturalNote},
+};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -172,7 +174,7 @@ impl From<Pitch> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Accidentals;
+    use crate::music::Accidentals;
 
     #[test]
     fn test_pitch_class() {

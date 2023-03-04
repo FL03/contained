@@ -6,10 +6,7 @@
 
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
-use crate::{
-    net::{tokio_transport, Peerable},
-    BoxedTransport,
-};
+use crate::{tokio_transport, BoxedTransport, Peerable};
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
     swarm::{NetworkBehaviour, Swarm},

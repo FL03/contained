@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::core::{Gradient, Pitch};
+use crate::music::{Gradient, Pitch};
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;

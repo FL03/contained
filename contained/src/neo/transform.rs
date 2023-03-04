@@ -14,7 +14,7 @@
         Shift by a tone: +/- 2
 */
 use super::Triad;
-use crate::core::{Notable, Thirds};
+use crate::music::{Notable, Thirds};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -83,7 +83,7 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]

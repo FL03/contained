@@ -12,9 +12,9 @@ use crate::actors::{
     turing::{Configuration, Machine, Program, Tape},
     Symbolic,
 };
-use crate::core::{Fifths, Note, Thirds};
-use crate::core::{Gradient, Notable};
+use crate::music::{Fifths, Gradient, Notable, Note, Thirds};
 use crate::Resultant;
+
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -226,7 +226,7 @@ impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
 
     #[test]
     fn test_triad() {

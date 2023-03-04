@@ -11,7 +11,7 @@ pub(crate) mod accidentals;
 pub(crate) mod naturals;
 pub(crate) mod note;
 
-use super::Gradient;
+use crate::music::Gradient;
 
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
 /// Given a [NaturalNote] find its optional sharp and flat variations
