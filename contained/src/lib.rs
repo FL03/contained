@@ -11,6 +11,6 @@ pub use self::{primitives::*, utils::*};
 pub(crate) mod primitives;
 pub(crate) mod utils;
 
-pub mod cmp;
+pub mod core;
 pub mod neo;
 pub mod net;

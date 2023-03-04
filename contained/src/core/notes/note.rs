@@ -10,7 +10,7 @@
 */
 use crate::absmod;
 use crate::actors::Symbolic;
-use crate::cmp::{Gradient, Notable, Pitch, PitchClass};
+use crate::core::{Gradient, Notable, PitchClass};
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -49,41 +49,28 @@ impl std::fmt::Display for Note {
     }
 }
 
+impl From<i64> for Note {
+    fn from(data: i64) -> Note {
+        Note::new(PitchClass::from(data), None)
+    }
+}
+
 impl From<Note> for i64 {
     fn from(data: Note) -> i64 {
-        let pitch: Pitch = data.into();
-        pitch.into()
+        data.pitch()
     }
 }
 
-impl From<i64> for Note {
-    fn from(d: i64) -> Note {
-        Note::new(PitchClass::from(d), None)
-    }
-}
-
-impl From<&dyn Gradient> for Note {
-    fn from(d: &dyn Gradient) -> Note {
+impl<P: Gradient> From<&P> for Note {
+    fn from(d: &P) -> Note {
         Note::new(d.class(), None)
-    }
-}
-
-impl From<Note> for Pitch {
-    fn from(data: Note) -> Pitch {
-        data.0.into()
-    }
-}
-
-impl From<Pitch> for Note {
-    fn from(data: Pitch) -> Note {
-        Note::new(data.into(), None)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cmp::{Gradient, NaturalNote};
+    use crate::core::{Gradient, NaturalNote};
 
     #[test]
     fn test_notes() {

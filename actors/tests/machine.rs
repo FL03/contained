@@ -1,7 +1,5 @@
 #[cfg(test)]
-use contained_actors::turing::{
-    Configurable, Configuration, Machine, Move, Program, Programatic, Tape, Turing,
-};
+use contained_actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
 use contained_actors::{State, States};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
@@ -11,10 +9,10 @@ fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(TEST_ALPHABET);
-    let cnf = Configuration::norm(tape);
+    let mut cnf = Configuration::build(tape, None);
 
     // Setup the program
-    let final_state = State::from(&States::invalid());
+    let final_state = State::from(States::invalid());
     let mut program = Program::new(alphabet, final_state);
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program
@@ -28,7 +26,7 @@ fn test_machine() {
             (
                 State::default(),
                 "c",
-                State::from(&States::invalid()),
+                State::from(States::invalid()),
                 "a",
                 Move::Left,
             )
@@ -39,7 +37,7 @@ fn test_machine() {
     assert!(a.is_ok());
 
     assert!(Machine::new("", program.clone()).is_err());
-    let res = a.unwrap().execute(&mut cnf.unwrap());
+    let res = a.unwrap().execute(&mut cnf);
     assert!(res.is_ok());
     assert_eq!(res.unwrap().tape().tape().clone(), vec!["c", "a", "a"]);
 }

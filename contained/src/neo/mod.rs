@@ -12,15 +12,19 @@ pub(crate) mod triad;
 
 use crate::Dirac;
 
+pub trait Transformable {}
+
 pub trait Transformation<S: Clone> {
-    type Error;
     type Output;
 
-    fn args(&self) -> &S;
     /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
-    fn dirac(&self) -> &Dirac<&S, Result<Option<Self::Output>, Self::Error>>;
+    fn dirac(&self) -> &Dirac<&S, Self::Output>;
     /// [Transformation::transform] applies the defined transition to the given objects
-    fn transform(&self) -> Result<Option<Self::Output>, Self::Error> {
-        self.dirac()(self.args())
+    fn transform(&self, args: &S) -> Self::Output {
+        self.dirac()(args)
     }
+}
+
+pub trait Validity {
+    fn is_valid(&self) -> bool;
 }

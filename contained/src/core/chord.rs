@@ -4,18 +4,15 @@
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 
 */
-use crate::actors::ArrayLike;
-use crate::cmp::Note;
+use super::{ArrayLike, Notable, Note};
 use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
 
 /// [Chord] is a wrapper for a [Vec] of [Note]
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Chord(Vec<Note>);
+pub struct Chord<N: Notable = Note>(Vec<N>);
 
-impl Chord {
-    pub fn new(chord: impl IntoIterator<Item = Note>) -> Self {
+impl<N: Notable> Chord<N> {
+    pub fn new(chord: impl IntoIterator<Item = N>) -> Self {
         Self(Vec::from_iter(chord))
     }
     pub fn chord(&self) -> &Self {
@@ -29,8 +26,8 @@ impl Chord {
     }
 }
 
-impl ArrayLike for Chord {
-    type Data = Note;
+impl<N: Notable> ArrayLike for Chord<N> {
+    type Data = N;
 
     fn content(&self) -> &Vec<Self::Data> {
         &self.0
@@ -41,8 +38,8 @@ impl ArrayLike for Chord {
     }
 }
 
-impl IntoIterator for Chord {
-    type Item = Note;
+impl<N: Notable> IntoIterator for Chord<N> {
+    type Item = N;
 
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
@@ -51,59 +48,16 @@ impl IntoIterator for Chord {
     }
 }
 
-pub trait ChordFactor {
-    fn factor(&self) -> &ChordFactors
-    where
-        Self: Sized;
-    fn note(&self) -> &Note
-    where
-        Self: Sized;
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum ChordFactors {
-    #[default]
-    Root(Note) = 0,
-    Third(Note) = 1,
-    Fifth(Note) = 2,
-}
-
-pub type Root = Note;
-pub type Third = Note;
-pub type Fifth = Note;
-
 #[cfg(test)]
 mod test {
     use super::*;
 
     #[test]
     fn test_chords() {
-        let a = vec![0.into(), 3.into(), 8.into()];
+        let a: Vec<Note> = vec![0.into(), 3.into(), 8.into()];
         let mut b = Chord::default();
         assert!(b.is_empty());
         b.append(&mut a.clone());
         assert_eq!(b.len(), 3);
-    }
-
-    #[test]
-    fn test_chord_factors() {
-        let a = ChordFactors::default();
-        assert_eq!(a, ChordFactors::Root(Default::default()))
     }
 }

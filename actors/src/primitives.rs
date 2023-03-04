@@ -5,15 +5,6 @@
 */
 pub use self::{constants::*, types::*};
 
-/// Simple trait for compatible symbols
-pub trait Symbolic: Clone + Default + Eq + PartialEq + ToString + serde::Serialize {}
-
-impl Symbolic for char {}
-
-impl Symbolic for &str {}
-
-impl Symbolic for String {}
-
 pub(crate) mod constants {}
 
 pub(crate) mod types {

@@ -13,61 +13,10 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use super::{Triad, Triadic};
-use crate::{
-    absmod,
-    cmp::{is_minor_third, Gradient},
-};
+use super::Triad;
+use crate::core::{Notable, Thirds};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub fn leading(triad: &Triad) -> Triad {
-    let (mut r, t, mut f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(r.clone(), t.clone()) {
-        f += 1;
-    } else {
-        r -= 1;
-    }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
-
-pub fn parallel(triad: &Triad) -> Triad {
-    let (r, mut t, f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(r.clone(), t.clone()) {
-        t += 1;
-    } else {
-        t -= 1;
-    }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
-
-pub fn relative(triad: &Triad) -> Triad {
-    let (mut r, t, mut f): (i64, i64, i64) = (
-        triad.root().pitch(),
-        triad.third().pitch(),
-        triad.fifth().pitch(),
-    );
-    if is_minor_third(r.clone(), t.clone()) {
-        r -= 2;
-    } else {
-        f += 2;
-    }
-    let triad = (absmod(r, 12), absmod(t, 12), absmod(f, 12));
-    // All triadic transformations will result in another valid triad
-    Triad::try_from(triad).unwrap()
-}
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -96,19 +45,39 @@ pub enum LPR {
 }
 
 impl LPR {
-    pub fn transform(&self, triad: &Triad) -> Triad {
+    pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
+        let ab =
+            Thirds::try_from((triad.root(), triad.third())).expect("Invalid triadic structure...");
+        let (mut r, mut t, mut f): (i64, i64, i64) = (
+            triad.root().pitch(),
+            triad.third().pitch(),
+            triad.fifth().pitch(),
+        );
         match self {
-            LPR::L => leading(triad),
-            LPR::P => parallel(triad),
-            LPR::R => relative(triad),
-        }
+            LPR::L => match ab {
+                Thirds::Major => r -= 1,
+                Thirds::Minor => f += 1,
+            },
+            LPR::P => match ab {
+                Thirds::Major => t -= 1,
+                Thirds::Minor => t += 1,
+            },
+            LPR::R => match ab {
+                Thirds::Major => f += 2,
+                Thirds::Minor => {
+                    r -= 2;
+                }
+            },
+        };
+        // All triadic transformations will result in another valid triad
+        Triad::try_from((r, t, f)).unwrap()
     }
 }
 
-impl std::ops::Mul<Triad> for LPR {
-    type Output = Triad;
+impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
+    type Output = Triad<N>;
 
-    fn mul(self, rhs: Triad) -> Self::Output {
+    fn mul(self, rhs: Triad<N>) -> Self::Output {
         self.transform(&mut rhs.clone())
     }
 }
@@ -116,32 +85,35 @@ impl std::ops::Mul<Triad> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]
     fn test_leading() {
-        let a = Triad::new(0.into(), Triads::Major);
-        let b = LPR::L * a.clone();
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let mut b = LPR::L * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
-        assert_eq!(a, LPR::L * b);
+        assert_eq!(b, Triad::<Note>::try_from((4, 7, 11)).unwrap());
+        b *= LPR::L;
+        assert_eq!(a, b);
     }
 
     #[test]
     fn test_parallel() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((0, 3, 7)).unwrap());
         assert_eq!(LPR::P * b, a)
     }
 
     #[test]
     fn test_relative() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
+
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 4, 9)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((9, 0, 4)).unwrap());
         assert_eq!(LPR::R * b, a)
     }
 }

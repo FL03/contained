@@ -1,22 +1,22 @@
 /*
-    Appellation: reactions <module>
+    Appellation: instructions <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        Turing machines are given three degrees of freedom when considering possible movements
-
+        Turing machines accept instructions in the form of a five-tuple:
+            (State, Symbol, State, Symbol, Move)
 */
 use crate::{State, States, Symbolic};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Head<S: Symbolic>(State<States, S>, S);
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Head<S: Symbolic>(State<States>, S);
 
 impl<S: Symbolic> Head<S> {
-    pub fn new(state: State<States, S>, symbol: S) -> Self {
+    pub fn new(state: State<States>, symbol: S) -> Self {
         Self(state, symbol)
     }
-    pub fn state(&self) -> &State<States, S> {
+    pub fn state(&self) -> &State<States> {
         &self.0
     }
     pub fn symbol(&self) -> &S {
@@ -24,29 +24,29 @@ impl<S: Symbolic> Head<S> {
     }
 }
 
-impl<S: Symbolic> From<Head<S>> for (State<States, S>, S) {
-    fn from(v: Head<S>) -> (State<States, S>, S) {
+impl<S: Symbolic> From<Head<S>> for (State<States>, S) {
+    fn from(v: Head<S>) -> (State<States>, S) {
         (v.0, v.1)
     }
 }
 
-impl<S: Symbolic> From<(State<States, S>, S)> for Head<S> {
-    fn from(value: (State<States, S>, S)) -> Self {
+impl<S: Symbolic> From<(State<States>, S)> for Head<S> {
+    fn from(value: (State<States>, S)) -> Self {
         Self(value.0, value.1)
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct Tail<S: Symbolic>(State<States, S>, S, Move);
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Tail<S: Symbolic>(State<States>, S, Move);
 
 impl<S: Symbolic> Tail<S> {
-    pub fn new(state: State<States, S>, symbol: S, act: Move) -> Self {
+    pub fn new(state: State<States>, symbol: S, act: Move) -> Self {
         Self(state, symbol, act)
     }
     pub fn action(&self) -> &Move {
         &self.2
     }
-    pub fn state(&self) -> &State<States, S> {
+    pub fn state(&self) -> &State<States> {
         &self.0
     }
     pub fn symbol(&self) -> &S {
@@ -54,7 +54,7 @@ impl<S: Symbolic> Tail<S> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instruction<S: Symbolic> {
     pub head: Head<S>,
     pub tail: Tail<S>,
@@ -64,10 +64,16 @@ impl<S: Symbolic> Instruction<S> {
     pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
         Self { head, tail }
     }
+    pub fn head(&self) -> &Head<S> {
+        &self.head
+    }
+    pub fn tail(&self) -> &Tail<S> {
+        &self.tail
+    }
 }
 
-impl<S: Symbolic> From<(State<States, S>, S, State<States, S>, S, Move)> for Instruction<S> {
-    fn from(value: (State<States, S>, S, State<States, S>, S, Move)) -> Self {
+impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instruction<S> {
+    fn from(value: (State<States>, S, State<States>, S, Move)) -> Self {
         let head = Head::new(value.0, value.1);
         let tail = Tail::new(value.2, value.3, value.4);
         Self::new(head, tail)
@@ -85,6 +91,7 @@ impl<S: Symbolic> From<(State<States, S>, S, State<States, S>, S, Move)> for Ins
     EnumVariantNames,
     Eq,
     Hash,
+    Ord,
     PartialEq,
     PartialOrd,
     Serialize,
@@ -99,7 +106,7 @@ pub enum Move {
 
 impl From<i64> for Move {
     fn from(d: i64) -> Self {
-        match d {
+        match (d % 3).abs() {
             0 => Self::Left,
             1 => Self::Right,
             _ => Self::Stay,
@@ -120,8 +127,8 @@ mod tests {
 
     #[test]
     fn test_instructions() {
-        let head = Head::new(State::new(None, States::invalid()), "b");
-        let tail = Tail::new(State::new(None, States::invalid()), "a", Move::Right);
+        let head = Head::new(State::new(States::invalid()), "b");
+        let tail = Tail::new(State::new(States::invalid()), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
         assert_eq!(instructions.tail.action(), &Move::Right)
     }
