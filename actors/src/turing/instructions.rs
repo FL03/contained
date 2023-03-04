@@ -67,6 +67,10 @@ impl<S: Symbolic> Instruction<S> {
     pub fn tail(&self) -> &Tail<S> {
         &self.1
     }
+    pub fn update(&mut self, head: Head<S>, tail: Tail<S>) {
+        self.0 = head;
+        self.1 = tail;
+    }
 }
 
 impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instruction<S> {

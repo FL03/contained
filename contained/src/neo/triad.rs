@@ -90,7 +90,7 @@ impl<N: Notable> Triad<N> {
     pub fn classify(&self) -> Resultant<Triads> {
         Triads::try_from(self.clone())
     }
-    /// Create a new [Configuration] with the [Triad] as its alphabet
+    /// Create a new [Operator] with the [Triad] as its alphabet
     pub fn config(&self) -> Operator<Note> {
         let a = self
             .clone()
@@ -109,9 +109,9 @@ impl<N: Notable> Triad<N> {
     pub fn machine(&self) -> Machine<Note> {
         Machine::new(self.config())
     }
-    /// Check and see if the given notes are classified by the defined relationships
+    /// Checks to see if the first interval is a third and the second interval is a fifth
     pub fn is_valid(&self) -> bool {
-        self.classify().is_ok()
+        Thirds::try_from((self.root(), self.third())).is_ok() && Fifths::try_from((self.root(), self.fifth())).is_ok()
     }
     ///
     pub fn fifth(&self) -> N {
