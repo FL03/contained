@@ -14,7 +14,7 @@ pub trait Peerable: Clone {
         self.clone().keypair().public()
     }
     fn pid(&self) -> PeerId {
-        PeerId::from(self.clone().pk())
+        self.clone().pk().to_peer_id()
     }
 }
 

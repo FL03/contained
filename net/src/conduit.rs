@@ -7,11 +7,12 @@
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
 use crate::peer::Peer;
-use crate::{tokio_transport, BoxedTransport, Peerable};
+use crate::{BoxedTransport, Peerable};
 use libp2p::{
-    swarm::{NetworkBehaviour, Swarm},
-    PeerId,
+    core::upgrade,
+    swarm::{NetworkBehaviour, Swarm}
 };
+use libp2p::{mplex, noise, tcp, PeerId, Transport};
 
 #[derive(Clone, Debug, Default)]
 pub struct Conduit {
@@ -22,9 +23,11 @@ impl Conduit {
     pub fn new(peer: Peer) -> Self {
         Self { peer }
     }
+    ///
     pub fn peer(self) -> Peer {
         self.peer
     }
+    ///
     pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
         Swarm::with_tokio_executor(
             self.transport(),
@@ -32,8 +35,15 @@ impl Conduit {
             PeerId::from(self.clone().peer().pk()),
         )
     }
-
+    ///
     pub fn transport(&self) -> BoxedTransport {
-        tokio_transport(&self.clone().peer().keypair(), true)
+        tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
+            .upgrade(upgrade::Version::V1)
+            .authenticate(
+                noise::NoiseAuthenticated::xx(&self.clone().peer.keypair())
+                    .expect("Signing libp2p-noise static DH keypair failed."),
+            )
+            .multiplex(mplex::MplexConfig::new())
+            .boxed()
     }
 }

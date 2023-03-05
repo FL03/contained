@@ -39,7 +39,7 @@ impl TryFrom<u8> for Peer {
     type Error = libp2p::identity::error::DecodingError;
 
     fn try_from(seed: u8) -> Result<Self, Self::Error> {
-        let sk = crate::keypair_from_seed(seed)?;
+        let sk = crate::sk_from_seed(seed)?;
         let res = Self::from(ed25519::Keypair::from(sk));
         Ok(res)
     }
