@@ -24,7 +24,7 @@ pub struct CommandLineInterface {
     #[clap(subcommand)]
     cmd: Option<Command>,
     #[clap(long)]
-    addr: Option<Multiaddr>,
+    listen: Option<Multiaddr>,
     #[clap(long)]
     peer: Option<Multiaddr>,
     /// Fixed value to generate deterministic peer ID.
@@ -43,7 +43,7 @@ impl CommandLineInterface {
         self.cmd
     }
     pub fn listen(self) -> Option<Multiaddr> {
-        self.addr
+        self.listen
     }
     pub fn peer(self) -> Option<Multiaddr> {
         self.peer

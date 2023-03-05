@@ -14,6 +14,7 @@ pub(crate) mod provide;
 use crate::NetResult;
 
 use libp2p::{Multiaddr, PeerId};
+use std::collections::HashSet;
 use tokio::sync::oneshot;
 
 #[derive(Debug)]
@@ -26,10 +27,16 @@ pub enum Frame {
 
 impl Frame {
     pub fn dial(addr: Multiaddr, pid: PeerId, sender: oneshot::Sender<NetResult>) -> Self {
-        Self::from(Dial::new(addr, pid, sender))
+        Dial::new(addr, pid, sender).into()
     }
     pub fn listen(addr: Multiaddr, sender: oneshot::Sender<NetResult>) -> Self {
-        Self::from(Listen::new(addr, sender))
+        Listen::new(addr, sender).into()
+    }
+    pub fn get(fname: String, sender: oneshot::Sender<HashSet<PeerId>>) -> Self {
+        GetProviders::new(fname, sender).into()
+    }
+    pub fn provide(fname: String, sender: oneshot::Sender<()>) -> Self {
+        StartProviding::new(fname, sender).into()
     }
 }
 

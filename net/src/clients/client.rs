@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::frame::{Dial, Frame, GetProviders, Listen, StartProviding};
+use super::frame::Frame;
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -25,7 +25,7 @@ impl Client {
     pub async fn start_listening(&mut self, addr: Multiaddr) -> NetResult {
         let (sender, receiver) = oneshot::channel();
         self.sender
-            .send(Listen::new(addr, sender).into())
+            .send(Frame::listen(addr, sender))
             .await
             .expect("Command receiver not to be dropped.");
         receiver.await.expect("Sender not to be dropped.")
@@ -34,7 +34,7 @@ impl Client {
     pub async fn dial(&mut self, peer_id: PeerId, peer_addr: Multiaddr) -> NetResult {
         let (sender, receiver) = oneshot::channel();
         self.sender
-            .send(Dial::new(peer_addr, peer_id, sender).into())
+            .send(Frame::dial(peer_addr, peer_id, sender))
             .await
             .expect("Command receiver not to be dropped.");
         receiver.await.expect("Sender not to be dropped.")
@@ -44,7 +44,7 @@ impl Client {
     pub async fn start_providing(&mut self, file_name: String) {
         let (sender, receiver) = oneshot::channel();
         self.sender
-            .send(StartProviding::new(file_name, sender).into())
+            .send(Frame::provide(file_name, sender))
             .await
             .expect("Command receiver not to be dropped.");
         receiver.await.expect("Sender not to be dropped.");
@@ -54,7 +54,7 @@ impl Client {
     pub async fn get_providers(&mut self, file_name: String) -> HashSet<PeerId> {
         let chan = oneshot::channel();
         self.sender
-            .send(GetProviders::new(file_name, chan.0).into())
+            .send(Frame::get(file_name, chan.0))
             .await
             .expect("Command receiver not to be dropped.");
         chan.1.await.expect("Sender not to be dropped.")

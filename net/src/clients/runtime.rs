@@ -42,13 +42,27 @@ impl Runtime {
     pub fn event(self) -> mpsc::Sender<Event> {
         self.event
     }
-    pub fn event_loop(self) -> EventLoop {
+    pub fn pending(self) -> EventLoop {
         self.stack
     }
     pub async fn handle_event(
         &mut self,
         event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<io::Error>, io::Error>>,
     ) {
+        match event {
+            SwarmEvent::Behaviour(_) => {},
+            SwarmEvent::ConnectionEstablished { peer_id, endpoint, num_established, concurrent_dial_errors, established_in } => {},
+            SwarmEvent::ConnectionClosed { peer_id, endpoint, num_established, cause } => {},
+            SwarmEvent::IncomingConnection { local_addr, send_back_addr } => {},
+            SwarmEvent::IncomingConnectionError { local_addr, send_back_addr, error } => {},
+            SwarmEvent::OutgoingConnectionError { peer_id, error } => {},
+            SwarmEvent::BannedPeer { peer_id, endpoint } => {},
+            SwarmEvent::NewListenAddr { listener_id, address } => {},
+            SwarmEvent::ExpiredListenAddr { listener_id, address } => {},
+            SwarmEvent::ListenerClosed { listener_id, addresses, reason } => {},
+            SwarmEvent::ListenerError { listener_id, error } => {},
+            SwarmEvent::Dialing(_) => {},
+        }
     }
     pub async fn handle_command(&mut self, action: Frame) {
         match action {
