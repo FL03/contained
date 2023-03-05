@@ -26,18 +26,16 @@ impl Client {
         let (sender, receiver) = oneshot::channel();
         self.sender
             .send(Frame::listen(addr, sender))
-            .await
-            .expect("Command receiver not to be dropped.");
-        receiver.await.expect("Sender not to be dropped.")
+            .await?;
+        receiver.await?
     }
     /// Dial the given peer at the given address.
     pub async fn dial(&mut self, peer_id: PeerId, peer_addr: Multiaddr) -> NetResult {
         let (sender, receiver) = oneshot::channel();
         self.sender
             .send(Frame::dial(peer_addr, peer_id, sender))
-            .await
-            .expect("Command receiver not to be dropped.");
-        receiver.await.expect("Sender not to be dropped.")
+            .await?;
+        receiver.await?
     }
 
     /// Advertise the local node as the provider of the given file on the DHT.
