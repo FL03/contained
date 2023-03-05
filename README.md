@@ -1,5 +1,7 @@
 # Contained
 
+[![crates.io](https://img.shields.io/crates/v/contained.svg)](https://crates.io/crates/contained)
+[![docs.rs](https://docs.rs/contained/badge.svg)](https://docs.rs/contained)
 [![Clippy](https://github.com/FL03/contained/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/clippy.yml)
 [![Docker](https://github.com/FL03/contained/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/docker.yml)
 [![Rust](https://github.com/FL03/contained/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/rust.yml)

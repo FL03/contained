@@ -14,10 +14,13 @@
         Shift by a tone: +/- 2
 */
 use super::Triad;
-use crate::cmp::is_minor_third;
+use crate::music::{intervals::Thirds, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
+/// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
+/// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
+/// [LPR::R] preserves the major third in the triad and moves the remaining note by whole tone.
 #[derive(
     Clone,
     Copy,
@@ -36,58 +39,41 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[strum(serialize_all = "snake_case")]
 pub enum LPR {
     #[default]
-    L = 0, // Preserves the minor third; shifts the remaining note by a semitone
-    P = 1, // Preserves the perfect fifth; shifts the remaining note by a semitone
-    R = 2, // preserves the major third in the triad and moves the remaining note by whole tone.
+    L = 0,
+    P = 1,
+    R = 2,
 }
 
 impl LPR {
-    pub fn transform(&self, triad: &Triad) -> Triad {
-        let (mut r, mut t, mut f): (i64, i64, i64) = triad.clone().into();
-        let rt_interval = is_minor_third(r.clone(), t.clone());
-        // Apply the active transformat to the given triad
+    pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
+        let triad: (N, N, N) = triad.clone().into();
+        let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
+            .expect("Invalid triadic structure...");
+        let (mut r, mut t, mut f): (i64, i64, i64) =
+            (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
         match self {
-            LPR::L => {
-                if rt_interval {
-                    f += 1;
-                } else {
-                    r -= 1;
-                }
-            }
-            LPR::P => {
-                if rt_interval {
-                    t += 1;
-                } else {
-                    t -= 1;
-                }
-            }
-            LPR::R => {
-                if rt_interval {
-                    r -= 2;
-                } else {
-                    f += 2;
-                }
-            }
-        }
-        // Double check to make sure all values are positive
-        if r < 0 {
-            r += 12;
-        }
-        if t < 0 {
-            r += 12;
-        }
-        if f < 0 {
-            f += 12;
-        }
+            LPR::L => match ab {
+                Thirds::Major => r -= 1,
+                Thirds::Minor => f += 1,
+            },
+            LPR::P => match ab {
+                Thirds::Major => t -= 1,
+                Thirds::Minor => t += 1,
+            },
+            LPR::R => match ab {
+                Thirds::Major => f += 2,
+                Thirds::Minor => r -= 2,
+            },
+        };
         // All triadic transformations will result in another valid triad
         Triad::try_from((r, t, f)).unwrap()
     }
 }
 
-impl std::ops::Mul<Triad> for LPR {
-    type Output = Triad;
+impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
+    type Output = Triad<N>;
 
-    fn mul(self, rhs: Triad) -> Self::Output {
+    fn mul(self, rhs: Triad<N>) -> Self::Output {
         self.transform(&mut rhs.clone())
     }
 }
@@ -95,33 +81,35 @@ impl std::ops::Mul<Triad> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::music::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]
     fn test_leading() {
-        let a = Triad::new(0.into(), Triads::Major);
-        let b = LPR::default() * a.clone();
-        let c = LPR::L * b.clone();
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let mut b = LPR::L * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
-        assert_eq!(a, c);
+        assert_eq!(b, Triad::<Note>::try_from((4, 7, 11)).unwrap());
+        b *= LPR::L;
+        assert_eq!(a, b);
     }
 
     #[test]
     fn test_parallel() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((0, 3, 7)).unwrap());
         assert_eq!(LPR::P * b, a)
     }
 
     #[test]
     fn test_relative() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
+
         assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 4, 9)).unwrap());
+        assert_eq!(b, Triad::<Note>::try_from((9, 0, 4)).unwrap());
         assert_eq!(LPR::R * b, a)
     }
 }

@@ -1,26 +1,23 @@
-/*
-    Appellation: basic <example>
-    Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
-*/
-extern crate contained;
-
-use contained::actors::turing::{
+#[cfg(test)]
+use contained_actors::turing::{
     Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
 };
-use contained::actors::{
+use contained_actors::{
     states::{State, States},
-    Extend, Resultant, Scope,
+    Extend, Scope,
 };
 
-fn main() -> Resultant {
+pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
+
+#[test]
+fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = Tape::new(alphabet.clone());
     let scope = Operator::build(Tapes::normal(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
-        (State::default(), "c", State::default(), "a", Move::Right).into(),
+        (State::default(), "a", State::default(), "c", Move::Right).into(),
         (State::default(), "b", State::default(), "a", Move::Right).into(),
         (
             State::default(),
@@ -35,11 +32,10 @@ fn main() -> Resultant {
     // Setup the program
     let mut program = Program::new(alphabet, States::invalid().into());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
-    program.extend(instructions)?;
+    program.extend(instructions).unwrap();
 
-    let res = Machine::new(scope).execute(program.clone())?;
-    assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
-    println!("{:?}", res);
+    let res = Machine::new(scope).execute(program.clone());
 
-    Ok(())
+    assert!(res.is_ok());
+    assert_eq!(res.unwrap().tape().clone(), Tape::new(["c", "a", "a"]));
 }
