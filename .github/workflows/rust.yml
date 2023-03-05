@@ -5,10 +5,10 @@ env:
 
 on:
   pull_request:
-    branches: [ "main", "master", "prod" ]
+    branches-ignore: [ "dev*" ]
     tags: [ "v*.*.*" ]
   push:
-    branches: [ "main", "master", "prod" ]
+    branches-ignore: [ "dev*" ]
     tags: [ "v*.*.*" ]
   workflow_dispatch:
     inputs:
@@ -35,10 +35,25 @@ jobs:
           rustup default ${{ matrix.toolchain }}
       - run: cargo build --workspace
       - run: cargo test --all --all-features -v
+  features:
+    if: ${{ github.event.inputs.publish == true }}
+    name: Features
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg: 
+          - contained-actors
+          - contained-net
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt install -y protobuf-compiler
+      - name: Publish (${{ matrix.pkg }})
+        run: cargo publish --all-features -v -p ${{ matrix.pkg }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
   publish:
     if: ${{ github.event.inputs.publish == true }}
     name: Publish
-    needs: [ build ]
+    needs: [ build, features ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
