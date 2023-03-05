@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::turing::{Symbolic, Tape};
-use crate::{Scope, State, States};
+use crate::states::{State, States};
+use crate::turing::Tape;
+use crate::{Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
 

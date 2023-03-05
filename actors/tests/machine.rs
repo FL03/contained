@@ -1,8 +1,11 @@
 #[cfg(test)]
 use contained_actors::turing::{
-    Extend, Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
+    Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
 };
-use contained_actors::{Scope, State, States};
+use contained_actors::{
+    states::{State, States},
+    Extend, Scope,
+};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 

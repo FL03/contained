@@ -6,9 +6,12 @@
 extern crate contained;
 
 use contained::actors::turing::{
-    Extend, Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
+    Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
 };
-use contained::actors::{Resultant, Scope, State, States};
+use contained::actors::{
+    states::{State, States},
+    Extend, Resultant, Scope,
+};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];

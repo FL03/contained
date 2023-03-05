@@ -4,8 +4,9 @@
     Description: ... summary ...
 */
 use crate::{
-    turing::{Move, Symbolic, Tape, Tapes},
-    State, States,
+    states::{State, States},
+    turing::{Move, Tape, Tapes},
+    Symbolic,
 };
 
 /// [Scope] describes the focus of the [crate::turing::Turing]

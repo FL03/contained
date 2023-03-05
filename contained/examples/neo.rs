@@ -5,8 +5,9 @@
 */
 extern crate contained;
 
-use contained::actors::turing::{Extend, Instruction, Program, Turing};
-use contained::actors::{Resultant, State, States};
+use contained::actors::states::{State, States};
+use contained::actors::turing::{Instruction, Program, Turing};
+use contained::actors::{Extend, Resultant};
 use contained::{
     music::Note,
     neo::{Triad, Triads},

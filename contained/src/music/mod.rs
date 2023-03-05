@@ -14,7 +14,7 @@ pub(crate) mod notes;
 pub(crate) mod pitch;
 
 use crate::absmod;
-use crate::actors::turing::Symbolic;
+use crate::actors::Symbolic;
 
 pub trait Gradient: Clone + std::convert::Into<i64> {
     fn class(&self) -> PitchClass {

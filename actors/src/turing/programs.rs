@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{Extend, Head, Instruction, Symbolic};
-use crate::{Resultant, State, Stateful, States};
+use crate::states::{State, Stateful, States};
+use crate::turing::{Head, Instruction};
+use crate::{Alphabet, Extend, Resultant, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
@@ -32,7 +33,7 @@ impl<S: Symbolic> Program<S> {
         &self.alphabet
     }
     pub fn default_symbol(&self) -> &S {
-        self.alphabet().first().unwrap()
+        &self.alphabet.default_symbol()
     }
     /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
@@ -101,8 +102,8 @@ impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::states::{State, States};
     use crate::turing::{Instruction, Move};
-    use crate::{State, States};
 
     #[test]
     fn test_program() {

@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::turing::{Operator, Symbolic, Tapes, Turing};
-use crate::Scope;
+use crate::turing::{Operator, Tapes, Turing};
+use crate::{Scope, Symbolic};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
@@ -19,6 +19,7 @@ impl<S: Symbolic> Machine<S> {
 }
 
 impl<S: Symbolic> Turing<S> for Machine<S> {
+    type Error = String;
     type Scope = Operator<S>;
 
     fn driver(&mut self) -> &mut Self::Scope {

@@ -9,14 +9,13 @@
 */
 use super::LPR;
 use crate::actors::{
-    turing::{Machine, Operator, Symbolic, Tapes},
-    Scope,
+    turing::{Machine, Operator, Tapes},
+    Resultant, Scope, Symbolic,
 };
 use crate::music::{
     intervals::{Fifths, Thirds},
     Gradient, Notable, Note,
 };
-use crate::Resultant;
 
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
