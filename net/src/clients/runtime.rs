@@ -9,11 +9,17 @@ use crate::{
     proto::mainnet::Mainnet,
 };
 use either::Either;
+use libp2p::kad::{self, KademliaEvent, QueryResult};
 use libp2p::{
+    mdns,
+    multiaddr::Protocol,
     swarm::{ConnectionHandlerUpgrErr, SwarmEvent},
     Swarm,
 };
-use tokio::{io, sync::mpsc};
+use tokio::{
+    io,
+    sync::{mpsc, oneshot},
+};
 use tokio_stream::StreamExt;
 
 pub struct Runtime {
@@ -50,24 +56,112 @@ impl Runtime {
         event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<io::Error>, io::Error>>,
     ) {
         match event {
-            SwarmEvent::Behaviour(_) => {},
-            SwarmEvent::ConnectionEstablished { peer_id, endpoint, num_established, concurrent_dial_errors, established_in } => {},
-            SwarmEvent::ConnectionClosed { peer_id, endpoint, num_established, cause } => {},
-            SwarmEvent::IncomingConnection { local_addr, send_back_addr } => {},
-            SwarmEvent::IncomingConnectionError { local_addr, send_back_addr, error } => {},
-            SwarmEvent::OutgoingConnectionError { peer_id, error } => {},
-            SwarmEvent::BannedPeer { peer_id, endpoint } => {},
-            SwarmEvent::NewListenAddr { listener_id, address } => {},
-            SwarmEvent::ExpiredListenAddr { listener_id, address } => {},
-            SwarmEvent::ListenerClosed { listener_id, addresses, reason } => {},
-            SwarmEvent::ListenerError { listener_id, error } => {},
-            SwarmEvent::Dialing(_) => {},
+            // Handle custom networking events
+            SwarmEvent::Behaviour(b) => match b {
+                Events::Kademlia(k) => match k {
+                    KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
+                        QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
+                            kad::GetProvidersOk::FoundProviders { providers, .. } => {
+                                if let Some(sender) = self.stack.get_providers.remove(&id) {
+                                    sender.send(providers).expect("Receiver not to be dropped");
+
+                                    // Finish the query. We are only interested in the first result.
+                                    self.swarm
+                                        .behaviour_mut()
+                                        .kademlia
+                                        .query_mut(&id)
+                                        .unwrap()
+                                        .finish();
+                                }
+                            }
+                            kad::GetProvidersOk::FinishedWithNoAdditionalRecord { .. } => {}
+                        },
+                        QueryResult::StartProviding(_) => {
+                            let sender: oneshot::Sender<()> = self
+                                .stack
+                                .start_providing
+                                .remove(&id)
+                                .expect("Completed query to be previously pending.");
+                            let _ = sender.send(());
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                },
+                Events::Mdns(m) => match m {
+                    mdns::Event::Discovered(_disc) => {}
+                    mdns::Event::Expired(_exp) => {}
+                },
+                Events::Ping(_) => {}
+            },
+            SwarmEvent::ConnectionEstablished {
+                peer_id, endpoint, ..
+            } => {
+                if endpoint.is_dialer() {
+                    if let Some(sender) = self.stack.dial.remove(&peer_id) {
+                        let _ = sender.send(Ok(()));
+                    }
+                }
+            }
+            SwarmEvent::OutgoingConnectionError { peer_id, error } => {
+                if let Some(pid) = peer_id {
+                    if let Some(sender) = self.stack.dial.remove(&pid) {
+                        let _ = sender.send(Err(Box::new(error)));
+                    }
+                }
+            }
+            SwarmEvent::NewListenAddr { address, .. } => {
+                let local_peer_id = *self.swarm.local_peer_id();
+                eprintln!(
+                    "Local node is listening on {:?}",
+                    address.with(Protocol::P2p(local_peer_id.into()))
+                );
+            }
+            SwarmEvent::Dialing(pid) => {
+                eprintln!("Dialing {pid}")
+            }
+            SwarmEvent::BannedPeer { .. } => {}
+            SwarmEvent::ConnectionClosed { .. } => {}
+            SwarmEvent::IncomingConnection { .. } => {}
+            SwarmEvent::IncomingConnectionError { .. } => {}
+            SwarmEvent::ExpiredListenAddr { .. } => {}
+            SwarmEvent::ListenerClosed { .. } => {}
+            // SwarmEvent::ListenerError { .. } => {},
+            e => panic!("{e:?}"),
         }
     }
     pub async fn handle_command(&mut self, action: Frame) {
         match action {
-            Frame::StartListening(_act) => {}
-            Frame::Dial(_act) => {}
+            Frame::StartListening(act) => {
+                let _ = match self.swarm.listen_on(act.address().clone()) {
+                    Ok(_) => act.sender().send(Ok(())),
+                    Err(e) => act.sender().send(Err(Box::new(e))),
+                };
+            }
+            Frame::Dial(act) => {
+                if let std::collections::hash_map::Entry::Vacant(e) =
+                    self.stack.dial.entry(act.pid().clone())
+                {
+                    self.swarm
+                        .behaviour_mut()
+                        .kademlia
+                        .add_address(act.pid(), act.address().clone());
+                    match self.swarm.dial(
+                        act.address()
+                            .clone()
+                            .with(Protocol::P2p(act.pid().clone().into())),
+                    ) {
+                        Ok(()) => {
+                            e.insert(act.sender());
+                        }
+                        Err(e) => {
+                            let _ = act.sender().send(Err(Box::new(e)));
+                        }
+                    }
+                } else {
+                    todo!("Already dialing peer.");
+                }
+            }
             Frame::StartProviding(_act) => {}
             Frame::GetProviders(_act) => {}
         }
@@ -75,8 +169,8 @@ impl Runtime {
     pub async fn run(mut self) {
         loop {
             tokio::select! {
-                event = self.swarm.next() => {
-
+                event = self.swarm.next() => if let Some(_) = event {
+                    // self.handle_event(e).await;
                 }
             }
         }

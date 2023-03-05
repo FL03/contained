@@ -17,8 +17,8 @@ impl GetProviders {
     pub fn new(fname: String, sender: oneshot::Sender<HashSet<PeerId>>) -> Self {
         Self { fname, sender }
     }
-    pub fn fname(self) -> String {
-        self.fname
+    pub fn fname(&self) -> String {
+        self.fname.clone()
     }
     pub fn sender(self) -> oneshot::Sender<HashSet<PeerId>> {
         self.sender

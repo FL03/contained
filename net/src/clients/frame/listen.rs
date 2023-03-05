@@ -17,8 +17,8 @@ impl Listen {
     pub fn new(addr: Multiaddr, sender: oneshot::Sender<NetResult>) -> Self {
         Self { addr, sender }
     }
-    pub fn address(self) -> Multiaddr {
-        self.addr
+    pub fn address(&self) -> &Multiaddr {
+        &self.addr
     }
     pub fn sender(self) -> oneshot::Sender<NetResult> {
         self.sender
