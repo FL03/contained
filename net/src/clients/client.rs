@@ -18,8 +18,8 @@ impl Client {
     pub fn new(sender: mpsc::Sender<Frame>) -> Self {
         Self { sender }
     }
-    pub fn sender(&self) -> &mpsc::Sender<Frame> {
-        &self.sender
+    pub fn sender(self) -> mpsc::Sender<Frame> {
+        self.sender
     }
     /// Listen for incoming connections on the given address.
     pub async fn start_listening(&mut self, addr: Multiaddr) -> NetResult {

@@ -5,7 +5,9 @@
 */
 pub use self::{constants::*, types::*};
 
-pub(crate) mod constants {}
+pub(crate) mod constants {
+    pub const DEFAULT_MULTIADDR: &str = "/ip4/0.0.0.0/tcp/0";
+}
 
 pub(crate) mod types {
     use libp2p::core::{muxing::StreamMuxerBox, transport::Boxed};
