@@ -13,6 +13,14 @@ updates:
     schedule:
         interval: daily
   - package-ecosystem: cargo
+    directory: /actors
+    schedule:
+        interval: daily
+  - package-ecosystem: cargo
     directory: /contained
+    schedule:
+        interval: daily
+  - package-ecosystem: cargo
+    directory: /net
     schedule:
         interval: daily
