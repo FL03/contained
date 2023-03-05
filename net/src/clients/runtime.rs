@@ -50,7 +50,14 @@ impl Runtime {
         event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<io::Error>, io::Error>>,
     ) {
     }
-    pub async fn handle_command(&mut self, action: Frame) {}
+    pub async fn handle_command(&mut self, action: Frame) {
+        match action {
+            Frame::StartListening(_act) => {}
+            Frame::Dial(_act) => {}
+            Frame::StartProviding(_act) => {}
+            Frame::GetProviders(_act) => {}
+        }
+    }
     pub async fn run(mut self) {
         loop {
             tokio::select! {
@@ -60,18 +67,6 @@ impl Runtime {
             }
         }
     }
-    // pub async fn run(mut self) {
-    //     loop {
-    //         tokio::select! {
-    //             event = self.swarm.next() => self.handle_event(event.expect("Swarm stream to be infinite.")).await  ,
-    //             command = self.action.next() => match command {
-    //                 Some(c) => self.handle_command(c).await,
-    //                 // Command channel closed, thus shutting down the network event loop.
-    //                 None=>  return,
-    //             },
-    //         }
-    //     }
-    // }
     pub fn swarm(self) -> Swarm<Mainnet> {
         self.swarm
     }

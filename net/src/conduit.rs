@@ -6,41 +6,34 @@
 
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
-use crate::{tokio_transport, BoxedTransport};
+use crate::peer::Peer;
+use crate::{tokio_transport, BoxedTransport, Peerable};
 use libp2p::{
-    identity::{ed25519, Keypair, PublicKey},
     swarm::{NetworkBehaviour, Swarm},
     PeerId,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Conduit {
-    kp: Keypair,
+    peer: Peer,
 }
 
 impl Conduit {
-    pub fn new() -> Self {
-        let kp = Keypair::generate_ed25519();
-        Self::from(kp)
+    pub fn new(peer: Peer) -> Self {
+        Self { peer }
     }
-
+    pub fn peer(self) -> Peer {
+        self.peer
+    }
     pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
-        Swarm::with_tokio_executor(self.transport(), behaviour, PeerId::from(self.kp.public()))
+        Swarm::with_tokio_executor(
+            self.transport(),
+            behaviour,
+            PeerId::from(self.clone().peer().pk()),
+        )
     }
 
     pub fn transport(&self) -> BoxedTransport {
-        tokio_transport(&self.kp, true)
-    }
-}
-
-impl From<Keypair> for Conduit {
-    fn from(kp: Keypair) -> Self {
-        Self { kp }
-    }
-}
-
-impl Default for Conduit {
-    fn default() -> Self {
-        Self::new()
+        tokio_transport(&self.clone().peer().keypair(), true)
     }
 }

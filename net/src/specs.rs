@@ -3,10 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use libp2p::{identity::PublicKey, PeerId};
+use libp2p::{
+    identity::{Keypair, PublicKey},
+    PeerId,
+};
 
 pub trait Peerable: Clone {
-    fn pk(self) -> PublicKey;
+    fn keypair(self) -> Keypair;
+    fn pk(self) -> PublicKey {
+        self.clone().keypair().public()
+    }
     fn pid(&self) -> PeerId {
         PeerId::from(self.clone().pk())
     }

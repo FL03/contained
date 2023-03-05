@@ -3,47 +3,35 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::{tokio_transport, BoxedTransport, Peerable};
-use libp2p::{
-    identity::{ed25519, Keypair, PublicKey},
-    swarm::{NetworkBehaviour, Swarm},
-};
+use crate::Peerable;
+use libp2p::identity::{ed25519, Keypair};
 
 #[derive(Clone, Debug)]
 pub struct Peer {
-    kp: Keypair,
+    keypair: [u8; 64],
 }
 
 impl Peer {
-    pub fn new() -> Self {
-        let kp = Keypair::generate_ed25519();
-        Self::from(kp)
-    }
-
-    pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
-        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
-    }
-
-    pub fn transport(&self) -> BoxedTransport {
-        tokio_transport(&self.kp, true)
+    pub fn new(keypair: [u8; 64]) -> Self {
+        Self { keypair }
     }
 }
 
 impl Default for Peer {
     fn default() -> Self {
-        Self::new()
+        Self::from(ed25519::Keypair::generate())
     }
 }
 
 impl Peerable for Peer {
-    fn pk(self) -> PublicKey {
-        self.kp.public()
+    fn keypair(self) -> Keypair {
+        Keypair::Ed25519(ed25519::Keypair::decode(&mut self.clone().keypair).unwrap())
     }
 }
 
-impl From<Keypair> for Peer {
-    fn from(kp: Keypair) -> Self {
-        Self { kp }
+impl From<ed25519::Keypair> for Peer {
+    fn from(keypair: ed25519::Keypair) -> Self {
+        Self::new(keypair.encode())
     }
 }
 
@@ -51,10 +39,9 @@ impl TryFrom<u8> for Peer {
     type Error = libp2p::identity::error::DecodingError;
 
     fn try_from(seed: u8) -> Result<Self, Self::Error> {
-        let mut bytes = [0u8; 32];
-        bytes[0] = seed;
-        let secret_key = ed25519::SecretKey::from_bytes(&mut bytes)?;
-        Ok(Self::from(Keypair::Ed25519(secret_key.into())))
+        let sk = crate::keypair_from_seed(seed)?;
+        let res = Self::from(ed25519::Keypair::from(sk));
+        Ok(res)
     }
 }
 

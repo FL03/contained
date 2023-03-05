@@ -50,21 +50,21 @@ impl<N: Notable> TryFrom<Triad<N>> for Triads {
     type Error = String;
 
     fn try_from(triad: Triad<N>) -> Result<Self, Self::Error> {
-        let ab = Thirds::try_from((triad.root(), triad.third()))?;
+        let (r, t, f): (N, N, N) = triad.into();
+        let ab = Thirds::try_from((r.clone(), t))?;
+        let bc = Fifths::try_from((r.clone(), f))?;
 
-        if Fifths::Perfect * triad.root() == triad.fifth() {
-            let res = match ab {
-                Thirds::Major => Self::Major,
-                Thirds::Minor => Self::Minor,
-            };
-            return Ok(res);
-        } else {
-            if Fifths::Augmented * triad.root() == triad.fifth() && ab == Thirds::Major {
-                return Ok(Self::Augmented);
-            } else if Fifths::Diminished * triad.root() == triad.fifth() && ab == Thirds::Minor {
-                return Ok(Self::Diminshed);
-            }
-            Err("Failed to find the required relationships...".to_string())
+        match ab {
+            Thirds::Major => match bc {
+                Fifths::Augmented => Ok(Self::Augmented),
+                Fifths::Perfect => Ok(Self::Major),
+                _ => Err("".to_string()),
+            },
+            Thirds::Minor => match bc {
+                Fifths::Diminished => Ok(Self::Diminshed),
+                Fifths::Perfect => Ok(Self::Minor),
+                _ => Err("".to_string()),
+            },
         }
     }
 }
@@ -110,20 +110,21 @@ impl<N: Notable> Triad<N> {
     }
     /// Checks to see if the first interval is a third and the second interval is a fifth
     pub fn is_valid(&self) -> bool {
-        Thirds::try_from((self.root(), self.third())).is_ok()
-            && Fifths::try_from((self.root(), self.fifth())).is_ok()
+        let triad: (N, N, N) = self.clone().into();
+        Thirds::try_from((triad.0, triad.1.clone())).is_ok()
+            && Fifths::try_from((triad.1, triad.2)).is_ok()
     }
     ///
-    pub fn fifth(&self) -> N {
-        self.2.clone()
+    pub fn fifth(self) -> N {
+        self.2
     }
     ///
-    pub fn root(&self) -> N {
-        self.0.clone()
+    pub fn root(self) -> N {
+        self.0
     }
     ///
-    pub fn third(&self) -> N {
-        self.1.clone()
+    pub fn third(self) -> N {
+        self.1
     }
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation

@@ -22,10 +22,7 @@ impl<N: Notable> Chord<N> {
         self
     }
     pub fn is_triadic(&self) -> bool {
-        if self.len() == 3 {
-            return true;
-        }
-        false
+        self.len() == 3
     }
 }
 

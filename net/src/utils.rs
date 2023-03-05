@@ -7,12 +7,19 @@ use crate::BoxedTransport;
 
 use libp2p::{
     core::upgrade,
-    identity::Keypair,
+    identity::{ed25519, error::DecodingError, Keypair},
     mplex, noise,
     swarm::{NetworkBehaviour, Swarm},
     tcp,
 };
 use libp2p::{PeerId, Transport};
+
+pub fn keypair_from_seed(seed: u8) -> Result<ed25519::SecretKey, DecodingError> {
+    let mut bytes = [0u8; 32];
+    bytes[0] = seed;
+    let secret_key = ed25519::SecretKey::from_bytes(&mut bytes)?;
+    Ok(secret_key)
+}
 
 pub fn tokio_swarm<B: NetworkBehaviour>(behaviour: B, keypair: &Keypair) -> Swarm<B> {
     Swarm::with_tokio_executor(

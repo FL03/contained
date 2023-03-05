@@ -10,7 +10,7 @@ pub(crate) mod event_loop;
 
 use libp2p::{mdns, ping};
 
-/// [Events] describes how the [Conduct] responds to different events
+/// [Events] describes how the [crate::proto::mainnet::Mainnet] responds to different events
 #[allow(clippy::large_enum_variant)]
 pub enum Events {
     Mdns(mdns::Event),

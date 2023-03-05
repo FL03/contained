@@ -3,13 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use crate::Dirac;
+
 pub trait Classifiable<Cls: std::convert::From<i64>> {
     fn class(&self) -> Cls;
 }
 
-pub trait Vector<T>: Clone + ExactSizeIterator + IntoIterator<Item = T> {
-    fn to_vec(&self) -> Vec<T> {
-        Vec::from_iter(self.clone())
+pub trait Arrays<T>: Clone + ExactSizeIterator + IntoIterator<Item = T> {
+    fn as_vec(self: Self) -> Vec<T> {
+        Vec::from_iter(self)
     }
 }
 
@@ -41,4 +43,21 @@ pub trait ArrayLike {
     fn len(&self) -> usize {
         self.content().len()
     }
+}
+
+pub trait Transformable {}
+
+pub trait Transformation<S: Clone> {
+    type Output;
+
+    /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
+    fn dirac(&self) -> &Dirac<&S, Self::Output>;
+    /// [Transformation::transform] applies the defined transition to the given objects
+    fn transform(&self, args: &S) -> Self::Output {
+        self.dirac()(args)
+    }
+}
+
+pub trait Validity {
+    fn is_valid(&self) -> bool;
 }

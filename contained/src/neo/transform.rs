@@ -46,13 +46,11 @@ pub enum LPR {
 
 impl LPR {
     pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
-        let ab =
-            Thirds::try_from((triad.root(), triad.third())).expect("Invalid triadic structure...");
-        let (mut r, mut t, mut f): (i64, i64, i64) = (
-            triad.root().pitch(),
-            triad.third().pitch(),
-            triad.fifth().pitch(),
-        );
+        let triad: (N, N, N) = triad.clone().into();
+        let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
+            .expect("Invalid triadic structure...");
+        let (mut r, mut t, mut f): (i64, i64, i64) =
+            (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
         match self {
             LPR::L => match ab {
                 Thirds::Major => r -= 1,

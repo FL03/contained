@@ -12,9 +12,9 @@ use tokio::sync::oneshot;
 
 #[derive(Debug, Default)]
 pub struct EventLoop {
-    dial: HashMap<PeerId, oneshot::Sender<NetResult>>,
-    start_providing: HashMap<QueryId, oneshot::Sender<()>>,
-    get_providers: HashMap<QueryId, oneshot::Sender<HashSet<PeerId>>>,
+    pub dial: HashMap<PeerId, oneshot::Sender<NetResult>>,
+    pub start_providing: HashMap<QueryId, oneshot::Sender<()>>,
+    pub get_providers: HashMap<QueryId, oneshot::Sender<HashSet<PeerId>>>,
 }
 
 impl EventLoop {
