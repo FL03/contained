@@ -97,10 +97,11 @@ impl Runtime {
             SwarmEvent::ConnectionEstablished {
                 peer_id, endpoint, ..
             } => {
-                if endpoint.is_dialer() {
-                    if let Some(sender) = self.stack.dial.remove(&peer_id) {
+                match endpoint {
+                    libp2p::core::ConnectedPoint::Dialer { .. } => if let Some(sender) = self.stack.dial.remove(&peer_id) {
                         let _ = sender.send(Ok(()));
-                    }
+                    },
+                    _ => {},
                 }
             }
             SwarmEvent::OutgoingConnectionError { peer_id, error } => {
