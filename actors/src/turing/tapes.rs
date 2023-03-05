@@ -6,8 +6,39 @@
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+
+pub enum Tapes<S: Symbolic = String> {
+    Normal(Tape<S>),
+    Standard(Tape<S>),
+}
+
+impl<S: Symbolic> Tapes<S> {
+    pub fn normal(tape: Tape<S>) -> Self {
+        Self::Normal(tape)
+    }
+    pub fn standard(tape: Tape<S>) -> Self {
+        Self::Standard(tape)
+    }
+}
+
+impl<S: Symbolic> Default for Tapes<S> {
+    fn default() -> Self {
+        Self::normal(Default::default())
+    }
+}
+
+impl<S: Symbolic> From<Tapes<S>> for Tape<S> {
+    fn from(tape: Tapes<S>) -> Tape<S> {
+        match tape {
+            Tapes::Normal(t) => t,
+            Tapes::Standard(t) => t,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Tape<S: Symbolic>(Vec<S>);
+pub struct Tape<S: Symbolic = String>(Vec<S>);
 
 impl<S: Symbolic> Tape<S> {
     pub fn new(symbols: impl IntoIterator<Item = S>) -> Self {
@@ -24,6 +55,9 @@ impl<S: Symbolic> Tape<S> {
     }
     pub fn len(&self) -> usize {
         self.tape().len()
+    }
+    pub fn push(&mut self, elem: S) {
+        self.0.push(elem);
     }
     pub fn set(&mut self, index: usize, elem: S) {
         self.0[index] = elem;

@@ -1,6 +1,11 @@
 #[cfg(test)]
-use contained_actors::turing::{Configuration, Machine, Move, Program, Tape, Turing};
-use contained_actors::{State, States};
+use contained_actors::turing::{
+    Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
+};
+use contained_actors::{
+    states::{State, States},
+    Extend, Scope,
+};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 
@@ -8,36 +13,29 @@ pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
-    let tape = Tape::new(TEST_ALPHABET);
-    let mut cnf = Configuration::build(tape, None);
+    let tape = Tape::new(alphabet.clone());
+    let scope = Operator::build(Tapes::normal(tape));
+
+    let instructions: Vec<Instruction<&str>> = vec![
+        (State::default(), "a", State::default(), "c", Move::Right).into(),
+        (State::default(), "b", State::default(), "a", Move::Right).into(),
+        (
+            State::default(),
+            "c",
+            States::invalid().into(),
+            "a",
+            Move::Stay,
+        )
+            .into(),
+    ];
 
     // Setup the program
-    let final_state = State::from(States::invalid());
-    let mut program = Program::new(alphabet, final_state);
+    let mut program = Program::new(alphabet, States::invalid().into());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
-    program
-        .insert((State::default(), "a", State::default(), "c", Move::Right).into())
-        .unwrap();
-    program
-        .insert((State::default(), "b", State::default(), "a", Move::Right).into())
-        .unwrap();
-    program
-        .insert(
-            (
-                State::default(),
-                "c",
-                State::from(States::invalid()),
-                "a",
-                Move::Left,
-            )
-                .into(),
-        )
-        .unwrap();
-    let a = Machine::new("a", program.clone());
-    assert!(a.is_ok());
+    program.extend(instructions).unwrap();
 
-    assert!(Machine::new("", program.clone()).is_err());
-    let res = a.unwrap().execute(&mut cnf);
+    let res = Machine::new(scope).execute(program.clone());
+
     assert!(res.is_ok());
-    assert_eq!(res.unwrap().tape().tape().clone(), vec!["c", "a", "a"]);
+    assert_eq!(res.unwrap().tape().clone(), Tape::new(["c", "a", "a"]));
 }

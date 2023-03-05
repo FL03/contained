@@ -3,44 +3,29 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::turing::{Program, Turing};
-use crate::{Resultant, Symbolic};
-
+use crate::turing::{Operator, Tapes, Turing};
+use crate::{Scope, Symbolic};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Machine<S: Symbolic = String> {
-    ds: S, // the default symbol
-    program: Program<S>,
+    scope: Operator<S>,
 }
 
 impl<S: Symbolic> Machine<S> {
-    pub fn new(ds: S, program: Program<S>) -> Resultant<Self> {
-        if program.alphabet().contains(&ds) {
-            Ok(Self { ds, program })
-        } else {
-            return Err(format!(
-                "The indicated default symbol ({}) is not present in the provided alphabet...",
-                ds.to_string()
-            ));
-        }
-    }
-    pub fn is_valid(&self) -> bool {
-        if self.program.alphabet().contains(&self.ds) {
-            return true;
-        }
-        false
+    pub fn new(scope: Operator<S>) -> Self {
+        Self { scope }
     }
 }
 
-impl<S: Symbolic> Turing for Machine<S> {
-    type Symbol = S;
+impl<S: Symbolic> Turing<S> for Machine<S> {
+    type Error = String;
+    type Scope = Operator<S>;
 
-    fn default_symbol(&self) -> &S {
-        &self.ds
+    fn driver(&mut self) -> &mut Self::Scope {
+        &mut self.scope
     }
-
-    fn program(&self) -> &Program<Self::Symbol> {
-        &self.program
+    fn update(&mut self, tape: Tapes<S>) {
+        self.scope = Operator::build(tape);
     }
 }

@@ -5,23 +5,19 @@
 */
 extern crate contained;
 
-use contained::actors::turing::{Configuration, Program, Turing};
-use contained::actors::{Resultant, State, States};
+use contained::actors::states::{State, States};
+use contained::actors::turing::{Instruction, Program, Turing};
+use contained::actors::{Extend, Resultant};
 use contained::{
-    core::Note,
+    music::Note,
     neo::{Triad, Triads},
 };
 
 fn main() -> Resultant {
     let triad = Triad::new(0.into(), Triads::Diminshed);
-
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
-    let mut cnf: Configuration<Note> = triad.config();
 
-    // Setup the program
-    let mut program = Program::new(alphabet, States::Invalid.into());
-    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
-    program.insert(
+    let instructions: Vec<Instruction<Note>> = vec![
         (
             State::default(),
             0.into(),
@@ -30,8 +26,6 @@ fn main() -> Resultant {
             1.into(),
         )
             .into(),
-    )?;
-    program.insert(
         (
             State::default(),
             3.into(),
@@ -40,8 +34,6 @@ fn main() -> Resultant {
             1.into(),
         )
             .into(),
-    )?;
-    program.insert(
         (
             State::default(),
             6.into(),
@@ -50,9 +42,15 @@ fn main() -> Resultant {
             2.into(),
         )
             .into(),
-    )?;
+    ];
 
-    let res = triad.machine(program)?.execute(&mut cnf)?;
+    // Setup the program
+    let mut program = Program::new(alphabet, States::Invalid.into());
+
+    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
+    program.extend(instructions)?;
+
+    let res = triad.machine().execute(program)?;
     println!("{:?}", res);
 
     Ok(())

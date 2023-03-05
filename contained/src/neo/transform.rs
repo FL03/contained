@@ -14,7 +14,7 @@
         Shift by a tone: +/- 2
 */
 use super::Triad;
-use crate::core::{Notable, Thirds};
+use crate::music::{intervals::Thirds, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -46,13 +46,11 @@ pub enum LPR {
 
 impl LPR {
     pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
-        let ab =
-            Thirds::try_from((triad.root(), triad.third())).expect("Invalid triadic structure...");
-        let (mut r, mut t, mut f): (i64, i64, i64) = (
-            triad.root().pitch(),
-            triad.third().pitch(),
-            triad.fifth().pitch(),
-        );
+        let triad: (N, N, N) = triad.clone().into();
+        let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
+            .expect("Invalid triadic structure...");
+        let (mut r, mut t, mut f): (i64, i64, i64) =
+            (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
         match self {
             LPR::L => match ab {
                 Thirds::Major => r -= 1,
@@ -64,9 +62,7 @@ impl LPR {
             },
             LPR::R => match ab {
                 Thirds::Major => f += 2,
-                Thirds::Minor => {
-                    r -= 2;
-                }
+                Thirds::Minor => r -= 2,
             },
         };
         // All triadic transformations will result in another valid triad
@@ -85,7 +81,7 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]

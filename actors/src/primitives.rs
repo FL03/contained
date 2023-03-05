@@ -9,8 +9,6 @@ pub(crate) mod constants {}
 
 pub(crate) mod types {
 
-    /// Dirac is a generic [Fn] which transforms one object into another
-    pub type Dirac<S, T> = dyn Fn(S) -> T;
     /// Type alias for a [Result]
     pub type Resultant<T = (), E = String> = Result<T, E>;
 }

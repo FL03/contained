@@ -16,9 +16,11 @@
         While one instance can only occupy a single configuration at a time, the tonnetz can break down the program into executable pieces
         injecting in LPR transformations to gaurentee execution. This process can be scaled as having multiple persistent instances allows
         the system to offload certain workloads without disrupting the overall experience.
+
+        Each subnet is orchestrated relative to the originator; the originator is considered to be the triadic structure being actively engaged with by the user.
 */
 use super::{Triad, LPR};
-use crate::core::{Notable, Note};
+use crate::music::{Notable, Note};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -60,7 +62,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
     use crate::neo::{Triad, Triads};
 
     #[test]

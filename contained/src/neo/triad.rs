@@ -9,12 +9,14 @@
 */
 use super::LPR;
 use crate::actors::{
-    turing::{Configuration, Machine, Program, Tape},
-    Symbolic,
+    turing::{Machine, Operator, Tapes},
+    Resultant, Scope, Symbolic,
 };
-use crate::core::{Fifths, Note, Thirds};
-use crate::core::{Gradient, Notable};
-use crate::Resultant;
+use crate::music::{
+    intervals::{Fifths, Thirds},
+    Gradient, Notable, Note,
+};
+
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -48,21 +50,21 @@ impl<N: Notable> TryFrom<Triad<N>> for Triads {
     type Error = String;
 
     fn try_from(triad: Triad<N>) -> Result<Self, Self::Error> {
-        let ab = Thirds::try_from((triad.root(), triad.third()))?;
+        let (r, t, f): (N, N, N) = triad.into();
+        let ab = Thirds::try_from((r.clone(), t))?;
+        let bc = Fifths::try_from((r.clone(), f))?;
 
-        if Fifths::Perfect * triad.root() == triad.fifth() {
-            let res = match ab {
-                Thirds::Major => Self::Major,
-                Thirds::Minor => Self::Minor,
-            };
-            return Ok(res);
-        } else {
-            if Fifths::Augmented * triad.root() == triad.fifth() && ab == Thirds::Major {
-                return Ok(Self::Augmented);
-            } else if Fifths::Diminished * triad.root() == triad.fifth() && ab == Thirds::Minor {
-                return Ok(Self::Diminshed);
-            }
-            Err("Failed to find the required relationships...".to_string())
+        match ab {
+            Thirds::Major => match bc {
+                Fifths::Augmented => Ok(Self::Augmented),
+                Fifths::Perfect => Ok(Self::Major),
+                _ => Err("".to_string()),
+            },
+            Thirds::Minor => match bc {
+                Fifths::Diminished => Ok(Self::Diminshed),
+                Fifths::Perfect => Ok(Self::Minor),
+                _ => Err("".to_string()),
+            },
         }
     }
 }
@@ -87,40 +89,42 @@ impl<N: Notable> Triad<N> {
     pub fn classify(&self) -> Resultant<Triads> {
         Triads::try_from(self.clone())
     }
-    /// Create a new [Configuration] with the [Triad] as its alphabet
-    pub fn config(&self) -> Configuration<Note> {
+    /// Create a new [Operator] with the [Triad] as its alphabet
+    pub fn config(&self) -> Operator<Note> {
         let a = self
             .clone()
             .into_iter()
             .map(|v| v.pitch().into())
             .collect::<Vec<Note>>();
-        Configuration::build(Tape::new(a), None)
+        Operator::build(Tapes::normal(a.into()))
     }
-    /// Repeatedly applies a chain of transformations to the [Triad]
+    /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, cycle: impl IntoIterator<Item = LPR> + Clone) {
-        loop {
-            self.walk(Vec::from_iter(cycle.clone()));
+        for i in Vec::from_iter(cycle).iter().cycle() {
+            self.transform(i.clone());
         }
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
-    pub fn machine(&self, program: Program<Note>) -> Resultant<Machine<Note>> {
-        Machine::new(self.root().pitch().into(), program)
+    pub fn machine(&self) -> Machine<Note> {
+        Machine::new(self.config())
     }
-    /// Check and see if the given notes are classified by the defined relationships
+    /// Checks to see if the first interval is a third and the second interval is a fifth
     pub fn is_valid(&self) -> bool {
-        self.classify().is_ok()
+        let triad: (N, N, N) = self.clone().into();
+        Thirds::try_from((triad.0, triad.1.clone())).is_ok()
+            && Fifths::try_from((triad.1, triad.2)).is_ok()
     }
     ///
-    pub fn fifth(&self) -> N {
-        self.2.clone()
+    pub fn fifth(self) -> N {
+        self.2
     }
     ///
-    pub fn root(&self) -> N {
-        self.0.clone()
+    pub fn root(self) -> N {
+        self.0
     }
     ///
-    pub fn third(&self) -> N {
-        self.1.clone()
+    pub fn third(self) -> N {
+        self.1
     }
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
@@ -226,7 +230,7 @@ impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::Note;
+    use crate::music::Note;
 
     #[test]
     fn test_triad() {
@@ -239,14 +243,15 @@ mod tests {
     }
 
     #[test]
-    fn test_cycles() {
+    fn test_walking() {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
+
         let mut a = triad.clone();
-        a *= LPR::L;
-        assert_eq!(a.clone(), Triad::try_from((11, 4, 7)).unwrap());
-        a *= LPR::L;
-        assert_eq!(a.clone(), triad.clone());
-        a.walk(vec![LPR::L, LPR::L]);
-        assert_eq!(a.clone(), triad)
+        // Apply three consecutive transformations to the scope
+        a.walk(vec![LPR::L, LPR::P, LPR::R]);
+        assert_eq!(a.clone(), Triad::try_from((1, 4, 8)).unwrap());
+        // Apply the same transformations in reverse to go back to the original
+        a.walk(vec![LPR::R, LPR::P, LPR::L]);
+        assert_eq!(a.clone(), triad);
     }
 }
