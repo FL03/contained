@@ -6,7 +6,7 @@
 
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
-use crate::{tokio_transport, BoxedTransport, Peerable};
+use crate::{tokio_transport, BoxedTransport};
 use libp2p::{
     identity::{ed25519, Keypair, PublicKey},
     swarm::{NetworkBehaviour, Swarm},
@@ -25,7 +25,7 @@ impl Conduit {
     }
 
     pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
-        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
+        Swarm::with_tokio_executor(self.transport(), behaviour, PeerId::from(self.kp.public()))
     }
 
     pub fn transport(&self) -> BoxedTransport {
@@ -36,26 +36,6 @@ impl Conduit {
 impl From<Keypair> for Conduit {
     fn from(kp: Keypair) -> Self {
         Self { kp }
-    }
-}
-
-impl TryFrom<u8> for Conduit {
-    type Error = libp2p::identity::error::DecodingError;
-
-    fn try_from(seed: u8) -> Result<Self, Self::Error> {
-        let mut bytes = [0u8; 32];
-        bytes[0] = seed;
-        let secret_key = ed25519::SecretKey::from_bytes(&mut bytes)?;
-        Ok(Self::from(Keypair::Ed25519(secret_key.into())))
-    }
-}
-
-impl Peerable for Conduit {
-    fn pk(&self) -> PublicKey {
-        self.kp.public()
-    }
-    fn pid(&self) -> PeerId {
-        PeerId::from(self.pk())
     }
 }
 

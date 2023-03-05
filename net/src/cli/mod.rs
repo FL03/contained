@@ -9,6 +9,7 @@ pub(crate) mod cmds;
 
 pub mod args;
 
+use crate::NetResult;
 use clap::Parser;
 use libp2p::Multiaddr;
 
@@ -32,7 +33,22 @@ pub struct CommandLineInterface {
 }
 
 impl CommandLineInterface {
+    pub async fn handle(&self) -> NetResult {
+        if let Some(cmd) = self.clone().cmd() {
+            cmd.handle()?;
+        };
+        Ok(())
+    }
     pub fn cmd(self) -> Option<Command> {
         self.cmd
+    }
+    pub fn listen(self) -> Option<Multiaddr> {
+        self.addr
+    }
+    pub fn peer(self) -> Option<Multiaddr> {
+        self.peer
+    }
+    pub fn seed(self) -> Option<u8> {
+        self.seed
     }
 }

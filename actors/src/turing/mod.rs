@@ -34,7 +34,10 @@ pub trait Turing<S: Symbolic> {
             self.driver().state().clone().into(),
             self.driver().scope().clone(),
         );
-        let inst = program.get(head).expect("Failed to fetch the instruction head...").clone();
+        let inst = program
+            .get(head)
+            .expect("Failed to fetch the instruction head...")
+            .clone();
         self.driver().set_state(inst.tail().state().clone());
         self.driver().set_symbol(inst.tail().symbol().clone());
         self.driver()
@@ -52,7 +55,10 @@ pub trait Turing<S: Symbolic> {
                 self.driver().state().clone().into(),
                 self.driver().scope().clone(),
             );
-            let inst = program.get(head).expect("Failed to fetch the instruction head...").clone();
+            let inst = program
+                .get(head)
+                .expect("Failed to fetch the instruction head...")
+                .clone();
             self.driver().set_state(inst.tail().state().clone());
             self.driver().set_symbol(inst.tail().symbol().clone());
             self.driver()

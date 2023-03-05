@@ -4,30 +4,30 @@
     Description: ... Summary ...
 */
 use crate::{
-    clients::actions::Action,
+    clients::frame::Frame,
     events::{Event, EventLoop, Events},
-    proto::Conduct,
+    proto::mainnet::Mainnet,
 };
 use either::Either;
-use futures::{Stream, StreamExt};
 use libp2p::{
     swarm::{ConnectionHandlerUpgrErr, SwarmEvent},
     Swarm,
 };
-use tokio::sync::mpsc;
+use tokio::{io, sync::mpsc};
+use tokio_stream::StreamExt;
 
 pub struct Runtime {
-    action: mpsc::Receiver<Action>,
+    action: mpsc::Receiver<Frame>,
     event: mpsc::Sender<Event>,
     stack: EventLoop,
-    swarm: Swarm<Conduct>,
+    swarm: Swarm<Mainnet>,
 }
 
 impl Runtime {
     pub fn new(
-        action: mpsc::Receiver<Action>,
+        action: mpsc::Receiver<Frame>,
         event: mpsc::Sender<Event>,
-        swarm: Swarm<Conduct>,
+        swarm: Swarm<Mainnet>,
     ) -> Self {
         Self {
             action,
@@ -36,18 +36,30 @@ impl Runtime {
             swarm,
         }
     }
-    pub fn action(self) -> mpsc::Receiver<Action> {
+    pub fn action(self) -> mpsc::Receiver<Frame> {
         self.action
     }
     pub fn event(self) -> mpsc::Sender<Event> {
         self.event
     }
+    pub fn event_loop(self) -> EventLoop {
+        self.stack
+    }
     pub async fn handle_event(
         &mut self,
-        event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<std::io::Error>, std::io::Error>>,
+        event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<io::Error>, io::Error>>,
     ) {
     }
-    pub async fn handle_command(&mut self, action: Action) {}
+    pub async fn handle_command(&mut self, action: Frame) {}
+    pub async fn run(mut self) {
+        loop {
+            tokio::select! {
+                event = self.swarm.next() => {
+
+                }
+            }
+        }
+    }
     // pub async fn run(mut self) {
     //     loop {
     //         tokio::select! {
@@ -60,7 +72,7 @@ impl Runtime {
     //         }
     //     }
     // }
-    pub fn swarm(self) -> Swarm<Conduct> {
+    pub fn swarm(self) -> Swarm<Mainnet> {
         self.swarm
     }
 }

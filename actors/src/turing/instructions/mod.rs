@@ -17,7 +17,6 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instruction<S: Symbolic>(Head<S>, Tail<S>);
 
@@ -44,7 +43,6 @@ impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instructi
         Self::new(head, tail)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

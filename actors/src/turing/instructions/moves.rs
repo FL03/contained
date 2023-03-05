@@ -2,7 +2,7 @@
     Appellation: moves <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        
+
 */
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};

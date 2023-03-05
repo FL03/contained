@@ -3,27 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{primitives::*, scope::*, utils::*};
+pub use self::{alphabet::*, primitives::*, scope::*, utils::*};
 
+pub(crate) mod alphabet;
 pub(crate) mod primitives;
 pub(crate) mod scope;
 pub(crate) mod utils;
 
 pub mod states;
 pub mod turing;
-
-pub trait Alphabet<S: Symbolic>: Clone + std::iter::IntoIterator<Item = S> {
-    fn alphabet(&self) -> Vec<S> {
-        Vec::from_iter(self.clone())
-    }
-    fn default_symbol(&self) -> &S;
-}
-
-impl<S: Symbolic> Alphabet<S> for Vec<S> {
-    fn default_symbol(&self) -> &S {
-        &self[0]
-    }
-}
 
 pub trait Extend<A> {
     fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Result<(), String>;

@@ -10,7 +10,7 @@ use libp2p::PeerId;
 use std::collections::{HashMap, HashSet};
 use tokio::sync::oneshot;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct EventLoop {
     dial: HashMap<PeerId, oneshot::Sender<NetResult>>,
     start_providing: HashMap<QueryId, oneshot::Sender<()>>,

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::actions::{Action, Dial, GetProviders, Listen, StartProviding};
+use super::frame::{Dial, Frame, GetProviders, Listen, StartProviding};
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -11,14 +11,14 @@ use tokio::sync::{mpsc, oneshot};
 
 #[derive(Debug)]
 pub struct Client {
-    sender: mpsc::Sender<Action>,
+    sender: mpsc::Sender<Frame>,
 }
 
 impl Client {
-    pub fn new(sender: mpsc::Sender<Action>) -> Self {
+    pub fn new(sender: mpsc::Sender<Frame>) -> Self {
         Self { sender }
     }
-    pub fn sender(&self) -> &mpsc::Sender<Action> {
+    pub fn sender(&self) -> &mpsc::Sender<Frame> {
         &self.sender
     }
     /// Listen for incoming connections on the given address.

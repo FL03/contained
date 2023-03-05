@@ -34,6 +34,7 @@ strum.workspace = true
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 either = "1"
 tokio = { features = ["full"], version = "1"}
+tokio-stream = "0.1"
 
 [dependencies.libp2p]
 features = [

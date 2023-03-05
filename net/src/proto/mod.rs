@@ -1,8 +1,8 @@
 /*
     Appellation: proto <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description: This module is primarily responsible for implementing the described behaviour of the network
 */
-pub use self::behaviour::*;
 
-pub(crate) mod behaviour;
+pub mod mainnet;
+pub mod subnet;

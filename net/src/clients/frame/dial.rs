@@ -18,4 +18,13 @@ impl Dial {
     pub fn new(addr: Multiaddr, pid: PeerId, sender: oneshot::Sender<NetResult>) -> Self {
         Self { addr, pid, sender }
     }
+    pub fn address(self) -> Multiaddr {
+        self.addr
+    }
+    pub fn pid(self) -> PeerId {
+        self.pid
+    }
+    pub fn sender(self) -> oneshot::Sender<NetResult> {
+        self.sender
+    }
 }

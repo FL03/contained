@@ -5,7 +5,7 @@
 */
 use crate::states::{State, Stateful, States};
 use crate::turing::{Head, Instruction};
-use crate::{Alphabet, Extend, Resultant, Symbolic};
+use crate::{Extend, Resultant, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
@@ -33,7 +33,7 @@ impl<S: Symbolic> Program<S> {
         &self.alphabet
     }
     pub fn default_symbol(&self) -> &S {
-        &self.alphabet.default_symbol()
+        &self.alphabet.first().unwrap()
     }
     /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
