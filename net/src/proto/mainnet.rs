@@ -7,7 +7,7 @@
 use crate::events::Events;
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
-use libp2p::{mdns, ping};
+use libp2p::{mdns, ping, PeerId};
 
 /// [Conduct] describes the behavior of our network
 #[derive(NetworkBehaviour)]
@@ -19,15 +19,21 @@ pub struct Mainnet {
 }
 
 impl Mainnet {
-    pub fn new(
-        freq: ping::Behaviour,
-        kademlia: Kademlia<MemoryStore>,
-        mdns: mdns::tokio::Behaviour,
-    ) -> Self {
+    pub fn new(kademlia: Kademlia<MemoryStore>, mdns: mdns::tokio::Behaviour) -> Self {
         Self {
-            freq,
+            freq: Default::default(),
             kademlia,
             mdns,
         }
+    }
+}
+
+impl From<PeerId> for Mainnet {
+    fn from(pid: PeerId) -> Self {
+        let kademlia = Kademlia::new(pid.clone(), MemoryStore::new(pid.clone()));
+        Self::new(
+            kademlia,
+            mdns::tokio::Behaviour::new(mdns::Config::default(), pid).unwrap(),
+        )
     }
 }

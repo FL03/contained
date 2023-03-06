@@ -3,8 +3,20 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::Peerable;
-use libp2p::identity::{ed25519, Keypair};
+use libp2p::{
+    identity::{ed25519, Keypair, PublicKey},
+    PeerId,
+};
+
+pub trait Peerable: Clone {
+    fn keypair(self) -> Keypair;
+    fn pk(self) -> PublicKey {
+        self.keypair().public()
+    }
+    fn pid(&self) -> PeerId {
+        self.clone().pk().to_peer_id()
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Peer {

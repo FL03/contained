@@ -54,3 +54,10 @@ impl Client {
         chan.1.await.expect("Sender not to be dropped.")
     }
 }
+
+impl Default for Client {
+    fn default() -> Self {
+        let (tx, _) = mpsc::channel::<Frame>(1);
+        Self::new(tx)
+    }
+}

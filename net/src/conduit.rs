@@ -6,8 +6,9 @@
 
         For us, a conduit is a flexible node capable of assuming a number of different forms.
 */
-use crate::peer::Peer;
-use crate::{BoxedTransport, Peerable};
+use crate::clients::{runtime::Runtime, Client};
+use crate::peer::{Peer, Peerable};
+use crate::BoxedTransport;
 use libp2p::{
     core::upgrade,
     swarm::{NetworkBehaviour, Swarm},
