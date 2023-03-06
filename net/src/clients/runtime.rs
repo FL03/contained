@@ -132,7 +132,7 @@ impl Runtime {
                 };
             }
             Frame::Dial(act) => {
-                if let hash_map::Entry::Vacant(e) = self.stack.dial.entry(act.pid().clone()) {
+                if let hash_map::Entry::Vacant(e) = self.stack.dial.entry(*act.pid()) {
                     self.swarm
                         .behaviour_mut()
                         .kademlia
@@ -140,7 +140,7 @@ impl Runtime {
                     let dialopts = act
                         .address()
                         .clone()
-                        .with(Protocol::P2p(act.pid().clone().into()));
+                        .with(Protocol::P2p((*act.pid()).into()));
                     match self.swarm.dial(dialopts) {
                         Ok(()) => {
                             e.insert(act.sender());

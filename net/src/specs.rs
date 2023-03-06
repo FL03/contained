@@ -11,7 +11,7 @@ use libp2p::{
 pub trait Peerable: Clone {
     fn keypair(self) -> Keypair;
     fn pk(self) -> PublicKey {
-        self.clone().keypair().public()
+        self.keypair().public()
     }
     fn pid(&self) -> PeerId {
         self.clone().pk().to_peer_id()

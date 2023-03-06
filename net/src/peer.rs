@@ -25,7 +25,7 @@ impl Default for Peer {
 
 impl Peerable for Peer {
     fn keypair(self) -> Keypair {
-        self.clone().into()
+        self.into()
     }
 }
 
@@ -37,7 +37,8 @@ impl From<ed25519::Keypair> for Peer {
 
 impl From<Peer> for Keypair {
     fn from(peer: Peer) -> Keypair {
-        Keypair::Ed25519(ed25519::Keypair::decode(&mut peer.clone().keypair).unwrap())
+        let mut kp = peer.keypair;
+        Keypair::Ed25519(ed25519::Keypair::decode(&mut kp).unwrap())
     }
 }
 
