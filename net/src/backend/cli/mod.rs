@@ -9,7 +9,7 @@ pub(crate) mod cmds;
 
 pub mod args;
 
-use crate::{clients::Client, peer::Peer, NetResult};
+use crate::{backend::Client, peer::Peer, NetResult};
 use clap::Parser;
 use libp2p::multiaddr::Protocol;
 use libp2p::{Multiaddr, PeerId};

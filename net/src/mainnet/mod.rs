@@ -1,17 +1,19 @@
 /*
-    Appellation: mainnet <module>
+    Appellation: proto <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        The mainnet describes interactions between subnets; this is accomplished in several ways including the binding of a namespace to the system.
+    Description: This module is primarily responsible for implementing the described behaviour of the network
 */
-use crate::events::Events;
+pub use self::events::*;
+
+pub(crate) mod events;
+
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
 use libp2p::{mdns, ping, PeerId};
 
 /// [Conduct] describes the behavior of our network
 #[derive(NetworkBehaviour)]
-#[behaviour(out_event = "Events")]
+#[behaviour(out_event = "NetworkEvent")]
 pub struct Mainnet {
     pub freq: ping::Behaviour,
     pub kademlia: Kademlia<MemoryStore>,

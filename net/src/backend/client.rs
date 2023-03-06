@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::frame::Frame;
+use crate::backend::rt::frame::Frame;
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -15,49 +15,52 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(sender: mpsc::Sender<Frame>) -> Self {
-        Self { sender }
-    }
     pub fn sender(self) -> mpsc::Sender<Frame> {
         self.sender
     }
     /// Listen for incoming connections on the given address.
     pub async fn start_listening(&mut self, addr: Multiaddr) -> NetResult {
-        let (sender, receiver) = oneshot::channel();
-        self.sender.send(Frame::listen(addr, sender)).await?;
-        receiver.await?
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(Frame::listen(addr, tx)).await?;
+        rx.await?
     }
     /// Dial the given peer at the given address.
     pub async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetResult {
-        let (sender, receiver) = oneshot::channel();
-        self.sender.send(Frame::dial(addr, pid, sender)).await?;
-        receiver.await?
+        let (tx, rx) = oneshot::channel();
+        self.sender.send(Frame::dial(addr, pid, tx)).await?;
+        rx.await?
     }
 
     /// Advertise the local node as the provider of the given file on the DHT.
     pub async fn start_providing(&mut self, fname: String) {
-        let (sender, receiver) = oneshot::channel();
+        let (tx, rx) = oneshot::channel();
         self.sender
-            .send(Frame::provide(fname, sender))
+            .send(Frame::provide(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
-        receiver.await.expect("Sender not to be dropped.");
+        rx.await.expect("Sender not to be dropped.");
     }
 
     /// Find the providers for the given file on the DHT.
     pub async fn get_providers(&mut self, fname: String) -> HashSet<PeerId> {
-        let chan = oneshot::channel();
+        let (tx, rx) = oneshot::channel();
         self.sender
-            .send(Frame::get(fname, chan.0))
+            .send(Frame::get(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
-        chan.1.await.expect("Sender not to be dropped.")
+        rx.await.expect("Sender not to be dropped.")
+    }
+}
+
+impl From<mpsc::Sender<Frame>> for Client {
+    fn from(sender: mpsc::Sender<Frame>) -> Client {
+        Client { sender }
     }
 }
 
 impl Default for Client {
     fn default() -> Self {
         let (tx, _) = mpsc::channel::<Frame>(1);
-        Self::new(tx)
+        Self::from(tx)
     }
 }

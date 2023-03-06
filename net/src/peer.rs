@@ -3,9 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use crate::BoxedTransport;
+use libp2p::swarm::{NetworkBehaviour, Swarm};
 use libp2p::{
+    core::upgrade,
     identity::{ed25519, Keypair, PublicKey},
-    PeerId,
+    mplex, noise, tcp, PeerId, Transport,
 };
 
 pub trait Peerable: Clone {
@@ -16,9 +19,20 @@ pub trait Peerable: Clone {
     fn pid(&self) -> PeerId {
         self.clone().pk().to_peer_id()
     }
+    ///
+    fn transport(&self) -> BoxedTransport {
+        tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
+            .upgrade(upgrade::Version::V1)
+            .authenticate(
+                noise::NoiseAuthenticated::xx(&self.clone().keypair())
+                    .expect("Signing libp2p-noise static DH keypair failed."),
+            )
+            .multiplex(mplex::MplexConfig::new())
+            .boxed()
+    }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Peer {
     keypair: [u8; 64],
 }
@@ -26,6 +40,9 @@ pub struct Peer {
 impl Peer {
     pub fn new(keypair: [u8; 64]) -> Self {
         Self { keypair }
+    }
+    pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
+        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
     }
 }
 
@@ -72,6 +89,6 @@ mod tests {
     fn test_peer() {
         let peer = Peer::try_from(9_u8);
         assert!(peer.is_ok());
-        assert_ne!(peer.unwrap().pk(), Peer::default().pk());
+        assert_ne!(peer.unwrap(), Peer::default());
     }
 }

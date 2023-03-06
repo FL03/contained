@@ -5,22 +5,22 @@
 */
 use crate::NetResult;
 use libp2p::Multiaddr;
-use tokio::sync::oneshot;
+use tokio::sync::oneshot::Sender;
 
 #[derive(Debug)]
 pub struct Listen {
     addr: Multiaddr,
-    sender: oneshot::Sender<NetResult<()>>,
+    sender: Sender<NetResult<()>>,
 }
 
 impl Listen {
-    pub fn new(addr: Multiaddr, sender: oneshot::Sender<NetResult>) -> Self {
+    pub fn new(addr: Multiaddr, sender: Sender<NetResult>) -> Self {
         Self { addr, sender }
     }
     pub fn address(&self) -> &Multiaddr {
         &self.addr
     }
-    pub fn sender(self) -> oneshot::Sender<NetResult> {
+    pub fn sender(self) -> Sender<NetResult> {
         self.sender
     }
 }

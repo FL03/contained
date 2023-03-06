@@ -4,18 +4,18 @@
     Description:
         This modules implements the network runtime;
 */
-use crate::events::{Event, EventLoop, Events};
-use crate::{clients::frame::Frame, proto::mainnet::Mainnet};
+use crate::backend::rt::{eloop::EventLoop, frame::Frame};
+use crate::events::Event;
+use crate::mainnet::{Mainnet, NetworkEvent};
 use libp2p::kad::{self, KademliaEvent, QueryResult};
-use libp2p::{
-    mdns,
-    multiaddr::Protocol,
-    swarm::{SwarmEvent, THandlerErr},
-    Swarm,
-};
+use libp2p::multiaddr::Protocol;
+use libp2p::swarm::{SwarmEvent, THandlerErr};
+use libp2p::{mdns, Swarm};
 use std::collections::hash_map;
-use tokio::sync::{mpsc, oneshot};
-use tokio::task::JoinHandle;
+use tokio::{
+    sync::{mpsc, oneshot},
+    task::JoinHandle,
+};
 use tokio_stream::StreamExt;
 
 pub struct Runtime {
@@ -47,11 +47,11 @@ impl Runtime {
     pub fn pending(self) -> EventLoop {
         self.stack
     }
-    pub async fn handle_event(&mut self, event: SwarmEvent<Events, THandlerErr<Mainnet>>) {
+    pub async fn handle_event(&mut self, event: SwarmEvent<NetworkEvent, THandlerErr<Mainnet>>) {
         match event {
             // Handle custom networking events
             SwarmEvent::Behaviour(b) => match b {
-                Events::Kademlia(k) => match k {
+                NetworkEvent::Kademlia(k) => match k {
                     KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
                         QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {
@@ -81,11 +81,11 @@ impl Runtime {
                     },
                     _ => {}
                 },
-                Events::Mdns(mdns_event) => match mdns_event {
+                NetworkEvent::Mdns(mdns_event) => match mdns_event {
                     mdns::Event::Discovered(_disc) => {}
                     mdns::Event::Expired(_exp) => {}
                 },
-                Events::Ping(_) => {}
+                NetworkEvent::Ping(_) => {}
             },
             SwarmEvent::ConnectionEstablished {
                 peer_id, endpoint, ..

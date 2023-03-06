@@ -5,17 +5,17 @@
 */
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
-use tokio::sync::oneshot;
+use tokio::sync::oneshot::Sender;
 
 #[derive(Debug)]
 pub struct Dial {
     addr: Multiaddr,
     pid: PeerId,
-    sender: oneshot::Sender<NetResult<()>>,
+    sender: Sender<NetResult<()>>,
 }
 
 impl Dial {
-    pub fn new(addr: Multiaddr, pid: PeerId, sender: oneshot::Sender<NetResult>) -> Self {
+    pub fn new(addr: Multiaddr, pid: PeerId, sender: Sender<NetResult>) -> Self {
         Self { addr, pid, sender }
     }
     pub fn address(&self) -> &Multiaddr {
@@ -24,7 +24,7 @@ impl Dial {
     pub fn pid(&self) -> &PeerId {
         &self.pid
     }
-    pub fn sender(self) -> oneshot::Sender<NetResult> {
+    pub fn sender(self) -> Sender<NetResult> {
         self.sender
     }
 }
