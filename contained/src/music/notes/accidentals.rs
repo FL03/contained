@@ -42,7 +42,7 @@ impl From<Accidentals> for i64 {
 }
 
 impl TryFrom<Pitch> for Accidentals {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(data: Pitch) -> Result<Accidentals, Self::Error> {
         if NaturalNote::try_from(data).is_err() {
@@ -53,12 +53,12 @@ impl TryFrom<Pitch> for Accidentals {
             };
             return Ok(note);
         }
-        Err(String::from("Provided note is natural"))
+        Err("Provided note is natural".into())
     }
 }
 
 impl TryFrom<i64> for Accidentals {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(data: i64) -> Result<Accidentals, Self::Error> {
         Accidentals::try_from(Pitch::new(data))
@@ -121,23 +121,23 @@ impl From<FlatNote> for i64 {
 }
 
 impl TryFrom<i64> for FlatNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
-        let data = value.clone().abs() % 12;
+        let data = value.abs() % 12;
         match data {
             1 => Ok(Self::D),
             3 => Ok(Self::E),
             6 => Ok(Self::G),
             8 => Ok(Self::A),
             10 => Ok(Self::B),
-            _ => Err(format!("")),
+            _ => Err("".into()),
         }
     }
 }
 
 impl TryFrom<Pitch> for FlatNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: Pitch) -> Result<Self, Self::Error> {
         FlatNote::try_from(value.pitch())
@@ -178,7 +178,7 @@ impl From<SharpNote> for i64 {
 }
 
 impl TryFrom<Pitch> for SharpNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: Pitch) -> Result<Self, Self::Error> {
         SharpNote::try_from(value.pitch())
@@ -186,17 +186,17 @@ impl TryFrom<Pitch> for SharpNote {
 }
 
 impl TryFrom<i64> for SharpNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
-        let data = value.clone() % 12;
+        let data = value % 12;
         match data {
             1 => Ok(Self::C),
             3 => Ok(Self::D),
             6 => Ok(Self::F),
             8 => Ok(Self::G),
             10 => Ok(Self::A),
-            _ => Err(format!("")),
+            _ => Err("".into()),
         }
     }
 }

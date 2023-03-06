@@ -10,7 +10,7 @@ pub trait Classifiable<Cls: std::convert::From<i64>> {
 }
 
 pub trait Arrays<T>: Clone + ExactSizeIterator + IntoIterator<Item = T> {
-    fn as_vec(self: Self) -> Vec<T> {
+    fn as_vec(self) -> Vec<T> {
         Vec::from_iter(self)
     }
 }

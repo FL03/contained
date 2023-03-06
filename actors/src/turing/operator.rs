@@ -50,13 +50,7 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
 
 impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}, {}, {:?}",
-            self.index,
-            self.state.to_string(),
-            self.tape
-        )
+        write!(f, "{}, {}, {:?}", self.index, self.state, self.tape)
     }
 }
 

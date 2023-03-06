@@ -21,8 +21,8 @@ mod tests {
 
     #[test]
     fn test_absmod() {
-        let a: i64 = -1 % 12;
-        assert_ne!(a.abs(), absmod(-1, 12));
+        let a: i64 = -13 % 12;
+        assert_ne!(a.abs(), absmod(-13, 12));
         assert_eq!(absmod(-1, 12), 11);
     }
 }

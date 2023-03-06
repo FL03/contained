@@ -28,7 +28,7 @@ impl Note {
 
 impl Gradient for Note {
     fn class(&self) -> PitchClass {
-        self.0.clone()
+        self.0
     }
 }
 

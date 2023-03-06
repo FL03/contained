@@ -54,10 +54,10 @@ mod test {
 
     #[test]
     fn test_chords() {
-        let a: Vec<Note> = vec![0.into(), 3.into(), 8.into()];
+        let mut a: Vec<Note> = vec![0.into(), 3.into(), 8.into()];
         let mut b = Chord::default();
         assert!(b.is_empty());
-        b.append(&mut a.clone());
+        b.append(&mut a);
         assert_eq!(b.len(), 3);
     }
 }

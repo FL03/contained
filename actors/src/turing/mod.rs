@@ -25,15 +25,12 @@ pub trait Turing<S: Symbolic> {
     fn driver(&mut self) -> &mut Self::Scope;
     /// [Turing::execute]
     fn execute(&mut self, program: Program<S>) -> Result<Self::Scope, Self::Error> {
-        let until = |actor: &Self::Scope| actor.clone().state().state().clone() == States::Invalid;
+        let until = |actor: &Self::Scope| *actor.clone().state().state() == States::Invalid;
         self.execute_until(program, until)
     }
     /// [Turing::execute_once]
     fn execute_once(&mut self, program: Program<S>) -> Result<Self::Scope, Self::Error> {
-        let head = Head::new(
-            self.driver().state().clone().into(),
-            self.driver().scope().clone(),
-        );
+        let head = Head::new(self.driver().state().clone(), self.driver().scope().clone());
         let inst = program
             .get(head)
             .expect("Failed to fetch the instruction head...")
@@ -51,10 +48,7 @@ pub trait Turing<S: Symbolic> {
         until: impl Fn(&Self::Scope) -> bool,
     ) -> Result<Self::Scope, Self::Error> {
         while !until(self.driver()) {
-            let head = Head::new(
-                self.driver().state().clone().into(),
-                self.driver().scope().clone(),
-            );
+            let head = Head::new(self.driver().state().clone(), self.driver().scope().clone());
             let inst = program
                 .get(head)
                 .expect("Failed to fetch the instruction head...")

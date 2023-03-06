@@ -14,7 +14,7 @@ pub mod states;
 pub mod turing;
 
 pub trait Extend<A> {
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Result<(), String>;
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Resultant;
 }
 
 /// Simple trait for compatible symbols

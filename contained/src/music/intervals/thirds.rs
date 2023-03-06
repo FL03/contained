@@ -72,7 +72,7 @@ impl<N: Notable> std::ops::Mul<N> for Thirds {
     type Output = N;
 
     fn mul(self, rhs: N) -> Self::Output {
-        (rhs.pitch() + self.clone() as i64).into()
+        (rhs.pitch() + self as i64).into()
     }
 }
 

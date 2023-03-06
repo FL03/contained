@@ -74,7 +74,7 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
     type Output = Triad<N>;
 
     fn mul(self, rhs: Triad<N>) -> Self::Output {
-        self.transform(&mut rhs.clone())
+        self.transform(&rhs)
     }
 }
 

@@ -10,5 +10,5 @@ pub(crate) mod constants {}
 pub(crate) mod types {
 
     /// Type alias for a [Result]
-    pub type Resultant<T = (), E = String> = Result<T, E>;
+    pub type Resultant<T = ()> = Result<T, Box<dyn std::error::Error>>;
 }

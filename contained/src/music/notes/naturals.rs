@@ -45,7 +45,7 @@ impl From<NaturalNote> for i64 {
 }
 
 impl TryFrom<Pitch> for NaturalNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: Pitch) -> Result<Self, Self::Error> {
         NaturalNote::try_from(value.pitch())
@@ -53,10 +53,10 @@ impl TryFrom<Pitch> for NaturalNote {
 }
 
 impl TryFrom<i64> for NaturalNote {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
-        let data = value.clone() % 12;
+        let data = value % 12;
         match data {
             0 => Ok(Self::C),
             2 => Ok(Self::D),
@@ -65,7 +65,7 @@ impl TryFrom<i64> for NaturalNote {
             7 => Ok(Self::G),
             9 => Ok(Self::A),
             11 => Ok(Self::B),
-            _ => Err(format!("")),
+            _ => Err("".into()),
         }
     }
 }
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn test_naturals() {
         assert!(NaturalNote::try_from(1).is_err());
-        assert_eq!(NaturalNote::try_from(5), Ok(NaturalNote::F));
-        assert_eq!(NaturalNote::from_str("a"), Ok(NaturalNote::A))
+        assert_eq!(NaturalNote::try_from(5).unwrap(), NaturalNote::F);
+        assert_eq!(NaturalNote::from_str("a").unwrap(), NaturalNote::A);
     }
 }

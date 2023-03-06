@@ -47,23 +47,23 @@ pub enum Triads {
 }
 
 impl<N: Notable> TryFrom<Triad<N>> for Triads {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
 
     fn try_from(triad: Triad<N>) -> Result<Self, Self::Error> {
         let (r, t, f): (N, N, N) = triad.into();
         let ab = Thirds::try_from((r.clone(), t))?;
-        let bc = Fifths::try_from((r.clone(), f))?;
+        let bc = Fifths::try_from((r, f))?;
 
         match ab {
             Thirds::Major => match bc {
                 Fifths::Augmented => Ok(Self::Augmented),
                 Fifths::Perfect => Ok(Self::Major),
-                _ => Err("".to_string()),
+                _ => Err("".into()),
             },
             Thirds::Minor => match bc {
                 Fifths::Diminished => Ok(Self::Diminshed),
                 Fifths::Perfect => Ok(Self::Minor),
-                _ => Err("".to_string()),
+                _ => Err("".into()),
             },
         }
     }
@@ -101,7 +101,7 @@ impl<N: Notable> Triad<N> {
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, cycle: impl IntoIterator<Item = LPR> + Clone) {
         for i in Vec::from_iter(cycle).iter().cycle() {
-            self.transform(i.clone());
+            self.transform(*i);
         }
     }
     /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
@@ -144,13 +144,7 @@ impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> 
 
 impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}.{}.{}",
-            self.0.to_string(),
-            self.1.to_string(),
-            self.2.to_string()
-        )
+        write!(f, "{}.{}.{}", self.0, self.1, self.2)
     }
 }
 
@@ -158,7 +152,7 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
     type Output = Triad<N>;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.transform(&mut self.clone())
+        rhs.transform(&self)
     }
 }
 
@@ -199,13 +193,13 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
                 }
             }
         }
-        Err("Failed to find the required relationships within the given notes...".to_string())
+        Err("Failed to find the required relationships within the given notes...".into())
     }
 }
 
 impl<N: Notable> From<Triad<N>> for (N, N, N) {
     fn from(d: Triad<N>) -> (N, N, N) {
-        (d.0.clone(), d.1.clone(), d.2.clone())
+        (d.0.clone(), d.1.clone(), d.2)
     }
 }
 

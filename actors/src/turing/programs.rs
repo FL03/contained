@@ -18,7 +18,7 @@ pub struct Program<S: Symbolic> {
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = final_state.state().clone().into();
+        let s: i64 = (*final_state.state()).into();
         let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);
 
@@ -33,7 +33,7 @@ impl<S: Symbolic> Program<S> {
         &self.alphabet
     }
     pub fn default_symbol(&self) -> &S {
-        &self.alphabet.first().unwrap()
+        self.alphabet.first().unwrap()
     }
     /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
@@ -46,7 +46,7 @@ impl<S: Symbolic> Program<S> {
     /// Given some [Head], find the coresponding [Instruction]
     pub fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
         if self.final_state().clone().state() < head.state().clone().state() {
-            return Err("The provided head is greater than the final state...".to_string());
+            return Err("The provided head is greater than the final state...".into());
         }
         if let Some(v) = self
             .instructions()
@@ -55,25 +55,25 @@ impl<S: Symbolic> Program<S> {
         {
             return Ok(v);
         }
-        Err("Failed to find instructions for the provided head...".to_string())
+        Err("Failed to find instructions for the provided head...".into())
     }
     /// Insert a new [Instruction] set into the program
     pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
         if inst.head().state() == &State::from(States::invalid()) {
-            return Err("Set error: Instruction cannot have 0 state in head...".to_string());
+            return Err("Set error: Instruction cannot have 0 state in head...".into());
         }
         if !self.alphabet().contains(inst.head().symbol())
             || !self.alphabet().contains(inst.tail().symbol())
         {
             return Err(
                 "The provided instruction set fails to be represented within the alphabet..."
-                    .to_string(),
+                    .into(),
             );
         }
         if self.final_state().clone().state() < inst.head().state().clone().state()
             || self.final_state().clone().state() < inst.tail().state().clone().state()
         {
-            return Err("Instructions have states greater than the ones availible...".to_string());
+            return Err("Instructions have states greater than the ones availible...".into());
         }
         let position = self
             .instructions()
@@ -91,7 +91,7 @@ impl<S: Symbolic> Program<S> {
 }
 
 impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
-    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) -> Result<(), String> {
+    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) -> Resultant {
         for i in iter {
             self.insert(i)?;
         }

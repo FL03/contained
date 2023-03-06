@@ -47,13 +47,13 @@ impl<S: StateSpec> std::ops::Add for State<S> {
     type Output = State<S>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        self + rhs.state().clone()
+        self + *rhs.state()
     }
 }
 
 impl<S: StateSpec> std::ops::AddAssign for State<S> {
     fn add_assign(&mut self, rhs: Self) {
-        self.state = self.state().clone() + rhs.state().clone();
+        self.state = *self.state() + *rhs.state();
     }
 }
 
@@ -61,7 +61,7 @@ impl<S: StateSpec> std::ops::Add<S> for State<S> {
     type Output = State<S>;
 
     fn add(self, rhs: S) -> Self::Output {
-        State::new(self.state().clone() + rhs)
+        State::new(*self.state() + rhs)
     }
 }
 
