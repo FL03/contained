@@ -24,35 +24,31 @@ impl Client {
     /// Listen for incoming connections on the given address.
     pub async fn start_listening(&mut self, addr: Multiaddr) -> NetResult {
         let (sender, receiver) = oneshot::channel();
-        self.sender
-            .send(Frame::listen(addr, sender))
-            .await?;
+        self.sender.send(Frame::listen(addr, sender)).await?;
         receiver.await?
     }
     /// Dial the given peer at the given address.
-    pub async fn dial(&mut self, peer_id: PeerId, peer_addr: Multiaddr) -> NetResult {
+    pub async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetResult {
         let (sender, receiver) = oneshot::channel();
-        self.sender
-            .send(Frame::dial(peer_addr, peer_id, sender))
-            .await?;
+        self.sender.send(Frame::dial(addr, pid, sender)).await?;
         receiver.await?
     }
 
     /// Advertise the local node as the provider of the given file on the DHT.
-    pub async fn start_providing(&mut self, file_name: String) {
+    pub async fn start_providing(&mut self, fname: String) {
         let (sender, receiver) = oneshot::channel();
         self.sender
-            .send(Frame::provide(file_name, sender))
+            .send(Frame::provide(fname, sender))
             .await
             .expect("Command receiver not to be dropped.");
         receiver.await.expect("Sender not to be dropped.");
     }
 
     /// Find the providers for the given file on the DHT.
-    pub async fn get_providers(&mut self, file_name: String) -> HashSet<PeerId> {
+    pub async fn get_providers(&mut self, fname: String) -> HashSet<PeerId> {
         let chan = oneshot::channel();
         self.sender
-            .send(Frame::get(file_name, chan.0))
+            .send(Frame::get(fname, chan.0))
             .await
             .expect("Command receiver not to be dropped.");
         chan.1.await.expect("Sender not to be dropped.")

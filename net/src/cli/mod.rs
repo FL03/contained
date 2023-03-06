@@ -11,8 +11,8 @@ pub mod args;
 
 use crate::{clients::Client, peer::Peer, NetResult};
 use clap::Parser;
-use libp2p::{Multiaddr, PeerId};
 use libp2p::multiaddr::Protocol;
+use libp2p::{Multiaddr, PeerId};
 
 pub fn new() -> CommandLineInterface {
     CommandLineInterface::parse()
@@ -37,7 +37,7 @@ impl CommandLineInterface {
     pub async fn handle(&self, client: &mut Client) -> NetResult {
         if let Some(cmd) = self.clone().cmd() {
             match cmd {
-                Command::Get { .. } => {},
+                Command::Get { .. } => {}
                 Command::Provide { .. } => {}
             }
         };
@@ -50,9 +50,11 @@ impl CommandLineInterface {
         if let Some(addr) = self.clone().listen() {
             client.start_listening(addr).await?;
         } else {
-            client.start_listening(crate::DEFAULT_MULTIADDR.parse()?).await?;
+            client
+                .start_listening(crate::DEFAULT_MULTIADDR.parse()?)
+                .await?;
         }
-        // Handle the optional peer address 
+        // Handle the optional peer address
         if let Some(addr) = self.clone().peer() {
             let peer_id = match addr.iter().last() {
                 Some(Protocol::P2p(hash)) => PeerId::from_multihash(hash).expect("Valid hash."),

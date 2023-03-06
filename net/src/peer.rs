@@ -51,9 +51,8 @@ mod tests {
 
     #[test]
     fn test_peer() {
-        let kp = Keypair::generate_ed25519();
-        // let sk = kp.
-        assert_ne!(kp.public(), Peer::default().pk());
-        // assert
+        let peer = Peer::try_from(9_u8);
+        assert!(peer.is_ok());
+        assert_ne!(peer.unwrap().pk(), Peer::default().pk());
     }
 }

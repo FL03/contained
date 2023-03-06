@@ -19,16 +19,14 @@ pub trait Peerable: Clone {
 }
 
 pub trait Handle<T> {
-    type Error;
-    type Output: std::convert::From<T>;
+    type Output;
 
-    fn handle(&mut self, msg: T) -> Result<Self::Output, Self::Error>;
+    fn handle(&mut self, msg: T) -> Self::Output;
 }
 
 #[async_trait::async_trait]
 pub trait AsyncHandle<T: Send + Sync> {
-    type Error: Send + Sync;
-    type Output: std::convert::From<T>;
+    type Output: Send + Sync;
 
-    async fn handle(&mut self, msg: T) -> Result<Self::Output, Self::Error>;
+    async fn handle(&mut self, msg: T) -> Self::Output;
 }

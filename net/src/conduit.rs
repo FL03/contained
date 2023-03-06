@@ -10,7 +10,7 @@ use crate::peer::Peer;
 use crate::{BoxedTransport, Peerable};
 use libp2p::{
     core::upgrade,
-    swarm::{NetworkBehaviour, Swarm}
+    swarm::{NetworkBehaviour, Swarm},
 };
 use libp2p::{mplex, noise, tcp, PeerId, Transport};
 
@@ -40,7 +40,7 @@ impl Conduit {
         tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
             .upgrade(upgrade::Version::V1)
             .authenticate(
-                noise::NoiseAuthenticated::xx(&self.clone().peer.keypair())
+                noise::NoiseAuthenticated::xx(&self.clone().peer().keypair())
                     .expect("Signing libp2p-noise static DH keypair failed."),
             )
             .multiplex(mplex::MplexConfig::new())

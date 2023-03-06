@@ -1,25 +1,21 @@
 /*
     Appellation: runtime <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
+    Description:
+        This modules implements the network runtime;
 */
-use crate::{
-    clients::frame::Frame,
-    events::{Event, EventLoop, Events},
-    proto::mainnet::Mainnet,
-};
-use either::Either;
+use crate::events::{Event, EventLoop, Events};
+use crate::{clients::frame::Frame, proto::mainnet::Mainnet};
 use libp2p::kad::{self, KademliaEvent, QueryResult};
 use libp2p::{
     mdns,
     multiaddr::Protocol,
-    swarm::{ConnectionHandlerUpgrErr, SwarmEvent},
+    swarm::{SwarmEvent, THandlerErr},
     Swarm,
 };
-use tokio::{
-    io,
-    sync::{mpsc, oneshot},
-};
+use std::collections::hash_map;
+use tokio::sync::{mpsc, oneshot};
+use tokio::task::JoinHandle;
 use tokio_stream::StreamExt;
 
 pub struct Runtime {
@@ -51,10 +47,7 @@ impl Runtime {
     pub fn pending(self) -> EventLoop {
         self.stack
     }
-    pub async fn handle_event(
-        &mut self,
-        event: SwarmEvent<Events, Either<ConnectionHandlerUpgrErr<io::Error>, io::Error>>,
-    ) {
+    pub async fn handle_event(&mut self, event: SwarmEvent<Events, THandlerErr<Mainnet>>) {
         match event {
             // Handle custom networking events
             SwarmEvent::Behaviour(b) => match b {
@@ -88,7 +81,7 @@ impl Runtime {
                     },
                     _ => {}
                 },
-                Events::Mdns(m) => match m {
+                Events::Mdns(mdns_event) => match mdns_event {
                     mdns::Event::Discovered(_disc) => {}
                     mdns::Event::Expired(_exp) => {}
                 },
@@ -96,14 +89,14 @@ impl Runtime {
             },
             SwarmEvent::ConnectionEstablished {
                 peer_id, endpoint, ..
-            } => {
-                match endpoint {
-                    libp2p::core::ConnectedPoint::Dialer { .. } => if let Some(sender) = self.stack.dial.remove(&peer_id) {
+            } => match endpoint {
+                libp2p::core::ConnectedPoint::Dialer { .. } => {
+                    if let Some(sender) = self.stack.dial.remove(&peer_id) {
                         let _ = sender.send(Ok(()));
-                    },
-                    _ => {},
+                    }
                 }
-            }
+                _ => {}
+            },
             SwarmEvent::OutgoingConnectionError { peer_id, error } => {
                 if let Some(pid) = peer_id {
                     if let Some(sender) = self.stack.dial.remove(&pid) {
@@ -140,18 +133,16 @@ impl Runtime {
                 };
             }
             Frame::Dial(act) => {
-                if let std::collections::hash_map::Entry::Vacant(e) =
-                    self.stack.dial.entry(act.pid().clone())
-                {
+                if let hash_map::Entry::Vacant(e) = self.stack.dial.entry(act.pid().clone()) {
                     self.swarm
                         .behaviour_mut()
                         .kademlia
                         .add_address(act.pid(), act.address().clone());
-                    match self.swarm.dial(
-                        act.address()
-                            .clone()
-                            .with(Protocol::P2p(act.pid().clone().into())),
-                    ) {
+                    let dialopts = act
+                        .address()
+                        .clone()
+                        .with(Protocol::P2p(act.pid().clone().into()));
+                    match self.swarm.dial(dialopts) {
                         Ok(()) => {
                             e.insert(act.sender());
                         }
@@ -170,11 +161,17 @@ impl Runtime {
     pub async fn run(mut self) {
         loop {
             tokio::select! {
-                event = self.swarm.next() => if let Some(_) = event {
-                    // self.handle_event(e).await;
-                }
+                Some(act) = self.action.recv() => {
+                    self.handle_command(act).await;
+                },
+                Some(event) = self.swarm.next() => {
+                    self.handle_event(event).await;
+                },
             }
         }
+    }
+    pub fn spawn(self) -> JoinHandle<()> {
+        tokio::spawn(self.run())
     }
     pub fn swarm(self) -> Swarm<Mainnet> {
         self.swarm
