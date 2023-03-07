@@ -18,7 +18,8 @@ pub fn new() -> CommandLineInterface {
     CommandLineInterface::parse()
 }
 
-#[derive(Clone, Debug, Parser)]
+
+#[derive(Clone, Debug, Eq, Hash, Ord, Parser, PartialEq, PartialOrd)]
 #[clap(about, author, long_about = None, version)]
 #[command(arg_required_else_help(true), allow_missing_positional(true))]
 pub struct CommandLineInterface {
@@ -75,5 +76,11 @@ impl CommandLineInterface {
     }
     pub fn seed(self) -> Option<u8> {
         self.seed
+    }
+}
+
+impl Default for CommandLineInterface {
+    fn default() -> Self {
+        Self::parse()
     }
 }

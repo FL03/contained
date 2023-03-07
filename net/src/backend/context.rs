@@ -1,16 +1,16 @@
 /*
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
+    Description: The context of our network is plug-n-play solution responsible for connecting everything together
 */
 use super::{
     rt::{frame::Frame, Runtime},
-    Client,
+    Client, cli,
 };
 use crate::events::Event;
 use crate::peer::{Peer, Peerable};
-use crate::{mainnet::Mainnet, NetResult};
-
+use crate::mainnet::Mainnet;
+use crate::NetResult;
 use tokio::sync::mpsc;
 
 pub struct Context {
@@ -21,8 +21,8 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn client(self) -> Client {
-        self.client
+    pub fn client(&self) -> &Client {
+        &self.client
     }
     pub fn event(self) -> mpsc::Receiver<Event> {
         self.event
@@ -30,13 +30,18 @@ impl Context {
     pub fn peer(self) -> Peer {
         self.peer
     }
-    pub fn runtime(self) -> Runtime {
-        self.runtime
+    pub fn runtime(&self) -> &Runtime {
+        &self.runtime
     }
-    pub async fn run(self) -> NetResult {
-        self.runtime.spawn().await?;
-
-        Ok(())
+    pub async fn start(mut self, cli: cli::CommandLineInterface) -> NetResult {
+        // Startup the network in the background
+        self.runtime.spawn();
+        // Process the inputs
+        loop {
+            tokio::select! {
+                Ok(_) = cli.handle(&mut self.client) => {},
+            }
+        }
     }
 }
 

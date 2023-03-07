@@ -10,3 +10,20 @@ pub(crate) mod context;
 
 pub mod cli;
 pub mod rt;
+
+use crate::NetResult;
+
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct Backend {
+    cli: cli::CommandLineInterface,
+}
+
+impl Backend {
+    pub fn new() -> Self {
+        let cli = cli::new();
+        Self { cli }
+    }
+    pub async fn start(&self, ctx: Context) -> NetResult {
+        ctx.start(self.cli.clone()).await
+    }
+}

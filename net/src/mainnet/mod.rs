@@ -1,5 +1,5 @@
 /*
-    Appellation: proto <module>
+    Appellation: mainnet <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: This module is primarily responsible for implementing the described behaviour of the network
 */
