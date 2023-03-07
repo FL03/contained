@@ -8,8 +8,8 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::actors::Symbolic;
-use crate::music::{Gradient, Notable, PitchClass};
+use crate::{Gradient, Notable, PitchClass};
+use contained_core::Symbolic;
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -63,7 +63,7 @@ impl<P: Gradient> From<&P> for Note {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::{Gradient, NaturalNote};
+    use crate::{Gradient, NaturalNote};
 
     #[test]
     fn test_notes() {

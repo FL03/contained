@@ -4,10 +4,8 @@
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 
 */
-use crate::{
-    music::{Notable, Note},
-    ArrayLike,
-};
+use super::{Notable, Note};
+use contained_core::ArrayLike;
 use serde::{Deserialize, Serialize};
 
 /// [Chord] is a wrapper for a [Vec] of [Note]

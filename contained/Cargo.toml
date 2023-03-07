@@ -15,17 +15,23 @@ version.workspace = true
 crate-type = ["cdylib", "rlib"]
 test = true
 
-[features]
-default = ["actors", "core", "net"]
+[[bin]]
+bench = true
+name = "conduit"
+test = false
 
-actors = ["contained-actors"]
-core = []
+[features]
+default = ["core", "music", "net"]
+
+core = ["contained-core"]
+music = ["contained-music"]
 net = ["contained-net"]
 
 [build-dependencies]
 
 [dependencies]
-contained-actors = { features = [], optional = true, path = "../actors", version = "0.1.4" }
+contained-core = { features = [], optional = true, path = "../core", version = "0.1.4" }
+contained-music = { features = [], optional = true, path = "../music", version = "0.1.4" }
 contained-net = { features = [], optional = true, path = "../net", version = "0.1.4" }
 
 # Standard dependencies

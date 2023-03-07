@@ -1,12 +1,10 @@
 /*
-    Appellation: intervals <module>
+    Appellation: thirds <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A collection of common musical intervals
-
-        Thirds: Major / Minor
-        Fifth: Augmented, Dimenished, Perfect
+        A musical third can be either be a difference of three (minor) or four (major) semitones
 */
-use crate::music::{Gradient, Notable};
+use crate::{Gradient, Notable};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -79,7 +77,7 @@ impl<N: Notable> std::ops::Mul<N> for Thirds {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::Note;
+    use crate::Note;
 
     #[test]
     fn test_thirds() {

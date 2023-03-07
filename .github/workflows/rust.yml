@@ -43,7 +43,8 @@ jobs:
     strategy:
       matrix:
         pkg: 
-          - contained-actors
+          - contained-core
+          - contained-music
           - contained-net
     steps:
       - uses: actions/checkout@v3

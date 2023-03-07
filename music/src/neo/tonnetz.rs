@@ -20,7 +20,7 @@
         Each subnet is orchestrated relative to the originator; the originator is considered to be the triadic structure being actively engaged with by the user.
 */
 use super::{Triad, LPR};
-use crate::music::{Notable, Note};
+use crate::{Notable, Note};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -62,8 +62,8 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::Note;
     use crate::neo::{Triad, Triads};
+    use crate::Note;
 
     #[test]
     fn test_tonnetz() {

@@ -5,12 +5,12 @@
 */
 extern crate contained;
 
-use contained::actors::states::{State, States};
-use contained::actors::turing::{Instruction, Program, Turing};
-use contained::actors::{Extend, Resultant};
-use contained::{
-    music::Note,
+use contained::core::states::{State, States};
+use contained::core::turing::{Instruction, Program, Turing};
+use contained::core::{Extend, Resultant};
+use contained::music::{
     neo::{Triad, Triads},
+    Note,
 };
 
 fn main() -> Resultant {

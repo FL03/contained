@@ -4,12 +4,13 @@
     Description: The context of our network is plug-n-play solution responsible for connecting everything together
 */
 use super::{
+    cli,
     rt::{frame::Frame, Runtime},
-    Client, cli,
+    Client,
 };
 use crate::events::Event;
-use crate::peer::{Peer, Peerable};
 use crate::mainnet::Mainnet;
+use crate::peer::{Peer, Peerable};
 use crate::NetResult;
 use tokio::sync::mpsc;
 

@@ -3,17 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::Dirac;
-
-pub trait Classifiable<Cls: std::convert::From<i64>> {
-    fn class(&self) -> Cls;
-}
-
-pub trait Arrays<T>: Clone + ExactSizeIterator + IntoIterator<Item = T> {
-    fn as_vec(self) -> Vec<T> {
-        Vec::from_iter(self)
-    }
-}
+use crate::Resultant;
 
 /// [ArrayLike] describes the basic behaviors of array-like structures
 pub trait ArrayLike {
@@ -45,19 +35,16 @@ pub trait ArrayLike {
     }
 }
 
-pub trait Transformable {}
-
-pub trait Transformation<S: Clone> {
-    type Output;
-
-    /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
-    fn dirac(&self) -> &Dirac<&S, Self::Output>;
-    /// [Transformation::transform] applies the defined transition to the given objects
-    fn transform(&self, args: &S) -> Self::Output {
-        self.dirac()(args)
-    }
+/// [Extend]
+pub trait Extend<A> {
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Resultant;
 }
 
-pub trait Validity {
-    fn is_valid(&self) -> bool;
+/// [With] describes a simple means of concating several objects together
+pub trait With<T> {
+    /// [With::Output] must be a superposition of self and T
+    type Output;
+
+    /// [With::with] accepts an owned instance of the given type and returns a [With::Output] instance
+    fn with(&self, other: &T) -> Self::Output;
 }

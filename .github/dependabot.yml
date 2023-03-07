@@ -13,11 +13,15 @@ updates:
     schedule:
         interval: daily
   - package-ecosystem: cargo
-    directory: /actors
+    directory: /contained
     schedule:
         interval: daily
   - package-ecosystem: cargo
-    directory: /contained
+    directory: /core
+    schedule:
+        interval: daily
+  - package-ecosystem: cargo
+    directory: /music
     schedule:
         interval: daily
   - package-ecosystem: cargo

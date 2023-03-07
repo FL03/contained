@@ -37,12 +37,12 @@ VOLUME [ "/data" ]
 COPY --chown=55 .config /config
 VOLUME [ "/config" ]
 
-COPY --chown=55 --from=builder /workspace/target/release/contained /bin/contained
+COPY --chown=55 --from=builder /workspace/target/release/conduit /bin/conduit
 
 FROM runner-base as runner
 
 EXPOSE 80
 EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT [ "contained" ]
-CMD [ "--up" ]
+ENTRYPOINT [ "conduit" ]
+CMD [ "-h" ]

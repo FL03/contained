@@ -8,13 +8,13 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
 */
 use super::LPR;
-use crate::actors::{
-    turing::{Machine, Operator, Tapes},
-    Resultant, Scope, Symbolic,
-};
-use crate::music::{
+use crate::{
     intervals::{Fifths, Thirds},
     Gradient, Notable, Note,
+};
+use contained_core::{
+    turing::{Machine, Operator, Tapes},
+    Resultant, Scope, Symbolic,
 };
 
 use serde::{Deserialize, Serialize};
@@ -224,7 +224,7 @@ impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::Note;
+    use crate::Note;
 
     #[test]
     fn test_triad() {

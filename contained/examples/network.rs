@@ -1,6 +1,9 @@
 extern crate contained;
 
-use contained::net::{backend::{Context, Backend}, NetResult};
+use contained::net::{
+    backend::{Backend, Context},
+    NetResult,
+};
 
 #[tokio::main]
 async fn main() -> NetResult {

@@ -1,8 +1,6 @@
 #[cfg(test)]
-use contained_actors::turing::{
-    Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing,
-};
-use contained_actors::{
+use contained_core::turing::{Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing};
+use contained_core::{
     states::{State, States},
     Extend, Scope,
 };

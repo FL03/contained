@@ -8,6 +8,7 @@ pub use self::{primitives::*, specs::*, utils::*};
 pub mod backend;
 pub mod events;
 pub mod mainnet;
+pub mod node;
 pub mod peer;
 
 pub(crate) mod primitives;

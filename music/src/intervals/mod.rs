@@ -8,7 +8,7 @@ pub use self::{fifths::*, thirds::*};
 pub(crate) mod fifths;
 pub(crate) mod thirds;
 
-use crate::music::Notable;
+use crate::Notable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -64,7 +64,7 @@ impl<N: Notable> std::ops::Mul<N> for Interval {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::music::Note;
+    use crate::Note;
 
     #[test]
     fn test_interval() {
