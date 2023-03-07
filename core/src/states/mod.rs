@@ -10,7 +10,7 @@ pub(crate) mod state;
 
 /// [Stateful] describes a stateful object
 pub trait Stateful<S: StateSpec>:
-    Clone + Eq + Ord + PartialEq + PartialOrd + ToString + std::convert::From<S> + std::ops::Add
+    Clone + Default + PartialEq + PartialOrd + ToString + std::convert::From<S> + std::ops::Add
 {
     fn state(&self) -> &S;
     fn update_state(&mut self, state: S);
@@ -29,12 +29,10 @@ impl Stateful<i64> for i64 {
 pub trait StateSpec:
     Clone
     + Copy
-    + Eq
-    + Ord
+    + Default
     + PartialEq
     + PartialOrd
-    + ToString
-    + serde::Serialize
+    + std::fmt::Display
     + std::ops::Add<Output = Self>
     + std::convert::From<i64>
     + std::convert::Into<i64>

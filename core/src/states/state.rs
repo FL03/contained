@@ -39,7 +39,7 @@ impl<S: StateSpec> Hashable for State<S> {
 
 impl<S: StateSpec> std::fmt::Display for State<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::to_string(&self).unwrap())
+        write!(f, "{}", self.state())
     }
 }
 
@@ -121,6 +121,12 @@ impl std::ops::Add for States {
 
     fn add(self, rhs: Self) -> Self::Output {
         (self as i64 + rhs as i64).into()
+    }
+}
+
+impl std::ops::AddAssign for States {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
     }
 }
 
