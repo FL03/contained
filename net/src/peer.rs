@@ -19,6 +19,9 @@ pub trait Peerable: Clone {
     fn pid(&self) -> PeerId {
         self.clone().pk().to_peer_id()
     }
+    fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
+        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
+    }
     ///
     fn transport(&self) -> BoxedTransport {
         tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
@@ -40,9 +43,6 @@ pub struct Peer {
 impl Peer {
     pub fn new(keypair: [u8; 64]) -> Self {
         Self { keypair }
-    }
-    pub fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
-        Swarm::with_tokio_executor(self.transport(), behaviour, self.pid())
     }
 }
 

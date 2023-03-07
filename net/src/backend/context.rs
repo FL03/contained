@@ -1,7 +1,7 @@
 /*
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: The context of our network is plug-n-play solution responsible for connecting everything together
+    Description: ... Summary ...
 */
 use super::{
     cli,
