@@ -45,7 +45,7 @@ pub enum LPR {
 }
 
 impl LPR {
-    pub fn transform<N: Notable>(&self, triad: &Triad<N>) -> Triad<N> {
+    pub fn transform<N: Notable>(&self, triad: Triad<N>) -> Triad<N> {
         let triad: (N, N, N) = triad.clone().into();
         let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
             .expect("Invalid triadic structure...");
@@ -74,7 +74,7 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
     type Output = Triad<N>;
 
     fn mul(self, rhs: Triad<N>) -> Self::Output {
-        self.transform(&rhs)
+        self.transform(rhs)
     }
 }
 

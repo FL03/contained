@@ -129,7 +129,7 @@ impl<N: Notable> Triad<N> {
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, dirac: LPR) {
-        *self = dirac.transform(self);
+        *self = dirac.transform(self.clone());
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
@@ -152,13 +152,13 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
     type Output = Triad<N>;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.transform(&self)
+        rhs.transform(self)
     }
 }
 
 impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
     fn mul_assign(&mut self, rhs: LPR) {
-        self.transform(rhs);
+        self.transform(rhs)
     }
 }
 
