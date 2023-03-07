@@ -1,5 +1,5 @@
 /*
-    Appellation: backend <module>
+    Appellation: node <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
@@ -14,11 +14,11 @@ pub mod rt;
 use crate::NetResult;
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Backend {
+pub struct Node {
     cli: cli::CommandLineInterface,
 }
 
-impl Backend {
+impl Node {
     pub fn new() -> Self {
         let cli = cli::new();
         Self { cli }

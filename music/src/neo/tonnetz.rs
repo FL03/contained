@@ -32,6 +32,11 @@ impl<N: Notable> Tonnetz<N> {
     pub fn new(scope: Arc<Triad<N>>) -> Self {
         Self { scope }
     }
+    pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
+            self.transform(*i)
+        }
+    }
     /// Returns an owned instance of the active [Triad]
     pub fn scope(&self) -> &Triad<N> {
         self.scope.as_ref()
@@ -40,8 +45,8 @@ impl<N: Notable> Tonnetz<N> {
         self.scope = Arc::new(self.scope().clone() * shift);
     }
 
-    pub fn walk(&mut self, cycle: Vec<LPR>) {
-        for s in cycle {
+    pub fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for s in iter {
             self.transform(s)
         }
     }

@@ -38,10 +38,11 @@ impl Context {
         // Startup the network in the background
         self.runtime.spawn();
         // Process the inputs
+        cli.handle(&mut self.client).await?;
         loop {
-            tokio::select! {
-                Ok(_) = cli.handle(&mut self.client) => {},
-            }
+            // tokio::select! {
+            //     Ok(_) = cli.handle(&mut self.client) => {},
+            // }
         }
     }
 }

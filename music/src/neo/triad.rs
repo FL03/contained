@@ -99,12 +99,12 @@ impl<N: Notable> Triad<N> {
         Operator::build(Tapes::normal(a.into()))
     }
     /// Endlessly applies the described transformations to the [Triad]
-    pub fn cycle(&mut self, cycle: impl IntoIterator<Item = LPR> + Clone) {
-        for i in Vec::from_iter(cycle).iter().cycle() {
+    pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
             self.transform(*i);
         }
     }
-    /// Tries to create a [Machine] running the given [Program] with a default set to the triad's root
+    /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self) -> Machine<Note> {
         Machine::new(self.config())
     }
