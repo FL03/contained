@@ -5,10 +5,11 @@
 */
 pub use self::{primitives::*, specs::*, utils::*};
 
-pub mod node;
+pub mod backend;
 pub mod events;
 pub mod mainnet;
-pub mod peer;
+pub mod nodes;
+pub mod peers;
 
 pub(crate) mod primitives;
 pub(crate) mod specs;

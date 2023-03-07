@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::node::rt::frame::Frame;
+use crate::nodes::rt::ops::Frame;
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -35,7 +35,7 @@ impl Client {
     pub async fn start_providing(&mut self, fname: String) {
         let (tx, rx) = oneshot::channel();
         self.sender
-            .send(Frame::provide(fname, tx))
+            .send(Frame::start_providing(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
         rx.await.expect("Sender not to be dropped.");
@@ -45,7 +45,7 @@ impl Client {
     pub async fn get_providers(&mut self, fname: String) -> HashSet<PeerId> {
         let (tx, rx) = oneshot::channel();
         self.sender
-            .send(Frame::get(fname, tx))
+            .send(Frame::get_provider(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
         rx.await.expect("Sender not to be dropped.")

@@ -32,10 +32,10 @@ impl Frame {
     pub fn listen(addr: Multiaddr, sender: Sender<NetResult>) -> Self {
         Listen::new(addr, sender).into()
     }
-    pub fn get(fname: String, sender: Sender<HashSet<PeerId>>) -> Self {
+    pub fn get_provider(fname: String, sender: Sender<HashSet<PeerId>>) -> Self {
         GetProviders::new(fname, sender).into()
     }
-    pub fn provide(fname: String, sender: Sender<()>) -> Self {
+    pub fn start_providing(fname: String, sender: Sender<()>) -> Self {
         StartProviding::new(fname, sender).into()
     }
 }

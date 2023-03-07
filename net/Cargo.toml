@@ -33,6 +33,7 @@ strum.workspace = true
 
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 either = "1"
+tarpc = { features = ["full"], version = "0.31" }
 tokio = { features = ["full"], version = "1"}
 tokio-stream = "0.1"
 tracing = { features = [], version = "0.1" }

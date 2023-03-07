@@ -9,7 +9,7 @@ pub(crate) mod cmds;
 
 pub mod args;
 
-use crate::{node::Client, peer::Peer, NetResult};
+use crate::{nodes::Client, peers::Peer, NetResult};
 use clap::Parser;
 use libp2p::multiaddr::Protocol;
 use libp2p::{Multiaddr, PeerId};
@@ -22,10 +22,13 @@ pub fn new() -> CommandLineInterface {
 #[clap(about, author, long_about = None, version)]
 #[command(arg_required_else_help(true), allow_missing_positional(true))]
 pub struct CommandLineInterface {
+    /// Network specific commands
     #[clap(subcommand)]
     cmd: Option<Command>,
+    /// Provide an address to listen to
     #[clap(long)]
     listen: Option<Multiaddr>,
+    /// Dial up another peer
     #[clap(long)]
     peer: Option<Multiaddr>,
     /// Fixed value to generate deterministic peer ID.
