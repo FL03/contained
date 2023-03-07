@@ -1,7 +1,7 @@
 extern crate contained;
 
 use contained::net::{
-    backend::{Backend, Context},
+    node::{Backend, Context},
     NetResult,
 };
 

@@ -4,7 +4,7 @@
     Description:
         This modules implements the network runtime;
 */
-use crate::backend::rt::{eloop::EventLoop, frame::Frame};
+use crate::node::rt::{eloop::EventLoop, frame::Frame};
 use crate::events::Event;
 use crate::mainnet::{Mainnet, NetworkEvent};
 use libp2p::kad::{self, KademliaEvent, QueryResult};

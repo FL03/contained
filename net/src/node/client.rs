@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::backend::rt::frame::Frame;
+use crate::node::rt::frame::Frame;
 use crate::NetResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
