@@ -35,9 +35,11 @@ pub trait ArrayLike {
     }
 }
 
-/// [Extend]
+/// [Extend] 
 pub trait Extend<A> {
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Resultant;
+    type Output;
+
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Self::Output;
 }
 
 /// [With] describes a simple means of concating several objects together

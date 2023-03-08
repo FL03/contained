@@ -7,16 +7,20 @@ use crate::{absmod, Dirac, NaturalNote, PitchClass};
 use contained_core::Symbolic;
 
 pub trait Gradient: Clone + std::convert::Into<i64> {
+    const MODULUS: i64;
+
     fn class(&self) -> PitchClass {
         self.pitch().into()
     }
     /// [Gradient::pitch] is a method for numerically representing the structure
     fn pitch(&self) -> i64 {
-        absmod(self.clone().into(), 12)
+        absmod(self.clone().into(), Self::MODULUS)
     }
 }
 
-impl Gradient for i64 {}
+impl Gradient for i64 {
+    const MODULUS: i64 = 12;
+}
 
 /// [Notable] is used to designate a structure used to represent a note
 pub trait Notable: Gradient + Send + Symbolic + Sync + std::convert::From<i64> {
@@ -28,12 +32,6 @@ pub trait Notable: Gradient + Send + Symbolic + Sync + std::convert::From<i64> {
 
 pub trait Classifiable<Cls: std::convert::From<i64>> {
     fn class(&self) -> Cls;
-}
-
-pub trait Arrays<T>: Clone + ExactSizeIterator + IntoIterator<Item = T> {
-    fn as_vec(self) -> Vec<T> {
-        Vec::from_iter(self)
-    }
 }
 
 pub trait Transformable {}

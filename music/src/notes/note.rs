@@ -15,20 +15,25 @@ use serde::{Deserialize, Serialize};
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
 /// This type of musical notation is adopted from the American Scientific Pitch Notation
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Note(PitchClass, i64);
+pub struct Note {
+    class: PitchClass,
+    octave: i64
+}
 
 impl Note {
     pub fn new(class: PitchClass, octave: Option<i64>) -> Self {
-        Self(class, octave.unwrap_or(1))
+        Self { class, octave: octave.unwrap_or(1) }
     }
     pub fn octave(&self) -> i64 {
-        self.1
+        self.octave
     }
 }
 
 impl Gradient for Note {
+    const MODULUS: i64 = crate::MODULUS;
+
     fn class(&self) -> PitchClass {
-        self.0
+        self.class
     }
 }
 
@@ -38,7 +43,7 @@ impl Symbolic for Note {}
 
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}.{}", self.0, self.1)
+        write!(f, "{}.{}", self.class, self.octave)
     }
 }
 

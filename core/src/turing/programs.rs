@@ -91,7 +91,9 @@ impl<S: Symbolic> Program<S> {
 }
 
 impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
-    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) -> Resultant {
+    type Output = Resultant;
+    
+    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) -> Self::Output {
         for i in iter {
             self.insert(i)?;
         }

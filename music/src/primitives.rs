@@ -6,8 +6,12 @@
 pub use self::{constants::*, types::*};
 
 pub(crate) mod constants {
-    pub const SEMITONE: usize = 1;
-    pub const TONE: usize = 2;
+    /// Used to describe the total number of notes considered
+    pub const MODULUS: i64 = 12;
+    /// A semitone is half of a tone
+    pub const SEMITONE: i64 = 1;
+    /// A tone is a difference of two 
+    pub const TONE: i64 = 2;
 }
 
 pub(crate) mod types {

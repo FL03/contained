@@ -41,7 +41,13 @@ pub enum PitchClass {
     Natural(NaturalNote),
 }
 
-impl Gradient for PitchClass {}
+impl Gradient for PitchClass {
+    const MODULUS: i64 = crate::MODULUS;
+
+    fn class(&self) -> PitchClass {
+        *self
+    }
+}
 
 impl From<PitchClass> for i64 {
     fn from(data: PitchClass) -> i64 {
@@ -105,8 +111,10 @@ impl Pitch {
 }
 
 impl Gradient for Pitch {
+    const MODULUS: i64 = crate::MODULUS;
+
     fn pitch(&self) -> i64 {
-        crate::absmod(self.0, 12)
+        crate::absmod(self.0, Self::MODULUS)
     }
 }
 
