@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::Resultant;
 
 /// [ArrayLike] describes the basic behaviors of array-like structures
 pub trait ArrayLike {
