@@ -8,35 +8,33 @@ use crate::turing::Tape;
 use crate::{Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
+use std::cell::Cell;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Operator<S: Symbolic = String> {
-    index: usize,
-    pub(crate) state: State<States>,
+    index: Cell<usize>,
+    state: State<States>,
     tape: Tape<S>,
 }
 
 impl<S: Symbolic> Scope<S> for Operator<S> {
-    fn new(index: usize, state: State<States>, tape: Tape<S>) -> Self {
+    fn new(index: Cell<usize>, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
     }
 
     fn insert(&mut self, elem: S) {
-        self.tape.insert(self.position(), elem);
+        self.tape.insert(self.position().get(), elem);
     }
 
-    fn position(&self) -> usize {
-        self.index
+    fn position(&self) -> &Cell<usize> {
+        &self.index
     }
 
-    fn set_position(&mut self, index: usize) {
-        self.index = index;
-    }
     fn set_state(&mut self, state: State<States>) {
         self.state = state;
     }
     fn set_symbol(&mut self, elem: S) {
-        self.tape.set(self.position(), elem);
+        self.tape.set(self.position().get(), elem);
     }
 
     fn state(&self) -> &State<States> {
@@ -50,7 +48,7 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
 
 impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, {}, {:?}", self.index, self.state, self.tape)
+        write!(f, "{}, {}, {:?}", self.index.get(), self.state, self.tape)
     }
 }
 
@@ -60,13 +58,13 @@ impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Operator<S> {
         if d.0 > d.2.len() {
             return Err("Starting index is out of bounds...".to_string());
         }
-        Ok(Self::new(d.0, d.1, d.2))
+        Ok(Self::new(Cell::new(d.0), d.1, d.2))
     }
 }
 
 impl<S: Symbolic> From<Operator<S>> for (usize, State<States>, Tape<S>) {
     fn from(d: Operator<S>) -> Self {
-        (d.index, d.state, d.tape)
+        (d.index.get(), d.state, d.tape)
     }
 }
 
@@ -86,7 +84,7 @@ mod tests {
     #[test]
     fn test_operations() {
         let tape = Tape::new(["a", "b", "c"]);
-        let mut actor = Operator::new(0, State::from(States::Valid), tape);
+        let mut actor = Operator::new(0.into(), State::from(States::Valid), tape);
         actor.shift(Move::Left, "b");
         assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));
         for _ in 0..actor.tape().len() {

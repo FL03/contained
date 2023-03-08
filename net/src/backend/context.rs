@@ -16,4 +16,7 @@ impl Context {
     pub fn new(cnf: Settings, peer: Peer) -> Self {
         Self { cnf, peer }
     }
+    pub fn peer(self) -> Peer {
+        self.peer
+    }
 }

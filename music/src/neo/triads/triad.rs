@@ -40,13 +40,10 @@ impl<N: Notable> Triad<N> {
         Triads::try_from(self.clone())
     }
     /// Create a new [Operator] with the [Triad] as its alphabet
-    pub fn config(&self) -> Operator<Note> {
-        let a = self
-            .clone()
-            .into_iter()
-            .map(|v| v.pitch().into())
-            .collect::<Vec<Note>>();
-        Operator::build(Tapes::normal(a.into()))
+    pub fn config(&self) -> Operator<N> {
+        Operator::build(Tapes::normal(
+            Vec::from_iter(self.clone().into_iter()).into(),
+        ))
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -55,7 +52,7 @@ impl<N: Notable> Triad<N> {
         }
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self) -> Machine<Note> {
+    pub fn machine(&self) -> Machine<N> {
         Machine::new(self.config())
     }
     /// Checks to see if the first interval is a third and the second interval is a fifth

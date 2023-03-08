@@ -6,6 +6,7 @@
 use crate::{absmod, Dirac, NaturalNote, PitchClass};
 use contained_core::Symbolic;
 
+/// [Gradient] provides a numerical interpretation of a given object
 pub trait Gradient: Clone + std::convert::Into<i64> {
     const MODULUS: i64;
 
