@@ -10,7 +10,7 @@ pub(crate) mod cmds;
 pub mod args;
 
 use crate::{nodes::Client, peers::Peer, NetResult};
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use libp2p::multiaddr::Protocol;
 use libp2p::{Multiaddr, PeerId};
 
@@ -34,9 +34,19 @@ pub struct CommandLineInterface {
     /// Fixed value to generate deterministic peer ID.
     #[clap(long)]
     seed: Option<u8>,
+    /// Startup the network
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    up: bool
 }
 
 impl CommandLineInterface {
+    pub fn handle_seed(&self) -> Peer {
+        if let Some(seed) = self.clone().seed() {
+            seed.try_into().unwrap_or_default()
+        } else {
+            Peer::default()
+        }
+    }
     pub async fn handle(&self, client: &mut Client) -> NetResult {
         if let Some(cmd) = self.clone().cmd() {
             match cmd {
@@ -44,11 +54,7 @@ impl CommandLineInterface {
                 Command::Provide { .. } => {}
             }
         };
-        let _peer = if let Some(seed) = self.clone().seed() {
-            Peer::try_from(seed).unwrap_or_default()
-        } else {
-            Peer::default()
-        };
+        let _peer = self.handle_seed();
         // Handle the optional listening address
         if let Some(addr) = self.clone().listen() {
             client.start_listening(addr).await?;

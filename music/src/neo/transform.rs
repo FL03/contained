@@ -13,7 +13,7 @@
         Shift by a semitone : +/- 1
         Shift by a tone: +/- 2
 */
-use super::Triad;
+use super::triads::Triad;
 use crate::{intervals::Thirds, Notable};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -81,7 +81,7 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::neo::{Triad, Triads};
+    use crate::neo::triads::{Triad, Triads};
     use crate::Note;
 
     #[test]

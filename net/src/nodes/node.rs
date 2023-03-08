@@ -14,6 +14,7 @@ use crate::{
     peers::{Peer, Peerable},
     NetResult,
 };
+use libp2p::Swarm;
 use tokio::sync::mpsc;
 
 pub struct Node {

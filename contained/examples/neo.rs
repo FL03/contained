@@ -9,7 +9,7 @@ use contained::core::states::{State, States};
 use contained::core::turing::{Instruction, Program, Turing};
 use contained::core::{Extend, Resultant};
 use contained::music::{
-    neo::{Triad, Triads},
+    neo::triads::{Triad, Triads},
     Note,
 };
 
