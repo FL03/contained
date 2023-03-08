@@ -1,17 +1,14 @@
 /*
     Appellation: triad <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        def. A triad is a set of three notes, called chord factors: root, third, and fifth
-        Generaically, triad's share two of its notes with three of its inversions.
-
-        For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
+    Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
+        These chord factors are considered by position and are referenced as the root, third, and fifth. 
 */
 use super::Triads;
 use crate::{
     intervals::{Fifths, Thirds},
     neo::LPR,
-    Gradient, Notable, Note,
+    Gradient, Notable,
 };
 use contained_core::{
     turing::{Machine, Operator, Tapes},
@@ -19,7 +16,7 @@ use contained_core::{
 };
 use serde::{Deserialize, Serialize};
 
-/// [Triad] is a set of three [Note], the root, third, and fifth.
+/// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad<N: Notable>(N, N, N);
 
