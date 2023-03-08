@@ -14,7 +14,6 @@ use crate::{
     peers::{Peer, Peerable},
     NetResult,
 };
-use libp2p::Swarm;
 use tokio::sync::mpsc;
 
 pub struct Node {
@@ -41,9 +40,11 @@ impl Node {
         &self.runtime
     }
     pub async fn start(mut self, cli: cli::CommandLineInterface) -> NetResult {
+        tracing::info!("Initializing the network...");
         // Startup the network in the background
         self.runtime.spawn();
         // Process the inputs
+        tracing::info!("Processing inputs...");
         cli.handle(&mut self.client).await?;
         loop {
             tokio::select! {
