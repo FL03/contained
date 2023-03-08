@@ -23,11 +23,8 @@ impl Backend {
     pub async fn handle_cli(&mut self) {
         let cli = self.cli.as_ref().clone();
         self.ctx.peer = cli.handle_seed();
-
     }
     pub async fn run(mut self) -> NetResult {
-        loop {
-
-        }
+        loop {}
     }
 }

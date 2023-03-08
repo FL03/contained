@@ -10,7 +10,7 @@ pub(crate) mod constants {
     pub const MODULUS: i64 = 12;
     /// A semitone is half of a tone
     pub const SEMITONE: i64 = 1;
-    /// A tone is a difference of two 
+    /// A tone is a difference of two
     pub const TONE: i64 = 2;
 }
 

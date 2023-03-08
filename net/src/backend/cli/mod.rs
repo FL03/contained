@@ -36,7 +36,7 @@ pub struct CommandLineInterface {
     seed: Option<u8>,
     /// Startup the network
     #[arg(action = ArgAction::SetTrue, long, short)]
-    up: bool
+    up: bool,
 }
 
 impl CommandLineInterface {

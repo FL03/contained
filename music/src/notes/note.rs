@@ -17,12 +17,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Note {
     class: PitchClass,
-    octave: i64
+    octave: i64,
 }
 
 impl Note {
     pub fn new(class: PitchClass, octave: Option<i64>) -> Self {
-        Self { class, octave: octave.unwrap_or(1) }
+        Self {
+            class,
+            octave: octave.unwrap_or(1),
+        }
     }
     pub fn octave(&self) -> i64 {
         self.octave

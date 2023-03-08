@@ -4,7 +4,6 @@
     Description: ... Summary ...
 */
 
-
 pub struct RPCBackend;
 
 impl RPCBackend {

@@ -35,7 +35,7 @@ pub trait ArrayLike {
     }
 }
 
-/// [Extend] 
+/// [Extend]
 pub trait Extend<A> {
     type Output;
 
