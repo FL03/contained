@@ -2,22 +2,7 @@
     Appellation: tonnetz <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        def. A tonnetz is a conceptual lattice diagram traditionally used for spatially representing tonal distance and relationships.
-
-        For our purposes, we specifcally consider the generalized tonnetz in a graph-based form of interconnected octahedrals which create a circle tied together by interconneted faces.
-        This means that each device will run at least one "cell" where a cell is a circular graph
-
-        This provides that the tonnetz is some sort of zeno-machine as each compute surface is capable of executing a countably infinite amount of steps....
-        Another option being considered is the multiway turing machine
-
-        If we consider a single triad to be the scope of a single tonnetz, than we can consider a single tonnetz to be a persistant set of non-repeating traidic structures.
-        Any two triads are connected if they share two notes or a single edge.
-
-        While one instance can only occupy a single configuration at a time, the tonnetz can break down the program into executable pieces
-        injecting in LPR transformations to gaurentee execution. This process can be scaled as having multiple persistent instances allows
-        the system to offload certain workloads without disrupting the overall experience.
-
-        Each subnet is orchestrated relative to the originator; the originator is considered to be the triadic structure being actively engaged with by the user.
+        A tonnetz can be any set of connected, non-repeating triads. The tonnetz is essentially a topological computer created by gluing together several triadic machines together.
 */
 use super::{triads::Triad, LPR};
 use crate::{Notable, Note};

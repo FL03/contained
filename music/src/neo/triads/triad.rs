@@ -17,8 +17,8 @@ use contained_core::{
     turing::{Machine, Operator, Tapes},
     Resultant, Scope, Symbolic,
 };
-
 use serde::{Deserialize, Serialize};
+
 /// [Triad] is a set of three [Note], the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad<N: Notable>(N, N, N);
