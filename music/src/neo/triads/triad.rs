@@ -82,6 +82,13 @@ impl<N: Notable> Triad<N> {
             self.transform(dirac);
         }
     }
+    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
+    pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
+        self.walk(iter.clone());
+        let mut args = Vec::from_iter(iter);
+        args.reverse();
+        self.walk(args);
+    }
 }
 
 impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> {}

@@ -14,21 +14,20 @@ pub mod states;
 pub mod turing;
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
-pub trait Alphabet<S: Symbolic>: Clone + IntoIterator<Item = S> {
+pub trait Alphabet<S: Symbolic>: Clone {
     /// [Alphabet::alphabet]
-    fn alphabet(self) -> Vec<S> {
-        Vec::from_iter(self)
-    }
+    fn alphabet(self) -> (S,);
     /// [Alphabet::default_symbol]
     fn default_symbol(&self) -> S {
-        match self.clone().alphabet().first() {
-            Some(v) => v.clone(),
-            None => Default::default(),
-        }
+        Default::default()
     }
 }
 
-impl<S: Symbolic> Alphabet<S> for Vec<S> {}
+impl<S: Symbolic> Alphabet<S> for (S,) {
+    fn alphabet(self) -> (S,) {
+        self
+    }
+}
 
 /// Simple trait for compatible symbols
 pub trait Symbolic: Clone + Default + PartialEq + std::fmt::Debug + std::fmt::Display {}
