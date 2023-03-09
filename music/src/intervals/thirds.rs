@@ -66,6 +66,14 @@ impl<N: Notable> TryFrom<(N, N)> for Thirds {
     }
 }
 
+impl<N: Notable> TryFrom<[N; 2]> for Thirds {
+    type Error = String;
+
+    fn try_from(data: [N; 2]) -> Result<Self, Self::Error> {
+        Thirds::try_from((data[0].clone(), data[1].clone()))
+    }
+}
+
 impl<N: Notable> std::ops::Mul<N> for Thirds {
     type Output = N;
 

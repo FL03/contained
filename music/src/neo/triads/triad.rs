@@ -6,7 +6,7 @@
 */
 use super::Triads;
 use crate::{
-    intervals::{Fifths, Thirds},
+    intervals::Thirds,
     neo::LPR,
     Gradient, Notable,
 };
@@ -32,9 +32,11 @@ impl<N: Notable> Triad<N> {
         };
         Self(triad.0, triad.1, triad.2)
     }
-    ///
-    pub fn classify(&self) -> Resultant<Triads> {
-        Triads::try_from(self.clone())
+    /// Classifies the [Triad] in-terms of [Thirds]
+    pub fn classify(&self) -> Resultant<(Thirds, Thirds)> {
+        let a = Thirds::try_from((self.clone().root(), self.clone().third()))?;
+        let b = Thirds::try_from((self.clone().third(), self.clone().fifth()))?;
+        Ok((a, b))
     }
     /// Create a new [Operator] with the [Triad] as its alphabet
     pub fn config(&self) -> Operator<N> {
@@ -52,11 +54,9 @@ impl<N: Notable> Triad<N> {
     pub fn machine(&self) -> Machine<N> {
         Machine::new(self.config())
     }
-    /// Checks to see if the first interval is a third and the second interval is a fifth
+    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
     pub fn is_valid(&self) -> bool {
-        let triad: (N, N, N) = self.clone().into();
-        Thirds::try_from((triad.0, triad.1.clone())).is_ok()
-            && Fifths::try_from((triad.1, triad.2)).is_ok()
+        self.classify().is_ok()
     }
     ///
     pub fn fifth(self) -> N {
