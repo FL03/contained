@@ -11,8 +11,8 @@ pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
-    let tape = Tape::new(alphabet.clone());
-    let scope = Operator::build(Tapes::normal(tape));
+    let tape = alphabet.clone();
+    let scope = Operator::build(Tapes::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
         (State::default(), "a", State::default(), "c", Move::Right).into(),

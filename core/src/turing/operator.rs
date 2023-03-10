@@ -76,8 +76,8 @@ mod tests {
     #[test]
     fn test_builder() {
         let tape = Tape::new(["a", "b", "c"]);
-        let a = Operator::build(Tapes::normal(tape.clone()));
-        let b = Operator::build(Tapes::standard(tape));
+        let a = Operator::build(Tapes::Normal(tape.clone()));
+        let b = Operator::build(Tapes::Standard(tape));
         assert_ne!(a, b);
     }
 

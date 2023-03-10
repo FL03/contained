@@ -14,8 +14,8 @@ use contained::core::{
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
-    let tape = Tape::new(alphabet.clone());
-    let scope = Operator::build(Tapes::normal(tape));
+    let tape = alphabet.clone();
+    let scope = Operator::build(Tapes::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
         (State::default(), "c", State::default(), "a", Move::Right).into(),

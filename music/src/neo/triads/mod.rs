@@ -59,6 +59,17 @@ impl From<Triads> for (Thirds, Thirds) {
     }
 }
 
+impl From<Triads> for (Thirds, Fifths) {
+    fn from(class: Triads) -> (Thirds, Fifths) {
+        match class {
+            Triads::Augmented => (Thirds::Major, Fifths::Augmented),
+            Triads::Diminished => (Thirds::Minor, Fifths::Diminished),
+            Triads::Major => (Thirds::Major, Fifths::Perfect),
+            Triads::Minor => (Thirds::Minor, Fifths::Perfect),
+        }
+    }
+}
+
 impl<N: Notable> TryFrom<Triad<N>> for Triads {
     type Error = Box<dyn std::error::Error>;
 

@@ -6,6 +6,14 @@
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
+pub trait Taped<S: Symbolic>:
+    Clone + IntoIterator<Item = S, IntoIter = std::vec::IntoIter<S>>
+{
+    fn tape(self) -> Vec<S> {
+        Vec::from_iter(self.clone())
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 
 pub enum Tapes<S: Symbolic = String> {
@@ -14,17 +22,17 @@ pub enum Tapes<S: Symbolic = String> {
 }
 
 impl<S: Symbolic> Tapes<S> {
-    pub fn normal(tape: Tape<S>) -> Self {
-        Self::Normal(tape)
+    pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
+        Self::Normal(Tape::new(iter))
     }
-    pub fn standard(tape: Tape<S>) -> Self {
-        Self::Standard(tape)
+    pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
+        Self::Standard(Tape::new(iter))
     }
 }
 
 impl<S: Symbolic> Default for Tapes<S> {
     fn default() -> Self {
-        Self::normal(Default::default())
+        Self::Normal(Default::default())
     }
 }
 
@@ -43,6 +51,14 @@ pub struct Tape<S: Symbolic = String>(Vec<S>);
 impl<S: Symbolic> Tape<S> {
     pub fn new(symbols: impl IntoIterator<Item = S>) -> Self {
         Self(Vec::from_iter(symbols))
+    }
+    pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
+        Self::new(iter)
+    }
+    pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
+        let mut tape = Vec::from_iter(iter);
+        tape.reverse();
+        Self::new(tape)
     }
     pub fn get(&self, pos: usize) -> Option<&S> {
         self.tape().get(pos)

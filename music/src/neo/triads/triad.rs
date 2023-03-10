@@ -29,15 +29,11 @@ impl<N: Notable> Triad<N> {
     }
     /// Classifies the [Triad] in-terms of [Thirds]
     pub fn classify(&self) -> Resultant<(Thirds, Thirds)> {
-        let a = Thirds::try_from((self.clone().root(), self.clone().third()))?;
-        let b = Thirds::try_from((self.clone().third(), self.clone().fifth()))?;
-        Ok((a, b))
+        Ok(Triads::try_from(self.clone())?.into())
     }
     /// Create a new [Operator] with the [Triad] as its alphabet
     pub fn config(&self) -> Operator<N> {
-        Operator::build(Tapes::normal(
-            Vec::from_iter(self.clone().into_iter()).into(),
-        ))
+        Operator::build(Tapes::norm(self.clone()))
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
