@@ -7,5 +7,5 @@ pub use self::runtime::*;
 
 pub(crate) mod runtime;
 
-pub mod eloop;
-pub mod ops;
+pub mod exec;
+pub mod frame;

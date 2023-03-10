@@ -4,9 +4,9 @@
     Description:
         This modules implements the network runtime;
 */
-use crate::events::Event;
+use crate::events::ClientEvent;
 use crate::mainnet::{Mainnet, NetworkEvent};
-use crate::nodes::rt::{eloop::EventLoop, ops::Frame};
+use crate::nodes::rt::{exec::Executor, frame::Frame};
 use libp2p::multiaddr::Protocol;
 use libp2p::swarm::{SwarmEvent, THandlerErr};
 use libp2p::Swarm;
@@ -16,35 +16,35 @@ use tokio_stream::StreamExt;
 
 pub struct Runtime {
     action: mpsc::Receiver<Frame>,
-    event: mpsc::Sender<Event>,
-    stack: EventLoop,
+    event: mpsc::Sender<ClientEvent>,
+    exec: Executor,
     swarm: Swarm<Mainnet>,
 }
 
 impl Runtime {
     pub fn new(
         action: mpsc::Receiver<Frame>,
-        event: mpsc::Sender<Event>,
+        event: mpsc::Sender<ClientEvent>,
         swarm: Swarm<Mainnet>,
     ) -> Self {
         Self {
             action,
             event,
-            stack: Default::default(),
+            exec: Default::default(),
             swarm,
         }
     }
     pub fn action(self) -> mpsc::Receiver<Frame> {
         self.action
     }
-    pub fn event(self) -> mpsc::Sender<Event> {
+    pub fn event(self) -> mpsc::Sender<ClientEvent> {
         self.event
     }
-    pub fn pending(self) -> EventLoop {
-        self.stack
+    pub fn pending(self) -> Executor {
+        self.exec
     }
     pub async fn handle_event(&mut self, event: SwarmEvent<NetworkEvent, THandlerErr<Mainnet>>) {
-        self.stack.handle_event(event, &mut self.swarm).await;
+        self.exec.handle_event(event, &mut self.swarm).await;
     }
     pub async fn handle_command(&mut self, action: Frame) {
         match action {
@@ -55,7 +55,7 @@ impl Runtime {
                 };
             }
             Frame::Dial(act) => {
-                if let hash_map::Entry::Vacant(e) = self.stack.dial.entry(*act.pid()) {
+                if let hash_map::Entry::Vacant(e) = self.exec.dial.entry(*act.pid()) {
                     self.swarm
                         .behaviour_mut()
                         .kademlia

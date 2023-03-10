@@ -4,11 +4,11 @@
     Description: ... Summary ...
 */
 use super::{
-    rt::{ops::Frame, Runtime},
+    rt::{frame::Frame, Runtime},
     Client,
 };
 use crate::{
-    events::Event,
+    events::ClientEvent,
     mainnet::Mainnet,
     peers::{Peer, Peerable},
     NetResult,
@@ -17,12 +17,12 @@ use tokio::sync::mpsc;
 
 pub struct Node {
     client: Client,
-    event: mpsc::Receiver<Event>,
+    event: mpsc::Receiver<ClientEvent>,
     runtime: Runtime,
 }
 
 impl Node {
-    pub fn new(client: Client, event: mpsc::Receiver<Event>, runtime: Runtime) -> Self {
+    pub fn new(client: Client, event: mpsc::Receiver<ClientEvent>, runtime: Runtime) -> Self {
         Self {
             client,
             event,
@@ -32,7 +32,7 @@ impl Node {
     pub fn client(&self) -> &Client {
         &self.client
     }
-    pub fn event(self) -> mpsc::Receiver<Event> {
+    pub fn event(self) -> mpsc::Receiver<ClientEvent> {
         self.event
     }
     pub fn runtime(&self) -> &Runtime {
@@ -62,7 +62,7 @@ impl Default for Node {
 impl<P: Peerable> From<P> for Node {
     fn from(peer: P) -> Node {
         let (atx, arx) = mpsc::channel::<Frame>(1);
-        let (etx, erx) = mpsc::channel::<Event>(1);
+        let (etx, erx) = mpsc::channel::<ClientEvent>(1);
         let runtime = Runtime::new(arx, etx, peer.clone().swarm(Mainnet::from(peer.pid())));
         Self::new(atx.into(), erx, runtime)
     }

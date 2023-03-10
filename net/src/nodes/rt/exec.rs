@@ -15,13 +15,13 @@ use std::collections::{HashMap, HashSet};
 use tokio::sync::oneshot;
 
 #[derive(Debug, Default)]
-pub struct EventLoop {
+pub struct Executor {
     pub dial: HashMap<PeerId, oneshot::Sender<NetResult>>,
     pub start_providing: HashMap<QueryId, oneshot::Sender<()>>,
     pub get_providers: HashMap<QueryId, oneshot::Sender<HashSet<PeerId>>>,
 }
 
-impl EventLoop {
+impl Executor {
     pub fn new(
         dial: HashMap<PeerId, oneshot::Sender<NetResult>>,
         start_providing: HashMap<QueryId, oneshot::Sender<()>>,
