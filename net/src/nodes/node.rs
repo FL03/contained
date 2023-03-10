@@ -8,7 +8,6 @@ use super::{
     Client,
 };
 use crate::{
-    backend::cli,
     events::Event,
     mainnet::Mainnet,
     peers::{Peer, Peerable},
@@ -39,13 +38,11 @@ impl Node {
     pub fn runtime(&self) -> &Runtime {
         &self.runtime
     }
-    pub async fn start(mut self, cli: cli::CommandLineInterface) -> NetResult {
-        tracing::info!("Initializing the network...");
+    pub async fn start(mut self) -> NetResult {
+        tracing::info!("Success: Network initialized");
         // Startup the network in the background
         self.runtime.spawn();
-        // Process the inputs
-        tracing::info!("Processing inputs...");
-        cli.handle(&mut self.client).await?;
+
         loop {
             tokio::select! {
                 Some(event) = self.event.recv() => {

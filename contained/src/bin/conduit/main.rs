@@ -3,15 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use contained::net::{nodes::Node, NetResult};
-
-use contained::net::peers::Peer;
+use contained::net::{backend::Backend, NetResult};
 
 #[tokio::main]
 async fn main() -> NetResult {
-    let peer = Peer::default();
-    let node = Node::from(peer);
-    node.start(Default::default()).await?;
-
+    let mut backend = Backend::default();
+    backend.run().await?;
     Ok(())
 }

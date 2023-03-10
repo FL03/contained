@@ -11,5 +11,5 @@ use serde::{Deserialize, Serialize};
 )]
 pub struct Network {
     #[clap(long, short)]
-    port: usize
+    port: usize,
 }

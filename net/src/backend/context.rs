@@ -6,7 +6,7 @@
 use super::Settings;
 use crate::peers::Peer;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Context {
     cnf: Settings,
     pub peer: Peer,
