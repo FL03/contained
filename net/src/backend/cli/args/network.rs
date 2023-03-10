@@ -5,11 +5,11 @@
 */
 use clap::Args;
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 #[derive(
     Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
-pub struct Provide {
-    #[]
+pub struct Network {
+    #[clap(long, short)]
+    port: usize
 }

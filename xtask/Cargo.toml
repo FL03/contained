@@ -1,20 +1,24 @@
 [package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
+default-run = "xtask"
 description = "xtask"
 edition = "2021"
-homepage = "https://github.com/FL03/template-cli-rs/wiki"
-keywords = [ "scsys" ]
 license = "Apache-2.0"
-name = "xtask"
-repository = "https://github.com/FL03/template-cli-rs"
+name = "xtask-sdk"
 version = "0.1.0" # TODO: Update the package version
+
+[features]
+default = []
 
 [lib]
 crate-type = ["cdylib", "rlib"]
-name = "xtask"
-path = "src/lib.rs"
 test = true
+
+[[bin]]
+bench = false
+name = "xtask"
+test = false
 
 [build-dependencies]
 

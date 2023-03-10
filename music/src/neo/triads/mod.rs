@@ -5,7 +5,7 @@
         def. A triad is a set of three notes, called chord factors: root, third, and fifth
         Generaically, triad's share two of its notes with three of its inversions.
 
-        For our purposes, a triad is said to be a three-tuple (a, b, c) where both [a, b] and [b, c] are thirds.
+        For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
 pub use self::triad::*;
 
@@ -18,6 +18,10 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
+/// [Triads::Augmented] is a [Triad] created with [Thirds::Major], [Thirds::Major] intervals
+/// [Triads::Diminished] is a [Triad] created with [Thirds::Minor], [Thirds::Minor] intervals
+/// [Triads::Major] is a [Triad] created with [Thirds::Major], [Thirds::Minor] intervals
+/// [Triads::Minor] is a [Triad] created with [Thirds::Minor], [Thirds::Major] intervals
 #[derive(
     Clone,
     Copy,
@@ -37,11 +41,22 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum Triads {
-    Augmented, // If the root -> third is major and if third -> fifth is major
-    Diminshed, // If the root -> third is minor and if third -> fifth is minor
+    Augmented,
+    Diminished,
     #[default]
-    Major, // If the root -> third is major and if third -> fifth is minor
-    Minor,     // If the root -> third is minor and if third -> fifth is major
+    Major,
+    Minor,
+}
+
+impl From<Triads> for (Thirds, Thirds) {
+    fn from(class: Triads) -> (Thirds, Thirds) {
+        match class {
+            Triads::Augmented => (Thirds::Major, Thirds::Major),
+            Triads::Diminished => (Thirds::Minor, Thirds::Minor),
+            Triads::Major => (Thirds::Major, Thirds::Minor),
+            Triads::Minor => (Thirds::Minor, Thirds::Major),
+        }
+    }
 }
 
 impl<N: Notable> TryFrom<Triad<N>> for Triads {
@@ -59,7 +74,7 @@ impl<N: Notable> TryFrom<Triad<N>> for Triads {
                 _ => Err("".into()),
             },
             Thirds::Minor => match bc {
-                Fifths::Diminished => Ok(Self::Diminshed),
+                Fifths::Diminished => Ok(Self::Diminished),
                 Fifths::Perfect => Ok(Self::Minor),
                 _ => Err("".into()),
             },

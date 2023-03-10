@@ -14,7 +14,7 @@ use contained::music::{
 };
 
 fn main() -> Resultant {
-    let triad = Triad::new(0.into(), Triads::Diminshed);
+    let triad = Triad::new(0.into(), Triads::Diminished);
     let alphabet: Vec<Note> = triad.clone().into_iter().collect();
 
     let instructions: Vec<Instruction<Note>> = vec![

@@ -42,9 +42,9 @@ pub enum Fifths {
 impl Fifths {
     pub fn compute<N: Notable>(note: N) -> (N, N, N) {
         (
-            Self::Augmented * note.clone(),
-            Self::Perfect * note.clone(),
-            Self::Diminished * note,
+            Self::Augmented + note.clone(),
+            Self::Perfect + note.clone(),
+            Self::Diminished + note,
         )
     }
 }
@@ -65,11 +65,19 @@ impl<N: Notable> TryFrom<(N, N)> for Fifths {
     }
 }
 
-impl<N: Notable> std::ops::Mul<N> for Fifths {
+impl<N: Notable> std::ops::Add<N> for Fifths {
     type Output = N;
 
-    fn mul(self, rhs: N) -> Self::Output {
+    fn add(self, rhs: N) -> Self::Output {
         (rhs.pitch() + self as i64).into()
+    }
+}
+
+impl<N: Notable> std::ops::Sub<N> for Fifths {
+    type Output = N;
+
+    fn sub(self, rhs: N) -> Self::Output {
+        (rhs.pitch() - self as i64).into()
     }
 }
 
@@ -80,6 +88,6 @@ mod tests {
 
     #[test]
     fn test_fifths() {
-        assert_eq!(Fifths::Perfect * Note::from(0), Note::from(7))
+        assert_eq!(Fifths::Perfect + Note::from(0), Note::from(7))
     }
 }

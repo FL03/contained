@@ -2,14 +2,10 @@
     Appellation: triad <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
-        These chord factors are considered by position and are referenced as the root, third, and fifth. 
+        These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
 use super::Triads;
-use crate::{
-    intervals::Thirds,
-    neo::LPR,
-    Gradient, Notable,
-};
+use crate::{intervals::Thirds, neo::LPR, Gradient, Notable, Note};
 use contained_core::{
     turing::{Machine, Operator, Tapes},
     Resultant, Scope, Symbolic,
@@ -18,19 +14,18 @@ use serde::{Deserialize, Serialize};
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Triad<N: Notable>(N, N, N);
+pub struct Triad<N: Notable = Note>(N, N, N);
 
 impl<N: Notable> Triad<N> {
     pub fn new(root: N, class: Triads) -> Self {
-        let (a, b) = Thirds::compute(root.clone());
-
-        let triad = match class {
-            Triads::Augmented => (root, a.clone(), Thirds::Major * a),
-            Triads::Diminshed => (root, b.clone(), Thirds::Minor * b),
-            Triads::Major => (root, a.clone(), Thirds::Minor * a),
-            Triads::Minor => (root, b.clone(), Thirds::Major * b),
-        };
-        Self(triad.0, triad.1, triad.2)
+        let intervals: (Thirds, Thirds) = class.into();
+        Self::build(root, intervals.0, intervals.1)
+    }
+    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
+    pub fn build(root: N, dt: Thirds, df: Thirds) -> Self {
+        let third = dt + root.clone();
+        let fifth = df + third.clone();
+        Self(root, third, fifth)
     }
     /// Classifies the [Triad] in-terms of [Thirds]
     pub fn classify(&self) -> Resultant<(Thirds, Thirds)> {
@@ -77,8 +72,8 @@ impl<N: Notable> Triad<N> {
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
-    pub fn walk(&mut self, chain: impl IntoIterator<Item = LPR>) {
-        for dirac in chain {
+    pub fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for dirac in iter {
             self.transform(dirac);
         }
     }
@@ -91,7 +86,7 @@ impl<N: Notable> Triad<N> {
     }
 }
 
-impl<N: Eq + Notable + Ord + Serialize + std::fmt::Debug> Symbolic for Triad<N> {}
+impl<N: Notable> Symbolic for Triad<N> {}
 
 impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -150,7 +145,7 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
 
 impl<N: Notable> From<Triad<N>> for (N, N, N) {
     fn from(d: Triad<N>) -> (N, N, N) {
-        (d.0.clone(), d.1.clone(), d.2)
+        (d.clone().root(), d.clone().third(), d.fifth())
     }
 }
 

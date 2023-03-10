@@ -49,15 +49,27 @@ impl From<Thirds> for Interval {
     }
 }
 
-impl<N: Notable> std::ops::Mul<N> for Interval {
+impl<N: Notable> std::ops::Add<N> for Interval {
     type Output = N;
 
-    fn mul(self, rhs: N) -> Self::Output {
+    fn add(self, rhs: N) -> Self::Output {
         let interval: i64 = match self {
             Interval::Fifth(i) => i as i64,
             Interval::Third(i) => i as i64,
         };
         (rhs.pitch() + interval).into()
+    }
+}
+
+impl<N: Notable> std::ops::Sub<N> for Interval {
+    type Output = N;
+
+    fn sub(self, rhs: N) -> Self::Output {
+        let interval: i64 = match self {
+            Interval::Fifth(i) => i as i64,
+            Interval::Third(i) => i as i64,
+        };
+        (rhs.pitch() - interval).into()
     }
 }
 
@@ -68,6 +80,6 @@ mod tests {
 
     #[test]
     fn test_interval() {
-        assert_eq!(Interval::from(Thirds::Major) * Note::from(0), Note::from(4))
+        assert_eq!(Interval::from(Thirds::Major) + Note::from(0), Note::from(4))
     }
 }

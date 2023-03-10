@@ -39,7 +39,7 @@ impl Thirds {
         Self::try_from((a, b))
     }
     pub fn compute<N: Notable>(note: N) -> (N, N) {
-        (Self::Major * note.clone(), Self::Minor * note)
+        (Self::Major + note.clone(), Self::Minor + note)
     }
     /// Functional method for creating a major third
     pub fn major() -> Self {
@@ -74,11 +74,19 @@ impl<N: Notable> TryFrom<[N; 2]> for Thirds {
     }
 }
 
-impl<N: Notable> std::ops::Mul<N> for Thirds {
+impl<N: Notable> std::ops::Add<N> for Thirds {
     type Output = N;
 
-    fn mul(self, rhs: N) -> Self::Output {
+    fn add(self, rhs: N) -> Self::Output {
         (rhs.pitch() + self as i64).into()
+    }
+}
+
+impl<N: Notable> std::ops::Sub<N> for Thirds {
+    type Output = N;
+
+    fn sub(self, rhs: N) -> Self::Output {
+        (rhs.pitch() - self as i64).into()
     }
 }
 
@@ -89,6 +97,6 @@ mod tests {
 
     #[test]
     fn test_thirds() {
-        assert_eq!(Thirds::Major * Note::from(0), Note::from(4))
+        assert_eq!(Thirds::Major + Note::from(0), Note::from(4))
     }
 }
