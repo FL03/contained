@@ -13,43 +13,55 @@ use crate::{
     peers::{Peer, Peerable},
     NetResult,
 };
+use libp2p::{futures::StreamExt, multiaddr::Protocol, Swarm};
+use std::collections::hash_map;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 
 pub struct Node {
-    client: Client,
+    pub client: Client,
     event: mpsc::Receiver<ClientEvent>,
-    runtime: Runtime,
+    swarm: Swarm<Mainnet>,
+    rt: Runtime,
 }
 
 impl Node {
-    pub fn new(client: Client, event: mpsc::Receiver<ClientEvent>, runtime: Runtime) -> Self {
+    pub fn new(
+        client: Client,
+        event: mpsc::Receiver<ClientEvent>,
+        rt: Runtime,
+        swarm: Swarm<Mainnet>,
+    ) -> Self {
         Self {
             client,
             event,
-            runtime,
+            rt,
+            swarm,
         }
-    }
-    pub fn client(&self) -> &Client {
-        &self.client
     }
     pub fn event(self) -> mpsc::Receiver<ClientEvent> {
         self.event
     }
     pub fn runtime(&self) -> &Runtime {
-        &self.runtime
+        &self.rt
     }
-    pub async fn start(mut self) -> NetResult {
-        tracing::info!("Success: Network initialized");
-        // Startup the network in the background
-        self.runtime.spawn();
-
+    pub async fn run(mut self) -> NetResult {
         loop {
             tokio::select! {
-                Some(event) = self.event.recv() => {
-                    println!("{event:?}");
+                Some(act) = self.rt.action.recv() => {
+                    tracing::info!("Processing the command");
+                    self.rt.exec.handle_command(act, &mut self.swarm).await;
                 },
+                Some(event) = self.swarm.next() => {
+                    tracing::info!("SwarmEvent: processing the network event");
+                    self.rt.exec.handle_event(event, &mut self.swarm).await;
+                },
+
             }
         }
+    }
+    pub fn spawn(self) -> tokio::task::JoinHandle<NetResult> {
+        tokio::spawn(self.run())
     }
 }
 
@@ -63,7 +75,12 @@ impl<P: Peerable> From<P> for Node {
     fn from(peer: P) -> Node {
         let (atx, arx) = mpsc::channel::<Frame>(1);
         let (etx, erx) = mpsc::channel::<ClientEvent>(1);
-        let runtime = Runtime::new(arx, etx, peer.clone().swarm(Mainnet::from(peer.pid())));
-        Self::new(atx.into(), erx, runtime)
+        let runtime = Runtime::new(arx, etx, Default::default());
+        Self::new(
+            Client::from(atx),
+            erx,
+            runtime,
+            peer.clone().swarm(Mainnet::from(peer.pid())),
+        )
     }
 }

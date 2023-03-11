@@ -3,13 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
         A tonnetz can be any set of connected, non-repeating triads. The tonnetz is essentially a topological computer created by gluing together several triadic machines together.
-        The tonnetz is an undirected, circular graph where each node is a note which is connected to 6 other nodes. There are a total of six connections for each note because the
-        graphical interpretation of the tonnetz considers all of the possible configurations of a triad and
+        The tonnetz is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
 
+        To find the six related notes, one simply must find the thirds and perfect fifth that lie above and below the given node. For example,
             Note(C) -> ((3, -3), (4, -4), (7, -7))
-                +/- 3 -> (D# / Eb, A)
-                +/- 4 -> (E, G# / Ab)
-                +/- 7 -> (G, F)
+                (Minor Third)   +/- 3 -> (D# / Eb, A)
+                (Major Third)   +/- 4 -> (E, G# / Ab)
+                (Perfect Fifth) +/- 7 -> (G, F)
 */
 use super::{triads::Triad, LPR};
 use crate::{Notable, Note};

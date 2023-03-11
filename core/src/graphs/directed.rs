@@ -4,8 +4,10 @@
     Description: ... Summary ...
 */
 use super::{Graph, GraphData};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct DirectedGraph<T: GraphData> {
     adjacency_table: HashMap<T, Vec<(T, i32)>>,
 }

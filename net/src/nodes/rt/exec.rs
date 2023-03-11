@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use super::frame::Frame;
 use crate::{
     mainnet::{Mainnet, NetworkEvent},
     NetResult,
@@ -11,7 +12,7 @@ use libp2p::kad::{self, KademliaEvent, QueryId, QueryResult};
 use libp2p::multiaddr::Protocol;
 use libp2p::swarm::{SwarmEvent, THandlerErr};
 use libp2p::{mdns, PeerId, Swarm};
-use std::collections::{HashMap, HashSet};
+use std::collections::{hash_map, HashMap, HashSet};
 use tokio::sync::oneshot;
 
 #[derive(Debug, Default)]
@@ -31,6 +32,40 @@ impl Executor {
             dial,
             start_providing,
             get_providers,
+        }
+    }
+    pub async fn handle_command(&mut self, action: Frame, swarm: &mut Swarm<Mainnet>) {
+        match action {
+            Frame::StartListening(act) => {
+                let _ = match swarm.listen_on(act.address().clone()) {
+                    Ok(_) => act.sender().send(Ok(())),
+                    Err(e) => act.sender().send(Err(Box::new(e))),
+                };
+            }
+            Frame::Dial(act) => {
+                if let hash_map::Entry::Vacant(e) = self.dial.entry(*act.pid()) {
+                    swarm
+                        .behaviour_mut()
+                        .kademlia
+                        .add_address(act.pid(), act.address().clone());
+                    let dialopts = act
+                        .address()
+                        .clone()
+                        .with(Protocol::P2p((*act.pid()).into()));
+                    match swarm.dial(dialopts) {
+                        Ok(()) => {
+                            e.insert(act.sender());
+                        }
+                        Err(e) => {
+                            let _ = act.sender().send(Err(Box::new(e)));
+                        }
+                    }
+                } else {
+                    todo!("Already dialing peer.");
+                }
+            }
+            Frame::StartProviding(_act) => {}
+            Frame::GetProviders(_act) => {}
         }
     }
     pub async fn handle_event(

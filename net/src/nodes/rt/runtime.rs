@@ -15,23 +15,21 @@ use tokio::{sync::mpsc, task::JoinHandle};
 use tokio_stream::StreamExt;
 
 pub struct Runtime {
-    action: mpsc::Receiver<Frame>,
+    pub action: mpsc::Receiver<Frame>,
     event: mpsc::Sender<ClientEvent>,
-    exec: Executor,
-    swarm: Swarm<Mainnet>,
+    pub exec: Executor,
 }
 
 impl Runtime {
     pub fn new(
         action: mpsc::Receiver<Frame>,
         event: mpsc::Sender<ClientEvent>,
-        swarm: Swarm<Mainnet>,
+        exec: Executor,
     ) -> Self {
         Self {
             action,
             event,
-            exec: Default::default(),
-            swarm,
+            exec,
         }
     }
     pub fn action(self) -> mpsc::Receiver<Frame> {
@@ -43,59 +41,19 @@ impl Runtime {
     pub fn pending(self) -> Executor {
         self.exec
     }
-    pub async fn handle_event(&mut self, event: SwarmEvent<NetworkEvent, THandlerErr<Mainnet>>) {
-        self.exec.handle_event(event, &mut self.swarm).await;
-    }
-    pub async fn handle_command(&mut self, action: Frame) {
-        match action {
-            Frame::StartListening(act) => {
-                let _ = match self.swarm.listen_on(act.address().clone()) {
-                    Ok(_) => act.sender().send(Ok(())),
-                    Err(e) => act.sender().send(Err(Box::new(e))),
-                };
-            }
-            Frame::Dial(act) => {
-                if let hash_map::Entry::Vacant(e) = self.exec.dial.entry(*act.pid()) {
-                    self.swarm
-                        .behaviour_mut()
-                        .kademlia
-                        .add_address(act.pid(), act.address().clone());
-                    let dialopts = act
-                        .address()
-                        .clone()
-                        .with(Protocol::P2p((*act.pid()).into()));
-                    match self.swarm.dial(dialopts) {
-                        Ok(()) => {
-                            e.insert(act.sender());
-                        }
-                        Err(e) => {
-                            let _ = act.sender().send(Err(Box::new(e)));
-                        }
-                    }
-                } else {
-                    todo!("Already dialing peer.");
-                }
-            }
-            Frame::StartProviding(_act) => {}
-            Frame::GetProviders(_act) => {}
-        }
-    }
-    pub async fn run(mut self) {
+    pub async fn run(mut self, swarm: &mut Swarm<Mainnet>) {
         loop {
             tokio::select! {
                 Some(act) = self.action.recv() => {
-                    self.handle_command(act).await;
+                    self.exec.handle_command(act, swarm).await;
                 },
-                Some(event) = self.swarm.next() => {
-                    self.handle_event(event).await;
+                Some(event) = swarm.next() => {
+                    self.exec.handle_event(event, swarm).await;
                 },
             }
         }
     }
-    pub fn spawn(self) -> JoinHandle<()> {
-        tokio::spawn(self.run())
-    }
-    pub fn swarm(self) -> Swarm<Mainnet> {
-        self.swarm
-    }
+    // pub fn spawn(self) -> JoinHandle<()> {
+    //     tokio::spawn(self.run())
+    // }
 }
