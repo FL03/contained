@@ -9,6 +9,8 @@ pub(crate) mod fifths;
 pub(crate) mod thirds;
 
 use crate::Notable;
+use contained_core::graphs::cmp::EdgeValue;
+
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -37,6 +39,17 @@ pub enum Interval {
     Third(Thirds),
 }
 
+impl EdgeValue for Interval {}
+
+impl From<Interval> for i64 {
+    fn from(interval: Interval) -> i64 {
+        match interval {
+            Interval::Fifth(i) => i as i64,
+            Interval::Third(i) => i as i64,
+        }
+    }
+}
+
 impl From<Fifths> for Interval {
     fn from(data: Fifths) -> Interval {
         Interval::Fifth(data)
@@ -53,10 +66,7 @@ impl<N: Notable> std::ops::Add<N> for Interval {
     type Output = N;
 
     fn add(self, rhs: N) -> Self::Output {
-        let interval: i64 = match self {
-            Interval::Fifth(i) => i as i64,
-            Interval::Third(i) => i as i64,
-        };
+        let interval: i64 = self.into();
         (rhs.pitch() + interval).into()
     }
 }

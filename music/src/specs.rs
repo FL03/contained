@@ -4,7 +4,7 @@
     Description: ... Summary ...
 */
 use crate::{absmod, Dirac, NaturalNote, PitchClass};
-use contained_core::Symbolic;
+use contained_core::{graphs, Symbolic};
 
 /// [Gradient] provides a numerical interpretation of a given object
 pub trait Gradient: Clone + Eq + Ord + std::convert::Into<i64> {
@@ -24,14 +24,14 @@ impl Gradient for i64 {
 }
 
 /// [Notable] is used to designate a structure used to represent a note
-pub trait Notable: Gradient + Send + Symbolic + Sync + std::convert::From<i64> {
+pub trait Notable: From<i64> + Gradient + Send + Symbolic + Sync + graphs::cmp::Node {
     /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()
     }
 }
 
-pub trait Classifiable<Cls: std::convert::From<i64>> {
+pub trait Classifiable<Cls: From<i64>> {
     fn class(&self) -> Cls;
 }
 

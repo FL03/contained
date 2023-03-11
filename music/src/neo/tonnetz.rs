@@ -12,29 +12,34 @@
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
 use super::{triads::Triad, LPR};
-use crate::{Notable, Note};
+use crate::{Interval, Notable, Note};
+use contained_core::graphs::{Graph, UndirectedGraph};
 use std::{collections::BTreeSet, sync::Arc};
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tonnetz<N: Notable = Note> {
-    cluster: BTreeSet<Triad<N>>,
+    cluster: UndirectedGraph<N, Interval>,
+    scope: Arc<Triad<N>>,
 }
 
 impl<N: Notable> Tonnetz<N> {
-    pub fn new(cluster: BTreeSet<Triad<N>>) -> Self {
-        Self { cluster }
+    pub fn new(cluster: UndirectedGraph<N, Interval>, scope: Arc<Triad<N>>) -> Self {
+        Self { cluster, scope }
     }
 }
 
 impl<N: Notable> std::fmt::Display for Tonnetz<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.cluster.clone().first().unwrap())
+        write!(f, "{:?}", self.cluster)
     }
 }
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
-    fn from(triad: Triad<N>) -> Tonnetz<N> {
-        Tonnetz::<N>::new(BTreeSet::from([triad]))
+    fn from(triad: Triad<N>) -> Self {
+        Self {
+            cluster: Default::default(),
+            scope: triad.into(),
+        }
     }
 }
 

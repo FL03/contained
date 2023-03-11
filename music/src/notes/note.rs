@@ -9,7 +9,7 @@
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
 use crate::{Gradient, Notable, PitchClass};
-use contained_core::Symbolic;
+use contained_core::{graphs, Symbolic};
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -39,6 +39,8 @@ impl Gradient for Note {
         self.class
     }
 }
+
+impl graphs::cmp::Node for Note {}
 
 impl Notable for Note {}
 
