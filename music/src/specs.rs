@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::{absmod, Dirac, NaturalNote, PitchClass};
+use crate::{absmod, intervals::Interval, Dirac, NaturalNote, PitchClass};
 use algae::graph::cmp::Node;
 use contained_core::Symbolic;
 

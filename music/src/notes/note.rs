@@ -8,7 +8,7 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::{Gradient, Notable, PitchClass};
+use crate::{intervals::Interval, Gradient, Notable, PitchClass};
 use contained_core::Symbolic;
 use serde::{Deserialize, Serialize};
 
@@ -49,6 +49,34 @@ impl Symbolic for Note {}
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}", self.class, self.octave)
+    }
+}
+
+impl<P: Gradient> std::ops::Add<P> for Note {
+    type Output = Self;
+
+    fn add(self, rhs: P) -> Self::Output {
+        (self.pitch() + rhs.pitch()).into()
+    }
+}
+
+impl<P: Gradient> std::ops::AddAssign<P> for Note {
+    fn add_assign(&mut self, rhs: P) {
+        *self = self.clone() + rhs;
+    }
+}
+
+impl<P: Gradient> std::ops::Sub<P> for Note {
+    type Output = Self;
+
+    fn sub(self, rhs: P) -> Self::Output {
+        (self.pitch() - rhs.pitch()).into()
+    }
+}
+
+impl<P: Gradient> std::ops::SubAssign<P> for Note {
+    fn sub_assign(&mut self, rhs: P) {
+        *self = self.clone() - rhs;
     }
 }
 

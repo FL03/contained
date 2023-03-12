@@ -8,7 +8,7 @@ pub use self::{fifths::*, thirds::*};
 pub(crate) mod fifths;
 pub(crate) mod thirds;
 
-use crate::Notable;
+use crate::{Gradient, Notable};
 
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
@@ -34,6 +34,8 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum Interval {
+    Semitone = 1,
+    Tone = 2,
     Fifth(Fifths),
     #[default]
     Third(Thirds),
@@ -50,6 +52,8 @@ impl From<Interval> for i64 {
         match interval {
             Interval::Fifth(i) => i as i64,
             Interval::Third(i) => i as i64,
+            Interval::Semitone => 1,
+            Interval::Tone => 2,
         }
     }
 }
@@ -79,10 +83,7 @@ impl<N: Notable> std::ops::Sub<N> for Interval {
     type Output = N;
 
     fn sub(self, rhs: N) -> Self::Output {
-        let interval: i64 = match self {
-            Interval::Fifth(i) => i as i64,
-            Interval::Third(i) => i as i64,
-        };
+        let interval: i64 = self.into();
         (rhs.pitch() - interval).into()
     }
 }
