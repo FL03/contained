@@ -22,7 +22,6 @@ use contained_core::{
     turing::{Machine, Operator, Tapes},
     Scope, 
 };
-use std::ops::{Mul, MulAssign};
 
 pub trait Triadic<N: Notable>:
     Clone
