@@ -15,5 +15,5 @@ pub struct Face<T>(T, State);
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Surface<N: Notable = Note> {
     alphabet: Triad<N>,
-    faces: (Face<N>,),
+    interface: Face<Triad<N>>,
 }

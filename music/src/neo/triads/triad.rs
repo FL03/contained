@@ -4,80 +4,14 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::Triads;
+use super::{Triadic, Triads};
 use crate::{
     intervals::{Fifths, Thirds},
     neo::LPR,
-    Gradient, Notable, Note,
-};
-use contained_core::{
-    turing::{Machine, Operator, Tapes},
-    Resultant, Scope, Symbolic,
+    Gradient, Notable, Note, MusicResult
 };
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
-use std::ops::{Mul, MulAssign};
-
-pub trait Triadic<N: Notable>:
-    Clone
-    + Into<(N, N, N)>
-    + IntoIterator<Item = N, IntoIter = std::vec::IntoIter<N>>
-    + Mul<LPR>
-    + MulAssign<LPR>
-    + ToString
-{
-    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
-    fn build(root: N, dt: Thirds, df: Thirds) -> Self;
-    /// Classifies the [Triad] by describing the intervals that connect the notes
-    fn classify(&self) -> Resultant<(Thirds, Thirds, Fifths)> {
-        let edges: (Thirds, Thirds, Fifths) = Triads::try_from(self.clone().triad())?.into();
-        Ok(edges)
-    }
-    /// Create a new [Operator] with the [Triad] as its alphabet
-    fn config(&self) -> Operator<N> {
-        Operator::build(Tapes::norm(self.clone()))
-    }
-    /// Endlessly applies the described transformations to the [Triad]
-    fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for i in Vec::from_iter(iter).iter().cycle() {
-            self.transform(*i);
-        }
-    }
-    /// Initializes a new instance of a [Machine] configured with the current alphabet
-    fn machine(&self) -> Machine<N> {
-        Machine::new(self.config())
-    }
-    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
-    fn is_valid(&self) -> bool {
-        self.classify().is_ok()
-    }
-    ///
-    fn fifth(self) -> N;
-    ///
-    fn root(self) -> N;
-    ///
-    fn third(self) -> N;
-    /// Apply a single [LPR] transformation onto the active machine
-    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
-    fn transform(&mut self, dirac: LPR);
-    fn triad(self) -> (N, N, N) {
-        self.into()
-    }
-    /// Applies multiple [LPR] transformations onto the scoped [Triad]
-    /// The goal here is to allow the machine to work on and in the scope
-    fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for dirac in iter {
-            self.transform(dirac);
-        }
-    }
-    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
-    fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
-        self.walk(iter.clone());
-        let mut args = Vec::from_iter(iter);
-        args.reverse();
-        self.walk(args);
-    }
-}
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -87,6 +21,15 @@ impl<N: Notable> Triad<N> {
     pub fn new(root: N, class: Triads) -> Self {
         let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
+    }
+    pub fn update(&mut self, triad: (N, N, N)) -> MusicResult {
+        match Self::try_from(triad) {
+            Ok(v) => {
+                *self = v;
+                Ok(())
+            },
+            Err(e) => Err(e.into())
+        }
     }
 }
 
@@ -116,8 +59,6 @@ impl<N: Notable> Hashable for Triad<N> {
         hasher(self).into()
     }
 }
-
-impl<N: Notable> Symbolic for Triad<N> {}
 
 impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -195,34 +136,5 @@ impl<N: Notable> From<Triad<N>> for (N, N, N) {
 impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
     fn from(d: Triad<N>) -> (i64, i64, i64) {
         (d.0.pitch(), d.1.pitch(), d.2.pitch())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::Note;
-
-    #[test]
-    fn test_triad() {
-        let a = Triad::<Note>::new(0.into(), Triads::Major);
-        let tmp: (i64, i64, i64) = a.clone().into();
-        assert_eq!(tmp, (0, 4, 7));
-        let b = Triad::try_from((11, 4, 7));
-        assert!(b.is_ok());
-        assert_ne!(a, b.unwrap())
-    }
-
-    #[test]
-    fn test_walking() {
-        let triad = Triad::<Note>::new(0.into(), Triads::Major);
-
-        let mut a = triad.clone();
-        // Apply three consecutive transformations to the scope
-        a.walk(vec![LPR::L, LPR::P, LPR::R]);
-        assert_eq!(a.clone(), Triad::try_from((1, 4, 8)).unwrap());
-        // Apply the same transformations in reverse to go back to the original
-        a.walk(vec![LPR::R, LPR::P, LPR::L]);
-        assert_eq!(a.clone(), triad);
     }
 }

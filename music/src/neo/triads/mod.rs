@@ -7,133 +7,107 @@
 
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
-pub use self::triad::*;
+pub use self::{class::*, triad::*};
 
 pub mod tonic;
+pub(crate) mod class;
 pub(crate) mod triad;
 
+use super::LPR;
 use crate::{
-    intervals::{Fifths, Interval, Thirds},
-    Notable,
+    intervals::{Fifths, Thirds},
+    Notable, MusicResult
 };
-use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use contained_core::{
+    turing::{Machine, Operator, Tapes},
+    Scope, 
+};
+use std::ops::{Mul, MulAssign};
 
-/// [Triads::Augmented] is a [Triad] created with [Thirds::Major], [Thirds::Major] intervals
-/// [Triads::Diminished] is a [Triad] created with [Thirds::Minor], [Thirds::Minor] intervals
-/// [Triads::Major] is a [Triad] created with [Thirds::Major], [Thirds::Minor] intervals
-/// [Triads::Minor] is a [Triad] created with [Thirds::Minor], [Thirds::Major] intervals
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Triads {
-    Augmented,
-    Diminished,
-    #[default]
-    Major,
-    Minor,
-}
-
-impl<N: Notable> TryFrom<Triad<N>> for Triads {
-    type Error = Box<dyn std::error::Error>;
-
-    fn try_from(data: Triad<N>) -> Result<Self, Self::Error> {
-        let triad: (N, N, N) = data.into();
-        Self::try_from(triad)
+pub trait Triadic<N: Notable>:
+    Clone
+    + IntoIterator<Item = N, IntoIter = std::vec::IntoIter<N>>
+    + ToString
+{
+    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
+    fn build(root: N, dt: Thirds, df: Thirds) -> Self;
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
+        let edges: (Thirds, Thirds, Fifths) = Triads::try_from(self.clone().triad())?.into();
+        Ok(edges)
     }
-}
-
-impl<N: Notable> TryFrom<(N, N, N)> for Triads {
-    type Error = Box<dyn std::error::Error>;
-
-    fn try_from(data: (N, N, N)) -> Result<Self, Self::Error> {
-        let (r, t, f): (N, N, N) = (data.0, data.1, data.2);
-        let ab = Thirds::try_from((r.clone(), t))?;
-        let bc = Fifths::try_from((r, f))?;
-
-        match ab {
-            Thirds::Major => match bc {
-                Fifths::Augmented => Ok(Self::Augmented),
-                Fifths::Perfect => Ok(Self::Major),
-                _ => Err("".into()),
-            },
-            Thirds::Minor => match bc {
-                Fifths::Diminished => Ok(Self::Diminished),
-                Fifths::Perfect => Ok(Self::Minor),
-                _ => Err("".into()),
-            },
+    /// Create a new [Operator] with the [Triad] as its alphabet
+    fn config(&self) -> Operator<N> {
+        Operator::build(Tapes::norm(self.clone()))
+    }
+    /// Endlessly applies the described transformations to the [Triad]
+    fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
+            self.transform(*i);
         }
     }
-}
-
-impl From<(Thirds, Thirds)> for Triads {
-    fn from(intervals: (Thirds, Thirds)) -> Triads {
-        match intervals.0 {
-            Thirds::Major => match intervals.1 {
-                Thirds::Major => Triads::Augmented,
-                Thirds::Minor => Triads::Major,
-            },
-            Thirds::Minor => match intervals.1 {
-                Thirds::Major => Triads::Diminished,
-                Thirds::Minor => Triads::Minor,
-            },
+    /// Initializes a new instance of a [Machine] configured with the current alphabet
+    fn machine(&self) -> Machine<N> {
+        Machine::new(self.config())
+    }
+    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
+    fn is_valid(&self) -> bool {
+        self.classify().is_ok()
+    }
+    ///
+    fn fifth(self) -> N;
+    ///
+    fn root(self) -> N;
+    ///
+    fn third(self) -> N;
+    /// Apply a single [LPR] transformation onto the active machine
+    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
+    fn transform(&mut self, dirac: LPR);
+    fn triad(self) -> (N, N, N) {
+        (self.clone().root(), self.clone().third(), self.fifth())
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow the machine to work on and in the scope
+    fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for dirac in iter {
+            self.transform(dirac);
         }
+    }
+    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
+    fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
+        self.walk(iter.clone());
+        let mut args = Vec::from_iter(iter);
+        args.reverse();
+        self.walk(args);
     }
 }
 
-impl TryFrom<(Thirds, Fifths)> for Triads {
-    type Error = crate::BoxedError;
 
-    fn try_from(intervals: (Thirds, Fifths)) -> Result<Triads, Self::Error> {
-        match intervals.0 {
-            Thirds::Major => match intervals.1 {
-                Fifths::Augmented => Ok(Triads::Augmented),
-                Fifths::Diminished => {
-                    Err("Cannot create a triad with a major third and a diminished fifth".into())
-                }
-                Fifths::Perfect => Ok(Triads::Major),
-            },
-            Thirds::Minor => match intervals.1 {
-                Fifths::Augmented => Err(
-                    "Cannot create an augmented triad with a minor third and an augmented fifth"
-                        .into(),
-                ),
-                Fifths::Diminished => Ok(Triads::Diminished),
-                Fifths::Perfect => Ok(Triads::Minor),
-            },
-        }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Note;
+
+    #[test]
+    fn test_triad() {
+        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let tmp: (i64, i64, i64) = a.clone().into();
+        assert_eq!(tmp, (0, 4, 7));
+        let b = Triad::try_from((11, 4, 7));
+        assert!(b.is_ok());
+        assert_ne!(a, b.unwrap())
     }
-}
 
-impl From<Triads> for (Interval, Interval, Interval) {
-    fn from(class: Triads) -> (Interval, Interval, Interval) {
-        let intervals: (Thirds, Thirds, Fifths) = class.into();
-        (intervals.0.into(), intervals.1.into(), intervals.2.into())
-    }
-}
+    #[test]
+    fn test_walking() {
+        let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
-impl From<Triads> for (Thirds, Thirds, Fifths) {
-    fn from(class: Triads) -> (Thirds, Thirds, Fifths) {
-        match class {
-            Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
-            Triads::Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
-            Triads::Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
-            Triads::Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
-        }
+        let mut a = triad.clone();
+        // Apply three consecutive transformations to the scope
+        a.walk(vec![LPR::L, LPR::P, LPR::R]);
+        assert_eq!(a.clone(), Triad::try_from((1, 4, 8)).unwrap());
+        // Apply the same transformations in reverse to go back to the original
+        a.walk(vec![LPR::R, LPR::P, LPR::L]);
+        assert_eq!(a.clone(), triad);
     }
 }

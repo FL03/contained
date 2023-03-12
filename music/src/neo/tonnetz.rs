@@ -30,6 +30,17 @@ impl<N: Notable> Tonnetz<N> {
     pub fn fulfilled(&self) -> bool {
         self.cluster.nodes().capacity() == crate::MODULUS as usize
     }
+    pub fn insert(&mut self, triad: Triad<N>) {
+        let (r, t, f): (N, N, N) = triad.clone().into();
+        let (rt, tf, rf): (Interval, Interval, Interval) = Triads::try_from(triad.clone())
+            .expect("Invalid triad")
+            .into();
+        let seed = triad.hash();
+
+        self.cluster.add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
+        self.cluster.add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
+        self.cluster.add_edge((r, f, Boundary::new(rf, seed).hash()));
+    }
 }
 
 impl<N: Notable> std::fmt::Display for Tonnetz<N> {

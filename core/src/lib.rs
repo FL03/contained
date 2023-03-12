@@ -17,11 +17,7 @@ pub mod turing;
 use std::collections::BTreeSet;
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
-pub trait Alphabet<S: Symbolic>: Clone {
-    /// [Alphabet::alphabet]
-    fn alphabet(self) -> Self {
-        self
-    }
+pub trait Alphabet<S: Symbolic>{
     /// [Alphabet::default_symbol]
     fn default_symbol(&self) -> S {
         Default::default()
@@ -31,6 +27,16 @@ pub trait Alphabet<S: Symbolic>: Clone {
 impl<S: Symbolic> Alphabet<S> for (S,) {
     fn default_symbol(&self) -> S {
         self.0.clone()
+    }
+}
+
+impl<S: Symbolic> Alphabet<S> for Vec<S> {
+    fn default_symbol(&self) -> S {
+        if let Some(entry) = self.first() {
+            entry.clone()
+        } else {
+            Default::default()
+        }
     }
 }
 

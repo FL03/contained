@@ -5,7 +5,7 @@
 */
 use crate::states::{State, Stateful, States};
 use crate::turing::{Head, Instruction};
-use crate::{Extend, Resultant, Symbolic};
+use crate::{Alphabet, Extend, Resultant, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
 
@@ -32,8 +32,8 @@ impl<S: Symbolic> Program<S> {
     pub fn alphabet(&self) -> &Vec<S> {
         &self.alphabet
     }
-    pub fn default_symbol(&self) -> &S {
-        self.alphabet.first().unwrap()
+    pub fn default_symbol(&self) -> S {
+        self.alphabet.default_symbol()
     }
     /// Returns an owned instance of the current [Instruction] set
     pub fn instructions(&self) -> &Vec<Instruction<S>> {
@@ -45,7 +45,7 @@ impl<S: Symbolic> Program<S> {
     }
     /// Given some [Head], find the coresponding [Instruction]
     pub fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
-        if self.final_state().clone().state() < head.state().clone().state() {
+        if self.final_state().state() < head.state().state() {
             return Err("The provided head is greater than the final state...".into());
         }
         if let Some(v) = self
@@ -70,8 +70,8 @@ impl<S: Symbolic> Program<S> {
                     .into(),
             );
         }
-        if self.final_state().clone().state() < inst.head().state().clone().state()
-            || self.final_state().clone().state() < inst.tail().state().clone().state()
+        if self.final_state().state() < inst.head().state().state()
+            || self.final_state().state() < inst.tail().state().state()
         {
             return Err("Instructions have states greater than the ones availible...".into());
         }
