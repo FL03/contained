@@ -5,7 +5,7 @@
 */
 use crate::{
     states::{State, States},
-    turing::{Move, Tail, Tape, Tapes},
+    turing::{Move, Tape, Tapes},
     Symbolic,
 };
 use std::cell::RefCell;

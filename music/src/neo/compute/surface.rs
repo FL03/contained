@@ -6,11 +6,14 @@
 */
 use crate::neo::triads::Triad;
 use crate::{Notable, Note};
-use contained_core::states::{State, States};
+use contained_core::states::State;
+use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Face<T>(T, State);
 
-pub struct Surface<N: Notable> {
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Surface<N: Notable = Note> {
     alphabet: Triad<N>,
     faces: (Face<N>,),
 }

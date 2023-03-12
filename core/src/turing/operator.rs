@@ -83,7 +83,7 @@ impl<S: Symbolic> From<Operator<S>> for (usize, State<States>, Tape<S>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::turing::{Move, Tail, Tapes};
+    use crate::turing::{Move, Tapes};
 
     #[test]
     fn test_builder() {

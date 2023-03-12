@@ -14,6 +14,7 @@ use contained_core::{
     turing::{Machine, Operator, Tapes},
     Resultant, Scope, Symbolic,
 };
+use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 use std::ops::{Mul, MulAssign};
 
@@ -107,6 +108,12 @@ impl<N: Notable> Triadic<N> for Triad<N> {
     }
     fn transform(&mut self, dirac: LPR) {
         *self = dirac.transform(self.clone());
+    }
+}
+
+impl<N: Notable> Hashable for Triad<N> {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
     }
 }
 

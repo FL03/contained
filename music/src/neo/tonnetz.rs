@@ -13,12 +13,11 @@
 */
 use super::{
     triads::{Triad, Triads},
-    Link,
+    Boundary,
 };
 use crate::{intervals::Interval, Notable, Note};
 use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::{Hashable, H256};
-use scsys::prelude::Timestamp;
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -28,7 +27,7 @@ pub struct Tonnetz<N: Notable = Note> {
 }
 
 impl<N: Notable> Tonnetz<N> {
-    pub fn is_full(&self) -> bool {
+    pub fn fulfilled(&self) -> bool {
         self.cluster.nodes().capacity() == crate::MODULUS as usize
     }
 }
@@ -45,12 +44,12 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
         let (rt, tf, rf): (Interval, Interval, Interval) = Triads::try_from(triad.clone())
             .expect("Invalid triad")
             .into();
-        let ts: i64 = Timestamp::default().into();
+        let seed = triad.hash();
 
         let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((r.clone(), t.clone(), Link::new(rt).hash()));
-        cluster.add_edge((t, f.clone(), Link::new(tf).hash()));
-        cluster.add_edge((r, f, Link::new(rf).hash()));
+        cluster.add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
+        cluster.add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
+        cluster.add_edge((r, f, Boundary::new(rf, seed).hash()));
         Self {
             cluster: cluster.clone(),
             scope: Arc::new(triad),
@@ -69,6 +68,6 @@ mod tests {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
         let a = Tonnetz::from(triad.clone());
-        assert!(a.is_full() == false);
+        assert!(a.fulfilled() == false);
     }
 }
