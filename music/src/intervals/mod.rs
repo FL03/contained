@@ -9,7 +9,6 @@ pub(crate) mod fifths;
 pub(crate) mod thirds;
 
 use crate::Notable;
-use contained_core::graphs::cmp::EdgeValue;
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -38,8 +37,6 @@ pub enum Interval {
     #[default]
     Third(Thirds),
 }
-
-impl EdgeValue for Interval {}
 
 impl From<Interval> for i64 {
     fn from(interval: Interval) -> i64 {

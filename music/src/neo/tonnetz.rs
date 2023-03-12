@@ -11,20 +11,21 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::triads::{Triad, Triads};
-use crate::{intervals::Interval, MusicResult, Notable, Note};
+use super::{triads::{Triad, Triads}, Link};
+use crate::{intervals::Interval, Notable, Note};
 use contained_core::graphs::{Graph, UndirectedGraph};
+use decanter::prelude::{Hashable, H256};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tonnetz<N: Notable = Note> {
-    cluster: UndirectedGraph<N, Interval>,
+    cluster: UndirectedGraph<N, H256>,
     scope: Arc<Triad<N>>,
 }
 
 impl<N: Notable> Tonnetz<N> {
-    pub fn link(&mut self, triad: Triad<N>) -> MusicResult {
-        Ok(())
+    pub fn is_full(&self) -> bool {
+        self.cluster.nodes().capacity() == crate::MODULUS as usize
     }
 }
 
@@ -41,10 +42,11 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
             .expect("Invalid triad")
             .into();
 
+
         let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((r.clone(), t.clone(), rt));
-        cluster.add_edge((t, f.clone(), tf));
-        cluster.add_edge((r, f, rf));
+        cluster.add_edge((r.clone(), t.clone(), Link::new(rt).hash()));
+        cluster.add_edge((t, f.clone(), Link::new(tf).hash()));
+        cluster.add_edge((r, f, Link::new(rf).hash()));
         Self {
             cluster: cluster.clone(),
             scope: Arc::new(triad),

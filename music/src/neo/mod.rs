@@ -4,8 +4,9 @@
     Description:
         This module is dedicated to the proposed harmonic computational fabric
 */
-pub use self::{tonnetz::*, transform::*};
+pub use self::{surface::*, tonnetz::*, transform::*};
 
+pub(crate) mod surface;
 pub(crate) mod tonnetz;
 pub(crate) mod transform;
 

@@ -10,11 +10,11 @@ pub(crate) mod undirected;
 
 pub mod cmp;
 
-use cmp::{EdgeValue, GraphError, Node, Weight};
+use cmp::{GraphError, Node};
 use std::collections::{HashMap, HashSet};
 
 /// [Graph] describes the basic operations of a graph data-structure
-pub trait Graph<N: Node = String, V: EdgeValue = Weight>: Clone {
+pub trait Graph<N: Node = String, V: Clone = i64>: Clone {
     fn new() -> Self;
     /// [Graph::add_edge]
     fn add_edge(&mut self, edge: (N, N, V)) {

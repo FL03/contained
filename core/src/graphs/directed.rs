@@ -4,18 +4,18 @@
     Description: ... Summary ...
 */
 use super::{
-    cmp::{EdgeValue, Node, Weight},
+    cmp::Node,
     Graph,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct DirectedGraph<N: Node = String, V: EdgeValue = Weight> {
+pub struct DirectedGraph<N: Node = String, V: Clone = i64> {
     adjacency_table: HashMap<N, Vec<(N, V)>>,
 }
 
-impl<N: Node, V: EdgeValue> Graph<N, V> for DirectedGraph<N, V> {
+impl<N: Node, V: Clone> Graph<N, V> for DirectedGraph<N, V> {
     fn new() -> Self {
         Self {
             adjacency_table: HashMap::new(),

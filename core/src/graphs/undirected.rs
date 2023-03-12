@@ -4,18 +4,18 @@
     Description: ... Summary ...
 */
 use super::{
-    cmp::{EdgeValue, Node, Weight},
+    cmp::Node,
     Graph,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
-pub struct UndirectedGraph<N: Node = String, V: EdgeValue = Weight> {
+pub struct UndirectedGraph<N: Node = String, V: Clone = i64> {
     adjacency_table: HashMap<N, Vec<(N, V)>>,
 }
 
-impl<N: Node, V: EdgeValue> Graph<N, V> for UndirectedGraph<N, V> {
+impl<N: Node, V: Clone> Graph<N, V> for UndirectedGraph<N, V> {
     fn new() -> Self {
         Self {
             adjacency_table: HashMap::new(),
@@ -32,7 +32,7 @@ impl<N: Node, V: EdgeValue> Graph<N, V> for UndirectedGraph<N, V> {
         self.add_node(edge.1.clone());
 
         self.adjacency_table.entry(edge.0.clone()).and_modify(|e| {
-            e.push((edge.1.clone(), edge.2));
+            e.push((edge.1.clone(), edge.2.clone()));
         });
         self.adjacency_table.entry(edge.1).and_modify(|e| {
             e.push((edge.0, edge.2));
