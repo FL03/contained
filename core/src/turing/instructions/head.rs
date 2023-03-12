@@ -17,11 +17,11 @@ impl<S: Symbolic> Head<S> {
     pub fn new(state: State<States>, symbol: S) -> Self {
         Self(state, symbol)
     }
-    pub fn state(&self) -> &State<States> {
-        &self.0
+    pub fn state(&self) -> State<States> {
+        self.0.clone()
     }
-    pub fn symbol(&self) -> &S {
-        &self.1
+    pub fn symbol(&self) -> S {
+        self.1.clone()
     }
 }
 

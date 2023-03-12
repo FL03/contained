@@ -19,13 +19,13 @@ impl<S: Symbolic> Tail<S> {
     pub fn new(state: State<States>, symbol: S, act: Move) -> Self {
         Self(state, symbol, act)
     }
-    pub fn action(&self) -> &Move {
-        &self.2
+    pub fn action(&self) -> Move {
+        self.2
     }
-    pub fn state(&self) -> &State<States> {
-        &self.0
+    pub fn state(&self) -> State<States> {
+        self.0.clone()
     }
-    pub fn symbol(&self) -> &S {
-        &self.1
+    pub fn symbol(&self) -> S {
+        self.1.clone()
     }
 }

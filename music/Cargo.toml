@@ -23,12 +23,14 @@ default = []
 [dependencies]
 contained-core = { features = [], path = "../core", version = "0.1.4" }
 
-# Standard dependencies
+# Custom dependencies
 algae.workspace = true
-anyhow.workspace = true
 decanter.workspace = true
-futures.workspace = true
 scsys.workspace = true
+
+# Standard dependencies
+anyhow.workspace = true
+futures.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true

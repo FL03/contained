@@ -51,10 +51,12 @@ pub trait Turing<S: Symbolic> {
             .get(head)
             .expect("Failed to fetch the instruction head...")
             .clone();
-        self.driver().set_state(inst.tail().state().clone());
-        self.driver().set_symbol(inst.tail().symbol().clone());
+        self.driver().update(
+            Some(inst.tail().state().clone()),
+            Some(inst.tail().symbol()),
+        );
         self.driver()
-            .shift(*inst.tail().action(), program.default_symbol().clone());
+            .shift(inst.tail().action(), program.default_symbol().clone());
         Ok(self.driver().clone())
     }
     /// [Turing::execute_until]
@@ -69,10 +71,12 @@ pub trait Turing<S: Symbolic> {
                 .get(head)
                 .expect("Failed to fetch the instruction head...")
                 .clone();
-            self.driver().set_state(inst.tail().state().clone());
-            self.driver().set_symbol(inst.tail().symbol().clone());
+            self.driver().update(
+                Some(inst.tail().state().clone()),
+                Some(inst.tail().symbol()),
+            );
             self.driver()
-                .shift(*inst.tail().action(), program.default_symbol().clone());
+                .shift(inst.tail().action(), program.default_symbol().clone());
         }
         Ok(self.driver().clone())
     }

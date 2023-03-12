@@ -19,11 +19,11 @@ impl<S: Symbolic> Instruction<S> {
     pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
         Self(head, tail)
     }
-    pub fn head(&self) -> &Head<S> {
-        &self.0
+    pub fn head(&self) -> Head<S> {
+        self.0.clone()
     }
-    pub fn tail(&self) -> &Tail<S> {
-        &self.1
+    pub fn tail(&self) -> Tail<S> {
+        self.1.clone()
     }
     pub fn update(&mut self, head: Head<S>, tail: Tail<S>) {
         self.0 = head;
@@ -49,6 +49,6 @@ mod tests {
         let head = Head::new(State::new(States::invalid()), "b");
         let tail = Tail::new(State::new(States::invalid()), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
-        assert_eq!(instructions.tail().action(), &Move::Right)
+        assert_eq!(instructions.tail().action(), Move::Right)
     }
 }

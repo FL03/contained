@@ -59,11 +59,11 @@ impl<S: Symbolic> Program<S> {
     }
     /// Insert a new [Instruction] set into the program
     pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
-        if inst.head().state() == &State::from(States::invalid()) {
+        if inst.head().state() == State::from(States::invalid()) {
             return Err("Set error: Instruction cannot have 0 state in head...".into());
         }
-        if !self.alphabet().contains(inst.head().symbol())
-            || !self.alphabet().contains(inst.tail().symbol())
+        if !self.alphabet().contains(&inst.head().symbol())
+            || !self.alphabet().contains(&inst.tail().symbol())
         {
             return Err(
                 "The provided instruction set fails to be represented within the alphabet..."

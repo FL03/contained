@@ -8,33 +8,30 @@ use crate::turing::Tape;
 use crate::{Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
-use std::cell::Cell;
+use std::cell::RefCell;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Operator<S: Symbolic = String> {
-    index: Cell<usize>,
+    index: RefCell<usize>,
     state: State<States>,
     tape: Tape<S>,
 }
 
 impl<S: Symbolic> Scope<S> for Operator<S> {
-    fn new(index: Cell<usize>, state: State<States>, tape: Tape<S>) -> Self {
+    fn new(index: RefCell<usize>, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
     }
 
     fn insert(&mut self, elem: S) {
-        self.tape.insert(self.position().get(), elem);
+        self.tape.insert(*self.index.borrow(), elem);
     }
 
-    fn position(&self) -> &Cell<usize> {
+    fn position(&self) -> &RefCell<usize> {
         &self.index
     }
 
-    fn set_state(&mut self, state: State<States>) {
-        self.state = state;
-    }
     fn set_symbol(&mut self, elem: S) {
-        self.tape.set(self.position().get(), elem);
+        self.tape.set(*self.index.borrow(), elem);
     }
 
     fn state(&self) -> &State<States> {
@@ -44,11 +41,26 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
     fn tape(&self) -> &Tape<S> {
         &self.tape
     }
+
+    fn update(&mut self, state: Option<State<States>>, elem: Option<S>) {
+        if let Some(s) = state {
+            self.state = s;
+        }
+        if let Some(t) = elem {
+            self.tape.set(*self.index.borrow(), t);
+        }
+    }
 }
 
 impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, {}, {:?}", self.index.get(), self.state, self.tape)
+        write!(
+            f,
+            "{}, {}, {:?}",
+            *self.index.borrow(),
+            self.state,
+            self.tape
+        )
     }
 }
 
@@ -58,20 +70,20 @@ impl<S: Symbolic> TryFrom<(usize, State<States>, Tape<S>)> for Operator<S> {
         if d.0 > d.2.len() {
             return Err("Starting index is out of bounds...".to_string());
         }
-        Ok(Self::new(Cell::new(d.0), d.1, d.2))
+        Ok(Self::new(RefCell::new(d.0), d.1, d.2))
     }
 }
 
 impl<S: Symbolic> From<Operator<S>> for (usize, State<States>, Tape<S>) {
     fn from(d: Operator<S>) -> Self {
-        (d.index.get(), d.state, d.tape)
+        (*d.index.borrow(), d.state, d.tape)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::turing::{Move, Tapes};
+    use crate::turing::{Move, Tail, Tapes};
 
     #[test]
     fn test_builder() {
@@ -85,6 +97,7 @@ mod tests {
     fn test_operations() {
         let tape = Tape::new(["a", "b", "c"]);
         let mut actor = Operator::new(0.into(), State::from(States::Valid), tape);
+
         actor.shift(Move::Left, "b");
         assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));
         for _ in 0..actor.tape().len() {

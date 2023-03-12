@@ -10,6 +10,7 @@ pub(crate) mod scope;
 pub(crate) mod specs;
 pub(crate) mod utils;
 
+pub mod space;
 pub mod states;
 pub mod turing;
 
