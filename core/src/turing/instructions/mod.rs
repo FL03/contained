@@ -5,9 +5,10 @@
         Turing machines accept instructions in the form of a five-tuple:
             (State, Symbol, State, Symbol, Move)
 */
-pub use self::{head::*, moves::*, tail::*};
+pub use self::{head::*, instruction::*, moves::*, tail::*};
 
 pub(crate) mod head;
+pub(crate) mod instruction;
 pub(crate) mod moves;
 pub(crate) mod tail;
 
@@ -18,42 +19,13 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Instruction<S: Symbolic>(Head<S>, Tail<S>);
+pub struct InstructionSet<S: Symbolic>(Vec<Instruction<S>>);
 
-impl<S: Symbolic> Instruction<S> {
-    pub fn new(head: Head<S>, tail: Tail<S>) -> Self {
-        Self(head, tail)
+impl<S: Symbolic> InstructionSet<S> {
+    pub fn new() -> Self {
+        Self(Vec::new())
     }
-    pub fn head(&self) -> &Head<S> {
-        &self.0
-    }
-    pub fn tail(&self) -> &Tail<S> {
-        &self.1
-    }
-    pub fn update(&mut self, head: Head<S>, tail: Tail<S>) {
-        self.0 = head;
-        self.1 = tail;
-    }
-}
-
-impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instruction<S> {
-    fn from(value: (State<States>, S, State<States>, S, Move)) -> Self {
-        let head = Head::new(value.0, value.1);
-        let tail = Tail::new(value.2, value.3, value.4);
-        Self::new(head, tail)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::states::States;
-
-    #[test]
-    fn test_instructions() {
-        let head = Head::new(State::new(States::invalid()), "b");
-        let tail = Tail::new(State::new(States::invalid()), "a", Move::Right);
-        let instructions = Instruction::new(head, tail);
-        assert_eq!(instructions.tail().action(), &Move::Right)
+    pub fn push(&mut self, elem: Instruction<S>) {
+        self.0.push(elem)
     }
 }

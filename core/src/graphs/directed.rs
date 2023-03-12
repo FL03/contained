@@ -3,25 +3,24 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{cmp::Node, Graph};
+use super::{cmp::{AdjacencyTable, Node}, Graph};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct DirectedGraph<N: Node = String, V: Clone = i64> {
-    adjacency_table: HashMap<N, Vec<(N, V)>>,
+    adjacency_table: AdjacencyTable<N, V>,
 }
 
 impl<N: Node, V: Clone> Graph<N, V> for DirectedGraph<N, V> {
     fn new() -> Self {
         Self {
-            adjacency_table: HashMap::new(),
+            adjacency_table: AdjacencyTable::new(),
         }
     }
-    fn adjacency_table_mut(&mut self) -> &mut HashMap<N, Vec<(N, V)>> {
+    fn adjacency_table_mut(&mut self) -> &mut AdjacencyTable<N, V> {
         &mut self.adjacency_table
     }
-    fn adjacency_table(&self) -> &HashMap<N, Vec<(N, V)>> {
+    fn adjacency_table(&self) -> &AdjacencyTable<N, V> {
         &self.adjacency_table
     }
 }

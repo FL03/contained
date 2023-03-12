@@ -10,7 +10,7 @@ use scsys::prelude::{SerdeDisplay, Timestamp};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
-pub fn surface_hash(interval: Interval, ts: i64) -> H256 {
+pub fn edge_hash(interval: Interval, ts: i64) -> H256 {
     hasher(&json!({
         "interval": interval,
         "ts": ts
@@ -30,7 +30,7 @@ pub struct Link {
 impl Link {
     pub fn new(interval: Interval) -> Self {
         let ts: i64 = Timestamp::default().into();
-        let hash: H256 = surface_hash(interval.clone(), ts);
+        let hash: H256 = edge_hash(interval.clone(), ts);
         Self { interval, hash, ts }
     }
 }

@@ -16,6 +16,22 @@ use crate::{
     Scope, Symbolic,
 };
 
+pub trait Executable<S: Symbolic> {
+    type Error;
+    type Scope: Clone + Scope<S>;
+    
+    /// [Executable::execute]
+    fn execute(&mut self, program: Program<S>) -> Result<Self::Scope, Self::Error>;
+    /// [Executable::execute_once]
+    fn execute_once(&mut self, program: Program<S>) -> Result<Self::Scope, Self::Error>;
+    /// [Executable::execute_until]
+    fn execute_until(
+        &mut self,
+        program: Program<S>,
+        until: impl Fn(&Self::Scope) -> bool,
+    ) -> Result<Self::Scope, Self::Error>;
+}
+
 /// [Turing] describes a programmable Turing machine
 pub trait Turing<S: Symbolic> {
     type Error;

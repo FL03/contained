@@ -10,8 +10,8 @@ pub(crate) mod undirected;
 
 pub mod cmp;
 
-use cmp::{GraphError, Node};
-use std::collections::{HashMap, HashSet};
+use cmp::{AdjacencyTable, GraphError, Node};
+use std::collections::HashSet;
 
 /// [Graph] describes the basic operations of a graph data-structure
 pub trait Graph<N: Node = String, V: Clone = i64>: Clone {
@@ -36,9 +36,9 @@ pub trait Graph<N: Node = String, V: Clone = i64>: Clone {
         }
     }
     /// [Graph::adjacency_table_mut]
-    fn adjacency_table_mut(&mut self) -> &mut HashMap<N, Vec<(N, V)>>;
+    fn adjacency_table_mut(&mut self) -> &mut AdjacencyTable<N, V>;
     /// [Graph::adjacency_table]
-    fn adjacency_table(&self) -> &HashMap<N, Vec<(N, V)>>;
+    fn adjacency_table(&self) -> &AdjacencyTable<N, V>;
     /// [Graph::contains]
     fn contains(&self, node: N) -> bool {
         self.adjacency_table().get(&node).is_some()
