@@ -16,7 +16,7 @@ use super::{
     Link,
 };
 use crate::{intervals::Interval, Notable, Note};
-use contained_core::graphs::{Graph, UndirectedGraph};
+use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::{Hashable, H256};
 use scsys::prelude::Timestamp;
 use std::sync::Arc;
@@ -46,7 +46,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
             .expect("Invalid triad")
             .into();
         let ts: i64 = Timestamp::default().into();
-        
+
         let mut cluster = UndirectedGraph::new();
         cluster.add_edge((r.clone(), t.clone(), Link::new(rt).hash()));
         cluster.add_edge((t, f.clone(), Link::new(tf).hash()));

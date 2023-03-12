@@ -12,10 +12,7 @@ pub(crate) mod instruction;
 pub(crate) mod moves;
 pub(crate) mod tail;
 
-use crate::{
-    states::{State, States},
-    turing::Symbolic,
-};
+use crate::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

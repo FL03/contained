@@ -5,6 +5,7 @@
         A musical third can be either be a difference of three (minor) or four (major) semitones
 */
 use crate::{Gradient, Notable};
+use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -31,6 +32,12 @@ pub enum Thirds {
     #[default]
     Major = 4,
     Minor = 3,
+}
+
+impl Hashable for Thirds {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
+    }
 }
 
 impl Thirds {

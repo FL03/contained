@@ -24,6 +24,7 @@ default = []
 contained-core = { features = [], path = "../core", version = "0.1.4" }
 
 # Standard dependencies
+algae.workspace = true
 anyhow.workspace = true
 decanter.workspace = true
 futures.workspace = true

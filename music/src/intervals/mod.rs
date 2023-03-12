@@ -10,6 +10,7 @@ pub(crate) mod thirds;
 
 use crate::Notable;
 
+use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -36,6 +37,12 @@ pub enum Interval {
     Fifth(Fifths),
     #[default]
     Third(Thirds),
+}
+
+impl Hashable for Interval {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
+    }
 }
 
 impl From<Interval> for i64 {

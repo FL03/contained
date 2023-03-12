@@ -19,7 +19,7 @@ use crate::{
 pub trait Executable<S: Symbolic> {
     type Error;
     type Scope: Clone + Scope<S>;
-    
+
     /// [Executable::execute]
     fn execute(&mut self, program: Program<S>) -> Result<Self::Scope, Self::Error>;
     /// [Executable::execute_once]
