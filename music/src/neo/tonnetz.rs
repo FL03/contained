@@ -28,7 +28,7 @@ pub struct Tonnetz<N: Notable = Note> {
 
 impl<N: Notable> Tonnetz<N> {
     pub fn fulfilled(&self) -> bool {
-        self.cluster.nodes().capacity() == crate::MODULUS as usize
+        self.cluster.nodes().len() == crate::MODULUS as usize
     }
     pub fn insert(&mut self, triad: Triad<N>) {
         let (r, t, f): (N, N, N) = triad.clone().into();
@@ -37,9 +37,12 @@ impl<N: Notable> Tonnetz<N> {
             .into();
         let seed = triad.hash();
 
-        self.cluster.add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
-        self.cluster.add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
-        self.cluster.add_edge((r, f, Boundary::new(rf, seed).hash()));
+        self.cluster
+            .add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
+        self.cluster
+            .add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
+        self.cluster
+            .add_edge((r, f, Boundary::new(rf, seed).hash()));
     }
 }
 
@@ -78,7 +81,11 @@ mod tests {
     fn test_tonnetz() {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
-        let a = Tonnetz::from(triad.clone());
-        assert!(a.fulfilled() == false);
+        let mut tonnetz = Tonnetz::from(triad.clone());
+        assert!(tonnetz.fulfilled() == false);
+        for i in 1..crate::MODULUS {
+            tonnetz.insert(Triad::<Note>::new(i.into(), Triads::Major));
+        }
+        assert!(tonnetz.fulfilled() == true);
     }
 }

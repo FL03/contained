@@ -4,11 +4,16 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::{Triadic, Triads};
+use super::Triads;
 use crate::{
-    intervals::{Fifths, Thirds},
+    intervals::{Fifths, Interval, Thirds},
     neo::LPR,
-    Gradient, Notable, Note, MusicResult
+    Gradient, MusicResult, Notable, Note,
+};
+use algae::graph::{Graph, UndirectedGraph};
+use contained_core::{
+    turing::{Machine, Operator, Tapes},
+    Scope,
 };
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
@@ -22,35 +27,98 @@ impl<N: Notable> Triad<N> {
         let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
     }
+    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
+    pub fn build(root: N, dt: Thirds, df: Thirds) -> Self {
+        let third = dt + root.clone();
+        let fifth = df + third.clone();
+        Self(root, third, fifth)
+    }
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    pub fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
+        let edges: (Thirds, Thirds, Fifths) = (
+            Thirds::try_from((self.root(), self.third()))?,
+            Thirds::try_from((self.third(), self.fifth()))?,
+            Fifths::try_from((self.root(), self.fifth()))?,
+        );
+        Ok(edges)
+    }
+    /// Create a new [Operator] with the [Triad] as its alphabet
+    pub fn config(&self) -> Operator<N> {
+        Operator::build(Tapes::norm(self.clone()))
+    }
+    /// Endlessly applies the described transformations to the [Triad]
+    pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
+            self.transform(*i);
+        }
+    }
+    /// Initializes a new instance of a [Machine] configured with the current alphabet
+    pub fn machine(&self) -> Machine<N> {
+        Machine::new(self.config())
+    }
+    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
+    pub fn is_valid(&self) -> bool {
+        self.classify().is_ok()
+    }
+    pub fn fifth(&self) -> N {
+        self.2.clone()
+    }
+    pub fn root(&self) -> N {
+        self.0.clone()
+    }
+    pub fn third(&self) -> N {
+        self.1.clone()
+    }
+    /// Apply a single [LPR] transformation onto the active machine
+    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
+    pub fn transform(&mut self, dirac: LPR) {
+        let triad: (N, N, N) = self.clone().into();
+        let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
+            .expect("Invalid triadic structure...");
+        let (mut r, mut t, mut f): (i64, i64, i64) =
+            (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
+        match dirac {
+            LPR::L => match ab {
+                Thirds::Major => r -= 1,
+                Thirds::Minor => f += 1,
+            },
+            LPR::P => match ab {
+                Thirds::Major => t -= 1,
+                Thirds::Minor => t += 1,
+            },
+            LPR::R => match ab {
+                Thirds::Major => f += 2,
+                Thirds::Minor => r -= 2,
+            },
+        };
+        let tmp: (N, N, N) = (r.into(), t.into(), f.into());
+        *self = Self::try_from(tmp).expect("Invalid triad");
+    }
+    pub fn triad(self) -> (N, N, N) {
+        (self.clone().root(), self.clone().third(), self.fifth())
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow the machine to work on and in the scope
+    pub fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for dirac in iter {
+            self.transform(dirac);
+        }
+    }
+    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
+    pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
+        self.walk(iter.clone());
+        let mut args = Vec::from_iter(iter);
+        args.reverse();
+        self.walk(args);
+    }
     pub fn update(&mut self, triad: (N, N, N)) -> MusicResult {
         match Self::try_from(triad) {
             Ok(v) => {
                 *self = v;
                 Ok(())
-            },
-            Err(e) => Err(e.into())
+            }
+            Err(e) => Err(e.into()),
         }
-    }
-}
-
-impl<N: Notable> Triadic<N> for Triad<N> {
-    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
-    fn build(root: N, dt: Thirds, df: Thirds) -> Self {
-        let third = dt + root.clone();
-        let fifth = df + third.clone();
-        Self(root, third, fifth)
-    }
-    fn fifth(self) -> N {
-        self.2
-    }
-    fn root(self) -> N {
-        self.0
-    }
-    fn third(self) -> N {
-        self.1
-    }
-    fn transform(&mut self, dirac: LPR) {
-        *self = dirac.transform(self.clone());
     }
 }
 
@@ -70,7 +138,7 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
     type Output = Triad<N>;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.transform(self)
+        rhs.transform(&mut self.clone())
     }
 }
 
@@ -127,9 +195,23 @@ impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
     }
 }
 
+impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
+    fn from(d: Triad<N>) -> UndirectedGraph<N, Interval> {
+        let (r, t, f): (N, N, N) = d.clone().into();
+        let (rt, tf, rf): (Interval, Interval, Interval) =
+            Triads::try_from(d.clone()).expect("Invalid triad").into();
+
+        let mut cluster = UndirectedGraph::new();
+        cluster.add_edge((r.clone(), t.clone(), rt));
+        cluster.add_edge((t, f.clone(), tf));
+        cluster.add_edge((r, f, rf));
+        cluster.clone()
+    }
+}
+
 impl<N: Notable> From<Triad<N>> for (N, N, N) {
     fn from(d: Triad<N>) -> (N, N, N) {
-        (d.clone().root(), d.clone().third(), d.fifth())
+        (d.root(), d.third(), d.fifth())
     }
 }
 

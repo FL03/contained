@@ -17,7 +17,7 @@ pub mod turing;
 use std::collections::BTreeSet;
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
-pub trait Alphabet<S: Symbolic>{
+pub trait Alphabet<S: Symbolic> {
     /// [Alphabet::default_symbol]
     fn default_symbol(&self) -> S {
         Default::default()

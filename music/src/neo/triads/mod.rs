@@ -9,83 +9,14 @@
 */
 pub use self::{class::*, triad::*};
 
-pub mod tonic;
 pub(crate) mod class;
+pub mod tonic;
 pub(crate) mod triad;
-
-use super::LPR;
-use crate::{
-    intervals::{Fifths, Thirds},
-    Notable, MusicResult
-};
-use contained_core::{
-    turing::{Machine, Operator, Tapes},
-    Scope, 
-};
-
-pub trait Triadic<N: Notable>:
-    Clone
-    + IntoIterator<Item = N, IntoIter = std::vec::IntoIter<N>>
-    + ToString
-{
-    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
-    fn build(root: N, dt: Thirds, df: Thirds) -> Self;
-    /// Classifies the [Triad] by describing the intervals that connect the notes
-    fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
-        let edges: (Thirds, Thirds, Fifths) = Triads::try_from(self.clone().triad())?.into();
-        Ok(edges)
-    }
-    /// Create a new [Operator] with the [Triad] as its alphabet
-    fn config(&self) -> Operator<N> {
-        Operator::build(Tapes::norm(self.clone()))
-    }
-    /// Endlessly applies the described transformations to the [Triad]
-    fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for i in Vec::from_iter(iter).iter().cycle() {
-            self.transform(*i);
-        }
-    }
-    /// Initializes a new instance of a [Machine] configured with the current alphabet
-    fn machine(&self) -> Machine<N> {
-        Machine::new(self.config())
-    }
-    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
-    fn is_valid(&self) -> bool {
-        self.classify().is_ok()
-    }
-    ///
-    fn fifth(self) -> N;
-    ///
-    fn root(self) -> N;
-    ///
-    fn third(self) -> N;
-    /// Apply a single [LPR] transformation onto the active machine
-    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
-    fn transform(&mut self, dirac: LPR);
-    fn triad(self) -> (N, N, N) {
-        (self.clone().root(), self.clone().third(), self.fifth())
-    }
-    /// Applies multiple [LPR] transformations onto the scoped [Triad]
-    /// The goal here is to allow the machine to work on and in the scope
-    fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for dirac in iter {
-            self.transform(dirac);
-        }
-    }
-    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
-    fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
-        self.walk(iter.clone());
-        let mut args = Vec::from_iter(iter);
-        args.reverse();
-        self.walk(args);
-    }
-}
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Note;
+    use crate::{neo::LPR, Note};
 
     #[test]
     fn test_triad() {
