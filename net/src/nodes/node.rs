@@ -13,9 +13,7 @@ use crate::{
     peers::{Peer, Peerable},
     NetResult,
 };
-use libp2p::{futures::StreamExt, multiaddr::Protocol, Swarm};
-use std::collections::hash_map;
-use std::sync::Arc;
+use libp2p::{futures::StreamExt, Swarm};
 use tokio::sync::mpsc;
 
 pub struct Node {

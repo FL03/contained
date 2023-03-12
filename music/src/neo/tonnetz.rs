@@ -11,7 +11,10 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::{triads::{Triad, Triads}, Link};
+use super::{
+    triads::{Triad, Triads},
+    Link,
+};
 use crate::{intervals::Interval, Notable, Note};
 use contained_core::graphs::{Graph, UndirectedGraph};
 use decanter::prelude::{Hashable, H256};
@@ -42,7 +45,6 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
             .expect("Invalid triad")
             .into();
 
-
         let mut cluster = UndirectedGraph::new();
         cluster.add_edge((r.clone(), t.clone(), Link::new(rt).hash()));
         cluster.add_edge((t, f.clone(), Link::new(tf).hash()));
@@ -64,6 +66,7 @@ mod tests {
     fn test_tonnetz() {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
 
-        let mut a = Tonnetz::from(triad.clone());
+        let a = Tonnetz::from(triad.clone());
+        assert!(a.is_full() == false);
     }
 }

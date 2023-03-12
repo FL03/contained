@@ -3,10 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{
-    cmp::Node,
-    Graph,
-};
+use super::{cmp::Node, Graph};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

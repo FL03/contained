@@ -9,6 +9,7 @@
 */
 pub use self::triad::*;
 
+pub mod tonic;
 pub(crate) mod triad;
 
 use crate::{
@@ -51,8 +52,17 @@ pub enum Triads {
 impl<N: Notable> TryFrom<Triad<N>> for Triads {
     type Error = Box<dyn std::error::Error>;
 
-    fn try_from(triad: Triad<N>) -> Result<Self, Self::Error> {
-        let (r, t, f): (N, N, N) = triad.into();
+    fn try_from(data: Triad<N>) -> Result<Self, Self::Error> {
+        let triad: (N, N, N) = data.into();
+        Self::try_from(triad)
+    }
+}
+
+impl<N: Notable> TryFrom<(N, N, N)> for Triads {
+    type Error = Box<dyn std::error::Error>;
+
+    fn try_from(data: (N, N, N)) -> Result<Self, Self::Error> {
+        let (r, t, f): (N, N, N) = (data.0, data.1, data.2);
         let ab = Thirds::try_from((r.clone(), t))?;
         let bc = Fifths::try_from((r, f))?;
 
