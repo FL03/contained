@@ -17,6 +17,9 @@ pub(crate) mod constants {
 pub(crate) mod types {
     use futures::Stream;
 
+    pub type BoxedError = Box<dyn std::error::Error>;
+
+    pub type MusicResult<T = ()> = Result<T, BoxedError>;
     /// Dirac is a generic [Fn] which transforms one object into another
     pub type Dirac<S, T> = dyn Fn(S) -> T;
     /// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another

@@ -11,10 +11,10 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::{triads::Triad, LPR};
-use crate::{Interval, Notable, Note};
+use super::triads::{Triad, Triads};
+use crate::{intervals::Interval, MusicResult, Notable, Note};
 use contained_core::graphs::{Graph, UndirectedGraph};
-use std::{collections::BTreeSet, sync::Arc};
+use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tonnetz<N: Notable = Note> {
@@ -23,8 +23,8 @@ pub struct Tonnetz<N: Notable = Note> {
 }
 
 impl<N: Notable> Tonnetz<N> {
-    pub fn new(cluster: UndirectedGraph<N, Interval>, scope: Arc<Triad<N>>) -> Self {
-        Self { cluster, scope }
+    pub fn link(&mut self, triad: Triad<N>) -> MusicResult {
+        Ok(())
     }
 }
 
@@ -36,9 +36,18 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
     fn from(triad: Triad<N>) -> Self {
+        let (r, t, f): (N, N, N) = triad.clone().into();
+        let (rt, tf, rf): (Interval, Interval, Interval) = Triads::try_from(triad.clone())
+            .expect("Invalid triad")
+            .into();
+
+        let mut cluster = UndirectedGraph::new();
+        cluster.add_edge((r.clone(), t.clone(), rt));
+        cluster.add_edge((t, f.clone(), tf));
+        cluster.add_edge((r, f, rf));
         Self {
-            cluster: Default::default(),
-            scope: triad.into(),
+            cluster: cluster.clone(),
+            scope: Arc::new(triad),
         }
     }
 }

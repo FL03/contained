@@ -12,7 +12,7 @@ pub use self::triad::*;
 pub(crate) mod triad;
 
 use crate::{
-    intervals::{Fifths, Thirds},
+    intervals::{Fifths, Interval, Thirds},
     Notable,
 };
 use serde::{Deserialize, Serialize};
@@ -48,28 +48,6 @@ pub enum Triads {
     Minor,
 }
 
-impl From<Triads> for (Thirds, Thirds) {
-    fn from(class: Triads) -> (Thirds, Thirds) {
-        match class {
-            Triads::Augmented => (Thirds::Major, Thirds::Major),
-            Triads::Diminished => (Thirds::Minor, Thirds::Minor),
-            Triads::Major => (Thirds::Major, Thirds::Minor),
-            Triads::Minor => (Thirds::Minor, Thirds::Major),
-        }
-    }
-}
-
-impl From<Triads> for (Thirds, Fifths) {
-    fn from(class: Triads) -> (Thirds, Fifths) {
-        match class {
-            Triads::Augmented => (Thirds::Major, Fifths::Augmented),
-            Triads::Diminished => (Thirds::Minor, Fifths::Diminished),
-            Triads::Major => (Thirds::Major, Fifths::Perfect),
-            Triads::Minor => (Thirds::Minor, Fifths::Perfect),
-        }
-    }
-}
-
 impl<N: Notable> TryFrom<Triad<N>> for Triads {
     type Error = Box<dyn std::error::Error>;
 
@@ -89,6 +67,63 @@ impl<N: Notable> TryFrom<Triad<N>> for Triads {
                 Fifths::Perfect => Ok(Self::Minor),
                 _ => Err("".into()),
             },
+        }
+    }
+}
+
+impl From<(Thirds, Thirds)> for Triads {
+    fn from(intervals: (Thirds, Thirds)) -> Triads {
+        match intervals.0 {
+            Thirds::Major => match intervals.1 {
+                Thirds::Major => Triads::Augmented,
+                Thirds::Minor => Triads::Major,
+            },
+            Thirds::Minor => match intervals.1 {
+                Thirds::Major => Triads::Diminished,
+                Thirds::Minor => Triads::Minor,
+            },
+        }
+    }
+}
+
+impl TryFrom<(Thirds, Fifths)> for Triads {
+    type Error = crate::BoxedError;
+
+    fn try_from(intervals: (Thirds, Fifths)) -> Result<Triads, Self::Error> {
+        match intervals.0 {
+            Thirds::Major => match intervals.1 {
+                Fifths::Augmented => Ok(Triads::Augmented),
+                Fifths::Diminished => {
+                    Err("Cannot create a triad with a major third and a diminished fifth".into())
+                }
+                Fifths::Perfect => Ok(Triads::Major),
+            },
+            Thirds::Minor => match intervals.1 {
+                Fifths::Augmented => Err(
+                    "Cannot create an augmented triad with a minor third and an augmented fifth"
+                        .into(),
+                ),
+                Fifths::Diminished => Ok(Triads::Diminished),
+                Fifths::Perfect => Ok(Triads::Minor),
+            },
+        }
+    }
+}
+
+impl From<Triads> for (Interval, Interval, Interval) {
+    fn from(class: Triads) -> (Interval, Interval, Interval) {
+        let intervals: (Thirds, Thirds, Fifths) = class.into();
+        (intervals.0.into(), intervals.1.into(), intervals.2.into())
+    }
+}
+
+impl From<Triads> for (Thirds, Thirds, Fifths) {
+    fn from(class: Triads) -> (Thirds, Thirds, Fifths) {
+        match class {
+            Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
+            Triads::Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
+            Triads::Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
+            Triads::Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
         }
     }
 }

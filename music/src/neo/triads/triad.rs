@@ -5,7 +5,11 @@
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
 use super::Triads;
-use crate::{intervals::Thirds, neo::LPR, Gradient, Notable, Note};
+use crate::{
+    intervals::{Fifths, Thirds},
+    neo::LPR,
+    Gradient, Notable, Note,
+};
 use contained_core::{
     turing::{Machine, Operator, Tapes},
     Resultant, Scope, Symbolic,
@@ -18,7 +22,7 @@ pub struct Triad<N: Notable = Note>(N, N, N);
 
 impl<N: Notable> Triad<N> {
     pub fn new(root: N, class: Triads) -> Self {
-        let intervals: (Thirds, Thirds) = class.into();
+        let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
@@ -27,9 +31,10 @@ impl<N: Notable> Triad<N> {
         let fifth = df + third.clone();
         Self(root, third, fifth)
     }
-    /// Classifies the [Triad] in-terms of [Thirds]
-    pub fn classify(&self) -> Resultant<(Thirds, Thirds)> {
-        Ok(Triads::try_from(self.clone())?.into())
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    pub fn classify(&self) -> Resultant<(Thirds, Thirds, Fifths)> {
+        let edges: (Thirds, Thirds, Fifths) = Triads::try_from(self.clone())?.into();
+        Ok(edges)
     }
     /// Create a new [Operator] with the [Triad] as its alphabet
     pub fn config(&self) -> Operator<N> {
@@ -139,12 +144,6 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
     }
 }
 
-impl<N: Notable> From<Triad<N>> for (N, N, N) {
-    fn from(d: Triad<N>) -> (N, N, N) {
-        (d.clone().root(), d.clone().third(), d.fifth())
-    }
-}
-
 impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
     type Error = String;
     fn try_from(data: (i64, i64, i64)) -> Result<Triad<N>, Self::Error> {
@@ -154,6 +153,12 @@ impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
             data.2.pitch().into(),
         );
         Triad::try_from(notes)
+    }
+}
+
+impl<N: Notable> From<Triad<N>> for (N, N, N) {
+    fn from(d: Triad<N>) -> (N, N, N) {
+        (d.clone().root(), d.clone().third(), d.fifth())
     }
 }
 
