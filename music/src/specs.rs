@@ -3,7 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::{absmod, intervals::Interval, Dirac, NaturalNote, PitchClass};
+use crate::{
+    absmod,
+    classes::{NaturalNote, PitchClass},
+};
 use algae::graph::cmp::Node;
 use contained_core::Symbolic;
 
@@ -25,7 +28,7 @@ impl Gradient for i64 {
 }
 
 /// [Notable] is used to designate a structure used to represent a note
-pub trait Notable: From<i64> + Gradient + Send + Symbolic + Sync + Node {
+pub trait Notable: From<i64> + Gradient + Symbolic + Node {
     /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
     fn is_natural(&self) -> bool {
         NaturalNote::try_from(self.pitch()).is_ok()
@@ -34,19 +37,6 @@ pub trait Notable: From<i64> + Gradient + Send + Symbolic + Sync + Node {
 
 pub trait Classifiable<Cls: From<i64>> {
     fn class(&self) -> Cls;
-}
-
-pub trait Transformable {}
-
-pub trait Transformation<S: Clone> {
-    type Output;
-
-    /// [Transformation::dirac] represents a single function capable of transforming one object into another while allowing for errors and null results
-    fn dirac(&self) -> &Dirac<&S, Self::Output>;
-    /// [Transformation::transform] applies the defined transition to the given objects
-    fn transform(&self, args: &S) -> Self::Output {
-        self.dirac()(args)
-    }
 }
 
 pub trait Validity {

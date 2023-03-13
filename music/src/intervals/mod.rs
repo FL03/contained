@@ -41,6 +41,17 @@ pub enum Interval {
     Third(Thirds),
 }
 
+impl Interval {
+    pub fn increase<N: Notable>(&self, note: N) -> N {
+        let interval: i64 = self.clone().into();
+        (note.pitch() + interval).into()
+    }
+    pub fn decrease<N: Notable>(&self, note: N) -> N {
+        let interval: i64 = self.clone().into();
+        (note.pitch() - interval).into()
+    }
+}
+
 impl Hashable for Interval {
     fn hash(&self) -> H256 {
         hasher(self).into()
@@ -67,6 +78,38 @@ impl From<Fifths> for Interval {
 impl From<Thirds> for Interval {
     fn from(data: Thirds) -> Interval {
         Interval::Third(data)
+    }
+}
+
+impl std::ops::Add<Interval> for i64 {
+    type Output = i64;
+
+    fn add(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        (self + interval).pitch()
+    }
+}
+
+impl std::ops::AddAssign<Interval> for i64 {
+    fn add_assign(&mut self, rhs: Interval) {
+        let interval: i64 = rhs.into();
+        *self = (*self + interval).pitch();
+    }
+}
+
+impl std::ops::Sub<Interval> for i64 {
+    type Output = i64;
+
+    fn sub(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        (self - interval).pitch()
+    }
+}
+
+impl std::ops::SubAssign<Interval> for i64 {
+    fn sub_assign(&mut self, rhs: Interval) {
+        let interval: i64 = rhs.into();
+        *self = (*self - interval).pitch();
     }
 }
 

@@ -1,7 +1,8 @@
 /*
     Appellation: tonic <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A tonic is used to des
+    Description: A tonic is traditionally used to to describe the first degree (note) of the diatonic scale.
+        For our purposes the tonic is used as an extension of the triad, implementing a complete UTM
 */
 use super::Triad;
 use crate::{Notable, Note};

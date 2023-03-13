@@ -24,14 +24,12 @@ impl<N: Notable> Chord<N> {
     }
 }
 
-impl<N: Notable> ArrayLike for Chord<N> {
-    type Data = N;
-
-    fn content(&self) -> &Vec<Self::Data> {
+impl<N: Notable> ArrayLike<N> for Chord<N> {
+    fn content(&self) -> &Vec<N> {
         &self.0
     }
 
-    fn mut_content(&mut self) -> &mut Vec<Self::Data> {
+    fn mut_content(&mut self) -> &mut Vec<N> {
         &mut self.0
     }
 }

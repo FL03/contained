@@ -8,7 +8,8 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use crate::{intervals::Interval, Gradient, Notable, PitchClass};
+use super::{classes::PitchClass, Pitch};
+use crate::{intervals::Interval, Gradient, Notable};
 use contained_core::Symbolic;
 use serde::{Deserialize, Serialize};
 
@@ -80,15 +81,47 @@ impl<P: Gradient> std::ops::SubAssign<P> for Note {
     }
 }
 
-impl From<i64> for Note {
-    fn from(data: i64) -> Note {
-        Note::new(PitchClass::from(data), None)
+impl std::ops::Add<Interval> for Note {
+    type Output = Self;
+
+    fn add(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        (self.pitch() + interval).into()
     }
 }
 
-impl From<Note> for i64 {
-    fn from(data: Note) -> i64 {
-        data.class().into()
+impl std::ops::AddAssign<Interval> for Note {
+    fn add_assign(&mut self, rhs: Interval) {
+        let interval: i64 = rhs.into();
+        *self = (self.pitch() + interval).into()
+    }
+}
+
+impl std::ops::Sub<Interval> for Note {
+    type Output = Self;
+
+    fn sub(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        (self.pitch() - interval).into()
+    }
+}
+
+impl std::ops::SubAssign<Interval> for Note {
+    fn sub_assign(&mut self, rhs: Interval) {
+        let interval: i64 = rhs.into();
+        *self = (self.pitch() - interval).into()
+    }
+}
+
+impl From<i64> for Note {
+    fn from(data: i64) -> Note {
+        Note::new(PitchClass::from(&Pitch::new(data)), None)
+    }
+}
+
+impl From<Pitch> for Note {
+    fn from(data: Pitch) -> Note {
+        Note::new(PitchClass::from(&data), None)
     }
 }
 
@@ -98,10 +131,16 @@ impl<P: Gradient> From<&P> for Note {
     }
 }
 
+impl From<Note> for i64 {
+    fn from(data: Note) -> i64 {
+        data.class.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Gradient, NaturalNote};
+    use crate::{classes::NaturalNote, Gradient};
 
     #[test]
     fn test_notes() {

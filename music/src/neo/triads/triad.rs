@@ -79,16 +79,16 @@ impl<N: Notable> Triad<N> {
             (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
         match dirac {
             LPR::L => match ab {
-                Thirds::Major => r -= 1,
-                Thirds::Minor => f += 1,
+                Thirds::Major => r -= Interval::Semitone,
+                Thirds::Minor => f += Interval::Semitone,
             },
             LPR::P => match ab {
-                Thirds::Major => t -= 1,
-                Thirds::Minor => t += 1,
+                Thirds::Major => t -= Interval::Semitone,
+                Thirds::Minor => t += Interval::Semitone,
             },
             LPR::R => match ab {
-                Thirds::Major => f += 2,
-                Thirds::Minor => r -= 2,
+                Thirds::Major => f += Interval::Tone,
+                Thirds::Minor => r -= Interval::Tone,
             },
         };
         let tmp: (N, N, N) = (r.into(), t.into(), f.into());
