@@ -6,7 +6,7 @@
 use super::Triad;
 use crate::{
     intervals::{Fifths, Interval, Thirds},
-    Notable,
+    BoxedError, Notable,
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -41,38 +41,6 @@ pub enum Triads {
     Minor,
 }
 
-impl<N: Notable> TryFrom<Triad<N>> for Triads {
-    type Error = Box<dyn std::error::Error>;
-
-    fn try_from(data: Triad<N>) -> Result<Self, Self::Error> {
-        let triad: (N, N, N) = data.into();
-        Self::try_from(triad)
-    }
-}
-
-impl<N: Notable> TryFrom<(N, N, N)> for Triads {
-    type Error = Box<dyn std::error::Error>;
-
-    fn try_from(data: (N, N, N)) -> Result<Self, Self::Error> {
-        let (r, t, f): (N, N, N) = (data.0, data.1, data.2);
-        let ab = Thirds::try_from((r.clone(), t))?;
-        let bc = Fifths::try_from((r, f))?;
-
-        match ab {
-            Thirds::Major => match bc {
-                Fifths::Augmented => Ok(Self::Augmented),
-                Fifths::Perfect => Ok(Self::Major),
-                _ => Err("".into()),
-            },
-            Thirds::Minor => match bc {
-                Fifths::Diminished => Ok(Self::Diminished),
-                Fifths::Perfect => Ok(Self::Minor),
-                _ => Err("".into()),
-            },
-        }
-    }
-}
-
 impl From<(Thirds, Thirds)> for Triads {
     fn from(intervals: (Thirds, Thirds)) -> Triads {
         match intervals.0 {
@@ -88,8 +56,17 @@ impl From<(Thirds, Thirds)> for Triads {
     }
 }
 
+impl<N: Notable> TryFrom<Triad<N>> for Triads {
+    type Error = BoxedError;
+
+    fn try_from(data: Triad<N>) -> Result<Self, Self::Error> {
+        let triad: (N, N, N) = data.into();
+        Self::try_from(triad)
+    }
+}
+
 impl TryFrom<(Thirds, Fifths)> for Triads {
-    type Error = crate::BoxedError;
+    type Error = BoxedError;
 
     fn try_from(intervals: (Thirds, Fifths)) -> Result<Triads, Self::Error> {
         match intervals.0 {
@@ -107,6 +84,29 @@ impl TryFrom<(Thirds, Fifths)> for Triads {
                 ),
                 Fifths::Diminished => Ok(Triads::Diminished),
                 Fifths::Perfect => Ok(Triads::Minor),
+            },
+        }
+    }
+}
+
+impl<N: Notable> TryFrom<(N, N, N)> for Triads {
+    type Error = BoxedError;
+
+    fn try_from(data: (N, N, N)) -> Result<Self, Self::Error> {
+        let (r, t, f): (N, N, N) = (data.0, data.1, data.2);
+        let ab = Thirds::try_from((r.clone(), t))?;
+        let bc = Fifths::try_from((r, f))?;
+
+        match ab {
+            Thirds::Major => match bc {
+                Fifths::Augmented => Ok(Self::Augmented),
+                Fifths::Perfect => Ok(Self::Major),
+                _ => Err("".into()),
+            },
+            Thirds::Minor => match bc {
+                Fifths::Diminished => Ok(Self::Diminished),
+                Fifths::Perfect => Ok(Self::Minor),
+                _ => Err("".into()),
             },
         }
     }

@@ -11,10 +11,7 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::{
-    triads::{Triad, Triads},
-    Boundary,
-};
+use super::{triads::Triad, Boundary};
 use crate::{intervals::Interval, Notable, Note};
 use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::{Hashable, H256};
@@ -31,18 +28,18 @@ impl<N: Notable> Tonnetz<N> {
         self.cluster.nodes().len() == crate::MODULUS as usize
     }
     pub fn insert(&mut self, triad: Triad<N>) {
-        let (r, t, f): (N, N, N) = triad.clone().into();
-        let (rt, tf, rf): (Interval, Interval, Interval) = Triads::try_from(triad.clone())
-            .expect("Invalid triad")
-            .into();
+        // determine the intervals used to create the given triad
+        let (a, b, c): (Interval, Interval, Interval) =
+            triad.clone().try_into().expect("Invalid triad");
+        // create a hash of the object for use as a seed
         let seed = triad.hash();
 
         self.cluster
-            .add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
+            .add_edge((triad.root(), triad.third(), Boundary::new(a, seed).hash()));
         self.cluster
-            .add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
+            .add_edge((triad.third(), triad.fifth(), Boundary::new(b, seed).hash()));
         self.cluster
-            .add_edge((r, f, Boundary::new(rf, seed).hash()));
+            .add_edge((triad.root(), triad.fifth(), Boundary::new(c, seed).hash()));
     }
 }
 
@@ -54,16 +51,17 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
     fn from(triad: Triad<N>) -> Self {
-        let (r, t, f): (N, N, N) = triad.clone().into();
-        let (rt, tf, rf): (Interval, Interval, Interval) = Triads::try_from(triad.clone())
-            .expect("Invalid triad")
-            .into();
+        // determine the intervals used to create the given triad
+        let (a, b, c): (Interval, Interval, Interval) =
+            triad.clone().try_into().expect("Invalid triad");
+        // create a hash of the object for use as a seed
         let seed = triad.hash();
 
         let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((r.clone(), t.clone(), Boundary::new(rt, seed).hash()));
-        cluster.add_edge((t, f.clone(), Boundary::new(tf, seed).hash()));
-        cluster.add_edge((r, f, Boundary::new(rf, seed).hash()));
+        cluster.add_edge((triad.root(), triad.third(), Boundary::new(a, seed).hash()));
+        cluster.add_edge((triad.third(), triad.fifth(), Boundary::new(b, seed).hash()));
+        cluster.add_edge((triad.root(), triad.fifth(), Boundary::new(c, seed).hash()));
+
         Self {
             cluster: cluster.clone(),
             scope: Arc::new(triad),

@@ -27,6 +27,15 @@ impl<N: Notable> Triad<N> {
         let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
     }
+    pub fn fifth(&self) -> N {
+        self.2.clone()
+    }
+    pub fn root(&self) -> N {
+        self.0.clone()
+    }
+    pub fn third(&self) -> N {
+        self.1.clone()
+    }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: N, dt: Thirds, df: Thirds) -> Self {
         let third = dt + root.clone();
@@ -60,42 +69,26 @@ impl<N: Notable> Triad<N> {
     pub fn is_valid(&self) -> bool {
         self.classify().is_ok()
     }
-    pub fn fifth(&self) -> N {
-        self.2.clone()
-    }
-    pub fn root(&self) -> N {
-        self.0.clone()
-    }
-    pub fn third(&self) -> N {
-        self.1.clone()
-    }
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     pub fn transform(&mut self, dirac: LPR) {
-        let triad: (N, N, N) = self.clone().into();
-        let ab = Thirds::try_from((triad.clone().0, triad.clone().1))
-            .expect("Invalid triadic structure...");
-        let (mut r, mut t, mut f): (i64, i64, i64) =
-            (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
-        match dirac {
-            LPR::L => match ab {
-                Thirds::Major => r -= Interval::Semitone,
-                Thirds::Minor => f += Interval::Semitone,
+        let (mut r, mut t, mut f): (i64, i64, i64) = self.clone().into();
+        match self.classify().expect("Invalid triad").0 {
+            Thirds::Major => match dirac {
+                LPR::L => r -= Interval::Semitone,
+                LPR::P => t -= Interval::Semitone,
+                LPR::R => f += Interval::Tone,
             },
-            LPR::P => match ab {
-                Thirds::Major => t -= Interval::Semitone,
-                Thirds::Minor => t += Interval::Semitone,
-            },
-            LPR::R => match ab {
-                Thirds::Major => f += Interval::Tone,
-                Thirds::Minor => r -= Interval::Tone,
+            Thirds::Minor => match dirac {
+                LPR::L => f += Interval::Semitone,
+                LPR::P => t += Interval::Semitone,
+                LPR::R => r -= Interval::Tone,
             },
         };
-        let tmp: (N, N, N) = (r.into(), t.into(), f.into());
-        *self = Self::try_from(tmp).expect("Invalid triad");
+        *self = Self::try_from((r, t, f)).expect("Invalid triad");
     }
     pub fn triad(self) -> (N, N, N) {
-        (self.clone().root(), self.clone().third(), self.fifth())
+        (self.0, self.1, self.2)
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
@@ -159,7 +152,7 @@ impl<N: Notable> IntoIterator for Triad<N> {
 }
 
 impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
-    type Error = String;
+    type Error = crate::BoxedError;
 
     fn try_from(data: (N, N, N)) -> Result<Triad<N>, Self::Error> {
         let args = vec![data.0, data.1, data.2];
@@ -184,7 +177,8 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
 }
 
 impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
-    type Error = String;
+    type Error = crate::BoxedError;
+
     fn try_from(data: (i64, i64, i64)) -> Result<Triad<N>, Self::Error> {
         let notes: (N, N, N) = (
             data.0.pitch().into(),
@@ -192,6 +186,23 @@ impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
             data.2.pitch().into(),
         );
         Triad::try_from(notes)
+    }
+}
+
+impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
+    type Error = crate::BoxedError;
+
+    fn try_from(data: Triad<N>) -> Result<(Thirds, Thirds, Fifths), Self::Error> {
+        data.classify()
+    }
+}
+
+impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
+    type Error = crate::BoxedError;
+
+    fn try_from(data: Triad<N>) -> Result<(Interval, Interval, Interval), Self::Error> {
+        let (a, b, c): (Thirds, Thirds, Fifths) = data.classify()?;
+        Ok((a.into(), b.into(), c.into()))
     }
 }
 
