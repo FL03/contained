@@ -10,11 +10,11 @@ pub(crate) mod scope;
 pub(crate) mod specs;
 pub(crate) mod utils;
 
-pub mod space;
 pub mod states;
+pub mod surface;
 pub mod turing;
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
 pub trait Alphabet<S: Symbolic> {
@@ -43,6 +43,16 @@ impl<S: Symbolic> Alphabet<S> for Vec<S> {
 impl<S: Symbolic> Alphabet<S> for BTreeSet<S> {
     fn default_symbol(&self) -> S {
         if let Some(entry) = self.first() {
+            entry.clone()
+        } else {
+            Default::default()
+        }
+    }
+}
+
+impl<S: Symbolic> Alphabet<S> for HashSet<S> {
+    fn default_symbol(&self) -> S {
+        if let Some(entry) = self.iter().next() {
             entry.clone()
         } else {
             Default::default()

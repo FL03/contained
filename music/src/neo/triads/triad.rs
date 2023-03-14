@@ -12,7 +12,7 @@ use crate::{
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{
-    turing::{tapes::Tapes, Machine, Operator},
+    turing::{tapes::Tapes, Machine, Operator, Program},
     Scope,
 };
 use decanter::prelude::{hasher, Hashable, H256};
@@ -61,8 +61,8 @@ impl<N: Notable> Triad<N> {
         }
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self) -> Machine<N> {
-        Machine::new(self.config())
+    pub fn machine(&self, program: Program<N>) -> Machine<N> {
+        Machine::new(self.config(), program)
     }
     /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
     pub fn is_valid(&self) -> bool {

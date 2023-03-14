@@ -20,9 +20,8 @@ test = true
 [build-dependencies]
 
 [dependencies]
-anyhow.workspace = true
+algae.workspace = true
 decanter.workspace = true
-futures.workspace = true
 scsys.workspace = true
 serde.workspace = true
 serde_json.workspace = true

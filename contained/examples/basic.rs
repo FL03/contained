@@ -39,7 +39,8 @@ fn main() -> Resultant {
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions)?;
 
-    let res = Machine::new(scope).execute(program.clone())?;
+    let mut res = Machine::new(scope, program);
+    res.execute()?;
     assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
     println!("{:?}", res);
 

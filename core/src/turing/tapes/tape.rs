@@ -25,7 +25,7 @@ impl<S: Symbolic> Tape<S> {
         self.tape().get(pos)
     }
     pub fn insert(&mut self, pos: usize, elem: S) {
-        self.0.insert(pos, elem);
+        self.tape_mut().insert(pos, elem);
     }
     pub fn is_empty(&self) -> bool {
         self.tape().is_empty()
@@ -34,13 +34,16 @@ impl<S: Symbolic> Tape<S> {
         self.tape().len()
     }
     pub fn push(&mut self, elem: S) {
-        self.0.push(elem);
+        self.tape_mut().push(elem);
     }
     pub fn set(&mut self, index: usize, elem: S) {
         self.0[index] = elem;
     }
     pub fn tape(&self) -> &Vec<S> {
         &self.0
+    }
+    pub fn tape_mut(&mut self) -> &mut Vec<S> {
+        &mut self.0
     }
 }
 

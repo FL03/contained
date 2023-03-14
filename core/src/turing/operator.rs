@@ -4,7 +4,7 @@
     Description: ... Summary ...
 */
 use super::tapes::Tape;
-use crate::states::{State, States};
+use crate::states::{State, Stateful, States};
 use crate::{Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
@@ -13,44 +13,15 @@ use std::cell::RefCell;
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Operator<S: Symbolic = String> {
     index: RefCell<usize>,
-    state: State<States>,
+    state: State,
     tape: Tape<S>,
 }
 
 impl<S: Symbolic> Operator<S> {}
 
-impl<S: Symbolic> Scope<S> for Operator<S> {
-    fn new(index: RefCell<usize>, state: State<States>, tape: Tape<S>) -> Self {
-        Self { index, state, tape }
-    }
-
-    fn insert(&mut self, elem: S) {
-        self.tape.insert(*self.index.borrow(), elem);
-    }
-
-    fn index(&self) -> &RefCell<usize> {
-        &self.index
-    }
-
-    fn set_symbol(&mut self, elem: S) {
-        self.tape.set(*self.index.borrow(), elem);
-    }
-
-    fn state(&self) -> &State<States> {
-        &self.state
-    }
-
-    fn tape(&self) -> &Tape<S> {
-        &self.tape
-    }
-
-    fn update(&mut self, state: Option<State<States>>, elem: Option<S>) {
-        if let Some(s) = state {
-            self.state = s;
-        }
-        if let Some(t) = elem {
-            self.tape.set(*self.index.borrow(), t);
-        }
+impl<S: Symbolic> ExactSizeIterator for Operator<S> {
+    fn len(&self) -> usize {
+        self.tape.len()
     }
 }
 
@@ -68,11 +39,50 @@ impl<S: Symbolic> Iterator for Operator<S> {
     }
 }
 
-impl<S: Symbolic> ExactSizeIterator for Operator<S> {
-    fn len(&self) -> usize {
-        self.tape.len()
+impl<S: Symbolic> Scope<S> for Operator<S> {
+    fn new(index: RefCell<usize>, state: State, tape: Tape<S>) -> Self {
+        Self { index, state, tape }
+    }
+
+    fn insert(&mut self, elem: S) {
+        self.tape.insert(*self.index.borrow(), elem);
+    }
+
+    fn index(&self) -> &RefCell<usize> {
+        &self.index
+    }
+
+    fn set_symbol(&mut self, elem: S) {
+        self.tape.set(*self.index.borrow(), elem);
+    }
+
+    fn state(&self) -> &State {
+        &self.state
+    }
+
+    fn tape(&self) -> &Tape<S> {
+        &self.tape
+    }
+
+    fn update(&mut self, state: Option<State>, elem: Option<S>) {
+        if let Some(s) = state {
+            self.state = s;
+        }
+        if let Some(t) = elem {
+            self.tape.set(*self.index.borrow(), t);
+        }
     }
 }
+
+// impl<S: Symbolic> Stateful<States> for Operator<S> {
+//     fn state(&self) -> States {
+//         self.state.state()
+//     }
+
+//     fn update_state(&mut self, state: States) {
+//         self.state.update_state(state)
+//     }
+// }
 
 impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

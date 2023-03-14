@@ -50,8 +50,8 @@ fn main() -> Resultant {
     // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
     program.extend(instructions)?;
 
-    let res = triad.machine().execute(program)?;
-    println!("{:?}", res);
+    let mut res = triad.machine(program);
+    println!("{:?}", res.execute()?);
 
     Ok(())
 }

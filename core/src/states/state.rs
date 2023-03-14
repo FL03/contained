@@ -38,8 +38,8 @@ impl<S: StateSpec> Hashable for State<S> {
 }
 
 impl<S: StateSpec> Stateful<S> for State<S> {
-    fn state(&self) -> &S {
-        &self.state
+    fn state(&self) -> S {
+        self.state.clone()
     }
     fn update_state(&mut self, state: S) {
         self.state = state;
@@ -57,13 +57,13 @@ impl<S: StateSpec> std::ops::Add for State<S> {
     type Output = State<S>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        self + *rhs.state()
+        self + rhs.state()
     }
 }
 
 impl<S: StateSpec> std::ops::AddAssign for State<S> {
     fn add_assign(&mut self, rhs: Self) {
-        self.state = *self.state() + *rhs.state();
+        self.state = self.state() + rhs.state();
     }
 }
 
@@ -71,7 +71,7 @@ impl<S: StateSpec> std::ops::Add<S> for State<S> {
     type Output = State<S>;
 
     fn add(self, rhs: S) -> Self::Output {
-        State::new(*self.state() + rhs)
+        State::new(self.state() + rhs)
     }
 }
 

@@ -18,7 +18,7 @@ pub struct Program<S: Symbolic> {
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = (*final_state.state()).into();
+        let s: i64 = final_state.state().into();
         let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);
 
@@ -87,6 +87,12 @@ impl<S: Symbolic> Program<S> {
                 Ok(None)
             }
         }
+    }
+}
+
+impl<S: Symbolic> Alphabet<S> for Program<S> {
+    fn default_symbol(&self) -> S {
+        self.alphabet.default_symbol()
     }
 }
 

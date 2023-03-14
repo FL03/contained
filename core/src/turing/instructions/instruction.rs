@@ -6,10 +6,7 @@
             (State, Symbol, State, Symbol, Move)
 */
 use super::{Head, Move, Tail};
-use crate::{
-    states::{State, States},
-    turing::Symbolic,
-};
+use crate::{states::State, turing::Symbolic};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -31,8 +28,8 @@ impl<S: Symbolic> Instruction<S> {
     }
 }
 
-impl<S: Symbolic> From<(State<States>, S, State<States>, S, Move)> for Instruction<S> {
-    fn from(value: (State<States>, S, State<States>, S, Move)) -> Self {
+impl<S: Symbolic> From<(State, S, State, S, Move)> for Instruction<S> {
+    fn from(value: (State, S, State, S, Move)) -> Self {
         let head = Head::new(value.0, value.1);
         let tail = Tail::new(value.2, value.3, value.4);
         Self::new(head, tail)

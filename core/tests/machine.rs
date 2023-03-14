@@ -36,8 +36,8 @@ fn test_machine() {
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions).unwrap();
 
-    let res = Machine::new(scope).execute(program.clone());
+    let mut machine = Machine::new(scope, program);
 
-    assert!(res.is_ok());
-    assert_eq!(res.unwrap().tape().clone(), Tape::new(["c", "a", "a"]));
+    assert!(machine.execute().is_ok());
+    assert_eq!(machine.tape().clone(), Tape::new(["c", "a", "a"]));
 }

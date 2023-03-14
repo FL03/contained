@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use crate::{
-    states::{State, States},
+    states::State,
     turing::{
         instructions::Move,
         tapes::{Tape, Tapes},
@@ -15,7 +15,7 @@ use std::cell::RefCell;
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
 pub trait Scope<S: Symbolic>: Iterator<Item = S> + ExactSizeIterator {
-    fn new(index: RefCell<usize>, state: State<States>, tape: Tape<S>) -> Self;
+    fn new(index: RefCell<usize>, state: State, tape: Tape<S>) -> Self;
     fn build(tape: Tapes<S>) -> Self
     where
         Self: Sized,
@@ -52,12 +52,12 @@ pub trait Scope<S: Symbolic>: Iterator<Item = S> + ExactSizeIterator {
             Move::Stay => {}
         }
     }
-    fn state(&self) -> &State<States>;
     fn scope(&self) -> &S {
         self.tape()
             .get(*self.index().borrow())
             .expect("Index is out of bounds...")
     }
+    fn state(&self) -> &State;
     fn tape(&self) -> &Tape<S>;
-    fn update(&mut self, state: Option<State<States>>, symbol: Option<S>);
+    fn update(&mut self, state: Option<State>, symbol: Option<S>);
 }
