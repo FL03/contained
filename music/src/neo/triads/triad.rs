@@ -39,8 +39,7 @@ impl<N: Notable> Triad<N> {
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: N, dt: Thirds, df: Thirds) -> Self {
         let third = dt + root.clone();
-        let fifth = df + third.clone();
-        Self(root, third, fifth)
+        Self(root, third.clone(), df + third)
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     pub fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
