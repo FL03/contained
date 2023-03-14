@@ -13,6 +13,16 @@ pub(crate) mod class;
 pub mod tonic;
 pub(crate) mod triad;
 
+use crate::Notable;
+use contained_core::states::State;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Instance<N: Notable> {
+    state: State,
+    pub triad: Triad<N>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

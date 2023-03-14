@@ -5,7 +5,11 @@
 */
 extern crate contained;
 
-use contained::core::turing::{Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing};
+use contained::core::turing::{
+    instructions::{Instruction, Move},
+    tapes::{Tape, Tapes},
+    Machine, Operator, Program, Turing,
+};
 use contained::core::{
     states::{State, States},
     Extend, Resultant, Scope,

@@ -3,18 +3,21 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{instructions::*, machine::*, operator::*, programs::*, tapes::*};
+pub use self::{machine::*, operator::*, programs::*};
 
-pub(crate) mod instructions;
+pub mod instructions;
+pub mod tapes;
+
 pub(crate) mod machine;
 pub(crate) mod operator;
 pub(crate) mod programs;
-pub(crate) mod tapes;
 
 use crate::{
     states::{Stateful, States},
     Scope, Symbolic,
 };
+use instructions::Head;
+use tapes::{Tape, Tapes};
 
 pub trait Executable<S: Symbolic> {
     type Error;

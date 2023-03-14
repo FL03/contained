@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use super::tapes::Tape;
 use crate::states::{State, States};
-use crate::turing::Tape;
 use crate::{Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
@@ -17,6 +17,8 @@ pub struct Operator<S: Symbolic = String> {
     tape: Tape<S>,
 }
 
+impl<S: Symbolic> Operator<S> {}
+
 impl<S: Symbolic> Scope<S> for Operator<S> {
     fn new(index: RefCell<usize>, state: State<States>, tape: Tape<S>) -> Self {
         Self { index, state, tape }
@@ -26,7 +28,7 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
         self.tape.insert(*self.index.borrow(), elem);
     }
 
-    fn position(&self) -> &RefCell<usize> {
+    fn index(&self) -> &RefCell<usize> {
         &self.index
     }
 
@@ -49,6 +51,26 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
         if let Some(t) = elem {
             self.tape.set(*self.index.borrow(), t);
         }
+    }
+}
+
+impl<S: Symbolic> Iterator for Operator<S> {
+    type Item = S;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = *self.index.borrow();
+        self.index.replace(i + 1);
+        if let Some(cur) = self.tape.get(i) {
+            Some(cur.clone())
+        } else {
+            None
+        }
+    }
+}
+
+impl<S: Symbolic> ExactSizeIterator for Operator<S> {
+    fn len(&self) -> usize {
+        self.tape.len()
     }
 }
 
@@ -83,7 +105,7 @@ impl<S: Symbolic> From<Operator<S>> for (usize, State<States>, Tape<S>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::turing::{Move, Tapes};
+    use crate::turing::{instructions::Move, tapes::Tapes};
 
     #[test]
     fn test_builder() {

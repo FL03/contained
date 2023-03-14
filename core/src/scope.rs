@@ -5,13 +5,16 @@
 */
 use crate::{
     states::{State, States},
-    turing::{Move, Tape, Tapes},
+    turing::{
+        instructions::Move,
+        tapes::{Tape, Tapes},
+    },
     Symbolic,
 };
 use std::cell::RefCell;
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic> {
+pub trait Scope<S: Symbolic>: Iterator<Item = S> + ExactSizeIterator {
     fn new(index: RefCell<usize>, state: State<States>, tape: Tape<S>) -> Self;
     fn build(tape: Tapes<S>) -> Self
     where
@@ -23,26 +26,26 @@ pub trait Scope<S: Symbolic> {
         }
     }
     fn insert(&mut self, elem: S);
-    fn position(&self) -> &RefCell<usize>;
+    fn index(&self) -> &RefCell<usize>;
     fn set_symbol(&mut self, elem: S);
     /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
     /// [Move::Right] inserts a new element at the end of the tape if the current position equals the total number of cells
     /// [Move::Stay] does nothing
     fn shift(&mut self, shift: Move, elem: S) {
-        let index = *self.position().borrow();
+        let index = *self.index().borrow();
 
         match shift {
             // If the current position is 0, insert a new element at the top of the vector
-            Move::Left if *self.position().borrow() == 0 => {
+            Move::Left if *self.index().borrow() == 0 => {
                 self.insert(elem);
             }
             Move::Left => {
-                self.position().replace(index - 1);
+                self.index().replace(index - 1);
             }
             Move::Right => {
-                self.position().replace(index + 1);
+                self.index().replace(index + 1);
 
-                if *self.position().borrow() == self.tape().len() {
+                if *self.index().borrow() == self.tape().len() {
                     self.insert(elem);
                 }
             }
@@ -52,7 +55,7 @@ pub trait Scope<S: Symbolic> {
     fn state(&self) -> &State<States>;
     fn scope(&self) -> &S {
         self.tape()
-            .get(*self.position().borrow())
+            .get(*self.index().borrow())
             .expect("Index is out of bounds...")
     }
     fn tape(&self) -> &Tape<S>;

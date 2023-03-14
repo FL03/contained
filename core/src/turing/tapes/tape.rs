@@ -1,49 +1,10 @@
 /*
-    Appellation: tapes <module>
+    Appellation: tape <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
-
-pub trait Taped<S: Symbolic>:
-    Clone + IntoIterator<Item = S, IntoIter = std::vec::IntoIter<S>>
-{
-    fn tape(self) -> Vec<S> {
-        Vec::from_iter(self.clone())
-    }
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-
-pub enum Tapes<S: Symbolic = String> {
-    Normal(Tape<S>),
-    Standard(Tape<S>),
-}
-
-impl<S: Symbolic> Tapes<S> {
-    pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
-        Self::Normal(Tape::new(iter))
-    }
-    pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
-        Self::Standard(Tape::new(iter))
-    }
-}
-
-impl<S: Symbolic> Default for Tapes<S> {
-    fn default() -> Self {
-        Self::Normal(Default::default())
-    }
-}
-
-impl<S: Symbolic> From<Tapes<S>> for Tape<S> {
-    fn from(tape: Tapes<S>) -> Tape<S> {
-        match tape {
-            Tapes::Normal(t) => t,
-            Tapes::Standard(t) => t,
-        }
-    }
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tape<S: Symbolic = String>(Vec<S>);
@@ -80,6 +41,15 @@ impl<S: Symbolic> Tape<S> {
     }
     pub fn tape(&self) -> &Vec<S> {
         &self.0
+    }
+}
+
+impl<S: Symbolic> IntoIterator for Tape<S> {
+    type Item = S;
+    type IntoIter = std::vec::IntoIter<S>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 

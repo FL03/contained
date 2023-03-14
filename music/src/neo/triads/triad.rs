@@ -12,7 +12,7 @@ use crate::{
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{
-    turing::{Machine, Operator, Tapes},
+    turing::{tapes::Tapes, Machine, Operator},
     Scope,
 };
 use decanter::prelude::{hasher, Hashable, H256};
@@ -207,14 +207,12 @@ impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
 
 impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
     fn from(d: Triad<N>) -> UndirectedGraph<N, Interval> {
-        let (r, t, f): (N, N, N) = d.clone().into();
-        let (rt, tf, rf): (Interval, Interval, Interval) =
-            Triads::try_from(d.clone()).expect("Invalid triad").into();
+        let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.classify().expect("Invalid Triad");
 
         let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((r.clone(), t.clone(), rt));
-        cluster.add_edge((t, f.clone(), tf));
-        cluster.add_edge((r, f, rf));
+        cluster.add_edge((d.root(), d.third(), rt.into()));
+        cluster.add_edge((d.third(), d.fifth(), tf.into()));
+        cluster.add_edge((d.root(), d.fifth(), rf.into()));
         cluster.clone()
     }
 }

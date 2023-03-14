@@ -1,5 +1,9 @@
 #[cfg(test)]
-use contained_core::turing::{Instruction, Machine, Move, Operator, Program, Tape, Tapes, Turing};
+use contained_core::turing::{
+    instructions::{Instruction, Move},
+    tapes::{Tape, Tapes},
+    Machine, Operator, Program, Turing,
+};
 use contained_core::{
     states::{State, States},
     Extend, Scope,

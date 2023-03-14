@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use super::instructions::{Head, Instruction};
 use crate::states::{State, Stateful, States};
-use crate::turing::{Head, Instruction};
 use crate::{Alphabet, Extend, Resultant, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
@@ -105,7 +105,7 @@ impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
 mod test {
     use super::*;
     use crate::states::{State, States};
-    use crate::turing::{Instruction, Move};
+    use crate::turing::instructions::Move;
 
     #[test]
     fn test_program() {
