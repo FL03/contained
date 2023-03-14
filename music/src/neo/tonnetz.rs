@@ -41,6 +41,7 @@ impl<N: Notable> Tonnetz<N> {
         self.cluster
             .add_edge((triad.root(), triad.fifth(), Boundary::new(c, seed).hash()));
     }
+
 }
 
 impl<N: Notable> std::fmt::Display for Tonnetz<N> {

@@ -14,7 +14,7 @@ version = "0.1.4"
 # Custom crates
 algae = { default-features = false, features = ["graph"], git = "https://github.com/FL03/algae", branch = "v0.1.18", version = "0.1.18" }
 decanter = { features = ["derive"], git = "https://github.com/FL03/decanter", branch = "v0.1.4", version = "0.1.4" }
-scsys = { features = ["derive"], version = "0.1.41" }
+scsys = { features = ["derive"], git = "https://github.com/scattered-systems/scsys", branch = "v0.1.42", version = "0.1.42" }
 
 # Standard dependencies
 anyhow = "1"

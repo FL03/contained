@@ -14,32 +14,9 @@
         Shift by a tone: +/- 2
 */
 use super::triads::Triad;
-use crate::{intervals::Thirds, Notable};
+use crate::Notable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub fn transform<N: Notable>(dirac: LPR, triad: (N, N, N)) -> (N, N, N) {
-    let ab =
-        Thirds::try_from((triad.clone().0, triad.clone().1)).expect("Invalid triadic structure...");
-    let (mut r, mut t, mut f): (i64, i64, i64) =
-        (triad.0.pitch(), triad.1.pitch(), triad.2.pitch());
-    match dirac {
-        LPR::L => match ab {
-            Thirds::Major => r -= 1,
-            Thirds::Minor => f += 1,
-        },
-        LPR::P => match ab {
-            Thirds::Major => t -= 1,
-            Thirds::Minor => t += 1,
-        },
-        LPR::R => match ab {
-            Thirds::Major => f += 2,
-            Thirds::Minor => r -= 2,
-        },
-    };
-    // TODO: Reorder
-    (r.into(), t.into(), f.into())
-}
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -69,9 +46,7 @@ pub enum LPR {
 
 impl LPR {
     pub fn transform<N: Notable>(&self, triad: &mut Triad<N>) -> Triad<N> {
-        triad
-            .update(transform(*self, triad.clone().into()))
-            .expect("Invalid triad");
+        triad.transform(*self);
         triad.clone()
     }
 }
