@@ -34,11 +34,3 @@ pub trait Notable: From<i64> + Gradient + Symbolic + Node {
         NaturalNote::try_from(self.pitch()).is_ok()
     }
 }
-
-pub trait Classifiable<Cls: From<i64>> {
-    fn class(&self) -> Cls;
-}
-
-pub trait Validity {
-    fn is_valid(&self) -> bool;
-}
