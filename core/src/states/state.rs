@@ -3,83 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::states::{StateSpec, Stateful};
+use super::StateSpec;
 use decanter::prelude::{hasher, Hashable, H256};
-use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct State<S: StateSpec = States> {
-    state: S,
-    ts: i64,
-}
-
-impl<S: StateSpec> State<S> {
-    pub fn new(state: S) -> Self {
-        Self {
-            state,
-            ts: Timestamp::default().into(),
-        }
-    }
-    pub fn timestamp(&self) -> i64 {
-        self.ts
-    }
-    pub fn update(&mut self, state: S) {
-        self.state = state;
-        self.ts = Timestamp::default().into();
-    }
-}
-
-impl<S: StateSpec> Hashable for State<S> {
-    fn hash(&self) -> H256 {
-        hasher(&self).into()
-    }
-}
-
-impl<S: StateSpec> Stateful<S> for State<S> {
-    fn state(&self) -> S {
-        self.state.clone()
-    }
-    fn update_state(&mut self, state: S) {
-        self.state = state;
-        self.ts = Timestamp::default().into();
-    }
-}
-
-impl<S: StateSpec> std::fmt::Display for State<S> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.state())
-    }
-}
-
-impl<S: StateSpec> std::ops::Add for State<S> {
-    type Output = State<S>;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        self + rhs.state()
-    }
-}
-
-impl<S: StateSpec> std::ops::AddAssign for State<S> {
-    fn add_assign(&mut self, rhs: Self) {
-        self.state = self.state() + rhs.state();
-    }
-}
-
-impl<S: StateSpec> std::ops::Add<S> for State<S> {
-    type Output = State<S>;
-
-    fn add(self, rhs: S) -> Self::Output {
-        State::new(self.state() + rhs)
-    }
-}
-
-impl<S: StateSpec> From<S> for State<S> {
-    fn from(data: S) -> Self {
-        Self::new(data)
-    }
-}
 
 #[derive(
     Clone,
@@ -99,13 +26,13 @@ impl<S: StateSpec> From<S> for State<S> {
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
-pub enum States {
+pub enum State {
     #[default]
     Valid = 0,
     Invalid = 1,
 }
 
-impl States {
+impl State {
     pub fn invalid() -> Self {
         Self::Invalid
     }
@@ -114,40 +41,54 @@ impl States {
     }
 }
 
-impl StateSpec for States {}
-
-impl std::ops::Add for States {
-    type Output = States;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        (self as i64 + rhs as i64).into()
+impl Hashable for State {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
     }
 }
 
-impl std::ops::AddAssign for States {
+impl StateSpec for State {}
+
+impl std::ops::Add for State {
+    type Output = State;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        match self {
+            Self::Invalid => match rhs {
+                Self::Invalid => Self::Invalid,
+                Self::Valid => Self::Valid,
+            },
+            Self::Valid => match rhs {
+                Self::Invalid => Self::Invalid,
+                Self::Valid => Self::Valid,
+            },
+        }
+    }
+}
+
+impl std::ops::AddAssign for State {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs;
     }
 }
 
-impl From<usize> for States {
+impl From<usize> for State {
     fn from(d: usize) -> Self {
         Self::from(d as i64)
     }
 }
 
-impl From<i64> for States {
+impl From<i64> for State {
     fn from(d: i64) -> Self {
-        match d {
-            0 => States::invalid(),
-            1 => States::valid(),
-            _ => States::invalid(),
+        match d.abs() {
+            0 => State::valid(),
+            _ => State::invalid(),
         }
     }
 }
 
-impl From<States> for i64 {
-    fn from(d: States) -> i64 {
+impl From<State> for i64 {
+    fn from(d: State) -> i64 {
         d as i64
     }
 }
@@ -158,13 +99,10 @@ mod tests {
 
     #[test]
     fn test_default_state() {
-        let mut a = State::<States>::default();
-        let b = a.clone();
-        assert_eq!(a.state().clone(), States::valid());
-
-        a.update(States::invalid());
-
-        assert_eq!(a.state().clone(), States::invalid());
-        assert_ne!(b.timestamp(), a.timestamp())
+        let a = State::default();
+        let mut b = a.clone();
+        b += a;
+        assert_eq!(a, State::valid());
+        assert_eq!(b, State::valid());
     }
 }

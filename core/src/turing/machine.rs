@@ -4,11 +4,10 @@
     Description: ... Summary ...
 */
 use super::{
-    instructions::Head,
     tapes::{Tape, Tapes},
     Operator, Program, Turing,
 };
-use crate::states::{Stateful, States};
+use crate::states::{State, Stateful};
 use crate::{Scope, Symbolic};
 use serde::{Deserialize, Serialize};
 
@@ -38,17 +37,15 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
     type Scope = Operator<S>;
 
     fn execute(&mut self) -> Result<&Self, Self::Error> {
-        let until = |actor: &Operator<S>| actor.state().state() == States::Invalid;
+        let until = |actor: &Operator<S>| actor.state() == State::Invalid;
         self.execute_until(until)
     }
 
     fn execute_once(&mut self) -> Result<&Self, Self::Error> {
-        let head = Head::new(self.driver().state().clone(), self.driver.scope().clone());
+        let head = self.driver.clone().into();
         let inst = self.program.get(head)?.clone();
-        self.driver.update(
-            Some(inst.tail().state().clone()),
-            Some(inst.tail().symbol()),
-        );
+        self.driver.update_state(inst.tail().state());
+        self.driver.set_symbol(inst.tail().symbol());
         self.driver
             .shift(inst.tail().action(), self.program.default_symbol().clone());
         Ok(self)
@@ -59,12 +56,10 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         until: impl Fn(&Self::Scope) -> bool,
     ) -> Result<&Self, Self::Error> {
         while !until(&self.driver) {
-            let head = Head::new(self.driver.state().clone(), self.driver.scope().clone());
+            let head = self.driver.clone().into();
             let inst = self.program.get(head)?.clone();
-            self.driver.update(
-                Some(inst.tail().state().clone()),
-                Some(inst.tail().symbol()),
-            );
+            self.driver.update_state(inst.tail().state());
+            self.driver.set_symbol(inst.tail().symbol());
             self.driver
                 .shift(inst.tail().action(), self.program.default_symbol().clone());
         }

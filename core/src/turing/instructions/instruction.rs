@@ -39,13 +39,13 @@ impl<S: Symbolic> From<(State, S, State, S, Move)> for Instruction<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::states::States;
 
     #[test]
     fn test_instructions() {
-        let head = Head::new(State::new(States::invalid()), "b");
-        let tail = Tail::new(State::new(States::invalid()), "a", Move::Right);
+        let head = Head::new(State::invalid(), "b");
+        let tail = Tail::new(State::invalid(), "a", Move::Right);
         let instructions = Instruction::new(head, tail);
+
         assert_eq!(instructions.tail().action(), Move::Right)
     }
 }

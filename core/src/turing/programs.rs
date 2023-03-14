@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use super::instructions::{Head, Instruction};
-use crate::states::{State, Stateful, States};
+use crate::states::{State, Stateful};
 use crate::{Alphabet, Extend, Resultant, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
@@ -13,12 +13,12 @@ use std::mem::replace;
 pub struct Program<S: Symbolic> {
     alphabet: Vec<S>,
     instructions: Vec<Instruction<S>>,
-    final_state: State<States>,
+    final_state: State,
 }
 
 impl<S: Symbolic> Program<S> {
     pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
-        let s: i64 = final_state.state().into();
+        let s: i64 = final_state.into();
         let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);
 
@@ -45,8 +45,8 @@ impl<S: Symbolic> Program<S> {
     }
     /// Given some [Head], find the coresponding [Instruction]
     pub fn get(&self, head: Head<S>) -> Resultant<&Instruction<S>> {
-        if self.final_state().state() < head.state().state() {
-            return Err("The provided head is greater than the final state...".into());
+        if *self.final_state() < head.state() {
+            return Err("The final state".into());
         }
         if let Some(v) = self
             .instructions()
@@ -59,7 +59,7 @@ impl<S: Symbolic> Program<S> {
     }
     /// Insert a new [Instruction] set into the program
     pub fn insert(&mut self, inst: Instruction<S>) -> Resultant<Option<Instruction<S>>> {
-        if inst.head().state() == State::from(States::invalid()) {
+        if inst.head().state() == State::invalid() {
             return Err("Set error: Instruction cannot have 0 state in head...".into());
         }
         if !self.alphabet().contains(&inst.head().symbol())
@@ -70,9 +70,7 @@ impl<S: Symbolic> Program<S> {
                     .into(),
             );
         }
-        if self.final_state().state() < inst.head().state().state()
-            || self.final_state().state() < inst.tail().state().state()
-        {
+        if *self.final_state() < inst.head().state() || *self.final_state() < inst.tail().state() {
             return Err("Instructions have states greater than the ones availible...".into());
         }
         let position = self
@@ -110,20 +108,19 @@ impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::states::{State, States};
     use crate::turing::instructions::Move;
 
     #[test]
     fn test_program() {
         let inst = Instruction::from((
-            State::from(States::valid()),
+            State::from(State::valid()),
             "a",
-            State::from(States::valid()),
+            State::from(State::valid()),
             "b",
             Move::Right,
         ));
         let alphabet = vec!["a", "b", "c"];
-        let mut program = Program::new(alphabet, State::from(States::invalid()));
+        let mut program = Program::new(alphabet, State::invalid());
 
         assert!(program.insert(inst.clone()).is_ok());
         assert!(program.get(inst.head().clone()).is_ok())

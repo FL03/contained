@@ -4,10 +4,7 @@ use contained_core::turing::{
     tapes::{Tape, Tapes},
     Machine, Operator, Program, Turing,
 };
-use contained_core::{
-    states::{State, States},
-    Extend, Scope,
-};
+use contained_core::{states::State, Extend, Scope};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 
@@ -24,7 +21,7 @@ fn test_machine() {
         (
             State::default(),
             "c",
-            States::invalid().into(),
+            State::invalid().into(),
             "a",
             Move::Stay,
         )
@@ -32,7 +29,7 @@ fn test_machine() {
     ];
 
     // Setup the program
-    let mut program = Program::new(alphabet, States::invalid().into());
+    let mut program = Program::new(alphabet, State::invalid());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions).unwrap();
 

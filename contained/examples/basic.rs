@@ -10,10 +10,7 @@ use contained::core::turing::{
     tapes::{Tape, Tapes},
     Machine, Operator, Program, Turing,
 };
-use contained::core::{
-    states::{State, States},
-    Extend, Resultant, Scope,
-};
+use contained::core::{states::State, Extend, Resultant, Scope};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
@@ -27,7 +24,7 @@ fn main() -> Resultant {
         (
             State::default(),
             "c",
-            States::invalid().into(),
+            State::invalid().into(),
             "a",
             Move::Stay,
         )
@@ -35,7 +32,7 @@ fn main() -> Resultant {
     ];
 
     // Setup the program
-    let mut program = Program::new(alphabet, States::invalid().into());
+    let mut program = Program::new(alphabet, State::invalid().into());
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions)?;
 

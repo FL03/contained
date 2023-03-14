@@ -5,7 +5,7 @@
 */
 extern crate contained;
 
-use contained::core::states::{State, States};
+use contained::core::states::State;
 use contained::core::turing::{instructions::Instruction, Program, Turing};
 use contained::core::{Extend, Resultant};
 use contained::music::{
@@ -37,7 +37,7 @@ fn main() -> Resultant {
         (
             State::default(),
             6.into(),
-            States::invalid().into(),
+            State::invalid().into(),
             3.into(),
             2.into(),
         )
@@ -45,7 +45,7 @@ fn main() -> Resultant {
     ];
 
     // Setup the program
-    let mut program = Program::new(alphabet, States::Invalid.into());
+    let mut program = Program::new(alphabet, State::Invalid.into());
 
     // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
     program.extend(instructions)?;
