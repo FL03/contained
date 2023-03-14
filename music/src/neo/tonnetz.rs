@@ -11,15 +11,14 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::{triads::Triad, Boundary};
+use super::triads::Triad;
 use crate::{intervals::Interval, Notable, Note};
 use algae::graph::{Graph, UndirectedGraph};
-use decanter::prelude::{Hashable, H256};
 use std::sync::Arc;
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Tonnetz<N: Notable = Note> {
-    cluster: UndirectedGraph<N, H256>,
+    cluster: UndirectedGraph<N, Interval>,
     scope: Arc<Triad<N>>,
 }
 
@@ -31,15 +30,10 @@ impl<N: Notable> Tonnetz<N> {
         // determine the intervals used to create the given triad
         let (a, b, c): (Interval, Interval, Interval) =
             triad.clone().try_into().expect("Invalid triad");
-        // create a hash of the object for use as a seed
-        let seed = triad.hash();
 
-        self.cluster
-            .add_edge((triad.root(), triad.third(), Boundary::new(a, seed).hash()));
-        self.cluster
-            .add_edge((triad.third(), triad.fifth(), Boundary::new(b, seed).hash()));
-        self.cluster
-            .add_edge((triad.root(), triad.fifth(), Boundary::new(c, seed).hash()));
+        self.cluster.add_edge((triad.root(), triad.third(), a));
+        self.cluster.add_edge((triad.third(), triad.fifth(), b));
+        self.cluster.add_edge((triad.root(), triad.fifth(), c));
     }
 }
 
@@ -51,19 +45,8 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
     fn from(triad: Triad<N>) -> Self {
-        // determine the intervals used to create the given triad
-        let (a, b, c): (Interval, Interval, Interval) =
-            triad.clone().try_into().expect("Invalid triad");
-        // create a hash of the object for use as a seed
-        let seed = triad.hash();
-
-        let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((triad.root(), triad.third(), Boundary::new(a, seed).hash()));
-        cluster.add_edge((triad.third(), triad.fifth(), Boundary::new(b, seed).hash()));
-        cluster.add_edge((triad.root(), triad.fifth(), Boundary::new(c, seed).hash()));
-
         Self {
-            cluster: cluster.clone(),
+            cluster: triad.clone().into(),
             scope: Arc::new(triad),
         }
     }
@@ -83,6 +66,12 @@ mod tests {
         assert!(tonnetz.fulfilled() == false);
         for i in 1..crate::MODULUS {
             tonnetz.insert(Triad::<Note>::new(i.into(), Triads::Major));
+        }
+        assert!(tonnetz.fulfilled() == true);
+        for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
+            for i in 0..crate::MODULUS {
+                tonnetz.insert(Triad::<Note>::new(i.into(), class));
+            }
         }
         assert!(tonnetz.fulfilled() == true);
     }
