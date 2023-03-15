@@ -51,7 +51,7 @@ impl<S: Symbolic> Program<S> {
         if let Some(v) = self
             .instructions()
             .iter()
-            .find(|inst: &&Instruction<S>| inst.head().clone() == head)
+            .find(|inst: &&Instruction<S>| inst.head() == head)
         {
             return Ok(v);
         }
@@ -113,9 +113,9 @@ mod test {
     #[test]
     fn test_program() {
         let inst = Instruction::from((
-            State::from(State::valid()),
+            State::valid(),
             "a",
-            State::from(State::valid()),
+            State::valid(),
             "b",
             Move::Right,
         ));

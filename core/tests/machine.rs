@@ -21,7 +21,7 @@ fn test_machine() {
         (
             State::default(),
             "c",
-            State::invalid().into(),
+            State::invalid(),
             "a",
             Move::Stay,
         )

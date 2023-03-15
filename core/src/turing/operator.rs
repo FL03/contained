@@ -41,11 +41,7 @@ impl<S: Symbolic> Iterator for Operator<S> {
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.index();
         self.index.replace(i + 1);
-        if let Some(cur) = self.tape.get(i) {
-            Some(cur.clone())
-        } else {
-            None
-        }
+        self.tape.get(i).cloned()
     }
 }
 
@@ -119,7 +115,7 @@ mod tests {
     #[test]
     fn test_operations() {
         let tape = Tape::new(["a", "b", "c"]);
-        let mut actor = Operator::new(0.into(), State::from(State::Valid), tape);
+        let mut actor = Operator::new(0.into(), State::Valid, tape);
 
         actor.shift(Move::Left, "b");
         assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));

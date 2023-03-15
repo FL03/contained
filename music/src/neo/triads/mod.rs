@@ -7,6 +7,7 @@
 
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
+
 pub use self::{class::*, triad::*};
 
 pub(crate) mod class;
@@ -16,8 +17,14 @@ pub(crate) mod triad;
 use crate::Notable;
 use contained_core::states::{State, Stateful};
 use contained_core::{turing::tapes::Tape, Scope};
+use futures::Stream;
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
+use std::{
+    pin::Pin,
+    task::Poll,
+    time::{Duration, Instant},
+};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instance<N: Notable> {
@@ -86,6 +93,29 @@ impl<N: Notable> Stateful<State> for Instance<N> {
         self.state = state;
     }
 }
+
+// impl<N: Notable + Unpin> Stream for Instance<N> {
+//     type Item = N;
+
+//     fn poll_next(
+//         self: std::pin::Pin<&mut Self>,
+//         cx: &mut std::task::Context<'_>,
+//     ) -> std::task::Poll<Option<Self::Item>> {
+//         if self.index == 0 {
+//             // No more delays
+//             return Poll::Ready(None);
+//         }
+
+//         match Pin::new(&mut self.triad).poll(cx) {
+//             Poll::Ready(_) => {
+//                 let when = Instant::now() + Duration::from_millis(10);
+//                 self.index -= 1;
+//                 Poll::Ready(Some(self.scope().clone()))
+//             }
+//             Poll::Pending => Poll::Pending,
+//         }
+//     }
+// }
 
 impl<N: Notable> From<Triad<N>> for Instance<N> {
     fn from(triad: Triad<N>) -> Self {

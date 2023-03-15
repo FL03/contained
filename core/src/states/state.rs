@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn test_default_state() {
         let a = State::default();
-        let mut b = a.clone();
+        let mut b = a;
         b += a;
         assert_eq!(a, State::valid());
         assert_eq!(b, State::valid());

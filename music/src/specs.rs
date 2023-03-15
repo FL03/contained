@@ -25,6 +25,10 @@ pub trait Gradient: Clone + Eq + Ord + std::convert::Into<i64> {
 
 impl Gradient for i64 {
     const MODULUS: i64 = 12;
+
+    fn pitch(&self) -> i64 {
+        absmod(*self, Self::MODULUS)
+    }
 }
 
 /// [Notable] is used to designate a structure used to represent a note

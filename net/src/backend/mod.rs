@@ -28,7 +28,7 @@ impl Backend {
     pub async fn handle_cli(&mut self) {
         let cli = self.cli.as_ref().clone();
         self.ctx.peer = cli.handle_seed();
-        if let Some(opts) = cli.clone().cmd() {
+        if let Some(opts) = cli.cmd() {
             match opts {
                 Command::Get { .. } => {}
                 Command::Provide(_provide) => {}

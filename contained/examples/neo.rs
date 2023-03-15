@@ -37,7 +37,7 @@ fn main() -> Resultant {
         (
             State::default(),
             6.into(),
-            State::invalid().into(),
+            State::invalid(),
             3.into(),
             2.into(),
         )
@@ -45,7 +45,7 @@ fn main() -> Resultant {
     ];
 
     // Setup the program
-    let mut program = Program::new(alphabet, State::Invalid.into());
+    let mut program = Program::new(alphabet, State::Invalid);
 
     // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
     program.extend(instructions)?;

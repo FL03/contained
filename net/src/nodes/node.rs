@@ -78,7 +78,7 @@ impl<P: Peerable> From<P> for Node {
             Client::from(atx),
             erx,
             runtime,
-            peer.clone().swarm(Mainnet::from(peer.pid())),
+            peer.swarm(Mainnet::from(peer.pid())),
         )
     }
 }

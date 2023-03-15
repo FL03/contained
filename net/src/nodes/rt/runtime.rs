@@ -5,13 +5,13 @@
         This modules implements the network runtime;
 */
 use crate::events::ClientEvent;
-use crate::mainnet::{Mainnet, NetworkEvent};
+use crate::mainnet::{Mainnet};
 use crate::nodes::rt::{exec::Executor, frame::Frame};
-use libp2p::multiaddr::Protocol;
-use libp2p::swarm::{SwarmEvent, THandlerErr};
+
+
 use libp2p::Swarm;
-use std::collections::hash_map;
-use tokio::{sync::mpsc, task::JoinHandle};
+
+use tokio::{sync::mpsc};
 use tokio_stream::StreamExt;
 
 pub struct Runtime {

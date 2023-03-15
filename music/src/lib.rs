@@ -8,6 +8,7 @@ pub use self::{errors::*, notes::*, primitives::*, specs::*, utils::*};
 pub mod chord;
 pub mod clef;
 pub mod epoch;
+pub mod frequency;
 pub mod intervals;
 pub mod neo;
 

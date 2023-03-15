@@ -7,5 +7,5 @@
 pub struct RPCBackend;
 
 impl RPCBackend {
-    pub async fn run(mut self) {}
+    pub async fn run(self) {}
 }

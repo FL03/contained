@@ -47,7 +47,7 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         self.driver.update_state(inst.tail().state());
         self.driver.set_symbol(inst.tail().symbol());
         self.driver
-            .shift(inst.tail().action(), self.program.default_symbol().clone());
+            .shift(inst.tail().action(), self.program.default_symbol());
         Ok(self)
     }
 

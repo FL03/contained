@@ -14,6 +14,6 @@ pub trait Taped<S: Symbolic>:
     Clone + IntoIterator<Item = S, IntoIter = std::vec::IntoIter<S>>
 {
     fn tape(self) -> Vec<S> {
-        Vec::from_iter(self.clone())
+        Vec::from_iter(self)
     }
 }

@@ -32,7 +32,7 @@ impl Mainnet {
 
 impl From<PeerId> for Mainnet {
     fn from(pid: PeerId) -> Self {
-        let kademlia = Kademlia::new(pid.clone(), MemoryStore::new(pid.clone()));
+        let kademlia = Kademlia::new(pid, MemoryStore::new(pid));
         Self::new(
             kademlia,
             mdns::tokio::Behaviour::new(mdns::Config::default(), pid).unwrap(),

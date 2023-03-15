@@ -39,6 +39,9 @@ impl Gradient for Note {
     fn class(&self) -> PitchClass {
         self.class
     }
+    fn pitch(&self) -> i64 {
+        self.class.into()
+    }
 }
 
 impl algae::graph::cmp::Node for Note {}

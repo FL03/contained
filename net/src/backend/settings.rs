@@ -6,10 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Default)]
 pub struct Settings {}
 
-impl Default for Settings {
-    fn default() -> Self {
-        Self {}
-    }
-}
+

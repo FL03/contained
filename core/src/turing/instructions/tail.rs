@@ -23,7 +23,7 @@ impl<S: Symbolic> Tail<S> {
         self.2
     }
     pub fn state(&self) -> State {
-        self.0.clone()
+        self.0
     }
     pub fn symbol(&self) -> S {
         self.1.clone()
