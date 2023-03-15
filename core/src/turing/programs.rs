@@ -112,13 +112,7 @@ mod test {
 
     #[test]
     fn test_program() {
-        let inst = Instruction::from((
-            State::valid(),
-            "a",
-            State::valid(),
-            "b",
-            Move::Right,
-        ));
+        let inst = Instruction::from((State::valid(), "a", State::valid(), "b", Move::Right));
         let alphabet = vec!["a", "b", "c"];
         let mut program = Program::new(alphabet, State::invalid());
 

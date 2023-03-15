@@ -18,14 +18,7 @@ fn test_machine() {
     let instructions: Vec<Instruction<&str>> = vec![
         (State::default(), "a", State::default(), "c", Move::Right).into(),
         (State::default(), "b", State::default(), "a", Move::Right).into(),
-        (
-            State::default(),
-            "c",
-            State::invalid(),
-            "a",
-            Move::Stay,
-        )
-            .into(),
+        (State::default(), "c", State::invalid(), "a", Move::Stay).into(),
     ];
 
     // Setup the program

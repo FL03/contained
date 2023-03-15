@@ -4,7 +4,7 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::{Instance, Triads};
+use super::{actor::Actor, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
@@ -37,7 +37,10 @@ impl<N: Notable> Triad<N> {
     pub fn third(&self) -> N {
         self.1.clone()
     }
-
+    /// Create a new [Actor] with the [Triad] as its alphabet
+    pub fn actor(&self) -> Actor<N> {
+        self.clone().into()
+    }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     pub fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
         let edges: (Thirds, Thirds, Fifths) = (
@@ -46,10 +49,6 @@ impl<N: Notable> Triad<N> {
             Fifths::try_from((self.root(), self.fifth()))?,
         );
         Ok(edges)
-    }
-    /// Create a new [Operator] with the [Triad] as its alphabet
-    pub fn config(&self) -> Instance<N> {
-        self.clone().into()
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
