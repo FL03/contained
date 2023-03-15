@@ -29,7 +29,7 @@ pub trait Executable<T> {
 /// [Turing] describes a programmable Turing machine
 pub trait Turing<S: Symbolic> {
     type Error;
-    type Scope: Clone + Scope<S>;
+    type Scope: Scope<S>;
 
     /// [Turing::execute]
     fn execute(&mut self) -> Result<&Self, Self::Error>;

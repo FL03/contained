@@ -31,7 +31,7 @@ impl Backend {
         if let Some(opts) = cli.clone().cmd() {
             match opts {
                 Command::Get { .. } => {}
-                Command::Provide(provide) => {}
+                Command::Provide(_provide) => {}
             }
         }
     }

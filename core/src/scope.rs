@@ -5,47 +5,34 @@
 */
 use crate::{
     states::{State, Stateful},
-    turing::{
-        instructions::Move,
-        tapes::{Tape, Tapes},
-    },
+    turing::{instructions::Move, tapes::Tape},
     Symbolic,
 };
-use std::cell::RefCell;
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Iterator<Item = S> + ExactSizeIterator + Stateful<State> {
-    fn new(index: RefCell<usize>, state: State, tape: Tape<S>) -> Self;
-    fn build(tape: Tapes<S>) -> Self
-    where
-        Self: Sized,
-    {
-        match tape {
-            Tapes::Normal(t) => Self::new(RefCell::new(0), Default::default(), t),
-            Tapes::Standard(t) => Self::new(RefCell::new(t.len() - 1), Default::default(), t),
-        }
-    }
+pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State> {
     fn insert(&mut self, elem: S);
-    fn index(&self) -> &RefCell<usize>;
+    fn index(&self) -> usize;
+    fn set_index(&mut self, pos: usize);
     fn set_symbol(&mut self, elem: S);
     /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
     /// [Move::Right] inserts a new element at the end of the tape if the current position equals the total number of cells
     /// [Move::Stay] does nothing
     fn shift(&mut self, shift: Move, elem: S) {
-        let index = *self.index().borrow();
+        let index = self.index();
 
         match shift {
             // If the current position is 0, insert a new element at the top of the vector
-            Move::Left if *self.index().borrow() == 0 => {
+            Move::Left if self.index() == 0 => {
                 self.insert(elem);
             }
             Move::Left => {
-                self.index().replace(index - 1);
+                self.set_index(index - 1);
             }
             Move::Right => {
-                self.index().replace(index + 1);
+                self.set_index(index + 1);
 
-                if *self.index().borrow() == self.tape().len() {
+                if self.index() == self.tape().len() {
                     self.insert(elem);
                 }
             }
@@ -54,7 +41,7 @@ pub trait Scope<S: Symbolic>: Iterator<Item = S> + ExactSizeIterator + Stateful<
     }
     fn scope(&self) -> &S {
         self.tape()
-            .get(*self.index().borrow())
+            .get(self.index())
             .expect("Index is out of bounds...")
     }
     fn tape(&self) -> &Tape<S>;

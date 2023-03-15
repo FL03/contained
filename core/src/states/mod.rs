@@ -9,7 +9,7 @@ pub use self::state::*;
 pub(crate) mod state;
 
 /// [Stateful] describes a stateful object
-pub trait Stateful<S: StateSpec>: Clone + Default + PartialEq + PartialOrd + ToString {
+pub trait Stateful<S: StateSpec>: Clone + Default + PartialEq + PartialOrd {
     fn state(&self) -> S;
     fn update_state(&mut self, state: S);
 }

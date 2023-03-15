@@ -4,17 +4,14 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::Triads;
+use super::{Instance, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
     Gradient, MusicResult, Notable, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::{
-    turing::{tapes::Tapes, Machine, Operator, Program},
-    Scope,
-};
+use contained_core::turing::{tapes::Tape, Machine, Operator, Program};
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
@@ -27,6 +24,10 @@ impl<N: Notable> Triad<N> {
         let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
     }
+    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
+    pub fn build(root: N, a: Thirds, b: Thirds) -> Self {
+        Self(root.clone(), a + root.clone(), b + (a + root))
+    }
     pub fn fifth(&self) -> N {
         self.2.clone()
     }
@@ -36,11 +37,7 @@ impl<N: Notable> Triad<N> {
     pub fn third(&self) -> N {
         self.1.clone()
     }
-    /// Build a new [Triad] from a given [Notable] root and two [Thirds]
-    pub fn build(root: N, dt: Thirds, df: Thirds) -> Self {
-        let third = dt + root.clone();
-        Self(root, third.clone(), df + third)
-    }
+
     /// Classifies the [Triad] by describing the intervals that connect the notes
     pub fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
         let edges: (Thirds, Thirds, Fifths) = (
@@ -51,8 +48,8 @@ impl<N: Notable> Triad<N> {
         Ok(edges)
     }
     /// Create a new [Operator] with the [Triad] as its alphabet
-    pub fn config(&self) -> Operator<N> {
-        Operator::build(Tapes::norm(self.clone()))
+    pub fn config(&self) -> Instance<N> {
+        self.clone().into()
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -62,7 +59,10 @@ impl<N: Notable> Triad<N> {
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, program: Program<N>) -> Machine<N> {
-        Machine::new(self.config(), program)
+        Machine::new(
+            Operator::new(0.into(), Default::default(), Tape::new(self.clone())),
+            program,
+        )
     }
     /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
     pub fn is_valid(&self) -> bool {
@@ -147,6 +147,12 @@ impl<N: Notable> IntoIterator for Triad<N> {
 
     fn into_iter(self) -> Self::IntoIter {
         vec![self.0, self.1, self.2].into_iter()
+    }
+}
+
+impl<N: Notable> From<(N, Thirds, Thirds)> for Triad<N> {
+    fn from(data: (N, Thirds, Thirds)) -> Self {
+        Self::build(data.0, data.1, data.2)
     }
 }
 

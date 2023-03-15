@@ -34,6 +34,12 @@ impl<N: Notable> ArrayLike<N> for Chord<N> {
     }
 }
 
+impl<N: Notable> FromIterator<N> for Chord<N> {
+    fn from_iter<T: IntoIterator<Item = N>>(iter: T) -> Self {
+        Self(Vec::from_iter(iter))
+    }
+}
+
 impl<N: Notable> IntoIterator for Chord<N> {
     type Item = N;
 

@@ -47,6 +47,12 @@ impl<S: Symbolic> Tape<S> {
     }
 }
 
+impl<S: Symbolic> FromIterator<S> for Tape<S> {
+    fn from_iter<T: IntoIterator<Item = S>>(iter: T) -> Self {
+        Self(Vec::from_iter(iter))
+    }
+}
+
 impl<S: Symbolic> IntoIterator for Tape<S> {
     type Item = S;
     type IntoIter = std::vec::IntoIter<S>;

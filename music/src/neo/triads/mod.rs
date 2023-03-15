@@ -14,19 +14,108 @@ pub mod tonic;
 pub(crate) mod triad;
 
 use crate::Notable;
-use contained_core::states::State;
+use contained_core::states::{State, Stateful};
+use contained_core::{turing::tapes::Tape, Scope};
+use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instance<N: Notable> {
+    index: usize,
     state: State,
-    pub triad: Triad<N>,
+    tape: Tape<N>,
+    triad: Triad<N>,
+    ts: i64,
+}
+
+impl<N: Notable> Instance<N> {
+    pub fn new(index: usize, state: State, tape: Tape<N>, triad: Triad<N>) -> Self {
+        let ts = Timestamp::default().into();
+        Self {
+            index,
+            state,
+            tape,
+            triad,
+            ts,
+        }
+    }
+}
+
+impl<N: Notable> Iterator for Instance<N> {
+    type Item = N;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let i = self.index;
+        self.index += 1;
+        self.ts = Timestamp::default().into();
+        if let Some(cur) = self.tape.get(i) {
+            Some(cur.clone())
+        } else {
+            None
+        }
+    }
+}
+
+impl<N: Notable> Scope<N> for Instance<N> {
+    fn insert(&mut self, elem: N) {
+        self.tape.insert(self.index, elem);
+    }
+
+    fn index(&self) -> usize {
+        self.index
+    }
+
+    fn set_symbol(&mut self, elem: N) {
+        self.tape.set(self.index(), elem);
+    }
+
+    fn tape(&self) -> &Tape<N> {
+        &self.tape
+    }
+
+    fn set_index(&mut self, pos: usize) {
+        self.index = pos;
+    }
+}
+
+impl<N: Notable> Stateful<State> for Instance<N> {
+    fn state(&self) -> State {
+        self.state
+    }
+    fn update_state(&mut self, state: State) {
+        self.state = state;
+    }
+}
+
+impl<N: Notable> From<Triad<N>> for Instance<N> {
+    fn from(triad: Triad<N>) -> Self {
+        Self::new(0, Default::default(), Default::default(), triad)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{neo::LPR, Note};
+
+    #[test]
+    fn test_driver() {
+        let triad = Triad::<Note>::new(0.into(), Triads::Major);
+        let mut actor = Instance::new(0, State::Valid, Tape::new(triad.clone()), triad.clone());
+
+        actor.shift(0.into(), triad.third());
+        assert_eq!(
+            actor.tape(),
+            &Tape::new([4.into(), 0.into(), 4.into(), 7.into()])
+        );
+        for _ in 0..actor.tape().len() {
+            actor.shift(1.into(), triad.fifth());
+        }
+        assert_eq!(
+            actor.tape(),
+            &Tape::new([4.into(), 0.into(), 4.into(), 7.into(), 7.into()])
+        );
+    }
 
     #[test]
     fn test_triad() {

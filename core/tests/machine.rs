@@ -4,7 +4,7 @@ use contained_core::turing::{
     tapes::{Tape, Tapes},
     Machine, Operator, Program, Turing,
 };
-use contained_core::{states::State, Extend, Scope};
+use contained_core::{states::State, Extend};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 
