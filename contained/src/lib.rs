@@ -15,4 +15,5 @@ pub use self::{primitives::*, utils::*};
 pub(crate) mod primitives;
 pub(crate) mod utils;
 
+pub mod compute;
 pub mod simplex;

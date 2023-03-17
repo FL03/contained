@@ -119,6 +119,16 @@ impl<N: Notable> Hashable for Triad<N> {
     }
 }
 
+impl<N: Notable> IntoIterator for Triad<N> {
+    type Item = N;
+
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        vec![self.0, self.1, self.2].into_iter()
+    }
+}
+
 impl<N: Notable> std::fmt::Display for Triad<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}.{}", self.0, self.1, self.2)
@@ -136,16 +146,6 @@ impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
 impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
     fn mul_assign(&mut self, rhs: LPR) {
         self.transform(rhs)
-    }
-}
-
-impl<N: Notable> IntoIterator for Triad<N> {
-    type Item = N;
-
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        vec![self.0, self.1, self.2].into_iter()
     }
 }
 
@@ -193,23 +193,6 @@ impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
     }
 }
 
-impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
-    type Error = crate::BoxedError;
-
-    fn try_from(data: Triad<N>) -> Result<(Thirds, Thirds, Fifths), Self::Error> {
-        data.classify()
-    }
-}
-
-impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
-    type Error = crate::BoxedError;
-
-    fn try_from(data: Triad<N>) -> Result<(Interval, Interval, Interval), Self::Error> {
-        let (a, b, c): (Thirds, Thirds, Fifths) = data.classify()?;
-        Ok((a.into(), b.into(), c.into()))
-    }
-}
-
 impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
     fn from(d: Triad<N>) -> UndirectedGraph<N, Interval> {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.classify().expect("Invalid Triad");
@@ -231,5 +214,22 @@ impl<N: Notable> From<Triad<N>> for (N, N, N) {
 impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
     fn from(d: Triad<N>) -> (i64, i64, i64) {
         (d.0.pitch(), d.1.pitch(), d.2.pitch())
+    }
+}
+
+impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
+    type Error = crate::BoxedError;
+
+    fn try_from(data: Triad<N>) -> Result<(Thirds, Thirds, Fifths), Self::Error> {
+        data.classify()
+    }
+}
+
+impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
+    type Error = crate::BoxedError;
+
+    fn try_from(data: Triad<N>) -> Result<(Interval, Interval, Interval), Self::Error> {
+        let (a, b, c): (Thirds, Thirds, Fifths) = data.classify()?;
+        Ok((a.into(), b.into(), c.into()))
     }
 }

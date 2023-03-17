@@ -4,9 +4,8 @@
     Description: a computable surface is a valid universal turing machine
         Generically, a computable surface considers the vertices to be the alphabet
 */
-use crate::neo::triads::Triad;
-use crate::{Notable, Note};
-use contained_core::states::State;
+use crate::core::states::State;
+use crate::music::{neo::triads::Triad, Notable, Note};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

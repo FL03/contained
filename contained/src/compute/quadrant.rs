@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: each surface is broken down into equal parts called quadrants
 */
-use crate::intervals::Interval;
+use crate::music::intervals::Interval;
 use decanter::prelude::H256;
 use serde::{Deserialize, Serialize};
 
