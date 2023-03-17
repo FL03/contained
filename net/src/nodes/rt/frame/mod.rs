@@ -5,9 +5,8 @@
         Tokio.rs defines a frame to be the unit of data shared between any two peers.
 
 */
-pub use self::{dial::*, listen::*, provide::*};
+pub use self::{listen::*, provide::*};
 
-pub(crate) mod dial;
 pub(crate) mod listen;
 pub(crate) mod provide;
 
@@ -20,14 +19,18 @@ use tokio::sync::oneshot::Sender;
 #[derive(Debug)]
 pub enum Frame {
     StartListening(Listen),
-    Dial(Dial),
+    Dial {
+        addr: Multiaddr,
+        pid: PeerId,
+        sender: Sender<NetResult>,
+    },
     StartProviding(StartProviding),
     GetProviders(GetProviders),
 }
 
 impl Frame {
     pub fn dial(addr: Multiaddr, pid: PeerId, sender: Sender<NetResult>) -> Self {
-        Dial::new(addr, pid, sender).into()
+        Self::Dial { addr, pid, sender }
     }
     pub fn listen(addr: Multiaddr, sender: Sender<NetResult>) -> Self {
         Listen::new(addr, sender).into()
@@ -37,12 +40,6 @@ impl Frame {
     }
     pub fn start_providing(fname: String, sender: Sender<()>) -> Self {
         StartProviding::new(fname, sender).into()
-    }
-}
-
-impl From<Dial> for Frame {
-    fn from(data: Dial) -> Frame {
-        Frame::Dial(data)
     }
 }
 

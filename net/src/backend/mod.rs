@@ -11,19 +11,25 @@ pub(crate) mod settings;
 pub mod cli;
 pub mod rpc;
 
-use crate::{nodes::Node, NetResult};
+use crate::{events::NetworkEvent, nodes::Node, NetResult};
 use cli::{Command, CommandLineInterface};
 use std::sync::Arc;
+use tokio::sync::mpsc;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Debug)]
 pub struct Backend {
     cli: Arc<cli::CommandLineInterface>,
     ctx: Context,
+    event: mpsc::Receiver<NetworkEvent>,
 }
 
 impl Backend {
-    pub fn new(cli: Arc<CommandLineInterface>, ctx: Context) -> Self {
-        Self { cli, ctx }
+    pub fn new(
+        cli: Arc<CommandLineInterface>,
+        ctx: Context,
+        event: mpsc::Receiver<NetworkEvent>,
+    ) -> Self {
+        Self { cli, ctx, event }
     }
     pub async fn handle_cli(&mut self) {
         let cli = self.cli.as_ref().clone();
@@ -38,13 +44,24 @@ impl Backend {
     pub fn node(self) -> Node {
         Node::from(self.ctx.peer())
     }
-    pub async fn run(&mut self) -> NetResult {
+    pub async fn run(mut self) -> NetResult {
         tracing_subscriber::fmt::init();
         tracing::info!("Processing inputs...");
         self.handle_cli().await;
         tracing::info!("Initializing the network...");
-        let node = self.clone().node();
+        let node = self.node();
         node.spawn();
         loop {}
+    }
+}
+
+impl Default for Backend {
+    fn default() -> Self {
+        let (_, rx) = mpsc::channel(1);
+        Self {
+            cli: cli::CommandLineInterface::default().into(),
+            ctx: Default::default(),
+            event: rx,
+        }
     }
 }

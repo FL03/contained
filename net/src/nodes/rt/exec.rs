@@ -5,7 +5,7 @@
 */
 use super::frame::Frame;
 use crate::{
-    mainnet::{Mainnet, NetworkEvent},
+    mainnet::{Event, Mainnet},
     NetResult,
 };
 use libp2p::kad::{self, KademliaEvent, QueryId, QueryResult};
@@ -36,28 +36,22 @@ impl Executor {
     }
     pub async fn handle_command(&mut self, action: Frame, swarm: &mut Swarm<Mainnet>) {
         match action {
-            Frame::StartListening(act) => {
-                let _ = match swarm.listen_on(act.address().clone()) {
-                    Ok(_) => act.sender().send(Ok(())),
-                    Err(e) => act.sender().send(Err(Box::new(e))),
-                };
+            Frame::StartListening(actor) => {
+                actor.start_listening(swarm).await;
             }
-            Frame::Dial(act) => {
-                if let hash_map::Entry::Vacant(e) = self.dial.entry(*act.pid()) {
+            Frame::Dial { addr, pid, sender } => {
+                if let hash_map::Entry::Vacant(e) = self.dial.entry(pid) {
                     swarm
                         .behaviour_mut()
                         .kademlia
-                        .add_address(act.pid(), act.address().clone());
-                    let dialopts = act
-                        .address()
-                        .clone()
-                        .with(Protocol::P2p((*act.pid()).into()));
+                        .add_address(&pid, addr.clone());
+                    let dialopts = addr.with(Protocol::P2p((pid).into()));
                     match swarm.dial(dialopts) {
                         Ok(()) => {
-                            e.insert(act.sender());
+                            e.insert(sender);
                         }
                         Err(e) => {
-                            let _ = act.sender().send(Err(Box::new(e)));
+                            let _ = sender.send(Err(Box::new(e)));
                         }
                     }
                 } else {
@@ -70,13 +64,13 @@ impl Executor {
     }
     pub async fn handle_event(
         &mut self,
-        event: SwarmEvent<NetworkEvent, THandlerErr<Mainnet>>,
+        event: SwarmEvent<Event, THandlerErr<Mainnet>>,
         swarm: &mut Swarm<Mainnet>,
     ) {
         match event {
             // Handle custom networking events
             SwarmEvent::Behaviour(b) => match b {
-                NetworkEvent::Kademlia(k) => match k {
+                Event::Kademlia(k) => match k {
                     KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
                         QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {
@@ -105,11 +99,11 @@ impl Executor {
                     },
                     _ => {}
                 },
-                NetworkEvent::Mdns(mdns_event) => match mdns_event {
+                Event::Mdns(mdns_event) => match mdns_event {
                     mdns::Event::Discovered(_disc) => {}
                     mdns::Event::Expired(_exp) => {}
                 },
-                NetworkEvent::Ping(_) => {}
+                Event::Ping(_) => {}
             },
             SwarmEvent::ConnectionEstablished {
                 peer_id, endpoint, ..

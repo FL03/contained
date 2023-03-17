@@ -6,6 +6,7 @@
 pub use self::{primitives::*, specs::*, utils::*};
 
 pub mod backend;
+pub mod clients;
 pub mod events;
 pub mod mainnet;
 pub mod nodes;

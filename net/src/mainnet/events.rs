@@ -8,26 +8,26 @@ use libp2p::{kad, mdns, ping};
 /// [Events] describes the events considered by the network
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
-pub enum NetworkEvent {
+pub enum Event {
     Kademlia(kad::KademliaEvent),
     Mdns(mdns::Event),
     Ping(ping::Event),
 }
 
-impl From<kad::KademliaEvent> for NetworkEvent {
+impl From<kad::KademliaEvent> for Event {
     fn from(event: kad::KademliaEvent) -> Self {
-        NetworkEvent::Kademlia(event)
+        Event::Kademlia(event)
     }
 }
 
-impl From<mdns::Event> for NetworkEvent {
+impl From<mdns::Event> for Event {
     fn from(event: mdns::Event) -> Self {
-        NetworkEvent::Mdns(event)
+        Event::Mdns(event)
     }
 }
 
-impl From<ping::Event> for NetworkEvent {
+impl From<ping::Event> for Event {
     fn from(event: ping::Event) -> Self {
-        NetworkEvent::Ping(event)
+        Event::Ping(event)
     }
 }

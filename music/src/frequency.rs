@@ -102,3 +102,14 @@ impl Stream for Wave {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_frequency() {
+        let freq = Frequency::new(Duration::new(1, 0));
+        assert_eq!(freq, Default::default());
+    }
+}

@@ -7,7 +7,7 @@ use contained::net::{backend::Backend, NetResult};
 
 #[tokio::main]
 async fn main() -> NetResult {
-    let mut backend = Backend::default();
+    let backend = Backend::default();
     backend.run().await?;
     Ok(())
 }
