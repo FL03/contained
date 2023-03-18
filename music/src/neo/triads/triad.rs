@@ -4,7 +4,7 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::{actor::Actor, Triads};
+use super::{actor::Actor, Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
@@ -28,33 +28,9 @@ impl<N: Notable> Triad<N> {
     pub fn build(root: N, a: Thirds, b: Thirds) -> Self {
         Self(root.clone(), a + root.clone(), b + (a + root))
     }
-    pub fn fifth(&self) -> N {
-        self.2.clone()
-    }
-    pub fn root(&self) -> N {
-        self.0.clone()
-    }
-    pub fn third(&self) -> N {
-        self.1.clone()
-    }
     /// Create a new [Actor] with the [Triad] as its alphabet
     pub fn actor(&self) -> Actor<N> {
         self.clone().into()
-    }
-    /// Classifies the [Triad] by describing the intervals that connect the notes
-    pub fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
-        let edges: (Thirds, Thirds, Fifths) = (
-            Thirds::try_from((self.root(), self.third()))?,
-            Thirds::try_from((self.third(), self.fifth()))?,
-            Fifths::try_from((self.root(), self.fifth()))?,
-        );
-        Ok(edges)
-    }
-    /// Endlessly applies the described transformations to the [Triad]
-    pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for i in Vec::from_iter(iter).iter().cycle() {
-            self.transform(*i);
-        }
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, program: Program<N>) -> Machine<N> {
@@ -63,54 +39,19 @@ impl<N: Notable> Triad<N> {
             program,
         )
     }
-    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
-    pub fn is_valid(&self) -> bool {
-        self.classify().is_ok()
-    }
-    /// Apply a single [LPR] transformation onto the active machine
-    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
-    pub fn transform(&mut self, dirac: LPR) {
-        let (mut r, mut t, mut f): (i64, i64, i64) = self.clone().into();
-        match self.classify().expect("Invalid triad").0 {
-            Thirds::Major => match dirac {
-                LPR::L => r -= Interval::Semitone,
-                LPR::P => t -= Interval::Semitone,
-                LPR::R => f += Interval::Tone,
-            },
-            Thirds::Minor => match dirac {
-                LPR::L => f += Interval::Semitone,
-                LPR::P => t += Interval::Semitone,
-                LPR::R => r -= Interval::Tone,
-            },
-        };
-        self.update((r.into(), t.into(), f.into()))
-            .expect("Invalid triad");
-    }
-    pub fn triad(self) -> (N, N, N) {
+}
+
+impl<N: Notable> Triadic<N> for Triad<N> {
+    fn triad(self) -> (N, N, N) {
         (self.0, self.1, self.2)
     }
-    /// Applies multiple [LPR] transformations onto the scoped [Triad]
-    /// The goal here is to allow the machine to work on and in the scope
-    pub fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
-        for dirac in iter {
-            self.transform(dirac);
+
+    fn update(&mut self, triad: (N, N, N)) -> MusicResult {
+        if let Ok(t) = Self::try_from(triad) {
+            *self = t;
+            return Ok(());
         }
-    }
-    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
-    pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
-        self.walk(iter.clone());
-        let mut args = Vec::from_iter(iter);
-        args.reverse();
-        self.walk(args);
-    }
-    pub fn update(&mut self, triad: (N, N, N)) -> MusicResult {
-        match Self::try_from(triad) {
-            Ok(v) => {
-                *self = v;
-                Ok(())
-            }
-            Err(e) => Err(e.into()),
-        }
+        Err("The given notes failed to contain the necessary relationships...".into())
     }
 }
 

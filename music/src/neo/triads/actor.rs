@@ -122,7 +122,10 @@ impl<N: Notable> From<Triad<N>> for Actor<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{neo::triads::Triads, Note};
+    use crate::{
+        neo::triads::{Triadic, Triads},
+        Note,
+    };
 
     #[test]
     fn test_actor() {

@@ -15,7 +15,7 @@
 
         number of elements + freq
 */
-use crate::neo::triads::Triad;
+use crate::neo::triads::{Triad, Triadic};
 use crate::Notable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};

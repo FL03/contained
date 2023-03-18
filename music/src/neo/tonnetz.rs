@@ -11,7 +11,7 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::triads::Triad;
+use super::triads::{Triad, Triadic};
 use crate::{intervals::Interval, Notable, Note};
 use algae::graph::{Graph, UndirectedGraph};
 use std::sync::Arc;

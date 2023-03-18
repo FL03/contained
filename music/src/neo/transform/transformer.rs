@@ -4,7 +4,10 @@
     Description: ... Summary ...
 */
 use super::LPR;
-use crate::{neo::triads::Triad, Notable, Note};
+use crate::{
+    neo::triads::{Triad, Triadic},
+    Notable, Note,
+};
 use scsys::prelude::Timestamp;
 
 #[derive(Clone, Debug, Default)]
