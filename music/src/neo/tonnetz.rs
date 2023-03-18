@@ -59,7 +59,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 mod tests {
     use super::*;
     use crate::neo::triads::{Triad, Triads};
-    use crate::{MODULUS, Note};
+    use crate::{Note, MODULUS};
 
     #[test]
     fn test_tonnetz() {

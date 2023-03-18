@@ -8,5 +8,5 @@ use super::Face;
 pub struct Surface<V, W> {
     faces: Face<V>,
     edges: Vec<(V, V, W)>,
-    vertices: Vec<V>
+    vertices: Vec<V>,
 }

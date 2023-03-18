@@ -83,7 +83,8 @@ impl<N: Notable> Triad<N> {
                 LPR::R => r -= Interval::Tone,
             },
         };
-        self.update((r.into(), t.into(), f.into())).expect("Invalid triad");
+        self.update((r.into(), t.into(), f.into()))
+            .expect("Invalid triad");
     }
     pub fn triad(self) -> (N, N, N) {
         (self.0, self.1, self.2)
