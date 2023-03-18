@@ -4,6 +4,7 @@
     Description: ... Summary ...
 */
 use super::Triad;
+use crate::neo::LPR;
 use crate::{Notable, Note};
 use contained_core::states::{State, Stateful};
 use contained_core::{turing::tapes::Tape, Scope};

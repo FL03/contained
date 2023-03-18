@@ -59,7 +59,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 mod tests {
     use super::*;
     use crate::neo::triads::{Triad, Triads};
-    use crate::Note;
+    use crate::{MODULUS, Note};
 
     #[test]
     fn test_tonnetz() {
@@ -67,12 +67,12 @@ mod tests {
 
         let mut tonnetz = Tonnetz::from(triad.clone());
         assert!(tonnetz.fulfilled() == false);
-        for i in 1..crate::MODULUS {
+        for i in 1..MODULUS {
             tonnetz.insert(Triad::<Note>::new(i.into(), Triads::Major));
         }
         assert!(tonnetz.fulfilled() == true);
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
-            for i in 0..crate::MODULUS {
+            for i in 0..MODULUS {
                 tonnetz.insert(Triad::<Note>::new(i.into(), class));
             }
         }

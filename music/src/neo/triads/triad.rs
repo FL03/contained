@@ -8,7 +8,7 @@ use super::{actor::Actor, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
-    Gradient, MusicResult, Notable, Note,
+    BoxedError, Gradient, MusicResult, Notable, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::turing::{tapes::Tape, Machine, Operator, Program};
@@ -83,7 +83,7 @@ impl<N: Notable> Triad<N> {
                 LPR::R => r -= Interval::Tone,
             },
         };
-        *self = Self::try_from((r, t, f)).expect("Invalid triad");
+        self.update((r.into(), t.into(), f.into())).expect("Invalid triad");
     }
     pub fn triad(self) -> (N, N, N) {
         (self.0, self.1, self.2)
@@ -156,7 +156,7 @@ impl<N: Notable> From<(N, Thirds, Thirds)> for Triad<N> {
 }
 
 impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
-    type Error = crate::BoxedError;
+    type Error = BoxedError;
 
     fn try_from(data: (N, N, N)) -> Result<Triad<N>, Self::Error> {
         let args = vec![data.0, data.1, data.2];
@@ -181,7 +181,7 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
 }
 
 impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
-    type Error = crate::BoxedError;
+    type Error = BoxedError;
 
     fn try_from(data: (i64, i64, i64)) -> Result<Triad<N>, Self::Error> {
         let notes: (N, N, N) = (
@@ -218,7 +218,7 @@ impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
 }
 
 impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
-    type Error = crate::BoxedError;
+    type Error = BoxedError;
 
     fn try_from(data: Triad<N>) -> Result<(Thirds, Thirds, Fifths), Self::Error> {
         data.classify()
@@ -226,7 +226,7 @@ impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
 }
 
 impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
-    type Error = crate::BoxedError;
+    type Error = BoxedError;
 
     fn try_from(data: Triad<N>) -> Result<(Interval, Interval, Interval), Self::Error> {
         let (a, b, c): (Thirds, Thirds, Fifths) = data.classify()?;
