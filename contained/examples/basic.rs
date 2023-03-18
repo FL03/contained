@@ -19,9 +19,9 @@ fn main() -> Resultant {
     let scope = Operator::build(Tapes::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
-        (State::default(), "c", State::default(), "a", Move::Right).into(),
-        (State::default(), "b", State::default(), "a", Move::Right).into(),
-        (State::default(), "c", State::invalid(), "a", Move::Stay).into(),
+        (State::valid(), "c", State::valid(), "a", Move::Right).into(),
+        (State::valid(), "b", State::valid(), "a", Move::Right).into(),
+        (State::valid(), "c", State::invalid(), "a", Move::Stay).into(),
     ];
 
     // Setup the program

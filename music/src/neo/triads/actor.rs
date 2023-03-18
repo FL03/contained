@@ -129,7 +129,7 @@ mod tests {
         let triad = Triad::<Note>::new(0.into(), Triads::Major);
         let mut actor = Actor::new(0, State::Valid, Tape::new(triad.clone()), triad.clone());
 
-        actor.shift(0.into(), triad.third());
+        actor.shift((-1).into(), triad.third());
         assert_eq!(
             actor.tape(),
             &Tape::new([4.into(), 0.into(), 4.into(), 7.into()])

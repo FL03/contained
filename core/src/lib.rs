@@ -11,7 +11,6 @@ pub(crate) mod specs;
 pub(crate) mod utils;
 
 pub mod states;
-pub mod surface;
 pub mod turing;
 
 use std::collections::{BTreeSet, HashSet};
