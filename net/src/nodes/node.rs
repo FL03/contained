@@ -29,11 +29,11 @@ impl Node {
             tokio::select! {
                 Some(act) = self.rt.action.recv() => {
                     tracing::info!("Processing the command");
-                    self.rt.exec.handle_command(act, &mut self.swarm).await;
+                    self.rt.handle_command(act, &mut self.swarm).await;
                 },
                 Some(event) = self.swarm.next() => {
                     tracing::info!("SwarmEvent: processing the network event");
-                    self.rt.exec.handle_event(event, &mut self.swarm).await;
+                    self.rt.handle_event(event, &mut self.swarm).await;
                 },
 
             }

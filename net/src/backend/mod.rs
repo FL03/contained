@@ -31,13 +31,18 @@ impl Backend {
     ) -> Self {
         Self { cli, ctx, event }
     }
-    pub async fn handle_cli(&mut self) {
-        let cli = self.cli.as_ref().clone();
+    pub async fn handle_cli(&mut self, cli: cli::CommandLineInterface) {
         self.ctx.peer = cli.handle_seed();
         if let Some(opts) = cli.cmd() {
             match opts {
                 Command::Get { .. } => {}
-                Command::Provide(_provide) => {}
+                Command::Provide(_provide) => loop {
+                    if let Some(event) = self.event.recv().await {
+                        match event {
+                            NetworkEvent::InboundRequest { .. } => todo!(),
+                        }
+                    }
+                },
             }
         }
     }
@@ -47,7 +52,7 @@ impl Backend {
     pub async fn run(mut self) -> NetResult {
         tracing_subscriber::fmt::init();
         tracing::info!("Processing inputs...");
-        self.handle_cli().await;
+        self.handle_cli(self.cli.as_ref().clone()).await;
         tracing::info!("Initializing the network...");
         let node = self.node();
         node.spawn();

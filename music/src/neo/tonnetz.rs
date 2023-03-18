@@ -31,9 +31,12 @@ impl<N: Notable> Tonnetz<N> {
         let (a, b, c): (Interval, Interval, Interval) =
             triad.clone().try_into().expect("Invalid triad");
 
-        self.cluster.add_edge((triad.root(), triad.third(), a));
-        self.cluster.add_edge((triad.third(), triad.fifth(), b));
-        self.cluster.add_edge((triad.root(), triad.fifth(), c));
+        self.cluster
+            .add_edge((triad.root(), triad.third(), a).into());
+        self.cluster
+            .add_edge((triad.third(), triad.fifth(), b).into());
+        self.cluster
+            .add_edge((triad.root(), triad.fifth(), c).into());
     }
 }
 

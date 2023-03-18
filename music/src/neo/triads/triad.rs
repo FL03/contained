@@ -198,9 +198,9 @@ impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.classify().expect("Invalid Triad");
 
         let mut cluster = UndirectedGraph::new();
-        cluster.add_edge((d.root(), d.third(), rt.into()));
-        cluster.add_edge((d.third(), d.fifth(), tf.into()));
-        cluster.add_edge((d.root(), d.fifth(), rf.into()));
+        cluster.add_edge((d.root(), d.third(), rt.into()).into());
+        cluster.add_edge((d.third(), d.fifth(), tf.into()).into());
+        cluster.add_edge((d.root(), d.fifth(), rf.into()).into());
         cluster.clone()
     }
 }

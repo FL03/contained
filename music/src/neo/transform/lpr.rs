@@ -15,33 +15,10 @@
 
         number of elements + freq
 */
-use super::triads::Triad;
+use crate::neo::triads::Triad;
 use crate::Notable;
-use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub struct Transformer<N: Notable> {
-    iter: Vec<LPR>,
-    scope: Triad<N>,
-    ts: i64,
-}
-
-impl<N: Notable> Transformer<N> {}
-
-// impl<N: Notable> Iterator Transformer<N> {
-//     type Item = Triad<N>;
-
-//     fn next(&mut self) -> Option<Self::Item> {
-
-//         self.ts = Timestamp::default().into();
-//         if let Some(cur) = self.iter.next() {
-//             Some((self.scope * cur))
-//         } else {
-//             None
-//         }
-//     }
-// }
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -86,9 +63,18 @@ impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::*;
     use crate::neo::triads::{Triad, Triads};
     use crate::Note;
+
+    #[test]
+    fn test_lpr() {
+        let dirac = LPR::from_str("l");
+        assert!(dirac.is_ok());
+        assert_eq!(dirac.unwrap(), LPR::L);
+    }
 
     #[test]
     fn test_leading() {
