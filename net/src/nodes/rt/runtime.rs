@@ -4,7 +4,7 @@
     Description:
         This modules implements the network runtime;
 */
-use super::{exec::Executor, frame::Frame};
+use super::{cmd::Command, event_loop::Executor};
 use crate::{
     events::NetworkEvent,
     mainnet::{Event, Mainnet},
@@ -17,14 +17,14 @@ use std::collections::hash_map;
 use tokio::sync::{mpsc, oneshot};
 
 pub struct Runtime {
-    pub(crate) action: mpsc::Receiver<Frame>,
+    pub(crate) action: mpsc::Receiver<Command>,
     event: mpsc::Sender<NetworkEvent>,
     pub(crate) exec: Executor,
 }
 
 impl Runtime {
     pub fn new(
-        action: mpsc::Receiver<Frame>,
+        action: mpsc::Receiver<Command>,
         event: mpsc::Sender<NetworkEvent>,
         exec: Executor,
     ) -> Self {
@@ -34,38 +34,42 @@ impl Runtime {
             exec,
         }
     }
-    pub fn action(self) -> mpsc::Receiver<Frame> {
+    pub fn action(self) -> mpsc::Receiver<Command> {
         self.action
     }
     pub fn event(self) -> mpsc::Sender<NetworkEvent> {
         self.event
     }
-    pub async fn handle_command(&mut self, action: Frame, swarm: &mut Swarm<Mainnet>) {
+    pub async fn handle_command(&mut self, action: Command, swarm: &mut Swarm<Mainnet>) {
         match action {
-            Frame::StartListening(actor) => {
-                actor.start_listening(swarm).await;
+            Command::StartListening { addr, sender } => {
+                let _ = match swarm.listen_on(addr) {
+                    Ok(_) => sender.send(Ok(())),
+                    Err(e) => sender.send(Err(Box::new(e))),
+                };
             }
-            Frame::Dial { addr, pid, sender } => {
-                if let hash_map::Entry::Vacant(e) = self.exec.dial.entry(pid) {
+            Command::Dial { addr, pid, sender } => match self.exec.dial.entry(pid) {
+                hash_map::Entry::Occupied(_) => {
+                    tracing::warn!("The peer ({}) is already being dialed", pid);
+                }
+                hash_map::Entry::Vacant(e) => {
                     swarm
                         .behaviour_mut()
                         .kademlia
                         .add_address(&pid, addr.clone());
                     let dialopts = addr.with(Protocol::P2p((pid).into()));
                     match swarm.dial(dialopts) {
-                        Ok(()) => {
+                        Ok(_) => {
                             e.insert(sender);
                         }
                         Err(e) => {
                             let _ = sender.send(Err(Box::new(e)));
                         }
                     }
-                } else {
-                    todo!("Already dialing peer.");
                 }
-            }
-            Frame::StartProviding(_act) => {}
-            Frame::GetProviders(_act) => {}
+            },
+            Command::StartProviding { .. } => {}
+            Command::GetProviders { .. } => {}
         }
     }
     pub async fn handle_event(

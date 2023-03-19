@@ -15,6 +15,8 @@ pub(crate) mod programs;
 use crate::{Scope, Symbolic};
 use tapes::{Tape, Tapes};
 
+pub trait Worker {}
+
 pub trait Execute<T> {
     type Output;
 

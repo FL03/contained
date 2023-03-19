@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::rt::{frame::Frame, Runtime};
+use super::rt::{cmd::Command, Runtime};
 use crate::{
     clients::Client,
     events::NetworkEvent,
@@ -40,6 +40,7 @@ impl Node {
         }
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<NetResult> {
+        tracing::info!("Spawning the network...");
         tokio::spawn(self.run())
     }
 }
@@ -52,7 +53,7 @@ impl Default for Node {
 
 impl<P: Peerable> From<P> for Node {
     fn from(peer: P) -> Node {
-        let (atx, arx) = mpsc::channel::<Frame>(1);
+        let (atx, arx) = mpsc::channel::<Command>(1);
         let (etx, _) = mpsc::channel::<NetworkEvent>(1);
         let runtime = Runtime::new(arx, etx, Default::default());
         Self::new(

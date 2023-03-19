@@ -35,8 +35,8 @@ impl<N: Notable> Triad<N> {
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, program: Program<N>) -> Machine<N> {
         Machine::new(
-            Operator::new(0.into(), Default::default(), Tape::new(self.clone())),
             program,
+            Operator::new(0.into(), Default::default(), Tape::new(self.clone())),
         )
     }
 }
@@ -139,7 +139,7 @@ impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
     fn from(d: Triad<N>) -> UndirectedGraph<N, Interval> {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.classify().expect("Invalid Triad");
 
-        let mut cluster = UndirectedGraph::new();
+        let mut cluster = UndirectedGraph::with_capacity(3);
         cluster.add_edge((d.root(), d.third(), rt.into()).into());
         cluster.add_edge((d.third(), d.fifth(), tf.into()).into());
         cluster.add_edge((d.root(), d.fifth(), rf.into()).into());

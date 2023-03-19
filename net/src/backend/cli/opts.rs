@@ -27,7 +27,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Subcommand,
 )]
 #[strum(serialize_all = "snake_case")]
-pub enum Command {
+pub enum Opts {
     Provide(Provide),
     #[default]
     Get {
@@ -36,7 +36,7 @@ pub enum Command {
     },
 }
 
-impl Command {
+impl Opts {
     pub fn handle(&self) -> NetResult {
         Ok(())
     }
