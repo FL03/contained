@@ -16,10 +16,10 @@ pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
     (b - a) * t + a
 }
 
-///
+/// Find the difference between a collection of items where each element implements [Clone], [Into<i64>], and [Ord]
 pub fn intervals<T>(args: impl IntoIterator<Item = T>) -> Vec<((T, T), i64)>
 where
-    T: Clone + Ord + Into<i64>,
+    T: Clone + Into<i64> + Ord,
 {
     let pairs = {
         let mut tmp = Vec::from_iter(args);
@@ -39,6 +39,13 @@ where
             .then(a.1.abs().partial_cmp(&b.1.abs()).unwrap())
     });
     res
+}
+///
+pub fn permute<T>(args: impl IntoIterator<Item = T>, size: usize) -> Vec<Vec<T>>
+where
+    T: Clone,
+{
+    args.into_iter().permutations(size).collect::<Vec<_>>()
 }
 
 #[cfg(test)]
