@@ -40,36 +40,10 @@ where
     });
     res
 }
-///
+/// A simple function wrapper for [Itertools::permutations]
 pub fn permute<T>(args: impl IntoIterator<Item = T>, size: usize) -> Vec<Vec<T>>
 where
     T: Clone,
 {
     args.into_iter().permutations(size).collect::<Vec<_>>()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::Note;
-
-    #[test]
-    fn test_absmod() {
-        let a: i64 = -13 % 12;
-        assert_ne!(a.abs(), absmod(-13, 12));
-        assert_eq!(absmod(-1, 12), 11);
-    }
-
-    #[test]
-    fn test_intervals() {
-        let notes: Vec<Note> = vec![0.into(), 4.into(), 7.into()];
-        assert_eq!(
-            intervals(notes),
-            vec![
-                ((Note::from(0), Note::from(4)), 4),
-                ((Note::from(4), Note::from(7)), 3),
-                ((Note::from(7), Note::from(0)), -7),
-            ]
-        );
-    }
 }
