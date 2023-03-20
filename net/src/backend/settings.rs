@@ -59,7 +59,7 @@ pub struct Logger {
 impl Logger {
     pub fn setup_env(&mut self, level: Option<&str>) -> &Self {
         let key = level.unwrap_or("RUST_LOG");
-        if let Some(v) = std::env::var_os(key.to_string()) {
+        if let Some(v) = std::env::var_os(key) {
             self.level = v.into_string().expect("Failed to convert into string...");
         } else {
             std::env::set_var(key, self.level.clone());

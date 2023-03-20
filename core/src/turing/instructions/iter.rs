@@ -25,10 +25,6 @@ impl<S: Symbolic> Iterator for Iter<S> {
     fn next(&mut self) -> Option<Self::Item> {
         let index = self.index;
         self.index += 1;
-        if let Some(item) = self.iter.get(index) {
-            Some(item.clone())
-        } else {
-            None
-        }
+        self.iter.get(index).cloned()
     }
 }
