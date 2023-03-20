@@ -4,9 +4,14 @@
     Description: ... summary ...
 */
 use super::Face;
+use algae::graph::{cmp::Node, Graph, UndirectedGraph};
 
-pub struct Surface<V, W> {
+#[derive(Clone, Default)]
+pub struct Surface<V: Node, W: Clone + PartialEq> {
     faces: Face<V>,
-    edges: Vec<(V, V, W)>,
-    vertices: Vec<V>,
+    graph: UndirectedGraph<V, W>
+}
+
+impl<V: Node, W: Clone + PartialEq> Surface<V, W> {
+    
 }
