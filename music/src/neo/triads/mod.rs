@@ -22,7 +22,7 @@ use crate::{MusicResult, Notable};
 
 pub trait Triadic<N: Notable>: Clone {
     /// Classifies the [Triad] by describing the intervals that connect the notes
-    fn classify(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
+    fn intervals(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
         let edges: (Thirds, Thirds, Fifths) = (
             Thirds::try_from((self.root(), self.third()))?,
             Thirds::try_from((self.third(), self.fifth()))?,
@@ -42,7 +42,7 @@ pub trait Triadic<N: Notable>: Clone {
     }
     /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
     fn is_valid(&self) -> bool {
-        self.classify().is_ok()
+        self.intervals().is_ok()
     }
     /// Returns an cloned instance of the root of the triad
     fn root(&self) -> N {
@@ -57,7 +57,7 @@ pub trait Triadic<N: Notable>: Clone {
     fn transform(&mut self, dirac: LPR) {
         let (mut r, mut t, mut f): (i64, i64, i64) =
             (self.root().into(), self.third().into(), self.fifth().into());
-        match self.classify().expect("Invalid triad").0 {
+        match self.intervals().expect("Invalid triad").0 {
             Thirds::Major => match dirac {
                 LPR::L => r -= Interval::Semitone,
                 LPR::P => t -= Interval::Semitone,

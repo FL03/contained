@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use itertools::Itertools;
 
 /// [absmod] is short for the absolute value of a modular number;
 pub fn absmod(a: i64, m: i64) -> i64 {
@@ -15,14 +16,53 @@ pub fn harmonic_transformation(a: usize, b: usize, t: usize) -> usize {
     (b - a) * t + a
 }
 
+///
+pub fn intervals<T>(args: impl IntoIterator<Item = T>) -> Vec<((T, T), i64)>
+where
+    T: Clone + Ord + Into<i64>,
+{
+    let pairs = {
+        let mut tmp = Vec::from_iter(args);
+        tmp.sort();
+        tmp.clone()
+            .into_iter()
+            .circular_tuple_windows::<(T, T)>()
+            .collect::<Vec<_>>()
+    };
+    let mut res = pairs
+        .into_iter()
+        .map(|i| (i.clone(), i.1.into() - i.0.into()))
+        .collect::<Vec<_>>();
+    res.sort_by(|a, b| {
+        a.0.partial_cmp(&b.0)
+            .unwrap()
+            .then(a.1.abs().partial_cmp(&b.1.abs()).unwrap())
+    });
+    res
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Note;
 
     #[test]
     fn test_absmod() {
         let a: i64 = -13 % 12;
         assert_ne!(a.abs(), absmod(-13, 12));
         assert_eq!(absmod(-1, 12), 11);
+    }
+
+    #[test]
+    fn test_intervals() {
+        let notes: Vec<Note> = vec![0.into(), 4.into(), 7.into()];
+        assert_eq!(
+            intervals(notes),
+            vec![
+                ((Note::from(0), Note::from(4)), 4),
+                ((Note::from(4), Note::from(7)), 3),
+                ((Note::from(7), Note::from(0)), -7),
+            ]
+        );
     }
 }
