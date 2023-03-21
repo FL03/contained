@@ -11,141 +11,90 @@
 pub use self::{class::*, triad::*};
 
 pub(crate) mod class;
-pub mod tonic;
 pub(crate) mod triad;
 
-use crate::Notable;
-use contained_core::states::{State, Stateful};
-use contained_core::{turing::tapes::Tape, Scope};
-use futures::Stream;
-use scsys::prelude::Timestamp;
-use serde::{Deserialize, Serialize};
-use std::{
-    pin::Pin,
-    task::Poll,
-    time::{Duration, Instant},
-};
+pub mod actor;
+pub mod tonic;
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Instance<N: Notable> {
-    index: usize,
-    state: State,
-    tape: Tape<N>,
-    triad: Triad<N>,
-    ts: i64,
-}
+use super::LPR;
+use crate::intervals::{Fifths, Interval, Thirds};
+use crate::{MusicResult, Notable};
 
-impl<N: Notable> Instance<N> {
-    pub fn new(index: usize, state: State, tape: Tape<N>, triad: Triad<N>) -> Self {
-        let ts = Timestamp::default().into();
-        Self {
-            index,
-            state,
-            tape,
-            triad,
-            ts,
+pub trait Triadic<N: Notable>: Clone {
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    fn intervals(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
+        let edges: (Thirds, Thirds, Fifths) = (
+            Thirds::try_from((self.root(), self.third()))?,
+            Thirds::try_from((self.third(), self.fifth()))?,
+            Fifths::try_from((self.root(), self.fifth()))?,
+        );
+        Ok(edges)
+    }
+    /// Endlessly applies the described transformations to the [Triad]
+    fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
+            self.transform(*i);
         }
     }
-}
-
-impl<N: Notable> Iterator for Instance<N> {
-    type Item = N;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let i = self.index;
-        self.index += 1;
-        self.ts = Timestamp::default().into();
-        if let Some(cur) = self.tape.get(i) {
-            Some(cur.clone())
-        } else {
-            None
+    /// Returns an cloned instance of the note occupying the fifth
+    fn fifth(&self) -> N {
+        self.clone().triad().2
+    }
+    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
+    fn is_valid(&self) -> bool {
+        self.intervals().is_ok()
+    }
+    /// Returns an cloned instance of the root of the triad
+    fn root(&self) -> N {
+        self.clone().triad().0
+    }
+    /// Returns an cloned instance of the note occupying the third
+    fn third(&self) -> N {
+        self.clone().triad().1
+    }
+    /// Apply a single [LPR] transformation onto the active machine
+    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
+    fn transform(&mut self, dirac: LPR) {
+        let (mut r, mut t, mut f): (i64, i64, i64) =
+            (self.root().into(), self.third().into(), self.fifth().into());
+        match self.intervals().expect("Invalid triad").0 {
+            Thirds::Major => match dirac {
+                LPR::L => r -= Interval::Semitone,
+                LPR::P => t -= Interval::Semitone,
+                LPR::R => f += Interval::Tone,
+            },
+            Thirds::Minor => match dirac {
+                LPR::L => f += Interval::Semitone,
+                LPR::P => t += Interval::Semitone,
+                LPR::R => r -= Interval::Tone,
+            },
+        };
+        self.update((r.into(), t.into(), f.into()))
+            .expect("Invalid triad");
+    }
+    ///
+    fn triad(self) -> (N, N, N);
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow the machine to work on and in the scope
+    fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for dirac in iter {
+            self.transform(dirac);
         }
     }
-}
-
-impl<N: Notable> Scope<N> for Instance<N> {
-    fn insert(&mut self, elem: N) {
-        self.tape.insert(self.index, elem);
+    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
+    fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
+        self.walk(iter.clone());
+        let mut args = Vec::from_iter(iter);
+        args.reverse();
+        self.walk(args);
     }
-
-    fn index(&self) -> usize {
-        self.index
-    }
-
-    fn set_symbol(&mut self, elem: N) {
-        self.tape.set(self.index(), elem);
-    }
-
-    fn tape(&self) -> &Tape<N> {
-        &self.tape
-    }
-
-    fn set_index(&mut self, pos: usize) {
-        self.index = pos;
-    }
-}
-
-impl<N: Notable> Stateful<State> for Instance<N> {
-    fn state(&self) -> State {
-        self.state
-    }
-    fn update_state(&mut self, state: State) {
-        self.state = state;
-    }
-}
-
-// impl<N: Notable + Unpin> Stream for Instance<N> {
-//     type Item = N;
-
-//     fn poll_next(
-//         self: std::pin::Pin<&mut Self>,
-//         cx: &mut std::task::Context<'_>,
-//     ) -> std::task::Poll<Option<Self::Item>> {
-//         if self.index == 0 {
-//             // No more delays
-//             return Poll::Ready(None);
-//         }
-
-//         match Pin::new(&mut self.triad).poll(cx) {
-//             Poll::Ready(_) => {
-//                 let when = Instant::now() + Duration::from_millis(10);
-//                 self.index -= 1;
-//                 Poll::Ready(Some(self.scope().clone()))
-//             }
-//             Poll::Pending => Poll::Pending,
-//         }
-//     }
-// }
-
-impl<N: Notable> From<Triad<N>> for Instance<N> {
-    fn from(triad: Triad<N>) -> Self {
-        Self::new(0, Default::default(), Default::default(), triad)
-    }
+    fn update(&mut self, triad: (N, N, N)) -> MusicResult;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{neo::LPR, Note};
-
-    #[test]
-    fn test_driver() {
-        let triad = Triad::<Note>::new(0.into(), Triads::Major);
-        let mut actor = Instance::new(0, State::Valid, Tape::new(triad.clone()), triad.clone());
-
-        actor.shift(0.into(), triad.third());
-        assert_eq!(
-            actor.tape(),
-            &Tape::new([4.into(), 0.into(), 4.into(), 7.into()])
-        );
-        for _ in 0..actor.tape().len() {
-            actor.shift(1.into(), triad.fifth());
-        }
-        assert_eq!(
-            actor.tape(),
-            &Tape::new([4.into(), 0.into(), 4.into(), 7.into(), 7.into()])
-        );
-    }
 
     #[test]
     fn test_triad() {

@@ -25,16 +25,16 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Move {
-    Left = 0,
+    Left = -1,
     Right = 1,
     #[default]
-    Stay = 2,
+    Stay = 0,
 }
 
 impl From<i64> for Move {
     fn from(d: i64) -> Self {
-        match (d % 3).abs() {
-            0 => Self::Left,
+        match d % 2 {
+            -1 => Self::Left,
             1 => Self::Right,
             _ => Self::Stay,
         }

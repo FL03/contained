@@ -10,5 +10,4 @@ pub(crate) mod boundary;
 pub(crate) mod tonnetz;
 pub(crate) mod transform;
 
-pub mod compute;
 pub mod triads;

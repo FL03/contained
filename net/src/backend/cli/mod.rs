@@ -3,13 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::cmds::*;
+pub use self::opts::*;
 
-pub(crate) mod cmds;
+pub(crate) mod opts;
 
 pub mod args;
 
-use crate::{nodes::Client, peers::Peer, NetResult};
+use crate::{clients::Client, peers::Peer, NetResult};
 use clap::{ArgAction, Parser};
 use libp2p::multiaddr::Protocol;
 use libp2p::{Multiaddr, PeerId};
@@ -24,7 +24,7 @@ pub fn new() -> CommandLineInterface {
 pub struct CommandLineInterface {
     /// Network specific commands
     #[clap(subcommand)]
-    cmd: Option<Command>,
+    cmd: Option<Opts>,
     /// Provide an address to listen to
     #[clap(long)]
     listen: Option<Multiaddr>,
@@ -50,8 +50,8 @@ impl CommandLineInterface {
     pub async fn handle(&self, client: &mut Client) -> NetResult {
         if let Some(cmd) = self.clone().cmd() {
             match cmd {
-                Command::Get { .. } => {}
-                Command::Provide { .. } => {}
+                Opts::Get { .. } => {}
+                Opts::Provide { .. } => {}
             }
         };
         let _peer = self.handle_seed();
@@ -73,7 +73,7 @@ impl CommandLineInterface {
         }
         Ok(())
     }
-    pub fn cmd(self) -> Option<Command> {
+    pub fn cmd(self) -> Option<Opts> {
         self.cmd
     }
     pub fn listen(self) -> Option<Multiaddr> {

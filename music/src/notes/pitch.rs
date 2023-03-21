@@ -72,7 +72,7 @@ impl std::ops::Add<Interval> for Pitch {
 
 impl std::ops::AddAssign<Interval> for Pitch {
     fn add_assign(&mut self, rhs: Interval) {
-        *self = self.clone() + rhs;
+        *self = *self + rhs;
     }
 }
 
@@ -87,7 +87,7 @@ impl std::ops::Div<Interval> for Pitch {
 
 impl std::ops::DivAssign<Interval> for Pitch {
     fn div_assign(&mut self, rhs: Interval) {
-        *self = self.clone() / rhs;
+        *self = *self / rhs;
     }
 }
 
@@ -102,7 +102,7 @@ impl std::ops::Mul<Interval> for Pitch {
 
 impl std::ops::MulAssign<Interval> for Pitch {
     fn mul_assign(&mut self, rhs: Interval) {
-        *self = self.clone() * rhs;
+        *self = *self * rhs;
     }
 }
 
@@ -117,7 +117,7 @@ impl std::ops::Sub<Interval> for Pitch {
 
 impl std::ops::SubAssign<Interval> for Pitch {
     fn sub_assign(&mut self, rhs: Interval) {
-        *self = self.clone() - rhs;
+        *self = *self - rhs;
     }
 }
 
@@ -131,7 +131,7 @@ impl<P: Gradient> std::ops::Add<P> for Pitch {
 
 impl<P: Gradient> std::ops::AddAssign<P> for Pitch {
     fn add_assign(&mut self, rhs: P) {
-        *self = self.clone() + rhs.pitch();
+        *self = *self + rhs.pitch();
     }
 }
 
@@ -145,7 +145,7 @@ impl<P: Gradient> std::ops::Div<P> for Pitch {
 
 impl<P: Gradient> std::ops::DivAssign<P> for Pitch {
     fn div_assign(&mut self, rhs: P) {
-        *self = self.clone() / rhs.pitch();
+        *self = *self / rhs.pitch();
     }
 }
 
@@ -159,7 +159,7 @@ impl<P: Gradient> std::ops::Mul<P> for Pitch {
 
 impl<P: Gradient> std::ops::MulAssign<P> for Pitch {
     fn mul_assign(&mut self, rhs: P) {
-        *self = self.clone() * rhs.pitch();
+        *self = *self * rhs.pitch();
     }
 }
 

@@ -6,7 +6,7 @@
 use libp2p::request_response::ResponseChannel;
 
 #[derive(Debug)]
-pub enum ClientEvent {
+pub enum NetworkEvent {
     InboundRequest {
         request: String,
         channel: ResponseChannel<String>,

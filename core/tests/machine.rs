@@ -18,14 +18,7 @@ fn test_machine() {
     let instructions: Vec<Instruction<&str>> = vec![
         (State::default(), "a", State::default(), "c", Move::Right).into(),
         (State::default(), "b", State::default(), "a", Move::Right).into(),
-        (
-            State::default(),
-            "c",
-            State::invalid(),
-            "a",
-            Move::Stay,
-        )
-            .into(),
+        (State::default(), "c", State::invalid(), "a", Move::Stay).into(),
     ];
 
     // Setup the program
@@ -33,7 +26,7 @@ fn test_machine() {
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions).unwrap();
 
-    let mut machine = Machine::new(scope, program);
+    let mut machine = Machine::new(program, scope);
 
     assert!(machine.execute().is_ok());
     assert_eq!(machine.tape().clone(), Tape::new(["c", "a", "a"]));

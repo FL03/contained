@@ -23,18 +23,18 @@ default = []
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
+clap = { features = ["cargo", "derive", "env"], version = "4" }
+config = "0.13"
 decanter.workspace = true
+either = "1"
 futures.workspace = true
 scsys.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-
-clap = { features = ["cargo", "derive", "env"], version = "4" }
-either = "1"
 tarpc = { features = ["full"], version = "0.31" }
-tokio = { features = ["full"], version = "1"}
+tokio.workspace = true
 tokio-stream = "0.1"
 tracing = { features = [], version = "0.1" }
 tracing-subscriber = { features = [], version = "0.3" }

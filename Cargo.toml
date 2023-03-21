@@ -12,7 +12,7 @@ version = "0.1.4"
 
 [workspace.dependencies]
 # Custom crates
-algae = { default-features = false, features = ["graph"], git = "https://github.com/FL03/algae", branch = "v0.1.18", version = "0.1.18" }
+algae = { default-features = false, features = ["graph"], git = "https://github.com/FL03/algae", branch = "v0.1.19", version = "0.1.19" }
 decanter = { features = ["derive"], git = "https://github.com/FL03/decanter", branch = "v0.1.4", version = "0.1.4" }
 scsys = { features = ["derive"], git = "https://github.com/scattered-systems/scsys", branch = "v0.1.42", version = "0.1.42" }
 
@@ -20,10 +20,12 @@ scsys = { features = ["derive"], git = "https://github.com/scattered-systems/scs
 anyhow = "1"
 async-trait = "0.1"
 futures = "0.3"
+itertools = "0.10"
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
 smart-default = "0.6"
 strum = { features = ["derive"], version = "0.24" }
+tokio = { features = ["full"], version = "1" }
 
 [workspace]
 default-members = [

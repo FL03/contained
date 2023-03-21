@@ -10,38 +10,65 @@ use crate::{
     states::{State, Stateful},
     Symbolic,
 };
+use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Tail<S: Symbolic>(State, S, Move);
+pub struct Tail<S: Symbolic> {
+    state: State,
+    symbol: S,
+    action: Move,
+}
 
 impl<S: Symbolic> Tail<S> {
-    pub fn new(state: State, symbol: S, act: Move) -> Self {
-        Self(state, symbol, act)
+    pub fn new(state: State, symbol: S, action: Move) -> Self {
+        Self {
+            state,
+            symbol,
+            action,
+        }
     }
     pub fn action(&self) -> Move {
-        self.2
+        self.action
     }
     pub fn state(&self) -> State {
-        self.0
+        self.state
     }
     pub fn symbol(&self) -> S {
-        self.1.clone()
+        self.symbol.clone()
     }
 }
 
-impl<S: Symbolic> std::fmt::Display for Tail<S> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {}, {})", self.0, self.1, self.2)
+impl<S: Symbolic> Hashable for Tail<S> {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
     }
 }
 
 impl<S: Symbolic> Stateful<State> for Tail<S> {
     fn state(&self) -> State {
-        self.0
+        self.state
     }
 
     fn update_state(&mut self, state: State) {
-        self.0 = state;
+        self.state = state;
+    }
+}
+
+impl<S: Symbolic> std::fmt::Display for Tail<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.state, self.symbol, self.action)
+    }
+}
+
+impl<S: Symbolic> From<(State, S, Move)> for Tail<S> {
+    fn from(args: (State, S, Move)) -> Self {
+        Self::new(args.0, args.1, args.2)
+    }
+}
+
+impl<S: Symbolic> From<Tail<S>> for (State, S, Move) {
+    fn from(tail: Tail<S>) -> (State, S, Move) {
+        (tail.state(), tail.symbol(), tail.action())
     }
 }

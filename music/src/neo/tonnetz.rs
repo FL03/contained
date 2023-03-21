@@ -11,29 +11,35 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
-use super::triads::Triad;
-use crate::{intervals::Interval, Notable, Note};
+use super::triads::{Triad, Triadic};
+use crate::{intervals::Interval, Notable, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default)]
 pub struct Tonnetz<N: Notable = Note> {
     cluster: UndirectedGraph<N, Interval>,
-    scope: Arc<Triad<N>>,
+    scope: Arc<Mutex<Triad<N>>>,
 }
 
 impl<N: Notable> Tonnetz<N> {
     pub fn fulfilled(&self) -> bool {
-        self.cluster.nodes().len() == crate::MODULUS as usize
+        self.cluster.nodes().len() == MODULUS as usize
     }
     pub fn insert(&mut self, triad: Triad<N>) {
         // determine the intervals used to create the given triad
         let (a, b, c): (Interval, Interval, Interval) =
             triad.clone().try_into().expect("Invalid triad");
 
-        self.cluster.add_edge((triad.root(), triad.third(), a));
-        self.cluster.add_edge((triad.third(), triad.fifth(), b));
-        self.cluster.add_edge((triad.root(), triad.fifth(), c));
+        self.cluster
+            .add_edge((triad.root(), triad.third(), a).into());
+        self.cluster
+            .add_edge((triad.third(), triad.fifth(), b).into());
+        self.cluster
+            .add_edge((triad.root(), triad.fifth(), c).into());
+    }
+    pub fn scope(&self) -> &Arc<Mutex<Triad<N>>> {
+        &self.scope
     }
 }
 
@@ -45,9 +51,16 @@ impl<N: Notable> std::fmt::Display for Tonnetz<N> {
 
 impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
     fn from(triad: Triad<N>) -> Self {
+        // determine the intervals used to create the given triad
+        let (a, b, c): (Interval, Interval, Interval) =
+            triad.clone().try_into().expect("Invalid triad");
+        let mut cluster = UndirectedGraph::with_capacity(MODULUS as usize);
+        cluster.add_edge((triad.root(), triad.third(), a).into());
+        cluster.add_edge((triad.third(), triad.fifth(), b).into());
+        cluster.add_edge((triad.root(), triad.fifth(), c).into());
         Self {
-            cluster: triad.clone().into(),
-            scope: Arc::new(triad),
+            cluster,
+            scope: Arc::new(Mutex::new(triad)),
         }
     }
 }
@@ -56,7 +69,7 @@ impl<N: Notable> From<Triad<N>> for Tonnetz<N> {
 mod tests {
     use super::*;
     use crate::neo::triads::{Triad, Triads};
-    use crate::Note;
+    use crate::{Note, MODULUS};
 
     #[test]
     fn test_tonnetz() {
@@ -64,12 +77,12 @@ mod tests {
 
         let mut tonnetz = Tonnetz::from(triad.clone());
         assert!(tonnetz.fulfilled() == false);
-        for i in 1..crate::MODULUS {
+        for i in 1..MODULUS {
             tonnetz.insert(Triad::<Note>::new(i.into(), Triads::Major));
         }
         assert!(tonnetz.fulfilled() == true);
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
-            for i in 0..crate::MODULUS {
+            for i in 0..MODULUS {
                 tonnetz.insert(Triad::<Note>::new(i.into(), class));
             }
         }

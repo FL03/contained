@@ -9,33 +9,43 @@ use crate::{
     turing::{Operator, Symbolic},
     Scope,
 };
+use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Head<S: Symbolic>(State, S);
+pub struct Head<S: Symbolic> {
+    state: State,
+    symbol: S,
+}
 
 impl<S: Symbolic> Head<S> {
     pub fn new(state: State, symbol: S) -> Self {
-        Self(state, symbol)
+        Self { state, symbol }
     }
     pub fn symbol(&self) -> S {
-        self.1.clone()
+        self.symbol.clone()
     }
 }
 
-impl<S: Symbolic> std::fmt::Display for Head<S> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({}, {})", self.0, self.1)
+impl<S: Symbolic> Hashable for Head<S> {
+    fn hash(&self) -> H256 {
+        hasher(self).into()
     }
 }
 
 impl<S: Symbolic> Stateful<State> for Head<S> {
     fn state(&self) -> State {
-        self.0
+        self.state
     }
 
     fn update_state(&mut self, state: State) {
-        self.0 = state;
+        self.state = state;
+    }
+}
+
+impl<S: Symbolic> std::fmt::Display for Head<S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.state, self.symbol)
     }
 }
 
@@ -47,12 +57,12 @@ impl<S: Symbolic> From<Operator<S>> for Head<S> {
 
 impl<S: Symbolic> From<Head<S>> for (State, S) {
     fn from(v: Head<S>) -> (State, S) {
-        (v.0, v.1)
+        (v.state(), v.symbol())
     }
 }
 
 impl<S: Symbolic> From<(State, S)> for Head<S> {
     fn from(value: (State, S)) -> Self {
-        Self(value.0, value.1)
+        Self::new(value.0, value.1)
     }
 }

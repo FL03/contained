@@ -10,7 +10,7 @@ use contained::core::turing::{
     tapes::{Tape, Tapes},
     Machine, Operator, Program, Turing,
 };
-use contained::core::{states::State, Extend, Resultant, Scope};
+use contained::core::{states::State, Extend, Resultant};
 
 fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
@@ -19,16 +19,9 @@ fn main() -> Resultant {
     let scope = Operator::build(Tapes::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
-        (State::default(), "c", State::default(), "a", Move::Right).into(),
-        (State::default(), "b", State::default(), "a", Move::Right).into(),
-        (
-            State::default(),
-            "c",
-            State::invalid(),
-            "a",
-            Move::Stay,
-        )
-            .into(),
+        (State::valid(), "c", State::valid(), "a", Move::Right).into(),
+        (State::valid(), "b", State::valid(), "a", Move::Right).into(),
+        (State::valid(), "c", State::invalid(), "a", Move::Stay).into(),
     ];
 
     // Setup the program
@@ -36,7 +29,7 @@ fn main() -> Resultant {
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions)?;
 
-    let mut res = Machine::new(scope, program);
+    let mut res = Machine::new(program, scope);
     res.execute()?;
     assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
     println!("{:?}", res);

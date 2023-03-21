@@ -15,14 +15,16 @@ pub(crate) mod programs;
 use crate::{Scope, Symbolic};
 use tapes::{Tape, Tapes};
 
-pub trait Executable<T> {
+pub trait Worker {}
+
+pub trait Execute<T> {
     type Output;
 
-    /// [Executable::execute]
+    /// [Execute::execute]
     fn execute(&mut self) -> Self::Output;
-    /// [Executable::execute_once]
+    /// [Execute::execute_once]
     fn execute_once(&mut self) -> Self::Output;
-    /// [Executable::execute_until]
+    /// [Execute::execute_until]
     fn execute_until(&mut self, until: impl Fn(&T) -> bool) -> Self::Output;
 }
 

@@ -13,7 +13,7 @@ use libp2p::{mdns, ping, PeerId};
 
 /// [Conduct] describes the behavior of our network
 #[derive(NetworkBehaviour)]
-#[behaviour(out_event = "NetworkEvent")]
+#[behaviour(out_event = "Event")]
 pub struct Mainnet {
     pub freq: ping::Behaviour,
     pub kademlia: Kademlia<MemoryStore>,

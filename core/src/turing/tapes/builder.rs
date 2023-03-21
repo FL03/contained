@@ -34,6 +34,12 @@ impl<S: Symbolic> Tapes<S> {
     pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
         Self::Standard(Tape::new(iter))
     }
+    pub fn build(&self) -> Tape<S> {
+        match self.clone() {
+            Self::Normal(tape) => tape,
+            Self::Standard(tape) => tape,
+        }
+    }
 }
 
 impl<S: Symbolic> Default for Tapes<S> {
