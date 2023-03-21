@@ -4,8 +4,7 @@
     Description: ... Summary ...
 */
 use super::{
-    tapes::{Tape, Tapes},
-    Operator, Program, Turing,
+    Operator, Program, Tape, Turing,
 };
 use crate::states::{State, Stateful};
 use crate::{Scope, Symbolic};
@@ -13,8 +12,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Machine<S: Symbolic = String> {
-    program: Program<S>,
-    scope: Operator<S>,
+    pub program: Program<S>,
+    pub scope: Operator<S>,
 }
 
 impl<S: Symbolic> Machine<S> {
@@ -66,8 +65,8 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         Ok(self)
     }
 
-    fn translate(&mut self, tape: Tapes<S>) -> Result<Tape<S>, Self::Error> {
-        self.scope = Operator::build(tape);
+    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
+        self.scope = Operator::from(tape);
         self.execute()?;
         Ok(self.scope.tape().clone())
     }

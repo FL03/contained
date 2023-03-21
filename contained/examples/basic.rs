@@ -7,8 +7,7 @@ extern crate contained;
 
 use contained::core::turing::{
     instructions::{Instruction, Move},
-    tapes::{Tape, Tapes},
-    Machine, Operator, Program, Turing,
+    Machine, Operator, Program, Tape, Turing,
 };
 use contained::core::{states::State, Extend, Resultant};
 
@@ -16,7 +15,7 @@ fn main() -> Resultant {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = alphabet.clone();
-    let scope = Operator::build(Tapes::norm(tape));
+    let scope = Operator::from(Tape::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
         (State::valid(), "c", State::valid(), "a", Move::Right).into(),

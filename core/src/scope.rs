@@ -5,7 +5,7 @@
 */
 use crate::{
     states::{State, Stateful},
-    turing::{instructions::Move, tapes::Tape},
+    turing::{instructions::Move, Tape},
     Symbolic,
 };
 

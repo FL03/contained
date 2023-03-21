@@ -3,17 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{machine::*, operator::*, programs::*};
+pub use self::{machine::*, operator::*, programs::*, tape::*};
 
 pub mod instructions;
-pub mod tapes;
 
 pub(crate) mod machine;
 pub(crate) mod operator;
 pub(crate) mod programs;
+pub(crate) mod tape;
 
 use crate::{Scope, Symbolic};
-use tapes::{Tape, Tapes};
 
 pub trait Worker {}
 
@@ -41,5 +40,5 @@ pub trait Turing<S: Symbolic> {
     fn execute_until(&mut self, until: impl Fn(&Self::Scope) -> bool)
         -> Result<&Self, Self::Error>;
     /// [Turing::translate] returns the mutated [Tape] after updating the [Turing::Scope] and finally invoking [Turing::execute]
-    fn translate(&mut self, tape: Tapes<S>) -> Result<Tape<S>, Self::Error>;
+    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error>;
 }

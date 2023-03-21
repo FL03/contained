@@ -4,9 +4,9 @@
     Description: ... Summary ...
 */
 use super::Triad;
-use crate::{neo::LPR, Note};
+use crate::{neo::LPR, MusicResult, Note};
 use contained_core::states::{State, Stateful};
-use contained_core::{turing::tapes::Tape, Scope};
+use contained_core::{turing::{instructions::Instruction, Program, Tape}, Scope};
 use futures::Stream;
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
@@ -19,6 +19,7 @@ use std::{
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Actor {
     index: usize,
+    program: Program<Note>,
     state: State,
     tape: Tape<Note>,
     triad: Triad,
@@ -26,15 +27,18 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new(index: usize, state: State, tape: Tape<Note>, triad: Triad) -> Self {
-        let ts = Timestamp::default().into();
+    pub fn new(tape: Tape<Note>, triad: Triad) -> Self {
         Self {
-            index,
-            state,
+            index: 0,
+            program: Program::new(triad.clone().into_iter().collect(), State::Invalid),
+            state: State::Valid,
             tape,
             triad,
-            ts,
+            ts: Timestamp::default().into(),
         }
+    }
+    pub fn insert_instruction(&mut self, instruction: Instruction<Note>) -> MusicResult<Option<Instruction<Note>>> {
+        self.program.insert(instruction)
     }
 }
 
@@ -115,7 +119,7 @@ impl Stateful<State> for Actor {
 
 impl From<Triad> for Actor {
     fn from(triad: Triad) -> Self {
-        Self::new(0, Default::default(), Default::default(), triad)
+        Self::new(Default::default(), triad)
     }
 }
 #[cfg(test)]
@@ -126,7 +130,7 @@ mod tests {
     #[test]
     fn test_actor() {
         let triad = Triad::new(0.into(), Triads::Major);
-        let mut actor = Actor::new(0, State::Valid, Tape::new(triad.clone()), triad.clone());
+        let mut actor = Actor::new(Tape::new(triad.clone()), triad.clone());
 
         actor.shift((-1).into(), triad.third());
         assert_eq!(

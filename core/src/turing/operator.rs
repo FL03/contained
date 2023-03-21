@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::tapes::{Tape, Tapes};
+use super::{Tape};
 use crate::states::{State, Stateful};
 use crate::{Scope, Symbolic};
 
@@ -18,14 +18,8 @@ pub struct Operator<S: Symbolic = String> {
 }
 
 impl<S: Symbolic> Operator<S> {
-    pub fn new(index: RefCell<usize>, state: State, tape: Tape<S>) -> Self {
-        Self { index, state, tape }
-    }
-    pub fn build(tape: Tapes<S>) -> Self {
-        match tape {
-            Tapes::Normal(t) => Self::new(0.into(), Default::default(), t),
-            Tapes::Standard(t) => Self::new((t.len() - 1).into(), Default::default(), t),
-        }
+    pub fn new(state: State, tape: Tape<S>) -> Self {
+        Self { index: 0.into(), state, tape }
     }
 }
 
@@ -83,13 +77,20 @@ impl<S: Ord + Symbolic> std::fmt::Display for Operator<S> {
     }
 }
 
+impl<S: Symbolic> From<Tape<S>> for Operator<S> {
+    fn from(tape: Tape<S>) -> Self {
+        Self::new(State::Valid, tape)
+    }
+}
+
 impl<S: Symbolic> TryFrom<(usize, State, Tape<S>)> for Operator<S> {
-    type Error = String;
+    type Error = Box<dyn std::error::Error>;
+    
     fn try_from(d: (usize, State, Tape<S>)) -> Result<Self, Self::Error> {
         if d.0 > d.2.len() {
-            return Err("Starting index is out of bounds...".to_string());
+            return Err("Starting index is out of bounds...".into());
         }
-        Ok(Self::new(d.0.into(), d.1, d.2))
+        Ok(Self { index: d.0.into(), state: d.1, tape: d.2 })
     }
 }
 
@@ -102,20 +103,18 @@ impl<S: Symbolic> From<Operator<S>> for (usize, State, Tape<S>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::turing::{instructions::Move, tapes::Tapes};
+    use crate::turing::{instructions::Move, Tape};
 
     #[test]
     fn test_builder() {
-        let tape = Tape::new(["a", "b", "c"]);
-        let a = Operator::build(Tapes::Normal(tape.clone()));
-        let b = Operator::build(Tapes::Standard(tape));
-        assert_ne!(a, b);
+        let tape = ["a", "b", "c"];
+        assert_ne!(Tape::norm(tape.clone()), Tape::std(tape));
     }
 
     #[test]
     fn test_operations() {
         let tape = Tape::new(["a", "b", "c"]);
-        let mut actor = Operator::new(0.into(), State::Valid, tape);
+        let mut actor = Operator::new(State::Valid, tape);
 
         actor.shift(Move::Left, "b");
         assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));

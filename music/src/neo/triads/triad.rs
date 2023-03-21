@@ -11,7 +11,7 @@ use crate::{
     BoxedError, Gradient, MusicResult, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::turing::{tapes::Tape, Machine, Operator, Program};
+use contained_core::{states::State, turing::{Tape, Machine, Operator, Program}, Alphabet};
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
@@ -24,8 +24,11 @@ pub struct Triad {
 
 impl Triad {
     pub fn new(root: Note, class: Triads) -> Self {
-        let intervals: (Thirds, Thirds, Fifths) = class.into();
-        Self::build(root, intervals.0, intervals.1)
+        let (a, _, c): (Thirds, Thirds, Fifths) = class.into();
+        Self {
+            class,
+            notes: (root.clone(), a + root.clone(), c + root),
+        }
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
@@ -40,11 +43,17 @@ impl Triad {
         self.clone().into()
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self, program: Program<Note>) -> Machine<Note> {
+    pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
         Machine::new(
-            program,
-            Operator::new(0.into(), Default::default(), Tape::new(self.clone())),
+            Program::new(self.clone().into(), State::Invalid),
+            Operator::new(State::Valid, tape.unwrap_or_default()),
         )
+    }
+}
+
+impl Alphabet<Note> for Triad {
+    fn default_symbol(&self) -> Note {
+        self.root()
     }
 }
 
@@ -157,6 +166,18 @@ impl From<Triad> for UndirectedGraph<Note, Interval> {
         cluster.add_edge((d.third(), d.fifth(), tf.into()).into());
         cluster.add_edge((d.root(), d.fifth(), rf.into()).into());
         cluster.clone()
+    }
+}
+
+impl From<Triad> for Vec<Note> {
+    fn from(d: Triad) -> Vec<Note> {
+        vec![d.root(), d.third(), d.fifth()]
+    }
+}
+
+impl From<Triad> for [Note; 3] {
+    fn from(d: Triad) -> [Note; 3] {
+        [d.root(), d.third(), d.fifth()]
     }
 }
 

@@ -6,7 +6,7 @@
 extern crate contained;
 
 use contained::core::states::State;
-use contained::core::turing::{instructions::Instruction, Program, Turing};
+use contained::core::turing::{instructions::Instruction, Tape, Turing};
 use contained::core::{Extend, Resultant};
 use contained::music::{
     neo::triads::{Triad, Triads},
@@ -14,9 +14,10 @@ use contained::music::{
 };
 
 fn main() -> Resultant {
+    tracing_subscriber::fmt::init();
+    // Setup the triad
     let triad = Triad::new(0.into(), Triads::Diminished);
-    let alphabet: Vec<Note> = triad.clone().into_iter().collect();
-
+    //
     let instructions: Vec<Instruction<Note>> = vec![
         (
             State::default(),
@@ -43,15 +44,15 @@ fn main() -> Resultant {
         )
             .into(),
     ];
-
-    // Setup the program
-    let mut program = Program::new(alphabet, State::Invalid);
-
-    // Instruction set; turn ["C", "D#", "F#"] into ["F#", "D#", "D#"]
-    program.extend(instructions)?;
-
-    let mut res = triad.machine(program);
-    println!("{:?}", res.execute()?);
+    tracing::info!("Instructions: \n{:?}", instructions.clone());
+    // Initialize a new machine
+    let mut machine = triad.clone().machine(Some(Tape::new(triad)));
+    // Extend the program; turn [0, 3, 6] into [6, 3, 3]
+    machine.program.extend(instructions)?;
+    tracing::info!("Success: inserted the instructions into the machine...");
+    // Execute the program
+    tracing::info!("Executing the program...");
+    println!("{:?}", machine.execute()?);
 
     Ok(())
 }

@@ -48,7 +48,8 @@ strum.workspace = true
 
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 tokio = { features = ["full"], version = "1"}
-
+tracing = { features = ["log"], version = "0.1" }
+tracing-subscriber = { features = ["fmt"], version = "0.2" }
 
 [dev-dependencies]
 
