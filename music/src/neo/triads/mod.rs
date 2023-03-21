@@ -18,18 +18,11 @@ pub mod tonic;
 
 use super::LPR;
 use crate::intervals::{Fifths, Interval, Thirds};
-use crate::{MusicResult, Notable};
+use crate::{MusicResult, Note};
 
-pub trait Triadic<N: Notable>: Clone {
-    /// Classifies the [Triad] by describing the intervals that connect the notes
-    fn intervals(&self) -> MusicResult<(Thirds, Thirds, Fifths)> {
-        let edges: (Thirds, Thirds, Fifths) = (
-            Thirds::try_from((self.root(), self.third()))?,
-            Thirds::try_from((self.third(), self.fifth()))?,
-            Fifths::try_from((self.root(), self.fifth()))?,
-        );
-        Ok(edges)
-    }
+pub trait Triadic: Clone {
+    fn class(&self) -> Triads;
+
     /// Endlessly applies the described transformations to the [Triad]
     fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
         for i in Vec::from_iter(iter).iter().cycle() {
@@ -37,19 +30,19 @@ pub trait Triadic<N: Notable>: Clone {
         }
     }
     /// Returns an cloned instance of the note occupying the fifth
-    fn fifth(&self) -> N {
+    fn fifth(&self) -> Note {
         self.clone().triad().2
     }
-    /// Asserts the validity of a [Triad] by trying to describe it in-terms of [Thirds]
-    fn is_valid(&self) -> bool {
-        self.intervals().is_ok()
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    fn intervals(&self) -> (Thirds, Thirds, Fifths) {
+        self.class().intervals()
     }
     /// Returns an cloned instance of the root of the triad
-    fn root(&self) -> N {
+    fn root(&self) -> Note {
         self.clone().triad().0
     }
     /// Returns an cloned instance of the note occupying the third
-    fn third(&self) -> N {
+    fn third(&self) -> Note {
         self.clone().triad().1
     }
     /// Apply a single [LPR] transformation onto the active machine
@@ -57,7 +50,7 @@ pub trait Triadic<N: Notable>: Clone {
     fn transform(&mut self, dirac: LPR) {
         let (mut r, mut t, mut f): (i64, i64, i64) =
             (self.root().into(), self.third().into(), self.fifth().into());
-        match self.intervals().expect("Invalid triad").0 {
+        match self.intervals().0 {
             Thirds::Major => match dirac {
                 LPR::L => r -= Interval::Semitone,
                 LPR::P => t -= Interval::Semitone,
@@ -73,7 +66,7 @@ pub trait Triadic<N: Notable>: Clone {
             .expect("Invalid triad");
     }
     ///
-    fn triad(self) -> (N, N, N);
+    fn triad(self) -> (Note, Note, Note);
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
     fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -88,17 +81,17 @@ pub trait Triadic<N: Notable>: Clone {
         args.reverse();
         self.walk(args);
     }
-    fn update(&mut self, triad: (N, N, N)) -> MusicResult;
+    fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult;
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{neo::LPR, Note};
+    use crate::neo::LPR;
 
     #[test]
     fn test_triad() {
-        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));
@@ -108,14 +101,17 @@ mod tests {
 
     #[test]
     fn test_walking() {
-        let triad = Triad::<Note>::new(0.into(), Triads::Major);
+        let expected = Triad::try_from((1, 4, 8)).unwrap();
+        let triad = Triad::new(0.into(), Triads::Major);
 
         let mut a = triad.clone();
+        let mut b = triad.clone();
         // Apply three consecutive transformations to the scope
         a.walk(vec![LPR::L, LPR::P, LPR::R]);
-        assert_eq!(a.clone(), Triad::try_from((1, 4, 8)).unwrap());
+        assert_eq!(a.clone(), expected);
         // Apply the same transformations in reverse to go back to the original
         a.walk(vec![LPR::R, LPR::P, LPR::L]);
-        assert_eq!(a.clone(), triad);
+        b.yoyo(vec![LPR::L, LPR::P, LPR::R]);
+        assert_eq!(a, b);
     }
 }

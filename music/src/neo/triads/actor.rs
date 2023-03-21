@@ -4,8 +4,7 @@
     Description: ... Summary ...
 */
 use super::Triad;
-use crate::neo::LPR;
-use crate::{Notable, Note};
+use crate::{neo::LPR, Note};
 use contained_core::states::{State, Stateful};
 use contained_core::{turing::tapes::Tape, Scope};
 use futures::Stream;
@@ -18,16 +17,16 @@ use std::{
 };
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Actor<N: Notable = Note> {
+pub struct Actor {
     index: usize,
     state: State,
-    tape: Tape<N>,
-    triad: Triad<N>,
+    tape: Tape<Note>,
+    triad: Triad,
     ts: i64,
 }
 
-impl<N: Notable> Actor<N> {
-    pub fn new(index: usize, state: State, tape: Tape<N>, triad: Triad<N>) -> Self {
+impl Actor {
+    pub fn new(index: usize, state: State, tape: Tape<Note>, triad: Triad) -> Self {
         let ts = Timestamp::default().into();
         Self {
             index,
@@ -39,8 +38,8 @@ impl<N: Notable> Actor<N> {
     }
 }
 
-impl<N: Notable> Iterator for Actor<N> {
-    type Item = N;
+impl Iterator for Actor {
+    type Item = Note;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.index;
@@ -54,14 +53,14 @@ impl<N: Notable> Iterator for Actor<N> {
     }
 }
 
-impl<N: Notable> ExactSizeIterator for Actor<N> {
+impl ExactSizeIterator for Actor {
     fn len(&self) -> usize {
         self.tape.len()
     }
 }
 
-impl<N: Notable> Scope<N> for Actor<N> {
-    fn insert(&mut self, elem: N) {
+impl Scope<Note> for Actor {
+    fn insert(&mut self, elem: Note) {
         self.tape.insert(self.index, elem);
     }
 
@@ -69,11 +68,11 @@ impl<N: Notable> Scope<N> for Actor<N> {
         self.index
     }
 
-    fn set_symbol(&mut self, elem: N) {
+    fn set_symbol(&mut self, elem: Note) {
         self.tape.set(self.index(), elem);
     }
 
-    fn tape(&self) -> &Tape<N> {
+    fn tape(&self) -> &Tape<Note> {
         &self.tape
     }
 
@@ -82,7 +81,7 @@ impl<N: Notable> Scope<N> for Actor<N> {
     }
 }
 
-impl<N: Notable> Stateful<State> for Actor<N> {
+impl Stateful<State> for Actor {
     fn state(&self) -> State {
         self.state
     }
@@ -114,22 +113,19 @@ impl<N: Notable> Stateful<State> for Actor<N> {
 //     }
 // }
 
-impl<N: Notable> From<Triad<N>> for Actor<N> {
-    fn from(triad: Triad<N>) -> Self {
+impl From<Triad> for Actor {
+    fn from(triad: Triad) -> Self {
         Self::new(0, Default::default(), Default::default(), triad)
     }
 }
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        neo::triads::{Triadic, Triads},
-        Note,
-    };
+    use crate::neo::triads::{Triadic, Triads};
 
     #[test]
     fn test_actor() {
-        let triad = Triad::<Note>::new(0.into(), Triads::Major);
+        let triad = Triad::new(0.into(), Triads::Major);
         let mut actor = Actor::new(0, State::Valid, Tape::new(triad.clone()), triad.clone());
 
         actor.shift((-1).into(), triad.third());

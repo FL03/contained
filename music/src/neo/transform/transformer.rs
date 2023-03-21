@@ -4,22 +4,19 @@
     Description: ... Summary ...
 */
 use super::LPR;
-use crate::{
-    neo::triads::{Triad, Triadic},
-    Notable, Note,
-};
+use crate::neo::triads::{Triad, Triadic};
 use scsys::prelude::Timestamp;
 
 #[derive(Clone, Debug, Default)]
-pub struct Transformer<N: Notable = Note> {
+pub struct Transformer {
     index: usize,
     iter: Vec<LPR>,
-    scope: Triad<N>,
+    scope: Triad,
     ts: i64,
 }
 
-impl<N: Notable> Transformer<N> {
-    pub fn new(iter: impl IntoIterator<Item = LPR>, scope: Triad<N>) -> Self {
+impl Transformer {
+    pub fn new(iter: impl IntoIterator<Item = LPR>, scope: Triad) -> Self {
         Self {
             index: 0,
             iter: Vec::from_iter(iter),
@@ -29,8 +26,8 @@ impl<N: Notable> Transformer<N> {
     }
 }
 
-impl<N: Notable> Iterator for Transformer<N> {
-    type Item = Triad<N>;
+impl Iterator for Transformer {
+    type Item = Triad;
 
     fn next(&mut self) -> Option<Self::Item> {
         let i = self.index;

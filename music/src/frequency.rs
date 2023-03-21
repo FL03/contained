@@ -12,7 +12,7 @@ use std::time::{Duration, Instant};
 use std::{future::Future, pin::Pin, thread};
 use tokio::sync::Notify;
 
-async fn delay(dur: Duration) {
+pub async fn delay(dur: Duration) {
     let when = Instant::now() + dur;
     let notify = Arc::new(Notify::new());
     let notify2 = notify.clone();
@@ -30,10 +30,12 @@ async fn delay(dur: Duration) {
     notify.notified().await;
 }
 
+/// The `Delay` future represents an asynchronous sleep.
 #[derive(Clone, Debug)]
 pub struct Delay {
     // This is Some when we have spawned a thread, and None otherwise.
     waker: Option<Arc<Mutex<Waker>>>,
+    // The `Instant` at which the delay will complete.
     when: Instant,
 }
 
@@ -41,15 +43,19 @@ impl Delay {
     pub fn new(when: Instant) -> Self {
         Self { waker: None, when }
     }
+    /// Adjusts the delay to be `duration` earlier.
     pub fn decrease(&mut self, duration: Duration) {
         self.when -= duration;
     }
+    /// Adjusts the delay to be `duration` later.
     pub fn increase(&mut self, duration: Duration) {
         self.when += duration;
     }
+    /// Returns the `Waker` that will be notified when the delay completes.
     pub fn waker(&self) -> Option<Arc<Mutex<Waker>>> {
         self.waker.clone()
     }
+    /// Returns the `Instant` at which the delay will complete.
     pub fn when(&self) -> Instant {
         self.when.clone()
     }
@@ -131,48 +137,67 @@ impl PartialEq for Delay {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Frequency(Duration);
+pub struct Frequency {
+    // The current count; the number of cycles completed.
+    cursor: usize,
+    // The period of a frequency; the time it takes to complete a cycle.
+    period: Duration,
+}
 
 impl Frequency {
-    pub fn new(duration: Duration) -> Self {
-        Self(duration)
+    pub fn new(period: Duration) -> Self {
+        Self { cursor: 0, period }
     }
+    /// Adjusts the frequency.
     pub fn adjust(&mut self, sec: u64, nano: u32) {
-        self.0 = Duration::new(sec, nano);
+        self.period = Duration::new(sec, nano);
     }
+    pub fn cursor(&self) -> usize {
+        self.cursor
+    }
+    /// Returns the current frequency.
     pub fn freq(&self) -> f64 {
-        1.0 / self.0.as_secs_f64()
+        1.0 / self.period.as_secs_f64()
     }
+    /// Returns the current period.
     pub fn period(&self) -> Duration {
-        self.0.clone()
+        self.period.clone()
     }
 }
 
 impl Default for Frequency {
     fn default() -> Self {
-        Self(Duration::new(1, 0))
+        let period = Duration::new(1, 0);
+        Self::new(period)
     }
 }
 
 impl Future for Frequency {
     type Output = Self;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        let when = Instant::now() + self.period();
-        let notify = Arc::new(Notify::new());
-        let notify2 = notify.clone();
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        // Stores the current cycle count.
+        let cycle = self.cursor;
+        // Increment the cycle count.
+        self.cursor += 1;
+        // Stores the current period
+        let period = self.period();
+        // Find the time at which the next cycle will complete.
+        let when = Instant::now() + Duration::from_secs_f64(self.freq());
+        // Clone a thread-safe waker for use in the timer thread.
+        let waker = Arc::new(Mutex::new(cx.waker().clone()));
 
+        // Spawn a new timer thread that will notify the current task when compelte
         thread::spawn(move || {
             let now = Instant::now();
 
             if now < when {
                 thread::sleep(when - now);
             }
-
-            notify2.notify_one();
+            //
+            waker.lock().unwrap().wake_by_ref();
         });
 
-        notify.notified();
         if Instant::now() >= when {
             Poll::Ready(self.clone())
         } else {

@@ -8,7 +8,7 @@ pub use self::{fifths::*, thirds::*};
 pub(crate) mod fifths;
 pub(crate) mod thirds;
 
-use crate::{Gradient, Notable};
+use crate::{Gradient, Note};
 
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
@@ -42,11 +42,11 @@ pub enum Interval {
 }
 
 impl Interval {
-    pub fn increase<N: Notable>(&self, note: N) -> N {
+    pub fn increase(&self, note: Note) -> Note {
         let interval: i64 = self.clone().into();
         (note.pitch() + interval).into()
     }
-    pub fn decrease<N: Notable>(&self, note: N) -> N {
+    pub fn decrease(&self, note: Note) -> Note {
         let interval: i64 = self.clone().into();
         (note.pitch() - interval).into()
     }
@@ -113,19 +113,19 @@ impl std::ops::SubAssign<Interval> for i64 {
     }
 }
 
-impl<N: Notable> std::ops::Add<N> for Interval {
-    type Output = N;
+impl std::ops::Add<Note> for Interval {
+    type Output = Note;
 
-    fn add(self, rhs: N) -> Self::Output {
+    fn add(self, rhs: Note) -> Self::Output {
         let interval: i64 = self.into();
         (rhs.pitch() + interval).into()
     }
 }
 
-impl<N: Notable> std::ops::Sub<N> for Interval {
-    type Output = N;
+impl std::ops::Sub<Note> for Interval {
+    type Output = Note;
 
-    fn sub(self, rhs: N) -> Self::Output {
+    fn sub(self, rhs: Note) -> Self::Output {
         let interval: i64 = self.into();
         (rhs.pitch() - interval).into()
     }

@@ -23,10 +23,18 @@ use strum::{Display, EnumString, EnumVariantNames};
     SmartDefault,
 )]
 #[strum(serialize_all = "title_case")]
-pub enum MusicalError {
+pub enum Error {
+    Custom(String),
     IntervalError(String),
+    IOError(String),
     #[default]
     PitchError,
 }
 
-impl std::error::Error for MusicalError {}
+impl std::error::Error for Error {}
+
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Error::IOError(error.to_string())
+    }
+}

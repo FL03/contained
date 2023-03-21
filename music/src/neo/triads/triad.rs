@@ -8,28 +8,27 @@ use super::{actor::Actor, Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
-    BoxedError, Gradient, MusicResult, Notable, Note,
+    BoxedError, Gradient, MusicResult, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::turing::{tapes::Tape, Machine, Operator, Program};
 use decanter::prelude::{hasher, Hashable, H256};
-use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Triad<N: Notable = Note> {
+pub struct Triad {
     class: Triads,
-    notes: (N, N, N),
+    notes: (Note, Note, Note),
 }
 
-impl<N: Notable> Triad<N> {
-    pub fn new(root: N, class: Triads) -> Self {
+impl Triad {
+    pub fn new(root: Note, class: Triads) -> Self {
         let intervals: (Thirds, Thirds, Fifths) = class.into();
         Self::build(root, intervals.0, intervals.1)
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
-    pub fn build(root: N, a: Thirds, b: Thirds) -> Self {
+    pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         let notes = (root.clone(), a + root.clone(), b + (a + root));
         Self {
             class: Triads::from((a, b)),
@@ -37,11 +36,11 @@ impl<N: Notable> Triad<N> {
         }
     }
     /// Create a new [Actor] with the [Triad] as its alphabet
-    pub fn actor(&self) -> Actor<N> {
+    pub fn actor(&self) -> Actor {
         self.clone().into()
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self, program: Program<N>) -> Machine<N> {
+    pub fn machine(&self, program: Program<Note>) -> Machine<Note> {
         Machine::new(
             program,
             Operator::new(0.into(), Default::default(), Tape::new(self.clone())),
@@ -49,12 +48,16 @@ impl<N: Notable> Triad<N> {
     }
 }
 
-impl<N: Notable> Triadic<N> for Triad<N> {
-    fn triad(self) -> (N, N, N) {
+impl Triadic for Triad {
+    fn class(&self) -> Triads {
+        self.class
+    }
+
+    fn triad(self) -> (Note, Note, Note) {
         self.notes
     }
 
-    fn update(&mut self, triad: (N, N, N)) -> MusicResult {
+    fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult {
         if let Ok(t) = Self::try_from(triad) {
             *self = t;
             return Ok(());
@@ -63,14 +66,14 @@ impl<N: Notable> Triadic<N> for Triad<N> {
     }
 }
 
-impl<N: Notable> Hashable for Triad<N> {
+impl Hashable for Triad {
     fn hash(&self) -> H256 {
         hasher(self).into()
     }
 }
 
-impl<N: Notable> IntoIterator for Triad<N> {
-    type Item = N;
+impl IntoIterator for Triad {
+    type Item = Note;
 
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
@@ -79,36 +82,36 @@ impl<N: Notable> IntoIterator for Triad<N> {
     }
 }
 
-impl<N: Notable> std::fmt::Display for Triad<N> {
+impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}.{}", self.root(), self.third(), self.fifth())
     }
 }
 
-impl<N: Notable> std::ops::Mul<LPR> for Triad<N> {
-    type Output = Triad<N>;
+impl std::ops::Mul<LPR> for Triad {
+    type Output = Triad;
 
     fn mul(self, rhs: LPR) -> Self::Output {
         rhs.transform(&mut self.clone())
     }
 }
 
-impl<N: Notable> std::ops::MulAssign<LPR> for Triad<N> {
+impl std::ops::MulAssign<LPR> for Triad {
     fn mul_assign(&mut self, rhs: LPR) {
         self.transform(rhs)
     }
 }
 
-impl<N: Notable> From<(N, Thirds, Thirds)> for Triad<N> {
-    fn from(data: (N, Thirds, Thirds)) -> Self {
+impl From<(Note, Thirds, Thirds)> for Triad {
+    fn from(data: (Note, Thirds, Thirds)) -> Self {
         Self::build(data.0, data.1, data.2)
     }
 }
 
-impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
+impl TryFrom<(Note, Note, Note)> for Triad {
     type Error = BoxedError;
 
-    fn try_from(data: (N, N, N)) -> Result<Triad<N>, Self::Error> {
+    fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
         let args = vec![data.0, data.1, data.2];
         for i in 0..args.len() {
             let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
@@ -132,11 +135,11 @@ impl<N: Notable> TryFrom<(N, N, N)> for Triad<N> {
     }
 }
 
-impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
+impl TryFrom<(i64, i64, i64)> for Triad {
     type Error = BoxedError;
 
-    fn try_from(data: (i64, i64, i64)) -> Result<Triad<N>, Self::Error> {
-        let notes: (N, N, N) = (
+    fn try_from(data: (i64, i64, i64)) -> Result<Triad, Self::Error> {
+        let notes: (Note, Note, Note) = (
             data.0.pitch().into(),
             data.1.pitch().into(),
             data.2.pitch().into(),
@@ -145,9 +148,9 @@ impl<N: Notable> TryFrom<(i64, i64, i64)> for Triad<N> {
     }
 }
 
-impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
-    fn from(d: Triad<N>) -> UndirectedGraph<N, Interval> {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals().expect("Invalid Triad");
+impl From<Triad> for UndirectedGraph<Note, Interval> {
+    fn from(d: Triad) -> UndirectedGraph<Note, Interval> {
+        let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals();
 
         let mut cluster = UndirectedGraph::with_capacity(3);
         cluster.add_edge((d.root(), d.third(), rt.into()).into());
@@ -157,31 +160,27 @@ impl<N: Notable> From<Triad<N>> for UndirectedGraph<N, Interval> {
     }
 }
 
-impl<N: Notable> From<Triad<N>> for (N, N, N) {
-    fn from(d: Triad<N>) -> (N, N, N) {
-        (d.root(), d.third(), d.fifth())
+impl From<Triad> for (Note, Note, Note) {
+    fn from(d: Triad) -> (Note, Note, Note) {
+        d.triad()
     }
 }
 
-impl<N: Notable> From<Triad<N>> for (i64, i64, i64) {
-    fn from(d: Triad<N>) -> (i64, i64, i64) {
+impl From<Triad> for (i64, i64, i64) {
+    fn from(d: Triad) -> (i64, i64, i64) {
         (d.root().pitch(), d.third().pitch(), d.fifth().pitch())
     }
 }
 
-impl<N: Notable> TryFrom<Triad<N>> for (Thirds, Thirds, Fifths) {
-    type Error = BoxedError;
-
-    fn try_from(data: Triad<N>) -> Result<(Thirds, Thirds, Fifths), Self::Error> {
+impl From<Triad> for (Thirds, Thirds, Fifths) {
+    fn from(data: Triad) -> (Thirds, Thirds, Fifths) {
         data.intervals()
     }
 }
 
-impl<N: Notable> TryFrom<Triad<N>> for (Interval, Interval, Interval) {
-    type Error = BoxedError;
-
-    fn try_from(data: Triad<N>) -> Result<(Interval, Interval, Interval), Self::Error> {
-        let (a, b, c): (Thirds, Thirds, Fifths) = data.intervals()?;
-        Ok((a.into(), b.into(), c.into()))
+impl From<Triad> for (Interval, Interval, Interval) {
+    fn from(data: Triad) -> (Interval, Interval, Interval) {
+        let intervals = data.intervals();
+        (intervals.0.into(), intervals.1.into(), intervals.2.into())
     }
 }
