@@ -3,11 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{machine::*, operator::*, programs::*, tape::*};
+pub use self::{mach::*, operator::*, programs::*, tape::*};
 
 pub mod instructions;
 
-pub(crate) mod machine;
+pub(crate) mod mach;
 pub(crate) mod operator;
 pub(crate) mod programs;
 pub(crate) mod tape;
