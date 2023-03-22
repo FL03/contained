@@ -4,7 +4,7 @@
     Description: ... Summary ...
 */
 use super::instructions::Instruction;
-use super::{Operator, Program, Tape, Turing};
+use super::{Driver, Program, Tape, Turing};
 use crate::states::{State, Stateful};
 use crate::{Alphabet, Error, Scope, Symbolic};
 use serde::{Deserialize, Serialize};
@@ -12,17 +12,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Machine<S: Symbolic = String> {
     pub program: Program<S>,
-    pub scope: Operator<S>,
+    pub scope: Driver<S>,
 }
 
 impl<S: Symbolic> Machine<S> {
-    pub fn new(program: Program<S>, scope: Operator<S>) -> Self {
+    pub fn new(program: Program<S>, scope: Driver<S>) -> Self {
         Self { program, scope }
     }
     pub fn program(&self) -> Program<S> {
         self.program.clone()
     }
-    pub fn scope(&self) -> Operator<S> {
+    pub fn scope(&self) -> Driver<S> {
         self.scope.clone()
     }
     pub fn tape(&self) -> &Tape<S> {
@@ -76,10 +76,10 @@ impl<S: Symbolic> Stateful for Machine<S> {
 
 impl<S: Symbolic> Turing<S> for Machine<S> {
     type Error = Error;
-    type Scope = Operator<S>;
+    type Scope = Driver<S>;
 
     fn execute(&mut self) -> Result<&Self, Self::Error> {
-        let until = |actor: &Operator<S>| actor.state() == State::Invalid;
+        let until = |actor: &Driver<S>| actor.state() == State::Invalid;
         self.execute_until(until)
     }
 
@@ -104,7 +104,7 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
     }
 
     fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
-        self.scope = Operator::from(tape);
+        self.scope = Driver::from(tape);
         self.execute()?;
         Ok(self.scope.tape().clone())
     }

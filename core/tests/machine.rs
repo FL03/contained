@@ -2,7 +2,7 @@ use contained_core::states::State;
 #[cfg(test)]
 use contained_core::turing::{
     instructions::{Instruction, Move},
-    Machine, Operator, Program, Tape, Turing,
+    Machine, Driver, Program, Tape, Turing,
 };
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
@@ -12,7 +12,7 @@ fn test_machine() {
     let alphabet = vec!["a", "b", "c"];
 
     let tape = alphabet.clone();
-    let scope = Operator::from(Tape::norm(tape));
+    let scope = Driver::from(Tape::norm(tape));
 
     let instructions: Vec<Instruction<&str>> = vec![
         (State::default(), "a", State::default(), "c", Move::Right).into(),

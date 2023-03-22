@@ -6,7 +6,7 @@
 */
 use crate::{
     states::{State, Stateful},
-    turing::{Operator, Symbolic},
+    turing::{Driver, Symbolic},
     Scope,
 };
 use decanter::prelude::{hasher, Hashable, H256};
@@ -51,8 +51,8 @@ impl<S: Symbolic> std::fmt::Display for Head<S> {
     }
 }
 
-impl<S: Symbolic> From<Operator<S>> for Head<S> {
-    fn from(value: Operator<S>) -> Self {
+impl<S: Symbolic> From<Driver<S>> for Head<S> {
+    fn from(value: Driver<S>) -> Self {
         Self::new(value.state(), value.symbol().clone())
     }
 }
