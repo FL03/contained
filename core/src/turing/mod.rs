@@ -3,12 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{mach::*, operator::*, programs::*, tape::*};
+pub use self::{driver::*, platform::*, programs::*, tape::*};
 
 pub mod instructions;
 
-pub(crate) mod mach;
-pub(crate) mod operator;
+pub(crate) mod driver;
+pub(crate) mod platform;
 pub(crate) mod programs;
 pub(crate) mod tape;
 

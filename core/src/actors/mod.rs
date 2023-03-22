@@ -11,7 +11,7 @@ use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Tape};
 use crate::{Alphabet, Error, Scope, Symbolic};
 
-/// [Execute] describes a programmable Turing machine
+/// [Execute] is a trait that allows for the execution of a program.
 pub trait Execute<S: Symbolic>:
     Alphabet<S> + Iterator<Item = Instruction<S>> + Stateful<State = State>
 {
