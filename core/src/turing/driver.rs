@@ -5,7 +5,7 @@
 */
 use super::Tape;
 use crate::states::{State, Stateful};
-use crate::{Include, InsertAt, Scope, Symbolic};
+use crate::{Include, Insert, Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -53,7 +53,7 @@ impl<S: Symbolic> Include<S> for Driver<S> {
     }
 }
 
-impl<S: Symbolic> InsertAt<usize, S> for Driver<S> {
+impl<S: Symbolic> Insert<usize, S> for Driver<S> {
     fn insert(&mut self, index: usize, elem: S) {
         self.tape.insert(index, elem);
     }

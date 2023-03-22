@@ -6,7 +6,7 @@
 use super::{Execute, Translate};
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{Alphabet, Error, Include, InsertAt, Scope, Symbolic};
+use crate::{Alphabet, Error, Include, Insert, Scope, Symbolic};
 use scsys::Timestamp;
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,18 @@ impl<S: Symbolic> Actor<S> {
     }
 }
 
+impl<S: Symbolic> AsMut<Actor<S>> for Actor<S> {
+    fn as_mut(&mut self) -> &mut Actor<S> {
+        self
+    }
+}
+
+impl<S: Symbolic> AsRef<Actor<S>> for Actor<S> {
+    fn as_ref(&self) -> &Actor<S> {
+        self
+    }
+}
+
 impl<S: Symbolic> Extend<S> for Actor<S> {
     fn extend<T: IntoIterator<Item = S>>(&mut self, iter: T) {
         self.memory.extend(iter)
@@ -49,7 +61,7 @@ impl<S: Symbolic> Include<S> for Actor<S> {
     }
 }
 
-impl<S: Symbolic> InsertAt<usize, S> for Actor<S> {
+impl<S: Symbolic> Insert<usize, S> for Actor<S> {
     fn insert(&mut self, index: usize, elem: S) {
         self.memory.insert(index, elem);
     }

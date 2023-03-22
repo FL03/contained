@@ -37,6 +37,7 @@ pub trait ArrayLike<T>: Clone + IntoIterator<Item = T, IntoIter = std::vec::Into
     }
 }
 
+/// [Include] describes the basic behaviors of a structure which can include a new element
 pub trait Include<T> {
     fn include(&mut self, elem: T);
 }
@@ -47,18 +48,19 @@ pub trait TryInclude<T> {
     fn try_include<Output>(&mut self, elem: T) -> Result<Output, Self::Error>;
 }
 
-pub trait InsertAt<K, V> {
+/// [Insert] describes the basic behaviors of a structure insert a new element given an index or key
+pub trait Insert<K, V> {
     fn insert(&mut self, key: K, elem: V);
 }
 
-pub trait TryInsertAt<K, V> {
+pub trait TryInsert<K, V> {
     type Error;
 
     fn try_insert<Output>(&mut self, key: K, elem: V) -> Result<Output, Self::Error>;
 }
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Include<S> + InsertAt<usize, S> + Stateful<State = State> {
+pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State = State> {
     /// [Scope::index] returns the current position of the [Scope] on the [Tape]
     fn index(&self) -> usize;
     /// [Scope::set_index] sets the current position of the [Scope] on the [Tape]

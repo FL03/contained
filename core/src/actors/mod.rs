@@ -10,6 +10,38 @@ mod actor;
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Tape};
 use crate::{Alphabet, Error, Scope, Symbolic};
+use async_trait::async_trait;
+use futures::{Future, StreamExt};
+
+#[async_trait]
+pub trait AsyncExecute<S: Symbolic + Send + Sync>:
+    Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State = State> + Unpin
+{
+    type Driver: Future + Scope<S>;
+
+    async fn execute(&mut self) -> Result<Self::Driver, Error> {
+        // Get the default symbol
+        let default_symbol = self.clone().default_symbol();
+        // Get the next instruction
+        while let Some(instruction) = self.next().await {
+            // Get the tail of the instruction
+            let tail = instruction.clone().tail();
+            // Update the current state
+            self.scope_mut().update_state(tail.state());
+            // Update the tape
+            self.scope_mut().set_symbol(tail.symbol());
+            // Update the index; adjusts the index according to the direction
+            self.scope_mut()
+                .shift(tail.action(), default_symbol.clone());
+        }
+        // Return the actor
+        Ok(self.scope())
+    }
+
+    fn scope(&self) -> Self::Driver;
+
+    fn scope_mut(&mut self) -> &mut Self::Driver;
+}
 
 /// [Execute] is a trait that allows for the execution of a program.
 pub trait Execute<S: Symbolic>:
