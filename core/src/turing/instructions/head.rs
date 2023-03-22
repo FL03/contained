@@ -53,7 +53,7 @@ impl<S: Symbolic> std::fmt::Display for Head<S> {
 
 impl<S: Symbolic> From<Operator<S>> for Head<S> {
     fn from(value: Operator<S>) -> Self {
-        Self::new(value.state(), value.scope().clone())
+        Self::new(value.state(), value.symbol().clone())
     }
 }
 

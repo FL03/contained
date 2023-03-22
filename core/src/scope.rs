@@ -10,10 +10,14 @@ use crate::{
 };
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State = State> {
-    fn insert(&mut self, elem: S);
+pub trait Scope<S: Symbolic>: Stateful<State = State> {
+    /// [Scope::index] returns the current position of the [Scope] on the [Tape]
     fn index(&self) -> usize;
+    /// [Scope::insert_symbol] inserts a new element at the current position of the [Scope]
+    fn insert_symbol(&mut self, elem: S);
+    /// [Scope::set_index] sets the current position of the [Scope] on the [Tape]
     fn set_index(&mut self, pos: usize);
+    /// [Scope::set_symbol] sets the current element of the [Scope] on the [Tape]
     fn set_symbol(&mut self, elem: S);
     /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
     /// [Move::Right] inserts a new element at the end of the tape if the current position equals the total number of cells
@@ -24,7 +28,7 @@ pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State = State> {
         match shift {
             // If the current position is 0, insert a new element at the top of the vector
             Move::Left if self.index() == 0 => {
-                self.insert(elem);
+                self.insert_symbol(elem);
             }
             Move::Left => {
                 self.set_index(index - 1);
@@ -33,16 +37,18 @@ pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State = State> {
                 self.set_index(index + 1);
 
                 if self.index() == self.tape().len() {
-                    self.insert(elem);
+                    self.insert_symbol(elem);
                 }
             }
             Move::Stay => {}
         }
     }
-    fn scope(&self) -> &S {
+    /// [Scope::symbol] returns the current element of the [Scope] on the [Tape]
+    fn symbol(&self) -> &S {
         self.tape()
             .get(self.index())
             .expect("Index is out of bounds...")
     }
+    /// [Scope::tape] returns the [Tape] of the [Scope]
     fn tape(&self) -> &Tape<S>;
 }

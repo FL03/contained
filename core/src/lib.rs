@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{primitives::*, scope::*, specs::*, utils::*};
+pub use self::{errors::*, primitives::*, scope::*, specs::*, utils::*};
 
+pub(crate) mod errors;
 pub(crate) mod primitives;
 pub(crate) mod scope;
 pub(crate) mod specs;

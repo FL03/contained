@@ -32,13 +32,6 @@ pub trait ArrayLike<T>: Clone + IntoIterator<Item = T, IntoIter = std::vec::Into
     }
 }
 
-/// [Extend]
-pub trait Extend<A> {
-    type Output;
-
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) -> Self::Output;
-}
-
 /// [With] describes a simple means of concating several objects together
 pub trait With<T> {
     /// [With::Output] must be a superposition of self and T

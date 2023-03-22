@@ -13,40 +13,65 @@ impl<S: Symbolic> Tape<S> {
     pub fn new() -> Self {
         Self(Default::default())
     }
+    /// Creates a new tape from an iterator; preserves the original order.
     pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
         Self(Vec::from_iter(iter))
     }
+    /// Creates a new tape from an iterator; the tape is reversed.
     pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
         let mut tape = Vec::from_iter(iter);
         tape.reverse();
         Self(tape.clone())
     }
-    pub fn get(&self, pos: usize) -> Option<&S> {
-        self.tape().get(pos)
+    /// Returns the element at the given index, or `None` if the index is out of bounds.
+    pub fn get(&self, index: usize) -> Option<&S> {
+        self.as_ref().get(index)
     }
-    pub fn insert(&mut self, pos: usize, elem: S) {
-        self.tape_mut().insert(pos, elem);
+    /// Inserts an element at the given index, shifting all elements after it to the right.
+    pub fn insert(&mut self, index: usize, elem: S) {
+        self.as_mut().insert(index, elem);
     }
+    /// Returns `true` if the tape contains no elements.
     pub fn is_empty(&self) -> bool {
-        self.tape().is_empty()
+        self.as_ref().is_empty()
     }
+    /// Returns the number of elements in the tape.
     pub fn len(&self) -> usize {
-        self.tape().len()
+        self.as_ref().len()
     }
+    /// Pushes an element to the end of the tape.
     pub fn push(&mut self, elem: S) {
-        self.tape_mut().push(elem);
+        self.as_mut().push(elem);
     }
+    /// Sets the element at the given index
     pub fn set(&mut self, index: usize, elem: S) {
         self.0[index] = elem;
     }
+    /// Returns a reference to the underlying vector
     pub fn tape(&self) -> &Vec<S> {
         &self.0
     }
-    pub fn tape_mut(&mut self) -> &mut Vec<S> {
-        &mut self.0
-    }
+    /// Creates a new tape with the specified capacity.
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Vec::with_capacity(capacity))
+    }
+}
+
+impl<S: Symbolic> AsMut<Vec<S>> for Tape<S> {
+    fn as_mut(&mut self) -> &mut Vec<S> {
+        &mut self.0
+    }
+}
+
+impl<S: Symbolic> AsRef<Vec<S>> for Tape<S> {
+    fn as_ref(&self) -> &Vec<S> {
+        self.tape()
+    }
+}
+
+impl<S: Symbolic> Extend<S> for Tape<S> {
+    fn extend<T: IntoIterator<Item = S>>(&mut self, iter: T) {
+        self.as_mut().extend(iter);
     }
 }
 

@@ -14,7 +14,7 @@ use std::cell::RefCell;
 pub struct Operator<S: Symbolic = String> {
     index: RefCell<usize>,
     state: State,
-    tape: Tape<S>,
+    pub tape: Tape<S>,
 }
 
 impl<S: Symbolic> Operator<S> {
@@ -24,6 +24,18 @@ impl<S: Symbolic> Operator<S> {
             state,
             tape,
         }
+    }
+}
+
+impl<S: Symbolic> AsMut<Operator<S>> for Operator<S> {
+    fn as_mut(&mut self) -> &mut Operator<S> {
+        self
+    }
+}
+
+impl<S: Symbolic> AsRef<Operator<S>> for Operator<S> {
+    fn as_ref(&self) -> &Operator<S> {
+        &self
     }
 }
 
@@ -47,7 +59,7 @@ impl<S: Symbolic> Iterator for Operator<S> {
 }
 
 impl<S: Symbolic> Scope<S> for Operator<S> {
-    fn insert(&mut self, elem: S) {
+    fn insert_symbol(&mut self, elem: S) {
         self.tape.insert(self.index(), elem);
     }
 

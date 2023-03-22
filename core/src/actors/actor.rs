@@ -3,12 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use super::{Execute, Translate};
 use crate::states::{State, Stateful};
-use crate::turing::{
-    instructions::{Instruction, Move},
-    Program, Tape, Turing,
-};
-use crate::{Resultant, Scope, Symbolic};
+use crate::turing::{instructions::Instruction, Program, Tape};
+use crate::{Alphabet, Error, Scope, Symbolic};
 use scsys::Timestamp;
 use serde::{Deserialize, Serialize};
 
@@ -22,64 +20,68 @@ pub struct Actor<S: Symbolic> {
 }
 
 impl<S: Symbolic> Actor<S> {
-    pub fn new(program: Program<S>) -> Self {
+    pub fn new(program: Program<S>, tape: Option<Tape<S>>) -> Self {
         Self {
             index: 0,
-            memory: Tape::default(),
+            memory: tape.unwrap_or_default(),
             program,
             state: Default::default(),
             ts: Timestamp::default().into(),
         }
     }
-    pub fn insert_instruction(
-        &mut self,
-        instruction: Instruction<S>,
-    ) -> Resultant<Option<Instruction<S>>> {
+
+    pub fn insert_instruction(&mut self, instruction: Instruction<S>) -> Option<Instruction<S>> {
         self.program.insert(instruction)
     }
 }
 
+impl<S: Symbolic> Extend<S> for Actor<S> {
+    fn extend<T: IntoIterator<Item = S>>(&mut self, iter: T) {
+        self.memory.extend(iter)
+    }
+}
+
+impl<S: Symbolic> Extend<Instruction<S>> for Actor<S> {
+    fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) {
+        self.program.extend(iter)
+    }
+}
+
 impl<S: Symbolic> Iterator for Actor<S> {
-    type Item = S;
+    type Item = Instruction<S>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(cur) = self.clone().memory.get(self.index) {
             // Update the timestamp
             self.ts = Timestamp::default().into();
             // Get the instruction
-            let _ = match self.clone().program.get((self.state, cur.clone()).into()) {
-                Ok(instruction) => {
-                    self.state = instruction.clone().tail().state();
-                    self.memory
-                        .set(self.index(), instruction.clone().tail().symbol());
-                    self.shift(
-                        instruction.clone().tail().action(),
-                        self.program.clone().default_symbol(),
-                    );
-                }
-                Err(_) => {}
-            };
-            Some(cur.clone())
+            self.program.get((self.state, cur.clone()).into()).cloned()
         } else {
             None
         }
     }
 }
 
-impl<S: Symbolic> Stateful for Actor<S> {
-    type State = State;
-
-    fn state(&self) -> Self::State {
-        self.state
+impl<S: Symbolic> Alphabet<S> for Actor<S> {
+    fn default_symbol(&self) -> S {
+        self.program.default_symbol()
     }
-    fn update_state(&mut self, state: Self::State) {
-        self.state = state;
-        self.ts = Timestamp::default().into();
+}
+
+impl<S: Symbolic> Execute<S> for Actor<S> {
+    type Driver = Self;
+
+    fn scope(&self) -> Self::Driver {
+        self.clone()
+    }
+
+    fn scope_mut(&mut self) -> &mut Self::Driver {
+        self
     }
 }
 
 impl<S: Symbolic> Scope<S> for Actor<S> {
-    fn insert(&mut self, elem: S) {
+    fn insert_symbol(&mut self, elem: S) {
         self.memory.insert(self.index(), elem);
     }
 
@@ -100,48 +102,33 @@ impl<S: Symbolic> Scope<S> for Actor<S> {
     }
 }
 
-impl<S: Symbolic> Turing<S> for Actor<S> {
-    type Error = Box<dyn std::error::Error>;
-    type Scope = Self;
+impl<S: Symbolic> Stateful for Actor<S> {
+    type State = State;
 
-    fn execute(&mut self) -> Result<&Self, Self::Error> {
-        self.execute_until(|s: &Self::Scope| s.state() == State::invalid())
+    fn state(&self) -> Self::State {
+        self.state
     }
-
-    fn execute_once(&mut self) -> Result<&Self, Self::Error> {
-        if let Some(cur) = self.clone().memory.get(self.index) {
-            // Update the timestamp
-            self.ts = Timestamp::default().into();
-            // Get the instruction
-            let _ = match self.clone().program.get((self.state, cur.clone()).into()) {
-                Ok(instruction) => {
-                    self.state = instruction.clone().tail().state();
-                    self.memory
-                        .set(self.index(), instruction.clone().tail().symbol());
-                    self.shift(
-                        instruction.clone().tail().action(),
-                        self.program.clone().default_symbol(),
-                    );
-                }
-                Err(_) => {}
-            };
-            Ok(self)
-        } else {
-            Err("No more instructions to execute".into())
-        }
+    fn update_state(&mut self, state: Self::State) {
+        self.state = state;
+        self.ts = Timestamp::default().into();
     }
+}
 
-    fn execute_until(
-        &mut self,
-        until: impl Fn(&Self::Scope) -> bool,
-    ) -> Result<&Self, Self::Error> {
-        while !until(self) {
-            self.execute_once()?;
-        }
-        Ok(self)
+impl<S: Symbolic> Translate<S> for Actor<S> {
+    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Error> {
+        *self = Self::new(self.program.clone(), Some(tape));
+        Ok(self.memory.clone())
     }
+}
 
-    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
-        todo!()
+impl<S: Symbolic> From<Program<S>> for Actor<S> {
+    fn from(program: Program<S>) -> Self {
+        Self::new(program, None)
+    }
+}
+
+impl<S: Symbolic> From<Tape<S>> for Actor<S> {
+    fn from(tape: Tape<S>) -> Self {
+        Self::new(Program::default(), Some(tape))
     }
 }

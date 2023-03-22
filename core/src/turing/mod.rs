@@ -14,19 +14,6 @@ pub(crate) mod tape;
 
 use crate::{Scope, Symbolic};
 
-pub trait Worker {}
-
-pub trait Execute<T> {
-    type Output;
-
-    /// [Execute::execute]
-    fn execute(&mut self) -> Self::Output;
-    /// [Execute::execute_once]
-    fn execute_once(&mut self) -> Self::Output;
-    /// [Execute::execute_until]
-    fn execute_until(&mut self, until: impl Fn(&T) -> bool) -> Self::Output;
-}
-
 /// [Turing] describes a programmable Turing machine
 pub trait Turing<S: Symbolic> {
     type Error;

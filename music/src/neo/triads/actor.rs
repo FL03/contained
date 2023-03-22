@@ -43,7 +43,7 @@ impl Actor {
     pub fn insert_instruction(
         &mut self,
         instruction: Instruction<Note>,
-    ) -> MusicResult<Option<Instruction<Note>>> {
+    ) -> Option<Instruction<Note>> {
         self.program.insert(instruction)
     }
 }
@@ -72,7 +72,7 @@ impl ExactSizeIterator for Actor {
 }
 
 impl Scope<Note> for Actor {
-    fn insert(&mut self, elem: Note) {
+    fn insert_symbol(&mut self, elem: Note) {
         self.tape.insert(self.index, elem);
     }
 
