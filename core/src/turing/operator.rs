@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{Tape};
+use super::Tape;
 use crate::states::{State, Stateful};
 use crate::{Scope, Symbolic};
 
@@ -19,7 +19,11 @@ pub struct Operator<S: Symbolic = String> {
 
 impl<S: Symbolic> Operator<S> {
     pub fn new(state: State, tape: Tape<S>) -> Self {
-        Self { index: 0.into(), state, tape }
+        Self {
+            index: 0.into(),
+            state,
+            tape,
+        }
     }
 }
 
@@ -33,9 +37,12 @@ impl<S: Symbolic> Iterator for Operator<S> {
     type Item = S;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let i = self.index();
-        self.index.replace(i + 1);
-        self.tape.get(i).cloned()
+        if let Some(cur) = self.tape.get(self.index()).cloned() {
+            self.index.replace(self.index() + 1);
+            Some(cur)
+        } else {
+            None
+        }
     }
 }
 
@@ -61,12 +68,14 @@ impl<S: Symbolic> Scope<S> for Operator<S> {
     }
 }
 
-impl<S: Symbolic> Stateful<State> for Operator<S> {
-    fn state(&self) -> State {
+impl<S: Symbolic> Stateful for Operator<S> {
+    type State = State;
+
+    fn state(&self) -> Self::State {
         self.state
     }
 
-    fn update_state(&mut self, state: State) {
+    fn update_state(&mut self, state: Self::State) {
         self.state = state;
     }
 }
@@ -85,12 +94,16 @@ impl<S: Symbolic> From<Tape<S>> for Operator<S> {
 
 impl<S: Symbolic> TryFrom<(usize, State, Tape<S>)> for Operator<S> {
     type Error = Box<dyn std::error::Error>;
-    
+
     fn try_from(d: (usize, State, Tape<S>)) -> Result<Self, Self::Error> {
         if d.0 > d.2.len() {
             return Err("Starting index is out of bounds...".into());
         }
-        Ok(Self { index: d.0.into(), state: d.1, tape: d.2 })
+        Ok(Self {
+            index: d.0.into(),
+            state: d.1,
+            tape: d.2,
+        })
     }
 }
 
@@ -113,14 +126,14 @@ mod tests {
 
     #[test]
     fn test_operations() {
-        let tape = Tape::new(["a", "b", "c"]);
+        let tape = Tape::from_iter(["a", "b", "c"]);
         let mut actor = Operator::new(State::Valid, tape);
 
         actor.shift(Move::Left, "b");
-        assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c"]));
+        assert_eq!(actor.tape(), &Tape::from_iter(["b", "a", "b", "c"]));
         for _ in 0..actor.tape().len() {
             actor.shift(Move::Right, "b");
         }
-        assert_eq!(actor.tape(), &Tape::new(["b", "a", "b", "c", "b"]));
+        assert_eq!(actor.tape(), &Tape::from_iter(["b", "a", "b", "c", "b"]));
     }
 }

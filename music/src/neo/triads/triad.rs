@@ -11,7 +11,11 @@ use crate::{
     BoxedError, Gradient, MusicResult, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::{states::State, turing::{Tape, Machine, Operator, Program}, Alphabet};
+use contained_core::{
+    states::State,
+    turing::{Machine, Operator, Program, Tape},
+    Alphabet,
+};
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
@@ -45,7 +49,7 @@ impl Triad {
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
         Machine::new(
-            Program::new(self.clone().into(), State::Invalid),
+            Program::new(self.clone(), State::Invalid),
             Operator::new(State::Valid, tape.unwrap_or_default()),
         )
     }

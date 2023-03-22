@@ -180,8 +180,6 @@ impl Future for Frequency {
         let cycle = self.cursor;
         // Increment the cycle count.
         self.cursor += 1;
-        // Stores the current period
-        let period = self.period();
         // Find the time at which the next cycle will complete.
         let when = Instant::now() + Duration::from_secs_f64(self.freq());
         // Clone a thread-safe waker for use in the timer thread.

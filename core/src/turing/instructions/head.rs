@@ -33,12 +33,14 @@ impl<S: Symbolic> Hashable for Head<S> {
     }
 }
 
-impl<S: Symbolic> Stateful<State> for Head<S> {
-    fn state(&self) -> State {
+impl<S: Symbolic> Stateful for Head<S> {
+    type State = State;
+
+    fn state(&self) -> Self::State {
         self.state
     }
 
-    fn update_state(&mut self, state: State) {
+    fn update_state(&mut self, state: Self::State) {
         self.state = state;
     }
 }

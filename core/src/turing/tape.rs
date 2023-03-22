@@ -10,16 +10,16 @@ use serde::{Deserialize, Serialize};
 pub struct Tape<S: Symbolic = String>(Vec<S>);
 
 impl<S: Symbolic> Tape<S> {
-    pub fn new(symbols: impl IntoIterator<Item = S>) -> Self {
-        Self(Vec::from_iter(symbols))
+    pub fn new() -> Self {
+        Self(Default::default())
     }
     pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
-        Self::new(iter)
+        Self(Vec::from_iter(iter))
     }
     pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
         let mut tape = Vec::from_iter(iter);
         tape.reverse();
-        Self::new(tape)
+        Self(tape.clone())
     }
     pub fn get(&self, pos: usize) -> Option<&S> {
         self.tape().get(pos)
@@ -45,6 +45,9 @@ impl<S: Symbolic> Tape<S> {
     pub fn tape_mut(&mut self) -> &mut Vec<S> {
         &mut self.0
     }
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
+    }
 }
 
 impl<S: Symbolic> FromIterator<S> for Tape<S> {
@@ -62,9 +65,15 @@ impl<S: Symbolic> IntoIterator for Tape<S> {
     }
 }
 
+impl<S: Symbolic> From<&[S]> for Tape<S> {
+    fn from(d: &[S]) -> Tape<S> {
+        Tape(d.into_iter().cloned().collect())
+    }
+}
+
 impl<S: Symbolic> From<Vec<S>> for Tape<S> {
     fn from(d: Vec<S>) -> Tape<S> {
-        Tape::new(d)
+        Tape(d)
     }
 }
 
@@ -82,7 +91,7 @@ mod tests {
     fn test_tape() {
         let alpha = vec!["a", "b", "c"];
 
-        let a = Tape::new(alpha);
+        let a = Tape::from(alpha);
         assert_eq!(a.len(), 3);
     }
 }

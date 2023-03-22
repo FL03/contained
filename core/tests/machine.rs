@@ -1,8 +1,7 @@
 #[cfg(test)]
 use contained_core::turing::{
     instructions::{Instruction, Move},
-    Tape,
-    Machine, Operator, Program, Turing,
+    Machine, Operator, Program, Tape, Turing,
 };
 use contained_core::{states::State, Extend};
 
@@ -29,5 +28,5 @@ fn test_machine() {
     let mut machine = Machine::new(program, scope);
 
     assert!(machine.execute().is_ok());
-    assert_eq!(machine.tape().clone(), Tape::new(["c", "a", "a"]));
+    assert_eq!(machine.tape().clone(), Tape::norm(["c", "a", "a"]));
 }

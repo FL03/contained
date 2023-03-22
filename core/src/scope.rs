@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State> {
+pub trait Scope<S: Symbolic>: Iterator<Item = S> + Stateful<State = State> {
     fn insert(&mut self, elem: S);
     fn index(&self) -> usize;
     fn set_index(&mut self, pos: usize);

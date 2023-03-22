@@ -45,12 +45,14 @@ impl<S: Symbolic> Hashable for Tail<S> {
     }
 }
 
-impl<S: Symbolic> Stateful<State> for Tail<S> {
-    fn state(&self) -> State {
+impl<S: Symbolic> Stateful for Tail<S> {
+    type State = State;
+
+    fn state(&self) -> Self::State {
         self.state
     }
 
-    fn update_state(&mut self, state: State) {
+    fn update_state(&mut self, state: Self::State) {
         self.state = state;
     }
 }

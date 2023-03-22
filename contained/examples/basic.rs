@@ -30,7 +30,7 @@ fn main() -> Resultant {
 
     let mut res = Machine::new(program, scope);
     res.execute()?;
-    assert_eq!(res.tape().clone(), Tape::new(vec!["c", "a", "a"]));
+    assert_eq!(res.tape().clone(), Tape::from_iter(vec!["c", "a", "a"]));
     println!("{:?}", res);
 
     Ok(())

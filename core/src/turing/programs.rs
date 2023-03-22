@@ -17,7 +17,8 @@ pub struct Program<S: Symbolic> {
 }
 
 impl<S: Symbolic> Program<S> {
-    pub fn new(alphabet: Vec<S>, final_state: State) -> Self {
+    pub fn new(alphabet: impl IntoIterator<Item = S>, final_state: State) -> Self {
+        let alphabet = Vec::from_iter(alphabet);
         let s: i64 = final_state.into();
         let capacity = alphabet.len() * s as usize;
         let instructions = Vec::with_capacity(capacity);

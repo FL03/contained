@@ -19,7 +19,6 @@ pub(crate) mod utils;
 
 use crate::classes::PitchClass;
 
-
 /// [Gradient] provides a numerical interpretation of a given object
 pub trait Gradient: Clone + Eq + Ord + Into<i64> {
     const MODULUS: i64;

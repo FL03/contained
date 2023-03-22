@@ -46,7 +46,7 @@ fn main() -> Resultant {
     ];
     tracing::info!("Instructions: \n{:?}", instructions.clone());
     // Initialize a new machine
-    let mut machine = triad.clone().machine(Some(Tape::new(triad)));
+    let mut machine = triad.clone().machine(Some(Tape::from_iter(triad)));
     // Extend the program; turn [0, 3, 6] into [6, 3, 3]
     machine.program.extend(instructions)?;
     tracing::info!("Success: inserted the instructions into the machine...");

@@ -6,7 +6,10 @@
 use super::Triad;
 use crate::{neo::LPR, MusicResult, Note};
 use contained_core::states::{State, Stateful};
-use contained_core::{turing::{instructions::Instruction, Program, Tape}, Scope};
+use contained_core::{
+    turing::{instructions::Instruction, Program, Tape},
+    Scope,
+};
 use futures::Stream;
 use scsys::prelude::Timestamp;
 use serde::{Deserialize, Serialize};
@@ -30,14 +33,17 @@ impl Actor {
     pub fn new(tape: Tape<Note>, triad: Triad) -> Self {
         Self {
             index: 0,
-            program: Program::new(triad.clone().into_iter().collect(), State::Invalid),
+            program: Program::new(triad.clone(), State::Invalid),
             state: State::Valid,
             tape,
             triad,
             ts: Timestamp::default().into(),
         }
     }
-    pub fn insert_instruction(&mut self, instruction: Instruction<Note>) -> MusicResult<Option<Instruction<Note>>> {
+    pub fn insert_instruction(
+        &mut self,
+        instruction: Instruction<Note>,
+    ) -> MusicResult<Option<Instruction<Note>>> {
         self.program.insert(instruction)
     }
 }
@@ -46,10 +52,12 @@ impl Iterator for Actor {
     type Item = Note;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let i = self.index;
-        self.index += 1;
-        self.ts = Timestamp::default().into();
-        if let Some(cur) = self.tape.get(i) {
+        if let Some(cur) = self.tape.get(self.index) {
+            // Increment the index
+            self.index += 1;
+            // Update the timestamp
+            self.ts = Timestamp::default().into();
+            // Return the current value
             Some(cur.clone())
         } else {
             None
@@ -85,11 +93,13 @@ impl Scope<Note> for Actor {
     }
 }
 
-impl Stateful<State> for Actor {
-    fn state(&self) -> State {
+impl Stateful for Actor {
+    type State = State;
+
+    fn state(&self) -> Self::State {
         self.state
     }
-    fn update_state(&mut self, state: State) {
+    fn update_state(&mut self, state: Self::State) {
         self.state = state;
     }
 }
@@ -130,19 +140,19 @@ mod tests {
     #[test]
     fn test_actor() {
         let triad = Triad::new(0.into(), Triads::Major);
-        let mut actor = Actor::new(Tape::new(triad.clone()), triad.clone());
+        let mut actor = Actor::new(Tape::from_iter(triad.clone()), triad.clone());
 
         actor.shift((-1).into(), triad.third());
         assert_eq!(
             actor.tape(),
-            &Tape::new([4.into(), 0.into(), 4.into(), 7.into()])
+            &Tape::from_iter([4.into(), 0.into(), 4.into(), 7.into()])
         );
         for _ in 0..actor.tape().len() {
             actor.shift(1.into(), triad.fifth());
         }
         assert_eq!(
             actor.tape(),
-            &Tape::new([4.into(), 0.into(), 4.into(), 7.into(), 7.into()])
+            &Tape::from_iter([4.into(), 0.into(), 4.into(), 7.into(), 7.into()])
         );
     }
 }

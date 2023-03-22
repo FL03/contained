@@ -3,9 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{
-    Operator, Program, Tape, Turing,
-};
+use super::{Operator, Program, Tape, Turing};
 use crate::states::{State, Stateful};
 use crate::{Scope, Symbolic};
 use serde::{Deserialize, Serialize};
@@ -55,12 +53,7 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         until: impl Fn(&Self::Scope) -> bool,
     ) -> Result<&Self, Self::Error> {
         while !until(&self.scope) {
-            let head = self.scope.clone().into();
-            let inst = self.program.get(head)?.clone();
-            self.scope.update_state(inst.tail().state());
-            self.scope.set_symbol(inst.tail().symbol());
-            self.scope
-                .shift(inst.tail().action(), self.program.default_symbol());
+            self.execute_once()?;
         }
         Ok(self)
     }
