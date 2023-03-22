@@ -13,7 +13,6 @@ pub use self::{class::*, triad::*};
 pub(crate) mod class;
 pub(crate) mod triad;
 
-pub mod actor;
 pub mod tonic;
 
 use super::LPR;

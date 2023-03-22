@@ -7,7 +7,7 @@ extern crate contained;
 
 use contained::core::turing::{
     instructions::{Instruction, Move},
-    Machine, Driver, Program, Tape, Turing,
+    Driver, Machine, Program, Tape, Turing,
 };
 use contained::core::{states::State, Resultant};
 

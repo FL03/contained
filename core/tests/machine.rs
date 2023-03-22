@@ -2,7 +2,7 @@ use contained_core::states::State;
 #[cfg(test)]
 use contained_core::turing::{
     instructions::{Instruction, Move},
-    Machine, Driver, Program, Tape, Turing,
+    Driver, Machine, Program, Tape, Turing,
 };
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];

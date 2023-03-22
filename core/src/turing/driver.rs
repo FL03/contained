@@ -5,7 +5,7 @@
 */
 use super::Tape;
 use crate::states::{State, Stateful};
-use crate::{Scope, Symbolic};
+use crate::{Include, InsertAt, Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -47,6 +47,18 @@ impl<S: Symbolic> ExactSizeIterator for Driver<S> {
     }
 }
 
+impl<S: Symbolic> Include<S> for Driver<S> {
+    fn include(&mut self, elem: S) {
+        self.tape.insert(self.index(), elem);
+    }
+}
+
+impl<S: Symbolic> InsertAt<usize, S> for Driver<S> {
+    fn insert(&mut self, index: usize, elem: S) {
+        self.tape.insert(index, elem);
+    }
+}
+
 impl<S: Symbolic> Iterator for Driver<S> {
     type Item = S;
 
@@ -61,10 +73,6 @@ impl<S: Symbolic> Iterator for Driver<S> {
 }
 
 impl<S: Symbolic> Scope<S> for Driver<S> {
-    fn insert_symbol(&mut self, elem: S) {
-        self.tape.insert(self.index(), elem);
-    }
-
     fn index(&self) -> usize {
         *self.index.borrow()
     }

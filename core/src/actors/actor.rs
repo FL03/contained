@@ -6,7 +6,7 @@
 use super::{Execute, Translate};
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{Alphabet, Error, Scope, Symbolic};
+use crate::{Alphabet, Error, Include, InsertAt, Scope, Symbolic};
 use scsys::Timestamp;
 use serde::{Deserialize, Serialize};
 
@@ -29,10 +29,6 @@ impl<S: Symbolic> Actor<S> {
             ts: Timestamp::default().into(),
         }
     }
-
-    pub fn insert_instruction(&mut self, instruction: Instruction<S>) -> Option<Instruction<S>> {
-        self.program.insert(instruction)
-    }
 }
 
 impl<S: Symbolic> Extend<S> for Actor<S> {
@@ -44,6 +40,24 @@ impl<S: Symbolic> Extend<S> for Actor<S> {
 impl<S: Symbolic> Extend<Instruction<S>> for Actor<S> {
     fn extend<T: IntoIterator<Item = Instruction<S>>>(&mut self, iter: T) {
         self.program.extend(iter)
+    }
+}
+
+impl<S: Symbolic> Include<S> for Actor<S> {
+    fn include(&mut self, elem: S) {
+        self.memory.insert(self.index, elem);
+    }
+}
+
+impl<S: Symbolic> InsertAt<usize, S> for Actor<S> {
+    fn insert(&mut self, index: usize, elem: S) {
+        self.memory.insert(index, elem);
+    }
+}
+
+impl<S: Symbolic> Include<Instruction<S>> for Actor<S> {
+    fn include(&mut self, elem: Instruction<S>) {
+        self.program.insert(elem);
     }
 }
 
@@ -81,10 +95,6 @@ impl<S: Symbolic> Execute<S> for Actor<S> {
 }
 
 impl<S: Symbolic> Scope<S> for Actor<S> {
-    fn insert_symbol(&mut self, elem: S) {
-        self.memory.insert(self.index(), elem);
-    }
-
     fn index(&self) -> usize {
         self.index
     }

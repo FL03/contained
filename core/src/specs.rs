@@ -37,12 +37,30 @@ pub trait ArrayLike<T>: Clone + IntoIterator<Item = T, IntoIter = std::vec::Into
     }
 }
 
+pub trait Include<T> {
+    fn include(&mut self, elem: T);
+}
+
+pub trait TryInclude<T> {
+    type Error;
+
+    fn try_include<Output>(&mut self, elem: T) -> Result<Output, Self::Error>;
+}
+
+pub trait InsertAt<K, V> {
+    fn insert(&mut self, key: K, elem: V);
+}
+
+pub trait TryInsertAt<K, V> {
+    type Error;
+
+    fn try_insert<Output>(&mut self, key: K, elem: V) -> Result<Output, Self::Error>;
+}
+
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Stateful<State = State> {
+pub trait Scope<S: Symbolic>: Include<S> + InsertAt<usize, S> + Stateful<State = State> {
     /// [Scope::index] returns the current position of the [Scope] on the [Tape]
     fn index(&self) -> usize;
-    /// [Scope::insert_symbol] inserts a new element at the current position of the [Scope]
-    fn insert_symbol(&mut self, elem: S);
     /// [Scope::set_index] sets the current position of the [Scope] on the [Tape]
     fn set_index(&mut self, pos: usize);
     /// [Scope::set_symbol] sets the current element of the [Scope] on the [Tape]
@@ -56,7 +74,7 @@ pub trait Scope<S: Symbolic>: Stateful<State = State> {
         match shift {
             // If the current position is 0, insert a new element at the top of the vector
             Move::Left if self.index() == 0 => {
-                self.insert_symbol(elem);
+                self.include(elem);
             }
             Move::Left => {
                 self.set_index(index - 1);
@@ -65,7 +83,7 @@ pub trait Scope<S: Symbolic>: Stateful<State = State> {
                 self.set_index(index + 1);
 
                 if self.index() == self.tape().len() {
-                    self.insert_symbol(elem);
+                    self.include(elem);
                 }
             }
             Move::Stay => {}
@@ -80,7 +98,6 @@ pub trait Scope<S: Symbolic>: Stateful<State = State> {
     /// [Scope::tape] returns the [Tape] of the [Scope]
     fn tape(&self) -> &Tape<S>;
 }
-
 
 /// [With] describes a simple means of concating several objects together
 pub trait With<T> {

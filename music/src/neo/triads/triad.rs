@@ -4,7 +4,7 @@
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 */
-use super::{actor::Actor, Triadic, Triads};
+use super::{Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::LPR,
@@ -12,8 +12,9 @@ use crate::{
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{
+    actors::Actor,
     states::State,
-    turing::{Machine, Driver, Program, Tape},
+    turing::{Driver, Machine, Program, Tape},
     Alphabet,
 };
 use decanter::prelude::{hasher, Hashable, H256};
@@ -43,8 +44,8 @@ impl Triad {
         }
     }
     /// Create a new [Actor] with the [Triad] as its alphabet
-    pub fn actor(&self) -> Actor {
-        self.clone().into()
+    pub fn actor(&self, tape: Option<Tape<Note>>) -> Actor<Note> {
+        Actor::new(Program::new(self.clone(), State::Invalid), tape)
     }
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {

@@ -31,7 +31,6 @@ pub trait InstructionSpec<S: Symbolic>: IntoIterator<Item = Self> {
     fn new(head: Self::Head, tail: Self::Tail) -> Self;
     fn head(&self) -> Self::Head;
     fn tail(&self) -> Self::Tail;
-    
 }
 
 pub trait InstructionSet<S: Symbolic>: Iterator<Item = Instruction<S>> {
