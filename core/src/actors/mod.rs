@@ -13,6 +13,7 @@ use crate::turing::instructions::Instruction;
 use crate::{Alphabet, Error, Scope, Symbolic};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
+use predicates::Predicate;
 
 pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruction<S>> {
     type Driver: Scope<S>;
@@ -79,9 +80,10 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
 pub trait AsyncExecute<S: Symbolic + Send + Sync>:
     Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State> + Unpin
 {
-    type Driver: Future + Scope<S>;
+    type Driver: Future + Scope<S> + Send + Sync;
+    type Error: Send + Sync;
 
-    async fn execute(&mut self) -> Result<Self::Driver, Error> {
+    async fn execute(&mut self) -> Result<Self::Driver, Self::Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
@@ -89,7 +91,7 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
             // Get the tail of the instruction
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
             self.scope_mut().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
@@ -99,9 +101,9 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
         // Return the actor
         Ok(self.scope())
     }
-
+    /// Returns a reference to the scope
     fn scope(&self) -> Self::Driver;
-
+    /// Returns a mutable reference to the scope
     fn scope_mut(&mut self) -> &mut Self::Driver;
 }
 
@@ -152,9 +154,9 @@ pub trait Execute<S: Symbolic>:
     /// [Execute::execute_until]
     fn execute_until(
         &mut self,
-        until: impl Fn(&Self::Driver) -> bool,
+        until: &dyn Predicate<Self::Driver>,
     ) -> Result<Self::Driver, Error> {
-        while !until(&self.scope()) {
+        while !until.eval(&self.scope()) {
             self.execute_once()?;
         }
         Ok(self.scope())
