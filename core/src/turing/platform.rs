@@ -6,7 +6,7 @@
 use super::instructions::Instruction;
 use super::{Driver, Program, Tape, Turing};
 use crate::states::{State, Stateful};
-use crate::{Alphabet, Error, Scope, Symbolic};
+use crate::{Alphabet, Error, Scope, Symbolic, Translate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
@@ -77,7 +77,6 @@ impl<S: Symbolic> Stateful<State> for Machine<S> {
 }
 
 impl<S: Symbolic> Turing<S> for Machine<S> {
-    type Error = Error;
     type Scope = Driver<S>;
 
     fn execute(&mut self) -> Result<&Self, Self::Error> {
@@ -104,6 +103,10 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         }
         Ok(self)
     }
+}
+
+impl<S: Symbolic> Translate<S> for Machine<S> {
+    type Error = Error;
 
     fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
         self.driver = Driver::from(tape);

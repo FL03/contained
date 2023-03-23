@@ -101,6 +101,13 @@ pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
     fn tape(&self) -> &Tape<S>;
 }
 
+/// [Translate] is a trait that allows for the translation of a machine's memory
+pub trait Translate<S: Symbolic> {
+    type Error;
+
+    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error>;
+}
+
 /// [With] describes a simple means of concating several objects together
 pub trait With<T> {
     /// [With::Output] must be a superposition of self and T

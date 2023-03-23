@@ -12,11 +12,10 @@ pub(crate) mod platform;
 pub(crate) mod programs;
 pub(crate) mod tape;
 
-use crate::{Scope, Symbolic};
+use crate::{Scope, Symbolic, Translate};
 
 /// [Turing] describes a programmable Turing machine
-pub trait Turing<S: Symbolic> {
-    type Error;
+pub trait Turing<S: Symbolic>: Translate<S> {
     type Scope: Scope<S>;
 
     /// [Turing::execute]
@@ -26,6 +25,4 @@ pub trait Turing<S: Symbolic> {
     /// [Turing::execute_until]
     fn execute_until(&mut self, until: impl Fn(&Self::Scope) -> bool)
         -> Result<&Self, Self::Error>;
-    /// [Turing::translate] returns the mutated [Tape] after updating the [Turing::Scope] and finally invoking [Turing::execute]
-    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error>;
 }

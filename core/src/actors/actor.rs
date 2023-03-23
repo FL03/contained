@@ -3,30 +3,28 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{Execute, Translate};
+use super::Execute;
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{Alphabet, Error, Include, Insert, Scope, Symbolic};
-use scsys::Timestamp;
+use crate::{Alphabet, Error, Include, Insert, Scope, Symbolic, Translate};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Actor<S: Symbolic> {
-    index: usize,
+    cursor: usize,
     pub memory: Tape<S>,
     program: Program<S>,
     state: State,
-    ts: i64,
 }
 
 impl<S: Symbolic> Actor<S> {
     pub fn new(program: Program<S>, tape: Option<Tape<S>>) -> Self {
         Self {
-            index: 0,
+            cursor: 0,
             memory: tape.unwrap_or_default(),
             program,
             state: Default::default(),
-            ts: Timestamp::default().into(),
         }
     }
 }
@@ -66,7 +64,7 @@ impl<S: Symbolic> Extend<Instruction<S>> for Actor<S> {
 
 impl<S: Symbolic> Include<S> for Actor<S> {
     fn include(&mut self, elem: S) {
-        self.memory.insert(self.index, elem);
+        self.memory.insert(self.cursor, elem);
     }
 }
 
@@ -86,9 +84,7 @@ impl<S: Symbolic> Iterator for Actor<S> {
     type Item = Instruction<S>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(cur) = self.clone().memory.get(self.index) {
-            // Update the timestamp
-            self.ts = Timestamp::default().into();
+        if let Some(cur) = self.clone().memory.get(self.cursor) {
             // Get the instruction
             self.program.get((self.state, cur.clone()).into()).cloned()
         } else {
@@ -111,11 +107,11 @@ impl<S: Symbolic> Execute<S> for Actor<S> {
 
 impl<S: Symbolic> Scope<S> for Actor<S> {
     fn index(&self) -> usize {
-        self.index
+        self.cursor
     }
 
     fn set_index(&mut self, pos: usize) {
-        self.index = pos;
+        self.cursor = pos;
     }
 
     fn set_symbol(&mut self, elem: S) {
@@ -138,7 +134,9 @@ impl<S: Symbolic> Stateful<State> for Actor<S> {
 }
 
 impl<S: Symbolic> Translate<S> for Actor<S> {
-    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Error> {
+    type Error = Error;
+
+    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
         *self = Self::new(self.program.clone(), Some(tape));
         Ok(self.memory.clone())
     }

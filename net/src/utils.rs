@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-
 use libp2p::identity::{ed25519, DecodingError};
 
 /// [sk_from_seed] A simple function wrapper attempting to create an [ed25519::SecretKey] from the provided seed
