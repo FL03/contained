@@ -6,6 +6,7 @@
 pub use self::actor::*;
 
 mod actor;
+pub mod exec;
 
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Tape};
@@ -15,7 +16,7 @@ use futures::{Future, StreamExt};
 
 #[async_trait]
 pub trait AsyncExecute<S: Symbolic + Send + Sync>:
-    Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State = State> + Unpin
+    Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State> + Unpin
 {
     type Driver: Future + Scope<S>;
 
@@ -45,7 +46,7 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
 
 /// [Execute] is a trait that allows for the execution of a program.
 pub trait Execute<S: Symbolic>:
-    Alphabet<S> + Iterator<Item = Instruction<S>> + Stateful<State = State>
+    Alphabet<S> + Iterator<Item = Instruction<S>> + Stateful<State>
 {
     type Driver: Scope<S>;
 
@@ -103,6 +104,7 @@ pub trait Execute<S: Symbolic>:
     fn scope_mut(&mut self) -> &mut Self::Driver;
 }
 
+/// [Translate] is a trait that allows for the translation of a machine's memory
 pub trait Translate<S: Symbolic> {
     fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Error>;
 }

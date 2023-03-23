@@ -9,16 +9,14 @@ pub use self::state::*;
 pub(crate) mod state;
 
 /// [Stateful] describes a stateful object
-pub trait Stateful: Clone + Default + PartialEq + PartialOrd {
-    type State: StateSpec;
-
-    fn state(&self) -> Self::State;
-    fn update_state(&mut self, state: Self::State);
+pub trait Stateful<S: StateSpec>: Clone + Default {
+    /// [Stateful::state] is used to get the state of the object
+    fn state(&self) -> S;
+    /// [Stateful::update_state] is used to update the state of the object
+    fn update_state(&mut self, state: S);
 }
 
-impl Stateful for i64 {
-    type State = i64;
-
+impl Stateful<i64> for i64 {
     fn state(&self) -> i64 {
         *self
     }
@@ -29,7 +27,7 @@ impl Stateful for i64 {
 
 /// [StateSpec] is used by [Stateful] to describe a specific state
 pub trait StateSpec:
-    Clone + Copy + Default + Eq + Ord + std::fmt::Display + std::ops::Add<Output = Self>
+    Copy + Default + Eq + Ord + std::fmt::Display + std::ops::Add<Output = Self>
 {
 }
 

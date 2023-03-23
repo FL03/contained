@@ -15,11 +15,11 @@ pub(crate) mod tail;
 use crate::states::{State, Stateful};
 use crate::turing::Symbolic;
 
-pub trait IHead<S: Symbolic>: Stateful<State = State> {
+pub trait IHead<S: Symbolic>: Stateful<State> {
     fn symbol(&self) -> S;
 }
 
-pub trait ITail<S: Symbolic>: Stateful<State = State> {
+pub trait ITail<S: Symbolic>: Stateful<State> {
     fn action(&self) -> Move;
     fn symbol(&self) -> S;
 }

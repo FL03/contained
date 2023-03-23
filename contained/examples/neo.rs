@@ -5,9 +5,8 @@
 */
 extern crate contained;
 
-use contained::core::states::State;
 use contained::core::turing::{instructions::Instruction, Tape, Turing};
-use contained::core::Resultant;
+use contained::core::{actors::Execute, states::State, Resultant, Scope};
 use contained::music::{
     neo::triads::{Triad, Triads},
     Note,
@@ -46,13 +45,16 @@ fn main() -> Resultant {
     ];
     tracing::info!("Instructions: \n{:?}", instructions.clone());
     // Initialize a new machine
-    let mut machine = triad.clone().machine(Some(Tape::from_iter(triad)));
+    let mut machine = triad
+        .clone()
+        .actor(Some(Tape::norm([0.into(), 3.into(), 6.into()])));
     // Extend the program; turn [0, 3, 6] into [6, 3, 3]
-    machine.program.extend(instructions);
+    machine.extend(instructions);
     tracing::info!("Success: inserted the instructions into the machine...");
     // Execute the program
     tracing::info!("Executing the program...");
-    println!("{:?}", machine.execute()?);
+    assert!(machine.execute().is_ok());
+    println!("{:?}", machine.memory.tape());
 
     Ok(())
 }

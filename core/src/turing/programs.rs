@@ -5,9 +5,58 @@
 */
 use super::instructions::{Head, Instruction};
 use crate::states::{State, Stateful};
-use crate::{Alphabet, Symbolic};
+use crate::{Alphabet, Include, Insert, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::mem::replace;
+
+pub trait Contract<S: Symbolic>:
+    Clone + Include<Instruction<S>> + Insert<usize, Instruction<S>>
+{
+    fn alphabet(&self) -> Box<dyn Alphabet<S>>;
+    fn final_state(&self) -> State;
+
+    /// Given some [Head], find the coresponding [Instruction]
+    fn get(&self, head: Head<S>) -> Option<&Instruction<S>> {
+        // TODO: Reimplement the checks for getting a head value
+        if head.state() > self.final_state() {
+            return None;
+        }
+        self.instructions()
+            .iter()
+            .find(|inst: &&Instruction<S>| inst.head() == head)
+    }
+    /// Try to insert a new [Instruction] into the program; if the instruction is invalid, return None
+    /// Otherwise, return the previous instruction at the same [Head] if it exists
+    fn insert(&mut self, inst: Instruction<S>) -> Option<Instruction<S>> {
+        // TODO: Reimplement the checks for insertion
+        if inst.head().state() == State::Invalid {
+            return None;
+        }
+        if self.final_state() < inst.head().state() || self.final_state() < inst.tail().state() {
+            return None;
+        }
+        if !self.alphabet().in_alphabet(&inst.head().symbol())
+            || !self.alphabet().in_alphabet(&inst.tail().symbol())
+        {
+            return None;
+        }
+
+        match self
+            .instructions()
+            .iter()
+            .position(|cand: &Instruction<S>| cand.head() == inst.head())
+        {
+            Some(index) => Some(replace(&mut self.instructions_mut()[index], inst)),
+            None => {
+                self.instructions_mut().push(inst.clone());
+                Some(inst)
+            }
+        }
+    }
+
+    fn instructions(&self) -> &Vec<Instruction<S>>;
+    fn instructions_mut(&mut self) -> &mut Vec<Instruction<S>>;
+}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Program<S: Symbolic> {
@@ -60,8 +109,8 @@ impl<S: Symbolic> Program<S> {
         if *self.final_state() < inst.head().state() || *self.final_state() < inst.tail().state() {
             return None;
         }
-        if !self.alphabet().contains(&inst.head().symbol())
-            || !self.alphabet().contains(&inst.tail().symbol())
+        if !self.alphabet().in_alphabet(&inst.head().symbol())
+            || !self.alphabet().in_alphabet(&inst.tail().symbol())
         {
             return None;
         }
@@ -81,6 +130,9 @@ impl<S: Symbolic> Program<S> {
 }
 
 impl<S: Symbolic> Alphabet<S> for Program<S> {
+    fn in_alphabet(&self, symbol: &S) -> bool {
+        self.alphabet.in_alphabet(symbol)
+    }
     fn default_symbol(&self) -> S {
         self.alphabet.default_symbol()
     }

@@ -50,13 +50,16 @@ impl Triad {
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
         Machine::new(
-            Program::new(self.clone(), State::Invalid),
             Driver::new(State::Valid, tape.unwrap_or_default()),
+            Program::new(self.clone(), State::Invalid),
         )
     }
 }
 
 impl Alphabet<Note> for Triad {
+    fn in_alphabet(&self, symbol: &Note) -> bool {
+        self.notes.0 == *symbol || self.notes.1 == *symbol || self.notes.2 == *symbol
+    }
     fn default_symbol(&self) -> Note {
         self.root()
     }

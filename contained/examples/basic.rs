@@ -30,7 +30,7 @@ fn main() -> Resultant {
     // Instruction set; turn ["a", "b", "c"] into ["c", "a", "a"]
     program.extend(instructions);
 
-    let mut machine = Machine::new(program, scope);
+    let mut machine = Machine::new(scope, program);
 
     assert!(machine.execute().is_ok());
     assert_eq!(machine.tape().clone(), Tape::norm(["c", "a", "a"]));

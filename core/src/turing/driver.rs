@@ -90,14 +90,12 @@ impl<S: Symbolic> Scope<S> for Driver<S> {
     }
 }
 
-impl<S: Symbolic> Stateful for Driver<S> {
-    type State = State;
-
-    fn state(&self) -> Self::State {
+impl<S: Symbolic> Stateful<State> for Driver<S> {
+    fn state(&self) -> State {
         self.state
     }
 
-    fn update_state(&mut self, state: Self::State) {
+    fn update_state(&mut self, state: State) {
         self.state = state;
     }
 }

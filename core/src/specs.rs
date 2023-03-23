@@ -60,7 +60,7 @@ pub trait TryInsert<K, V> {
 }
 
 /// [Scope] describes the focus of the [crate::turing::Turing]
-pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State = State> {
+pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
     /// [Scope::index] returns the current position of the [Scope] on the [Tape]
     fn index(&self) -> usize;
     /// [Scope::set_index] sets the current position of the [Scope] on the [Tape]

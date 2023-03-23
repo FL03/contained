@@ -27,6 +27,7 @@ algae.workspace = true
 async-trait.workspace = true
 decanter.workspace = true
 futures.workspace = true
+itertools.workspace = true
 predicates = "2.1"
 scsys.workspace = true
 serde.workspace = true

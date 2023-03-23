@@ -31,6 +31,15 @@ impl<S: Symbolic> Actor<S> {
     }
 }
 
+impl<S: Symbolic> Alphabet<S> for Actor<S> {
+    fn in_alphabet(&self, symbol: &S) -> bool {
+        self.program.in_alphabet(symbol)
+    }
+    fn default_symbol(&self) -> S {
+        self.program.default_symbol()
+    }
+}
+
 impl<S: Symbolic> AsMut<Actor<S>> for Actor<S> {
     fn as_mut(&mut self) -> &mut Actor<S> {
         self
@@ -88,12 +97,6 @@ impl<S: Symbolic> Iterator for Actor<S> {
     }
 }
 
-impl<S: Symbolic> Alphabet<S> for Actor<S> {
-    fn default_symbol(&self) -> S {
-        self.program.default_symbol()
-    }
-}
-
 impl<S: Symbolic> Execute<S> for Actor<S> {
     type Driver = Self;
 
@@ -124,15 +127,13 @@ impl<S: Symbolic> Scope<S> for Actor<S> {
     }
 }
 
-impl<S: Symbolic> Stateful for Actor<S> {
-    type State = State;
-
-    fn state(&self) -> Self::State {
+impl<S: Symbolic> Stateful<State> for Actor<S> {
+    fn state(&self) -> State {
         self.state
     }
-    fn update_state(&mut self, state: Self::State) {
+
+    fn update_state(&mut self, state: State) {
         self.state = state;
-        self.ts = Timestamp::default().into();
     }
 }
 
