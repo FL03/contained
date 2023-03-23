@@ -16,18 +16,24 @@ crate-type = ["cdylib", "rlib"]
 test = true
 
 [features]
+default = []
+
+wasm = []
 
 [build-dependencies]
 
 [dependencies]
 algae.workspace = true
+async-trait.workspace = true
 decanter.workspace = true
+futures.workspace = true
+itertools.workspace = true
+predicates = "2.1"
 scsys.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-
 
 [dev-dependencies]
 

@@ -8,7 +8,7 @@
             Perfect (7)
             Diminished (9)
 */
-use crate::{Gradient, Notable};
+use crate::{BoxedError, Gradient, Note};
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -40,7 +40,7 @@ pub enum Fifths {
 }
 
 impl Fifths {
-    pub fn compute<N: Notable>(note: N) -> (N, N, N) {
+    pub fn compute(note: Note) -> (Note, Note, Note) {
         (
             Self::Augmented + note.clone(),
             Self::Perfect + note.clone(),
@@ -55,10 +55,10 @@ impl Hashable for Fifths {
     }
 }
 
-impl<N: Notable> TryFrom<(N, N)> for Fifths {
-    type Error = String;
+impl TryFrom<(Note, Note)> for Fifths {
+    type Error = BoxedError;
 
-    fn try_from(data: (N, N)) -> Result<Self, Self::Error> {
+    fn try_from(data: (Note, Note)) -> Result<Self, Self::Error> {
         // An interval is the difference in pitch between an two notes
         // We take the pitch of the result to account for its modularity; (0, 11) -> 11 but (11, 0) -> 1
         let interval: i64 = (data.1.pitch() - data.0.pitch()).pitch();
@@ -66,23 +66,23 @@ impl<N: Notable> TryFrom<(N, N)> for Fifths {
             6 => Ok(Self::Diminished),
             7 => Ok(Self::Perfect),
             8 => Ok(Self::Augmented),
-            _ => Err("Interval is not a fifth...".to_string()),
+            _ => Err("Interval is not a fifth...".into()),
         }
     }
 }
 
-impl<N: Notable> std::ops::Add<N> for Fifths {
-    type Output = N;
+impl std::ops::Add<Note> for Fifths {
+    type Output = Note;
 
-    fn add(self, rhs: N) -> Self::Output {
+    fn add(self, rhs: Note) -> Self::Output {
         (rhs.pitch() + self as i64).into()
     }
 }
 
-impl<N: Notable> std::ops::Sub<N> for Fifths {
-    type Output = N;
+impl std::ops::Sub<Note> for Fifths {
+    type Output = Note;
 
-    fn sub(self, rhs: N) -> Self::Output {
+    fn sub(self, rhs: Note) -> Self::Output {
         (rhs.pitch() - self as i64).into()
     }
 }

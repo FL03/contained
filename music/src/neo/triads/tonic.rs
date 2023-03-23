@@ -5,13 +5,12 @@
         For our purposes the tonic is used as an extension of the triad, implementing a complete UTM
 */
 use super::Triad;
-use crate::{Notable, Note};
 use contained_core::states::State;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Tonic<N: Notable = Note> {
+pub struct Tonic {
     epoch: std::time::Duration,
     state: State,
-    triad: Triad<N>,
+    triad: Triad,
 }

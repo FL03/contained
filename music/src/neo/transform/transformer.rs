@@ -4,72 +4,45 @@
     Description: ... Summary ...
 */
 use super::LPR;
-use crate::{
-    neo::triads::{Triad, Triadic},
-    Notable, Note,
-};
-use scsys::prelude::Timestamp;
+use crate::neo::triads::{Triad, Triadic};
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, Default)]
-pub struct Transformer<N: Notable = Note> {
+pub struct Transformer {
     index: usize,
     iter: Vec<LPR>,
-    scope: Triad<N>,
-    ts: i64,
+    scope: Arc<Mutex<Triad>>,
 }
 
-impl<N: Notable> Transformer<N> {
-    pub fn new(iter: impl IntoIterator<Item = LPR>, scope: Triad<N>) -> Self {
+impl Transformer {
+    pub fn new(iter: impl IntoIterator<Item = LPR>, scope: Arc<Mutex<Triad>>) -> Self {
         Self {
             index: 0,
             iter: Vec::from_iter(iter),
             scope,
-            ts: Timestamp::default().into(),
         }
     }
 }
 
-impl<N: Notable> Iterator for Transformer<N> {
-    type Item = Triad<N>;
+impl ExactSizeIterator for Transformer {
+    fn len(&self) -> usize {
+        self.iter.len()
+    }
+}
+
+impl Iterator for Transformer {
+    type Item = Arc<Mutex<Triad>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let i = self.index;
-        self.index += 1;
-        self.ts = Timestamp::default().into();
-        if let Some(cur) = self.iter.get(i) {
-            self.scope.transform(*cur);
+        if let Some(cur) = self.iter.get(self.index) {
+            // Increment the index
+            self.index += 1;
+            // Transform the scope
+            self.scope.lock().unwrap().transform(*cur);
+            // Return the scope
             Some(self.scope.clone())
         } else {
             None
         }
     }
 }
-
-// impl<N: Notable + Unpin> Stream for Transformer<N> {
-//     type Item = Triad<N>;
-
-//     fn poll_next(
-//         self: Pin<&mut Self>,
-//         cx: &mut task::Context<'_>,
-//     ) -> Poll<Option<Self::Item>> {
-//         if self.index == self.iter.len() {
-//             // No more delays
-//             return Poll::Ready(None);
-//         }
-
-//         match Pin::new(&mut self.scope).poll(cx) {
-//             Poll::Ready(_) => {
-//                 let when = Instant::now() + Duration::new(1, 0);
-//                 let i = self.index;
-//                 self.index += 1;
-//                 if let Some(cur) = self.iter.get(i) {
-//                     self.scope.transform(*cur);
-//                     Poll::Ready(Some(self.scope.as_ref().clone()))
-//                 } else {
-//                     Poll::Ready(None)
-//                 }
-//             }
-//             Poll::Pending => Poll::Pending,
-//         }
-//     }
-// }

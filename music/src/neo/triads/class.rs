@@ -6,7 +6,7 @@
 use super::Triad;
 use crate::{
     intervals::{Fifths, Interval, Thirds},
-    BoxedError, Notable,
+    BoxedError, Note,
 };
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -41,6 +41,17 @@ pub enum Triads {
     Minor,
 }
 
+impl Triads {
+    pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
+        match self {
+            Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
+            Triads::Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
+            Triads::Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
+            Triads::Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
+        }
+    }
+}
+
 impl From<(Thirds, Thirds)> for Triads {
     fn from(intervals: (Thirds, Thirds)) -> Triads {
         match intervals.0 {
@@ -56,11 +67,11 @@ impl From<(Thirds, Thirds)> for Triads {
     }
 }
 
-impl<N: Notable> TryFrom<Triad<N>> for Triads {
+impl TryFrom<Triad> for Triads {
     type Error = BoxedError;
 
-    fn try_from(data: Triad<N>) -> Result<Self, Self::Error> {
-        let triad: (N, N, N) = data.into();
+    fn try_from(data: Triad) -> Result<Self, Self::Error> {
+        let triad: (Note, Note, Note) = data.into();
         Self::try_from(triad)
     }
 }
@@ -89,11 +100,11 @@ impl TryFrom<(Thirds, Fifths)> for Triads {
     }
 }
 
-impl<N: Notable> TryFrom<(N, N, N)> for Triads {
+impl TryFrom<(Note, Note, Note)> for Triads {
     type Error = BoxedError;
 
-    fn try_from(data: (N, N, N)) -> Result<Self, Self::Error> {
-        let (r, t, f): (N, N, N) = (data.0, data.1, data.2);
+    fn try_from(data: (Note, Note, Note)) -> Result<Self, Self::Error> {
+        let (r, t, f): (Note, Note, Note) = (data.0, data.1, data.2);
         let ab = Thirds::try_from((r.clone(), t))?;
         let bc = Fifths::try_from((r, f))?;
 

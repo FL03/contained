@@ -35,7 +35,7 @@ smart-default.workspace = true
 strum.workspace = true
 tarpc = { features = ["full"], version = "0.31" }
 tokio.workspace = true
-tokio-stream = "0.1"
+tokio-stream.workspace = true
 tracing = { features = [], version = "0.1" }
 tracing-subscriber = { features = [], version = "0.3" }
 

@@ -17,9 +17,7 @@ pub(crate) mod notes;
 pub(crate) mod primitives;
 pub(crate) mod utils;
 
-use crate::classes::{NaturalNote, PitchClass};
-use algae::graph::cmp::Node;
-use contained_core::Symbolic;
+use crate::classes::PitchClass;
 
 /// [Gradient] provides a numerical interpretation of a given object
 pub trait Gradient: Clone + Eq + Ord + Into<i64> {
@@ -39,13 +37,5 @@ impl Gradient for i64 {
 
     fn pitch(&self) -> i64 {
         absmod(*self, Self::MODULUS)
-    }
-}
-
-/// [Notable] is used to designate a structure used to represent a note
-pub trait Notable: From<i64> + Gradient + Symbolic + Node {
-    /// [Notable::is_natural] Simple way to detect if the pitch is natural or not
-    fn is_natural(&self) -> bool {
-        NaturalNote::try_from(self.pitch()).is_ok()
     }
 }

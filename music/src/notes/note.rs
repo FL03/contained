@@ -9,7 +9,8 @@
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
 use super::{classes::PitchClass, Pitch};
-use crate::{intervals::Interval, Gradient, Notable};
+use crate::{intervals::Interval, Gradient};
+use algae::graph::cmp::Node;
 use contained_core::Symbolic;
 use serde::{Deserialize, Serialize};
 
@@ -44,9 +45,7 @@ impl Gradient for Note {
     }
 }
 
-impl algae::graph::cmp::Node for Note {}
-
-impl Notable for Note {}
+impl Node for Note {}
 
 impl Symbolic for Note {}
 

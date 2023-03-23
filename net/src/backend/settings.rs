@@ -7,56 +7,19 @@ use config::{Config, Environment};
 use decanter::prelude::{hasher, Hashable, H256};
 use scsys::prelude::{try_collect_config_files, ConfigResult, SerdeDisplay};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use tracing::Level;
 
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
-#[strum(serialize_all = "snake_case")]
-pub enum LogMode {
-    #[default]
-    Debug = 0,
-    Info = 1,
-    Trace = 2,
-}
-
-impl Hashable for LogMode {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
-    }
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Default,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    SerdeDisplay,
-    Serialize,
+    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
 )]
 pub struct Logger {
     level: String,
 }
 
 impl Logger {
+    pub fn new(level: String) -> Self {
+        Self { level }
+    }
     pub fn setup_env(&mut self, level: Option<&str>) -> &Self {
         let key = level.unwrap_or("RUST_LOG");
         if let Some(v) = std::env::var_os(key) {
@@ -72,9 +35,23 @@ impl Logger {
     }
 }
 
+impl Default for Logger {
+    fn default() -> Self {
+        Self::from(Level::INFO)
+    }
+}
+
 impl Hashable for Logger {
     fn hash(&self) -> H256 {
         hasher(self).into()
+    }
+}
+
+impl From<Level> for Logger {
+    fn from(value: Level) -> Self {
+        Self {
+            level: value.to_string(),
+        }
     }
 }
 

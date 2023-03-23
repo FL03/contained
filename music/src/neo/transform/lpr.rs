@@ -16,7 +16,6 @@
         number of elements + freq
 */
 use crate::neo::triads::{Triad, Triadic};
-use crate::Notable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -47,16 +46,16 @@ pub enum LPR {
 }
 
 impl LPR {
-    pub fn transform<N: Notable>(&self, triad: &mut Triad<N>) -> Triad<N> {
+    pub fn transform(&self, triad: &mut Triad) -> Triad {
         triad.transform(*self);
         triad.clone()
     }
 }
 
-impl<N: Notable> std::ops::Mul<Triad<N>> for LPR {
-    type Output = Triad<N>;
+impl std::ops::Mul<Triad> for LPR {
+    type Output = Triad;
 
-    fn mul(self, rhs: Triad<N>) -> Self::Output {
+    fn mul(self, rhs: Triad) -> Self::Output {
         self.transform(&mut rhs.clone())
     }
 }
@@ -67,7 +66,6 @@ mod tests {
 
     use super::*;
     use crate::neo::triads::{Triad, Triads};
-    use crate::Note;
 
     #[test]
     fn test_lpr() {
@@ -78,30 +76,30 @@ mod tests {
 
     #[test]
     fn test_leading() {
-        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let mut b = LPR::L * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::<Note>::try_from((4, 7, 11)).unwrap());
+        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
         b *= LPR::L;
         assert_eq!(a, b);
     }
 
     #[test]
     fn test_parallel() {
-        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let b = LPR::P * a.clone();
         assert_ne!(a, b);
-        assert_eq!(b, Triad::<Note>::try_from((0, 3, 7)).unwrap());
+        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
         assert_eq!(LPR::P * b, a)
     }
 
     #[test]
     fn test_relative() {
-        let a = Triad::<Note>::new(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         let b = LPR::R * a.clone();
 
         assert_ne!(a, b);
-        assert_eq!(b, Triad::<Note>::try_from((9, 0, 4)).unwrap());
+        assert_eq!(b, Triad::try_from((9, 0, 4)).unwrap());
         assert_eq!(LPR::R * b, a)
     }
 }
