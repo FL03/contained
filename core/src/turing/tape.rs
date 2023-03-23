@@ -5,6 +5,7 @@
 */
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
+use std::ops::{Index, IndexMut};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Tape<S: Symbolic = String>(Vec<S>);
@@ -45,7 +46,7 @@ impl<S: Symbolic> Tape<S> {
     }
     /// Sets the element at the given index
     pub fn set(&mut self, index: usize, elem: S) {
-        self.0[index] = elem;
+        self[index] = elem;
     }
     /// Returns a reference to the underlying vector
     pub fn tape(&self) -> &Vec<S> {
@@ -78,6 +79,20 @@ impl<S: Symbolic> Extend<S> for Tape<S> {
 impl<S: Symbolic> FromIterator<S> for Tape<S> {
     fn from_iter<T: IntoIterator<Item = S>>(iter: T) -> Self {
         Self(Vec::from_iter(iter))
+    }
+}
+
+impl<S: Symbolic> Index<usize> for Tape<S> {
+    type Output = S;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+impl<S: Symbolic> IndexMut<usize> for Tape<S> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
     }
 }
 
