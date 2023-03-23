@@ -4,7 +4,7 @@
     Description: ... Summary ...
 */
 use super::Peerable;
-use libp2p::identity::{ed25519, Keypair};
+use libp2p::identity::{ed25519, DecodingError, Keypair};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Peer {
@@ -43,7 +43,7 @@ impl From<Peer> for Keypair {
 }
 
 impl TryFrom<u8> for Peer {
-    type Error = libp2p::identity::error::DecodingError;
+    type Error = DecodingError;
 
     fn try_from(seed: u8) -> Result<Self, Self::Error> {
         let sk = crate::sk_from_seed(seed)?;
