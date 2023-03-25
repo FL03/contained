@@ -16,67 +16,6 @@ use futures::{Future, StreamExt};
 use predicates::Predicate;
 use std::sync::{Arc, Mutex};
 
-pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruction<S>> {
-    type Driver: Scope<S>;
-    type Error;
-
-    fn execute(&mut self, driver: &mut Self::Driver) -> Result<Self::Driver, Self::Error> {
-        // Get the default symbol
-        let default_symbol = self.clone().default_symbol();
-        // Get the next instruction
-        while let Some(instruction) = self.next() {
-            let tail = instruction.clone().tail();
-            // Update the current state
-            driver.update_state(tail.state());
-            // Update the tape
-            driver.set_symbol(tail.symbol());
-            // Update the index; adjusts the index according to the direction
-            driver.shift(tail.action(), default_symbol.clone());
-        }
-        // Return the actor
-        Ok(driver.clone())
-    }
-    fn execute_once(&mut self, driver: &mut Self::Driver) -> Result<Self::Driver, Self::Error> {
-        // Get the default symbol
-        let default_symbol = self.clone().default_symbol();
-        // Get the next instruction
-        if let Some(instruction) = self.next() {
-            let tail = instruction.clone().tail();
-            // Update the current state
-            driver.update_state(tail.state());
-            // Update the tape
-            driver.set_symbol(tail.symbol());
-            // Update the index; adjusts the index according to the direction
-            driver.shift(tail.action(), default_symbol.clone());
-        }
-        // Return the actor
-        Ok(driver.clone())
-    }
-    fn execute_until(
-        &mut self,
-        driver: &mut Self::Driver,
-        until: impl Fn(&Self::Driver) -> bool,
-    ) -> Result<Self::Driver, Self::Error> {
-        // Get the default symbol
-        let default_symbol = self.clone().default_symbol();
-        // Get the next instruction
-        while let Some(instruction) = self.next() {
-            let tail = instruction.clone().tail();
-            // Update the current state
-            driver.update_state(tail.state());
-            // Update the tape
-            driver.set_symbol(tail.symbol());
-            // Update the index; adjusts the index according to the direction
-            driver.shift(tail.action(), default_symbol.clone());
-            if until(driver) {
-                break;
-            }
-        }
-        // Return the actor
-        Ok(driver.clone())
-    }
-}
-
 #[async_trait]
 pub trait AsyncExecute<S: Symbolic + Send + Sync>:
     Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State> + Unpin
@@ -96,7 +35,9 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
             // Update the tape
             self.scope_mut().lock().unwrap().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
-            self.scope_mut().lock().unwrap()
+            self.scope_mut()
+                .lock()
+                .unwrap()
                 .shift(tail.action(), default_symbol.clone());
         }
         // Return the actor

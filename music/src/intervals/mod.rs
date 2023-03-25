@@ -41,7 +41,7 @@ pub enum Interval {
     Third(Thirds),
     Fifth(Fifths),
     Seventh(Sevenths),
-    Interval
+    Interval,
 }
 
 impl Interval {

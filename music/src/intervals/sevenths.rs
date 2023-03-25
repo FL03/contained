@@ -38,7 +38,7 @@ pub enum Sevenths {
     Diminished = 9,
     #[default]
     Major = 11,
-    Minor = 10
+    Minor = 10,
 }
 
 impl Sevenths {
@@ -49,7 +49,7 @@ impl Sevenths {
             9 => Ok(Sevenths::Diminished),
             11 => Ok(Sevenths::Major),
             10 => Ok(Sevenths::Minor),
-            _ => Err("Invalid interval".into())
+            _ => Err("Invalid interval".into()),
         }
     }
     pub fn compute(&self, note: Note) -> Note {
@@ -57,7 +57,7 @@ impl Sevenths {
             Sevenths::Augmented => 12,
             Sevenths::Diminished => 9,
             Sevenths::Major => 11,
-            Sevenths::Minor => 10
+            Sevenths::Minor => 10,
         };
         let pitch = note.pitch() + interval;
         Note::from(pitch)

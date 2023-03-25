@@ -15,7 +15,12 @@
 
         number of elements + freq
 */
+use super::{Dirac, Transform};
 use crate::neo::triads::{Triad, Triadic};
+use crate::{
+    intervals::{Interval, Thirds},
+    Note,
+};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -46,9 +51,41 @@ pub enum LPR {
 }
 
 impl LPR {
+    pub fn others(&self) -> Vec<Self> {
+        vec![LPR::L, LPR::P, LPR::R]
+            .into_iter()
+            .filter(|x| x != self)
+            .collect()
+    }
+    pub fn transformations() -> Vec<Self> {
+        vec![LPR::L, LPR::P, LPR::R]
+    }
     pub fn transform(&self, triad: &mut Triad) -> Triad {
         triad.transform(*self);
         triad.clone()
+    }
+}
+
+impl Dirac<Triad> for LPR {
+    type Output = Triad;
+
+    fn dirac(&self, arg: &mut Triad) -> Self::Output {
+        let [mut r, mut t, mut f]: [Note; 3] = arg.triad().clone();
+        match arg.intervals().0 {
+            Thirds::Major => match *self {
+                LPR::L => r -= Interval::Semitone,
+                LPR::P => t -= Interval::Semitone,
+                LPR::R => f += Interval::Tone,
+            },
+            Thirds::Minor => match *self {
+                LPR::L => f += Interval::Semitone,
+                LPR::P => t += Interval::Semitone,
+                LPR::R => r -= Interval::Tone,
+            },
+        };
+        arg.update((r.into(), t.into(), f.into()))
+            .expect("Invalid triad");
+        arg.clone()
     }
 }
 

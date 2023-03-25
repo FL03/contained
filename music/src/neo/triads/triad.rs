@@ -5,12 +5,12 @@
         These chord factors are considered by position and are referenced as the root, third, and fifth.
 
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
-        
+
 */
 use super::{Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
-    neo::LPR,
+    neo::{Dirac, Transform, LPR},
     BoxedError, Gradient, MusicResult, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
@@ -27,8 +27,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
     class: Triads,
-    notes: (Note, Note, Note),
-    state: State
+    notes: [Note; 3],
+    state: State,
 }
 
 impl Triad {
@@ -36,8 +36,8 @@ impl Triad {
         let (a, _, c): (Thirds, Thirds, Fifths) = class.into();
         Self {
             class,
-            notes: (root.clone(), a + root.clone(), c + root),
-            state: State::Valid
+            notes: [root.clone(), a + root.clone(), c + root],
+            state: State::Valid,
         }
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
@@ -59,16 +59,16 @@ impl Triad {
 
 impl Alphabet<Note> for Triad {
     fn in_alphabet(&self, symbol: &Note) -> bool {
-        self.notes.0 == *symbol || self.notes.1 == *symbol || self.notes.2 == *symbol
+        self.notes.contains(symbol)
     }
     fn default_symbol(&self) -> Note {
         self.root()
     }
 }
 
-impl AsRef<(Note, Note, Note)> for Triad {
-    fn as_ref(&self) -> &(Note, Note, Note) {
-        &self.notes
+impl AsRef<[Note; 3]> for Triad {
+    fn as_ref(&self) -> &[Note; 3] {
+        self.triad()
     }
 }
 
@@ -81,13 +81,17 @@ impl Stateful<State> for Triad {
     }
 }
 
+impl Transform for Triad {
+    type Dirac = LPR;
+}
+
 impl Triadic for Triad {
     fn class(&self) -> Triads {
         self.class
     }
 
-    fn triad(self) -> (Note, Note, Note) {
-        self.notes
+    fn triad(&self) -> &[Note; 3] {
+        &self.notes
     }
 
     fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult {
@@ -111,7 +115,7 @@ impl IntoIterator for Triad {
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        vec![self.root(), self.third(), self.fifth()].into_iter()
+        self.triad().to_vec().into_iter()
     }
 }
 
@@ -131,13 +135,40 @@ impl std::ops::Mul<LPR> for Triad {
 
 impl std::ops::MulAssign<LPR> for Triad {
     fn mul_assign(&mut self, rhs: LPR) {
-        self.transform(rhs)
+        *self = self.transform(rhs);
     }
 }
 
 impl From<(Note, Thirds, Thirds)> for Triad {
     fn from(data: (Note, Thirds, Thirds)) -> Self {
         Self::build(data.0, data.1, data.2)
+    }
+}
+
+impl TryFrom<[Note; 3]> for Triad {
+    type Error = BoxedError;
+
+    fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
+        let args = data.to_vec();
+        for i in 0..args.len() {
+            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
+            for j in 0..tmp.len() {
+                let (a, b, c) = (
+                    args[i].clone(),
+                    args[tmp[j]].clone(),
+                    args[tmp[(j + 1) % tmp.len()]].clone(),
+                );
+                let (ab, bc) = (
+                    Thirds::try_from((a.clone(), b.clone())),
+                    Thirds::try_from((b.clone(), c.clone())),
+                );
+                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
+                if ab.is_ok() && bc.is_ok() {
+                    return Ok(Triad::build(a, ab?, bc?));
+                }
+            }
+        }
+        Err("Failed to find the required relationships within the given notes...".into())
     }
 }
 
@@ -201,13 +232,13 @@ impl From<Triad> for Vec<Note> {
 
 impl From<Triad> for [Note; 3] {
     fn from(d: Triad) -> [Note; 3] {
-        [d.root(), d.third(), d.fifth()]
+        d.triad().clone()
     }
 }
 
 impl From<Triad> for (Note, Note, Note) {
     fn from(d: Triad) -> (Note, Note, Note) {
-        d.triad()
+        (d.root(), d.third(), d.fifth())
     }
 }
 
