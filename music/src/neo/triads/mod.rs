@@ -18,9 +18,19 @@ pub mod tonic;
 use super::{Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{MusicResult, Note};
+use algae::graph::{Graph, UndirectedGraph};
+use itertools::Itertools;
 use std::collections::HashMap;
 
 pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
+    fn as_graph(&self) -> UndirectedGraph<Note, Interval> {
+        let mut graph = UndirectedGraph::new();
+        
+        graph.add_edge((self.root(), self.third(), self.intervals().0.into()).into());
+        graph.add_edge((self.third(), self.fifth(), self.intervals().1.into()).into());
+        graph.add_edge((self.fifth(), self.root(), self.intervals().2.into()).into());
+        graph.clone()
+    }
     fn class(&self) -> Triads;
     fn contains(&self, note: &Note) -> bool {
         &self.root() == note || &self.third() == note || &self.fifth() == note
@@ -35,29 +45,12 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
     fn fifth(&self) -> Note {
         self.triad()[2].clone()
     }
-    fn get_path_to(&self, note: &Note) -> Option<Vec<LPR>> {
-        let mut queue = vec![(Vec::new(), self.clone())];
-        while let Some((path, triad)) = queue.pop() {
-            if triad.contains(note) {
-                return Some(path);
-            }
-            for i in LPR::transformations() {
-                let mut triad = triad.clone();
-                triad.transform(i);
-                let mut path = path.clone();
-                path.push(i);
-                if triad.contains(note) {
-                    return Some(path);
-                }
-                queue.push((path, triad));
-            }
-        }
-        None
-    }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         self.class().intervals()
     }
+    
+    /// Returns a vector of all the possible [Triad]s that exist at 
     fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
         for i in LPR::transformations() {
@@ -116,14 +109,6 @@ mod tests {
         let b = Triad::try_from((11, 4, 7));
         assert!(b.is_ok());
         assert_ne!(a, b.unwrap())
-    }
-
-    #[test]
-    fn test_find_path() {
-        let triad = Triad::new(0.into(), Triads::Major);
-        assert!(triad.get_path_to(&Note::from(3)).is_some());
-        // assert!(triad.get_path_to(&Note::from(1)).is_some());
-        // assert!(triad.get_path_to(&Note::from(11)).is_some());
     }
 
     #[test]

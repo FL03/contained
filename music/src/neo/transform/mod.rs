@@ -4,9 +4,10 @@
     Description: ... Summary ...
 */
 
-pub use self::{lpr::LPR, transformer::*};
+pub use self::{lpr::LPR, pathfinder::*, transformer::*};
 
 mod lpr;
+mod pathfinder;
 mod transformer;
 
 /// [Dirac] is a trait used to describe a transformative function;
@@ -30,13 +31,15 @@ pub trait Transform: Sized {
 mod tests {
     use super::*;
     use crate::neo::triads::{Triad, Triads};
-    use crate::Note;
 
     #[test]
-    fn test_transformer() {
+    fn test_pathfinder() {
         let triad = Triad::new(0.into(), Triads::Major);
-        let mut transformer = Transformer::from(triad);
-        let dest: Note = 3.into();
-        // assert!(transformer.try_to_find(&dest).is_some());
+        let mut pathfinder = PathFinder::new(3.into());
+        assert!(pathfinder.find(triad.clone()).is_some());
+        let mut pathfinder = PathFinder::new(1.into());
+        assert!(pathfinder.find(triad.clone()).is_some());
+        let mut pathfinder = PathFinder::new(11.into());
+        assert!(pathfinder.find(triad.clone()).is_some());
     }
 }
