@@ -42,6 +42,9 @@ impl State {
     pub fn invalidate(&mut self) {
         *self = Self::Invalid;
     }
+    pub fn validate(&mut self) {
+        *self = Self::Valid;
+    }
     pub fn is_valid(&self) -> bool {
         *self == Self::Valid
     }

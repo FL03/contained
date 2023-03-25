@@ -9,7 +9,7 @@
 use super::{Triad, Triadic};
 use crate::{neo::PathFinder, MusicResult, Note};
 use contained_core::states::{State, Stateful};
-use contained_core::turing::Tape;
+use contained_core::turing::{Program, Tape};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
@@ -35,7 +35,16 @@ impl Tonic {
             } else {
                 // Invalidate the triad
                 self.triad.lock().unwrap().state().invalidate();
+                // Find a path to the current note
                 let path = self.triad.lock().unwrap().pathfinder(self.current()).find();
+                // If a path is found, walk it
+                if let Some(path) = path {
+                    self.triad.lock().unwrap().walk(path);
+                    // Validate the triad
+                    self.triad.lock().unwrap().state().validate();
+                } else {
+                    return Err("No path found".into());
+                }
             }
         }
         Ok(())

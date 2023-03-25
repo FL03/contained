@@ -55,6 +55,10 @@ impl Triad {
             Program::new(self.clone(), State::Invalid),
         )
     }
+
+    pub fn program(&self) -> Program<Note> {
+        Program::new(self.clone(), State::Invalid)
+    }
 }
 
 impl Alphabet<Note> for Triad {
