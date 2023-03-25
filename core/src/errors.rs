@@ -24,20 +24,30 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum Error {
+    AsyncError(String),
     Custom(String),
+    #[default]
+    Error(String),
     ExecutionError(String),
     IOError(String),
-    #[default]
     StateError,
+    StoreError,
     TranslateError,
     TransformError,
+    TapeError,
 }
 
 impl std::error::Error for Error {}
 
 impl From<Box<dyn std::error::Error>> for Error {
     fn from(error: Box<dyn std::error::Error>) -> Self {
-        Error::Custom(error.to_string())
+        Error::Error(error.to_string())
+    }
+}
+
+impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
+    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        Error::AsyncError(error.to_string())
     }
 }
 

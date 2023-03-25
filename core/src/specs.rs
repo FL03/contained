@@ -158,6 +158,7 @@ pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
 }
 
 /// [Include] describes the basic behaviors of a structure which can include a new element
+/// [Include] is designed to be an alternative to [ArrayLike::push] for structures which may or may not have a natural ordering
 pub trait Include<T> {
     fn include(&mut self, elem: T);
 }
@@ -235,4 +236,12 @@ pub trait With<T> {
 
     /// [With::with] accepts an owned instance of the given type and returns a [With::Output] instance
     fn with(&self, other: &T) -> Self::Output;
+}
+
+/// [TryWith] is a trait that describes a means of trying to concate several objects together
+pub trait TryWith<T> {
+    type Output;
+    type Error;
+
+    fn try_with(&self, other: &T) -> Result<Self::Output, Self::Error>;
 }

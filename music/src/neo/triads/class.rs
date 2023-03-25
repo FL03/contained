@@ -60,8 +60,8 @@ impl From<(Thirds, Thirds)> for Triads {
                 Thirds::Minor => Triads::Major,
             },
             Thirds::Minor => match intervals.1 {
-                Thirds::Major => Triads::Diminished,
-                Thirds::Minor => Triads::Minor,
+                Thirds::Major => Triads::Minor,
+                Thirds::Minor => Triads::Diminished,
             },
         }
     }

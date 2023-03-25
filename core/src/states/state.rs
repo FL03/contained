@@ -39,6 +39,12 @@ impl State {
     pub fn valid() -> Self {
         Self::Valid
     }
+    pub fn invalidate(&mut self) {
+        *self = Self::Invalid;
+    }
+    pub fn is_valid(&self) -> bool {
+        *self == Self::Valid
+    }
 }
 
 impl Hashable for State {

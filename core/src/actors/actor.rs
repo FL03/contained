@@ -96,8 +96,8 @@ impl<S: Symbolic> Iterator for Actor<S> {
 impl<S: Symbolic> Execute<S> for Actor<S> {
     type Driver = Self;
 
-    fn scope(&self) -> Self::Driver {
-        self.clone()
+    fn scope(&self) -> &Self::Driver {
+        self
     }
 
     fn scope_mut(&mut self) -> &mut Self::Driver {

@@ -14,6 +14,7 @@ use crate::{Alphabet, Error, Scope, Symbolic};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
 use predicates::Predicate;
+use std::sync::{Arc, Mutex};
 
 pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruction<S>> {
     type Driver: Scope<S>;
@@ -83,7 +84,7 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
     type Driver: Future + Scope<S> + Send + Sync;
     type Error: Send + Sync;
 
-    async fn execute(&mut self) -> Result<Self::Driver, Self::Error> {
+    async fn execute(&mut self) -> Result<&Arc<Mutex<Self::Driver>>, Self::Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
@@ -93,18 +94,18 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
             // Update the current state
             self.update_state(tail.state());
             // Update the tape
-            self.scope_mut().set_symbol(tail.symbol());
+            self.scope_mut().lock().unwrap().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
-            self.scope_mut()
+            self.scope_mut().lock().unwrap()
                 .shift(tail.action(), default_symbol.clone());
         }
         // Return the actor
         Ok(self.scope())
     }
     /// Returns a reference to the scope
-    fn scope(&self) -> Self::Driver;
+    fn scope(&self) -> &Arc<Mutex<Self::Driver>>;
     /// Returns a mutable reference to the scope
-    fn scope_mut(&mut self) -> &mut Self::Driver;
+    fn scope_mut(&mut self) -> &mut Arc<Mutex<Self::Driver>>;
 }
 
 /// [Execute] is a trait that allows for the execution of a program.
@@ -114,7 +115,7 @@ pub trait Execute<S: Symbolic>:
     type Driver: Scope<S>;
 
     /// [Execute::execute]
-    fn execute(&mut self) -> Result<Self::Driver, Error> {
+    fn execute(&mut self) -> Result<&Self::Driver, Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
@@ -132,7 +133,7 @@ pub trait Execute<S: Symbolic>:
         Ok(self.scope())
     }
     /// [Execute::execute_once]
-    fn execute_once(&mut self) -> Result<Self::Driver, Error> {
+    fn execute_once(&mut self) -> Result<&Self::Driver, Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
@@ -155,14 +156,14 @@ pub trait Execute<S: Symbolic>:
     fn execute_until(
         &mut self,
         until: &dyn Predicate<Self::Driver>,
-    ) -> Result<Self::Driver, Error> {
+    ) -> Result<&Self::Driver, Error> {
         while !until.eval(&self.scope()) {
             self.execute_once()?;
         }
         Ok(self.scope())
     }
 
-    fn scope(&self) -> Self::Driver;
+    fn scope(&self) -> &Self::Driver;
 
     fn scope_mut(&mut self) -> &mut Self::Driver;
 }

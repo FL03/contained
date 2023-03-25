@@ -3,6 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
         These chord factors are considered by position and are referenced as the root, third, and fifth.
+
+        Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
+        
 */
 use super::{Triadic, Triads};
 use crate::{
@@ -13,7 +16,7 @@ use crate::{
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{
     actors::Actor,
-    states::State,
+    states::{State, Stateful},
     turing::{Driver, Machine, Program, Tape},
     Alphabet,
 };
@@ -25,6 +28,7 @@ use serde::{Deserialize, Serialize};
 pub struct Triad {
     class: Triads,
     notes: (Note, Note, Note),
+    state: State
 }
 
 impl Triad {
@@ -33,15 +37,12 @@ impl Triad {
         Self {
             class,
             notes: (root.clone(), a + root.clone(), c + root),
+            state: State::Valid
         }
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
-        let notes = (root.clone(), a + root.clone(), b + (a + root));
-        Self {
-            class: Triads::from((a, b)),
-            notes,
-        }
+        Self::new(root, Triads::from((a, b)))
     }
     /// Create a new [Actor] with the [Triad] as its alphabet
     pub fn actor(&self, tape: Option<Tape<Note>>) -> Actor<Note> {
@@ -50,7 +51,7 @@ impl Triad {
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
         Machine::new(
-            Driver::new(State::Valid, tape.unwrap_or_default()),
+            Driver::new(self.state(), tape.unwrap_or_default()),
             Program::new(self.clone(), State::Invalid),
         )
     }
@@ -68,6 +69,15 @@ impl Alphabet<Note> for Triad {
 impl AsRef<(Note, Note, Note)> for Triad {
     fn as_ref(&self) -> &(Note, Note, Note) {
         &self.notes
+    }
+}
+
+impl Stateful<State> for Triad {
+    fn state(&self) -> State {
+        self.state
+    }
+    fn update_state(&mut self, state: State) {
+        self.state = state;
     }
 }
 

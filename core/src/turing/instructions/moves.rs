@@ -23,12 +23,34 @@ use strum::{Display, EnumString, EnumVariantNames};
     PartialOrd,
     Serialize,
 )]
+#[repr(i64)]
 #[strum(serialize_all = "snake_case")]
 pub enum Move {
     Left = -1,
     Right = 1,
     #[default]
     Stay = 0,
+}
+
+impl Move {
+    pub fn invert(&self) -> Self {
+        match self {
+            Self::Left => Self::Right,
+            Self::Right => Self::Left,
+            Self::Stay => Self::Stay,
+        }
+    }
+    pub fn shift(&self, pos: usize) -> usize {
+        (pos as i64 + *self as i64) as usize
+    }
+}
+
+impl std::ops::Mul<Move> for usize {
+    type Output = usize;
+
+    fn mul(self, rhs: Move) -> Self::Output {
+        rhs.shift(self)
+    }
 }
 
 impl From<i64> for Move {

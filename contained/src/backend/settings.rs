@@ -70,8 +70,11 @@ impl Settings {
             mode: mode.unwrap_or_else(|| String::from("production")),
         }
     }
+    pub fn builder() -> config::ConfigBuilder<config::builder::DefaultState> {
+        Config::builder()
+    }
     pub fn build() -> ConfigResult<Self> {
-        let mut builder = Config::builder()
+        let mut builder = Self::builder()
             .set_default("mode", "production")?
             .set_default("logger.level", "info")?;
 

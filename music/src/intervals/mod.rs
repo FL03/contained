@@ -3,9 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A collection of common musical intervals
 */
-pub use self::{fifths::*, thirds::*};
+pub use self::{fifths::*, sevenths::*, thirds::*};
 
 pub(crate) mod fifths;
+pub(crate) mod sevenths;
 pub(crate) mod thirds;
 
 use crate::{Gradient, Note};
@@ -36,12 +37,31 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub enum Interval {
     Semitone = 1,
     Tone = 2,
-    Fifth(Fifths),
     #[default]
     Third(Thirds),
+    Fifth(Fifths),
+    Seventh(Sevenths),
+    Interval
 }
 
 impl Interval {
+    pub fn new(from: Note, to: Note) -> Self {
+        let interval = to.pitch() - from.pitch();
+        match interval {
+            1 => Interval::Semitone,
+            2 => Interval::Tone,
+            3 => Interval::Third(Thirds::Minor),
+            4 => Interval::Third(Thirds::Major),
+            6 => Interval::Fifth(Fifths::Diminished),
+            7 => Interval::Fifth(Fifths::Perfect),
+            8 => Interval::Fifth(Fifths::Augmented),
+            9 => Interval::Seventh(Sevenths::Diminished),
+            10 => Interval::Seventh(Sevenths::Major),
+            11 => Interval::Seventh(Sevenths::Minor),
+            12 => Interval::Seventh(Sevenths::Augmented),
+            _ => Interval::Interval,
+        }
+    }
     pub fn increase(&self, note: Note) -> Note {
         let interval: i64 = self.clone().into();
         (note.pitch() + interval).into()
@@ -61,10 +81,12 @@ impl Hashable for Interval {
 impl From<Interval> for i64 {
     fn from(interval: Interval) -> i64 {
         match interval {
-            Interval::Fifth(i) => i as i64,
-            Interval::Third(i) => i as i64,
             Interval::Semitone => 1,
             Interval::Tone => 2,
+            Interval::Third(i) => i as i64,
+            Interval::Fifth(i) => i as i64,
+            Interval::Seventh(i) => i as i64,
+            Interval::Interval => 5,
         }
     }
 }

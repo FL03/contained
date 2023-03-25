@@ -21,7 +21,9 @@ use crate::{MusicResult, Note};
 
 pub trait Triadic: Clone {
     fn class(&self) -> Triads;
-
+    fn contains(&self, note: &Note) -> bool {
+        &self.root() == note || &self.third() == note || &self.fifth() == note
+    }
     /// Endlessly applies the described transformations to the [Triad]
     fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
         for i in Vec::from_iter(iter).iter().cycle() {
@@ -63,6 +65,23 @@ pub trait Triadic: Clone {
         self.update((r.into(), t.into(), f.into()))
             .expect("Invalid triad");
     }
+    fn transform_to_include(&mut self, note: Note) -> Vec<LPR> {
+        let mut args = Vec::new();
+        while !self.contains(&note) {
+            let (r, t, f) = self.clone().triad();
+            let (x, y, z) = (r.interval(&note), t.interval(&note), f.interval(&note));
+            let dirac = if r > note && x == Interval::Tone || f < note && z == Interval::Tone {
+                LPR::R
+            } else if y == Interval::Semitone {
+                LPR::P
+            } else {
+                LPR::L
+            };
+            self.transform(dirac);
+            args.push(dirac);
+        }
+        args
+    }
     ///
     fn triad(self) -> (Note, Note, Note);
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
@@ -95,6 +114,14 @@ mod tests {
         let b = Triad::try_from((11, 4, 7));
         assert!(b.is_ok());
         assert_ne!(a, b.unwrap())
+    }
+
+    #[test]
+    fn test_triad_transform() {
+        let mut triad = Triad::new(0.into(), Triads::Major);
+        let res = triad.transform_to_include(1.into());
+        println!("{:?}", res);
+        assert!(triad.contains(&1.into()));
     }
 
     #[test]

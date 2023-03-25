@@ -28,6 +28,9 @@ impl<S: Symbolic> Tape<S> {
     pub fn with_capacity(capacity: usize) -> Self {
         Self(Vec::with_capacity(capacity))
     }
+    pub fn write(&mut self, index: usize, symbol: S) {
+        self.0.insert(index, symbol)
+    }
 }
 
 impl<S: Symbolic> ArrayLike<S> for Tape<S> {}
