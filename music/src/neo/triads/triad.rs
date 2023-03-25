@@ -129,7 +129,7 @@ impl std::ops::Mul<LPR> for Triad {
     type Output = Triad;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.transform(&mut self.clone())
+        rhs.dirac(&mut self.clone())
     }
 }
 

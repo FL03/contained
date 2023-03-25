@@ -7,7 +7,7 @@
         as the environment in-which a WASM machine is operating.
 */
 use super::{Triad, Triadic};
-use crate::{neo::LPR, MusicResult, Note};
+use crate::{neo::PathFinder, MusicResult, Note};
 use contained_core::states::{State, Stateful};
 use contained_core::turing::Tape;
 use std::collections::HashMap;
@@ -35,11 +35,7 @@ impl Tonic {
             } else {
                 // Invalidate the triad
                 self.triad.lock().unwrap().state().invalidate();
-                // TODO: Implement a means of transforming the triad without knowing the transformations required to get there
-                // self.triad
-                //     .lock()
-                //     .unwrap()
-                //     .transform_to_include(self.current());
+                let path = self.triad.lock().unwrap().pathfinder(self.current()).find();
             }
         }
         Ok(())

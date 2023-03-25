@@ -3,16 +3,17 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{Transform, LPR};
+use super::LPR;
 use crate::neo::triads::*;
 use crate::Note;
 
-pub struct PathFinder {
-    queue: Vec<(Vec<LPR>, Triad)>,
+#[derive(Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd)]
+pub struct PathFinder<T: Triadic = Triad> {
+    queue: Vec<(Vec<LPR>, T)>,
     target: Note,
 }
 
-impl PathFinder {
+impl<T: Triadic> PathFinder<T> {
     pub fn new(target: Note) -> Self {
         Self {
             queue: Vec::new(),
@@ -20,8 +21,12 @@ impl PathFinder {
         }
     }
 
-    pub fn find(&mut self, triad: Triad) -> Option<Vec<LPR>> {
+    pub fn origin(mut self, triad: T) -> Self {
         self.queue.push((Vec::new(), triad));
+        self
+    }
+
+    pub fn find(&mut self) -> Option<Vec<LPR>> {
         while let Some((path, triad)) = self.queue.pop() {
             if triad.contains(&self.target) {
                 return Some(path);

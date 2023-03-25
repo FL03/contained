@@ -35,11 +35,9 @@ mod tests {
     #[test]
     fn test_pathfinder() {
         let triad = Triad::new(0.into(), Triads::Major);
-        let mut pathfinder = PathFinder::new(3.into());
-        assert!(pathfinder.find(triad.clone()).is_some());
-        let mut pathfinder = PathFinder::new(1.into());
-        assert!(pathfinder.find(triad.clone()).is_some());
-        let mut pathfinder = PathFinder::new(11.into());
-        assert!(pathfinder.find(triad.clone()).is_some());
+        for i in [1, 3, 11] {
+            let mut pathfinder = PathFinder::new(i.into()).origin(triad.clone());
+            assert!(pathfinder.find().is_some());
+        }
     }
 }

@@ -15,7 +15,7 @@ pub(crate) mod triad;
 
 pub mod tonic;
 
-use super::{Transform, LPR};
+use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{MusicResult, Note};
 use algae::graph::{Graph, UndirectedGraph};
@@ -25,7 +25,7 @@ use std::collections::HashMap;
 pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
     fn as_graph(&self) -> UndirectedGraph<Note, Interval> {
         let mut graph = UndirectedGraph::new();
-        
+
         graph.add_edge((self.root(), self.third(), self.intervals().0.into()).into());
         graph.add_edge((self.third(), self.fifth(), self.intervals().1.into()).into());
         graph.add_edge((self.fifth(), self.root(), self.intervals().2.into()).into());
@@ -45,12 +45,15 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
     fn fifth(&self) -> Note {
         self.triad()[2].clone()
     }
+    fn pathfinder(&self, note: Note) -> PathFinder<Self> {
+        PathFinder::new(note).origin(self.clone())
+    }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         self.class().intervals()
     }
-    
-    /// Returns a vector of all the possible [Triad]s that exist at 
+
+    /// Returns a vector of all the possible [Triad]s that exist at
     fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
         for i in LPR::transformations() {

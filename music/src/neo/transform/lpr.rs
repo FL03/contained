@@ -60,16 +60,12 @@ impl LPR {
     pub fn transformations() -> Vec<Self> {
         vec![LPR::L, LPR::P, LPR::R]
     }
-    pub fn transform(&self, triad: &mut Triad) -> Triad {
-        triad.transform(*self);
-        triad.clone()
-    }
 }
 
-impl Dirac<Triad> for LPR {
-    type Output = Triad;
+impl<T: Triadic> Dirac<T> for LPR {
+    type Output = T;
 
-    fn dirac(&self, arg: &mut Triad) -> Self::Output {
+    fn dirac(&self, arg: &mut T) -> Self::Output {
         let [mut r, mut t, mut f]: [Note; 3] = arg.triad().clone();
         match arg.intervals().0 {
             Thirds::Major => match *self {
@@ -93,7 +89,7 @@ impl std::ops::Mul<Triad> for LPR {
     type Output = Triad;
 
     fn mul(self, rhs: Triad) -> Self::Output {
-        self.transform(&mut rhs.clone())
+        self.dirac(&mut rhs.clone())
     }
 }
 
