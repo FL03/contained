@@ -8,32 +8,113 @@ use crate::{
     turing::{instructions::Move, Tape},
     Symbolic,
 };
+use std::ops::{Index, IndexMut};
+use std::vec;
 
-/// [ArrayLike] describes the basic behaviors of array-like structures
-pub trait ArrayLike<T>: Clone + IntoIterator<Item = T, IntoIter = std::vec::IntoIter<T>> {
-    /// [ArrayLike::content]
-    fn content(&self) -> &Vec<T>;
-    /// [ArrayLike::mut_content]
-    fn mut_content(&mut self) -> &mut Vec<T>;
-    /// [ArrayLike::append] describes a method which takes another similar array and adds the values to the end of the current array
-    fn append(&mut self, elem: &mut Vec<T>) {
-        self.mut_content().append(elem);
+/// [Iterable] describes the basic behaviors of an iterable structure
+pub trait Iterable<Idx, T>
+where
+    Self: Extend<T>
+        + FromIterator<T>
+        + Index<Idx, Output = T>
+        + Insert<Idx, T>
+        + IntoIterator<Item = T>,
+{
+}
+
+/// [ArrayLike] describes the basic behaviors of an array-like structure
+pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
+    AsMut<Vec<T>> + AsRef<Vec<T>> + IndexMut<usize, Output = T> + Iterable<usize, T>
+{
+    /// [ArrayLike::append] describes a method for appending another array to the end of the array
+    fn append(&mut self, elem: &mut Self) {
+        self.as_mut().append(elem.as_mut());
     }
-    /// [ArrayLike::extend] describes a method for extending the array with values from another, similar array
-    fn extend(&mut self, elem: impl IntoIterator<Item = T>) {
-        self.mut_content().extend(Vec::from_iter(elem));
+    fn as_slice(&self) -> &[T] {
+        self.as_ref().as_slice()
     }
-    /// [ArrayLike::insert] describes a method for inserting a new element at a specific position
-    fn insert(&mut self, index: usize, elem: T) {
-        self.mut_content().insert(index, elem)
+    /// The capacity of the array
+    fn capacity(&self) -> usize {
+        self.as_ref().capacity()
     }
-    /// [ArrayLike::is_empty] determines if the array is empty or not
+    /// [ArrayLike::clear] describes a method for clearing the array
+    fn clear(&mut self) {
+        self.as_mut().clear();
+    }
+    /// [ArrayLike::contains] describes a method for checking if an element is present in the array
+    fn contains(&self, elem: &T) -> bool {
+        self.as_ref().contains(elem)
+    }
+    /// [ArrayLike::count] describes a method for counting the number of times an element appears in the array
+    fn count(&self, elem: &T) -> usize {
+        self.as_ref().iter().filter(|&x| x == elem).count()
+    }
+    /// [ArrayLike::drain] describes a method for removing a range of elements from the array
+    fn drain(&mut self, range: std::ops::Range<usize>) -> vec::Drain<T> {
+        self.as_mut().drain(range)
+    }
+    /// [ArrayLike::filter] describes a method for filtering the array
+    fn filter(&self, predicate: impl Fn(&T) -> bool) -> Vec<T> {
+        self.as_ref()
+            .iter()
+            .filter(|&x| predicate(x))
+            .cloned()
+            .collect()
+    }
+    /// [ArrayLike::first] describes a method for getting a reference to the first element in the array
+    fn first(&self) -> Option<&T> {
+        self.as_ref().first()
+    }
+    /// [ArrayLike::get] describes a method for getting a reference to an element at a specific position
+    fn get(&self, index: usize) -> Option<&T> {
+        if index < self.len() {
+            Some(&self[index])
+        } else {
+            None
+        }
+    }
+    /// [ArrayLike::get_mut] describes a method for getting a mutable reference to an element at a specific position
+    fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        if index < self.len() {
+            Some(&mut self[index])
+        } else {
+            None
+        }
+    }
+    /// [ArrayLike::is_empty] checks if the array is empty
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
-    /// [ArrayLike::len] determine the length of the content
+    /// [ArrayLike::last] describes a method for gettings the last element in the array
+    fn last(&self) -> Option<&T> {
+        self.as_ref().last()
+    }
+    /// [ArrayLike::len] describes a method for getting the length of the array
     fn len(&self) -> usize {
-        self.clone().into_iter().count()
+        self.as_ref().len()
+    }
+    /// [ArrayLike::pop] describes a method for removing the last element from the array
+    fn pop(&mut self) -> Option<T> {
+        self.as_mut().pop()
+    }
+    /// [ArrayLike::push] describes a method for adding an element to the end of the array
+    fn push(&mut self, elem: T) {
+        self.as_mut().push(elem);
+    }
+    /// [ArrayLike::remove] describes a method for removing an element at a specific position
+    fn remove(&mut self, index: usize) -> T {
+        self.as_mut().remove(index)
+    }
+    fn reverse(&mut self) {
+        self.as_mut().reverse();
+    }
+    /// [ArrayLike::set] describes a method for setting the value of an element at a specific position
+    fn set(&mut self, index: usize, elem: T) {
+        self[index] = elem;
+    }
+    /// [ArrayLike::shrink_to_fit] describes a method for shrinking the capacity of the array to match its length
+    fn shrink_to_fit(&mut self) {
+        self.as_mut().shrink_to_fit();
     }
 }
 
@@ -49,14 +130,14 @@ pub trait TryInclude<T> {
 }
 
 /// [Insert] describes the basic behaviors of a structure insert a new element given an index or key
-pub trait Insert<K, V> {
-    fn insert(&mut self, key: K, elem: V);
+pub trait Insert<Idx, V> {
+    fn insert(&mut self, key: Idx, elem: V);
 }
 
-pub trait TryInsert<K, V> {
+pub trait TryInsert<Idx, V> {
     type Error;
 
-    fn try_insert<Output>(&mut self, key: K, elem: V) -> Result<Output, Self::Error>;
+    fn try_insert<Output>(&mut self, key: Idx, elem: V) -> Result<Output, Self::Error>;
 }
 
 /// [Scope] describes the focus of the [crate::turing::Turing]

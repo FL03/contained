@@ -6,7 +6,7 @@
 use super::Execute;
 use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{Alphabet, Error, Include, Insert, Scope, Symbolic, Translate};
+use crate::{Alphabet, ArrayLike, Error, Include, Insert, Scope, Symbolic, Translate};
 
 use serde::{Deserialize, Serialize};
 

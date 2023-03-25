@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
-use crate::Symbolic;
+use crate::{ArrayLike, Insert, Iterable, Symbolic};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 
@@ -16,41 +16,13 @@ impl<S: Symbolic> Tape<S> {
     }
     /// Creates a new tape from an iterator; preserves the original order.
     pub fn norm(iter: impl IntoIterator<Item = S>) -> Self {
-        Self(Vec::from_iter(iter))
+        Self::from_iter(iter)
     }
     /// Creates a new tape from an iterator; the tape is reversed.
     pub fn std(iter: impl IntoIterator<Item = S>) -> Self {
         let mut tape = Vec::from_iter(iter);
         tape.reverse();
-        Self(tape.clone())
-    }
-    /// Returns the element at the given index, or `None` if the index is out of bounds.
-    pub fn get(&self, index: usize) -> Option<&S> {
-        self.as_ref().get(index)
-    }
-    /// Inserts an element at the given index, shifting all elements after it to the right.
-    pub fn insert(&mut self, index: usize, elem: S) {
-        self.as_mut().insert(index, elem);
-    }
-    /// Returns `true` if the tape contains no elements.
-    pub fn is_empty(&self) -> bool {
-        self.as_ref().is_empty()
-    }
-    /// Returns the number of elements in the tape.
-    pub fn len(&self) -> usize {
-        self.as_ref().len()
-    }
-    /// Pushes an element to the end of the tape.
-    pub fn push(&mut self, elem: S) {
-        self.as_mut().push(elem);
-    }
-    /// Sets the element at the given index
-    pub fn set(&mut self, index: usize, elem: S) {
-        self[index] = elem;
-    }
-    /// Returns a reference to the underlying vector
-    pub fn tape(&self) -> &Vec<S> {
-        &self.0
+        Self::from_iter(tape.clone())
     }
     /// Creates a new tape with the specified capacity.
     pub fn with_capacity(capacity: usize) -> Self {
@@ -58,15 +30,17 @@ impl<S: Symbolic> Tape<S> {
     }
 }
 
+impl<S: Symbolic> ArrayLike<S> for Tape<S> {}
+
 impl<S: Symbolic> AsMut<Vec<S>> for Tape<S> {
     fn as_mut(&mut self) -> &mut Vec<S> {
-        &mut self.0
+        self.0.as_mut()
     }
 }
 
 impl<S: Symbolic> AsRef<Vec<S>> for Tape<S> {
     fn as_ref(&self) -> &Vec<S> {
-        self.tape()
+        self.0.as_ref()
     }
 }
 
@@ -96,6 +70,14 @@ impl<S: Symbolic> IndexMut<usize> for Tape<S> {
     }
 }
 
+impl<S: Symbolic> Insert<usize, S> for Tape<S> {
+    fn insert(&mut self, index: usize, elem: S) {
+        self.as_mut().insert(index, elem);
+    }
+}
+
+impl<S: Symbolic> Iterable<usize, S> for Tape<S> {}
+
 impl<S: Symbolic> IntoIterator for Tape<S> {
     type Item = S;
     type IntoIter = std::vec::IntoIter<S>;
@@ -105,21 +87,9 @@ impl<S: Symbolic> IntoIterator for Tape<S> {
     }
 }
 
-impl<S: Symbolic> From<&[S]> for Tape<S> {
-    fn from(d: &[S]) -> Tape<S> {
-        Tape(d.into_iter().cloned().collect())
-    }
-}
-
-impl<S: Symbolic> From<Vec<S>> for Tape<S> {
-    fn from(d: Vec<S>) -> Tape<S> {
-        Tape(d)
-    }
-}
-
 impl<S: Symbolic> From<Tape<S>> for Vec<S> {
-    fn from(d: Tape<S>) -> Vec<S> {
-        d.tape().clone()
+    fn from(tape: Tape<S>) -> Vec<S> {
+        tape.as_ref().clone()
     }
 }
 
@@ -129,9 +99,13 @@ mod tests {
 
     #[test]
     fn test_tape() {
-        let alpha = vec!["a", "b", "c"];
-
-        let a = Tape::from(alpha);
-        assert_eq!(a.len(), 3);
+        let mut tape = Tape::new();
+        assert!(tape.is_empty());
+        tape.push("a");
+        assert_eq!(tape.len(), 1);
+        assert_eq!(tape[0], "a");
+        tape.append(&mut Tape::from_iter(vec!["b", "c"]));
+        assert_eq!(tape.len(), 3);
+        assert_eq!(tape[2], "c");
     }
 }

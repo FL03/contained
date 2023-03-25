@@ -6,7 +6,7 @@
 use super::instructions::Instruction;
 use super::{Driver, Program, Tape, Turing};
 use crate::states::{State, Stateful};
-use crate::{Alphabet, Error, Scope, Symbolic, Translate};
+use crate::{Alphabet, ArrayLike, Error, Scope, Symbolic, Translate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]

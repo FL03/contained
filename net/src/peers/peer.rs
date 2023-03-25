@@ -6,31 +6,6 @@
 use super::Peerable;
 use libp2p::identity::{ed25519, DecodingError, Keypair};
 
-pub struct Keys {
-    pk: [u8; 32],
-    sk: [u8; 32],
-}
-
-impl Keys {
-    pub fn new(pk: [u8; 32], sk: [u8; 32]) -> Self {
-        Self { pk, sk }
-    }
-    pub fn public_key(&self) -> [u8; 32] {
-        self.pk
-    }
-    pub fn secret_key(&self) -> [u8; 32] {
-        self.sk
-    }
-}
-
-impl From<Keys> for Keypair {
-    fn from(keys: Keys) -> Self {
-        let mut pk = keys.pk;
-        let mut sk = keys.sk;
-        Keypair::Ed25519(ed25519::Keypair::decode_ed25519(&mut pk, &mut sk).unwrap())
-    }
-}
-
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Peer {
     keypair: [u8; 64],

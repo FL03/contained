@@ -5,7 +5,7 @@
 */
 use super::Tape;
 use crate::states::{State, Stateful};
-use crate::{Include, Insert, Scope, Symbolic};
+use crate::{ArrayLike, Include, Insert, Scope, Symbolic};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
