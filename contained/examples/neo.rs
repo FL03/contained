@@ -5,8 +5,8 @@
 */
 extern crate contained;
 
-use contained::core::turing::{instructions::Instruction, Tape, Turing};
-use contained::core::{actors::Execute, states::State, Resultant, Scope};
+use contained::core::turing::{instructions::Instruction, Tape};
+use contained::core::{actors::Execute, states::State, Resultant};
 use contained::music::{
     neo::triads::{Triad, Triads},
     Note,
@@ -54,7 +54,7 @@ fn main() -> Resultant {
     // Execute the program
     tracing::info!("Executing the program...");
     assert!(machine.execute().is_ok());
-    println!("{:?}", machine.memory.tape());
+    println!("{:?}", machine.memory.as_ref());
 
     Ok(())
 }

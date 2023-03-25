@@ -13,7 +13,7 @@ use tracing::Level;
     Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
 )]
 pub struct Logger {
-    level: String,
+    pub level: String,
 }
 
 impl Logger {
@@ -29,7 +29,7 @@ impl Logger {
         }
         self
     }
-    pub fn init_tracing(self) {
+    pub fn init_tracing(&self) {
         tracing_subscriber::fmt::init();
         tracing::debug!("Success: tracing layer initialized...");
     }

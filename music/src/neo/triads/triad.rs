@@ -65,6 +65,12 @@ impl Alphabet<Note> for Triad {
     }
 }
 
+impl AsRef<(Note, Note, Note)> for Triad {
+    fn as_ref(&self) -> &(Note, Note, Note) {
+        &self.notes
+    }
+}
+
 impl Triadic for Triad {
     fn class(&self) -> Triads {
         self.class

@@ -43,14 +43,10 @@ fn fibonacci_sequence() -> Fibonacci {
 fn recursive_fibonacci(b: &mut Bencher) {
     // exact code to benchmark must be passed as a closure to the iter
     // method of Bencher
-    b.iter(|| {
-        (0..BENCH_SIZE).map(fibonacci).collect::<Vec<u32>>()
-    })
+    b.iter(|| (0..BENCH_SIZE).map(fibonacci).collect::<Vec<u32>>())
 }
 
 #[bench]
 fn iterative_fibonacci(b: &mut Bencher) {
-    b.iter(|| {
-        fibonacci_sequence().take(BENCH_SIZE).collect::<Vec<u32>>()
-    })
+    b.iter(|| fibonacci_sequence().take(BENCH_SIZE).collect::<Vec<u32>>())
 }

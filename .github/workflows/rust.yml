@@ -6,7 +6,6 @@ env:
 on:
   pull_request:
     branches-ignore: [ "dev*" ]
-    tags: [ "v*.*.*" ]
   push:
     branches-ignore: [ "dev*" ]
     tags: [ "v*.*.*" ]
@@ -45,7 +44,6 @@ jobs:
         pkg: 
           - contained-core
           - contained-music
-          - contained-net
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt install -y protobuf-compiler
