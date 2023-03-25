@@ -47,8 +47,7 @@ pub trait Triadic: Clone {
     /// Apply a single [LPR] transformation onto the active machine
     /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
     fn transform(&mut self, dirac: LPR) {
-        let (mut r, mut t, mut f): (i64, i64, i64) =
-            (self.root().into(), self.third().into(), self.fifth().into());
+        let (mut r, mut t, mut f): (Note, Note, Note) = self.clone().triad();
         match self.intervals().0 {
             Thirds::Major => match dirac {
                 LPR::L => r -= Interval::Semitone,

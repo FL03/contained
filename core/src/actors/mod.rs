@@ -121,7 +121,7 @@ pub trait Execute<S: Symbolic>:
         while let Some(instruction) = self.next() {
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
             self.scope_mut().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
@@ -139,7 +139,7 @@ pub trait Execute<S: Symbolic>:
         if let Some(instruction) = self.next() {
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
             self.scope_mut().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction

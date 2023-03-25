@@ -24,7 +24,7 @@ where
 
 /// [ArrayLike] describes the basic behaviors of an array-like structure
 pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
-    AsMut<Vec<T>> + AsRef<Vec<T>> + IndexMut<usize, Output = T> + Iterable<usize, T>
+    AsMut<Vec<T>> + AsRef<Vec<T>> + Eq + IndexMut<usize, Output = T> + Iterable<usize, T> + Ord
 {
     /// [ArrayLike::append] describes a method for appending another array to the end of the array
     fn append(&mut self, elem: &mut Self) {
@@ -48,6 +48,25 @@ pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
     /// [ArrayLike::count] describes a method for counting the number of times an element appears in the array
     fn count(&self, elem: &T) -> usize {
         self.as_ref().iter().filter(|&x| x == elem).count()
+    }
+    /// [ArrayLike::dedup] describes a method for removing duplicate elements from the array
+    fn dedup(&mut self) {
+        self.as_mut().dedup();
+    }
+    /// [ArrayLike::dedup_by] describes a method for removing duplicate elements from the array using a custom comparison function
+    fn dedup_by<F>(&mut self, same_bucket: F)
+    where
+        F: FnMut(&mut T, &mut T) -> bool,
+    {
+        self.as_mut().dedup_by(same_bucket);
+    }
+    /// [ArrayLike::dedup_by_key] describes a method for removing duplicate elements from the array using a custom key extraction function
+    fn dedup_by_key<F, K>(&mut self, key: F)
+    where
+        F: FnMut(&mut T) -> K,
+        K: PartialEq<K>,
+    {
+        self.as_mut().dedup_by_key(key);
     }
     /// [ArrayLike::drain] describes a method for removing a range of elements from the array
     fn drain(&mut self, range: std::ops::Range<usize>) -> vec::Drain<T> {
@@ -112,9 +131,29 @@ pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
     fn set(&mut self, index: usize, elem: T) {
         self[index] = elem;
     }
+    /// [ArrayLike::shrink_to] describes a method for shrinking the capacity of the array to a specific minimum
+    fn shrink_to(&mut self, min_capacity: usize) {
+        self.as_mut().shrink_to(min_capacity);
+    }
     /// [ArrayLike::shrink_to_fit] describes a method for shrinking the capacity of the array to match its length
     fn shrink_to_fit(&mut self) {
         self.as_mut().shrink_to_fit();
+    }
+    /// [ArrayLike::splice] describes a method for removing a range of elements and replacing them with another array
+    fn splice(&mut self, range: std::ops::Range<usize>, replace_with: Vec<T>) -> Vec<T> {
+        self.as_mut().splice(range, replace_with).collect()
+    }
+    /// [ArrayLike::split_off] describes a method for splitting the array into two at a specific position
+    fn split_off(&mut self, at: usize) -> Vec<T> {
+        self.as_mut().split_off(at)
+    }
+    /// [ArrayLike::swap_remove] describes a method for removing an element at a specific position and returning it, replacing it with the last element
+    fn swap_remove(&mut self, index: usize) -> T {
+        self.as_mut().swap_remove(index)
+    }
+    /// [ArrayLike::truncate] describes a method for truncating the array to a specific length
+    fn truncate(&mut self, len: usize) {
+        self.as_mut().truncate(len);
     }
 }
 
