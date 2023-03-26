@@ -3,11 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A collection of common musical intervals
 */
-pub use self::{fifths::*, sevenths::*, thirds::*};
+pub use self::{fifths::*, fourths::*, sevenths::*, thirds::*};
 
-pub(crate) mod fifths;
-pub(crate) mod sevenths;
-pub(crate) mod thirds;
+mod fifths;
+mod fourths;
+mod sevenths;
+mod thirds;
 
 use crate::{Gradient, Note};
 
@@ -39,6 +40,7 @@ pub enum Interval {
     Tone = 2,
     #[default]
     Third(Thirds),
+    Fourth(Fourths),
     Fifth(Fifths),
     Seventh(Sevenths),
     Interval,
@@ -52,6 +54,7 @@ impl Interval {
             2 => Interval::Tone,
             3 => Interval::Third(Thirds::Minor),
             4 => Interval::Third(Thirds::Major),
+            5 => Interval::Fourth(Fourths::Perfect),
             6 => Interval::Fifth(Fifths::Diminished),
             7 => Interval::Fifth(Fifths::Perfect),
             8 => Interval::Fifth(Fifths::Augmented),
@@ -84,9 +87,10 @@ impl From<Interval> for i64 {
             Interval::Semitone => 1,
             Interval::Tone => 2,
             Interval::Third(i) => i as i64,
+            Interval::Fourth(i) => i as i64,
             Interval::Fifth(i) => i as i64,
             Interval::Seventh(i) => i as i64,
-            Interval::Interval => 5,
+            Interval::Interval => 0,
         }
     }
 }
