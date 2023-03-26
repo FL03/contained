@@ -36,6 +36,8 @@ contained-music = { features = [], optional = true, path = "../music", version =
 # Standard dependencies
 algae.workspace = true
 anyhow.workspace = true
+clap = { features = ["cargo", "derive", "env"], version = "4" }
+config = "0.13"
 decanter.workspace = true
 futures.workspace = true
 scsys.workspace = true
@@ -43,12 +45,10 @@ serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-
-clap = { features = ["cargo", "derive", "env"], version = "4" }
-config = "0.13"
-tokio = { features = ["full"], version = "1"}
+tokio.workspace = true
 tracing = { features = ["log"], version = "0.1" }
 tracing-subscriber = { features = ["fmt"], version = "0.3" }
+wasmer.workspace = true
 
 [dev-dependencies]
 
