@@ -15,6 +15,10 @@ use contained_core::{State, Stateful};
 
 use serde::{Deserialize, Serialize};
 
+pub trait Surface<T> {
+    fn vertices(&self) -> Vec<T>;
+}
+
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instance {
     memory: Tape<Note>,

@@ -1,35 +1,33 @@
 /*
-    Appellation: tonnetz <module>
+    Appellation: cluster <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        A tonnetz can be any set of connected, non-repeating triads. The tonnetz is essentially a topological computer created by gluing together several triadic machines together.
-        The tonnetz is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
-
-        To find the six related notes, one simply must find the thirds and perfect fifth that lie above and below the given node. For example,
-            Note(C) -> ((3, -3), (4, -4), (7, -7))
-                (Minor Third)   +/- 3 -> (D# / Eb, A)
-                (Major Third)   +/- 4 -> (E, G# / Ab)
-                (Perfect Fifth) +/- 7 -> (G, F)
+        This module is dedicated to the proposed harmonic computational fabric;
+        A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
+        The cluster is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
+        
+        If a tonnetz is a topological computer, then a cluster is a topological computer that is used to orchestrate a set of topological computers.
+        Locally, a tonnetz is typically fragemented only persisting as many triads as the host device allows for. However, as a network the cluster
+        glues together these framents into a single, cohesive, and complete experience orchestrated according to a single originator.
 */
-use super::triads::{Triad, Triadic};
+use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, Default)]
-pub struct Tonnetz {
+pub struct Cluster {
     cluster: UndirectedGraph<Note, Interval>,
     scope: Arc<Mutex<Triad>>,
 }
 
-impl Tonnetz {
+impl Cluster {
     pub fn fulfilled(&self) -> bool {
         self.cluster.nodes().len() == MODULUS as usize
     }
     pub fn insert(&mut self, triad: Triad) {
         // determine the intervals used to create the given triad
-        let (a, b, c): (Interval, Interval, Interval) =
-            triad.clone().try_into().expect("Invalid triad");
+        let (a, b, c): (Interval, Interval, Interval) = triad.clone().into();
 
         self.cluster
             .add_edge((triad.root(), triad.third(), a).into());
@@ -43,13 +41,13 @@ impl Tonnetz {
     }
 }
 
-impl std::fmt::Display for Tonnetz {
+impl std::fmt::Display for Cluster {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.cluster)
     }
 }
 
-impl From<Triad> for Tonnetz {
+impl From<Triad> for Cluster {
     fn from(triad: Triad) -> Self {
         // determine the intervals used to create the given triad
         let (a, b, c): (Interval, Interval, Interval) =
@@ -68,24 +66,22 @@ impl From<Triad> for Tonnetz {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::neo::triads::{Triad, Triads};
-    use crate::MODULUS;
 
     #[test]
-    fn test_tonnetz() {
+    fn test_cluster() {
         let triad = Triad::new(0.into(), Triads::Major);
 
-        let mut tonnetz = Tonnetz::from(triad.clone());
-        assert!(tonnetz.fulfilled() == false);
+        let mut cluster = Cluster::from(triad.clone());
+        assert!(cluster.fulfilled() == false);
         for i in 1..MODULUS {
-            tonnetz.insert(Triad::new(i.into(), Triads::Major));
+            cluster.insert(Triad::new(i.into(), Triads::Major));
         }
-        assert!(tonnetz.fulfilled() == true);
+        assert!(cluster.fulfilled() == true);
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
             for i in 0..MODULUS {
-                tonnetz.insert(Triad::new(i.into(), class));
+                cluster.insert(Triad::new(i.into(), class));
             }
         }
-        assert!(tonnetz.fulfilled() == true);
+        assert!(cluster.fulfilled() == true);
     }
 }

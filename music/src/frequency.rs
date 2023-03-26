@@ -176,8 +176,6 @@ impl Future for Frequency {
     type Output = Self;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        // Stores the current cycle count.
-        let cycle = self.cursor;
         // Increment the cycle count.
         self.cursor += 1;
         // Find the time at which the next cycle will complete.

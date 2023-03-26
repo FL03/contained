@@ -3,8 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::LPR;
-use crate::neo::triads::*;
+use super::{triads::*, LPR};
 use crate::Note;
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd)]

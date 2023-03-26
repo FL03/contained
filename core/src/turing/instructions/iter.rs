@@ -8,6 +8,7 @@ use super::*;
 use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Iter<S: Symbolic> {
     cursor: usize,
     instructions: Vec<Instruction<S>>,
