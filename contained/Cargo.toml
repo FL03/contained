@@ -36,6 +36,7 @@ contained-music = { features = [], optional = true, path = "../music", version =
 # Standard dependencies
 algae.workspace = true
 anyhow.workspace = true
+bytes = "1"
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 config = "0.13"
 decanter.workspace = true
