@@ -8,7 +8,7 @@ pub use self::{accidentals::*, naturals::*};
 pub(crate) mod accidentals;
 pub(crate) mod naturals;
 
-use crate::{Gradient, Pitch};
+use crate::{intervals::Interval, Gradient, Pitch};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -34,6 +34,16 @@ pub enum PitchClass {
     Accidental(Accidentals),
     #[default]
     Natural(NaturalNote),
+}
+
+impl PitchClass {
+    pub fn new(value: i64) -> Self {
+        if let Ok(v) = Accidentals::try_from(value) {
+            PitchClass::from(v)
+        } else {
+            PitchClass::from(NaturalNote::try_from(value).expect(""))
+        }
+    }
 }
 
 impl Gradient for PitchClass {
@@ -87,6 +97,67 @@ impl From<PitchClass> for Pitch {
             PitchClass::Accidental(v) => v.into(),
             PitchClass::Natural(n) => Pitch::from(n as i64),
         }
+    }
+}
+
+
+impl std::ops::Add<Interval> for PitchClass {
+    type Output = PitchClass;
+
+    fn add(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        PitchClass::new(self.pitch() + interval)
+    }
+}
+
+impl std::ops::AddAssign<Interval> for PitchClass {
+    fn add_assign(&mut self, rhs: Interval) {
+        *self = *self + rhs;
+    }
+}
+
+impl std::ops::Div<Interval> for PitchClass {
+    type Output = PitchClass;
+
+    fn div(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        PitchClass::new(self.pitch() / interval)
+    }
+}
+
+impl std::ops::DivAssign<Interval> for PitchClass {
+    fn div_assign(&mut self, rhs: Interval) {
+        *self = *self / rhs;
+    }
+}
+
+impl std::ops::Mul<Interval> for PitchClass {
+    type Output = PitchClass;
+
+    fn mul(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        PitchClass::new(self.pitch() * interval)
+    }
+}
+
+impl std::ops::MulAssign<Interval> for PitchClass {
+    fn mul_assign(&mut self, rhs: Interval) {
+        *self = *self * rhs;
+    }
+}
+
+impl std::ops::Sub<Interval> for PitchClass {
+    type Output = PitchClass;
+
+    fn sub(self, rhs: Interval) -> Self::Output {
+        let interval: i64 = rhs.into();
+        PitchClass::new(self.pitch() - interval)
+    }
+}
+
+impl std::ops::SubAssign<Interval> for PitchClass {
+    fn sub_assign(&mut self, rhs: Interval) {
+        *self = *self - rhs;
     }
 }
 
