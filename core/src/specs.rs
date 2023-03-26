@@ -183,10 +183,11 @@ where
 /// [Scope] describes the focus of the [crate::turing::Turing]
 pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
     /// [Scope::current] returns the current element of the [Scope] on the [Tape]
-    fn current(&self) -> &S {
+    fn current(&self) -> S {
         self.tape()
             .get(self.cursor())
             .expect("Index is out of bounds...")
+            .clone()
     }
     /// [Scope::cursor] returns the current position of the [Scope] on the [Tape]
     fn cursor(&self) -> usize;
@@ -219,7 +220,7 @@ pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
         }
     }
     /// [Scope::tape] returns the [Tape] of the [Scope]
-    fn tape(&self) -> &Tape<S>;
+    fn tape(&self) -> Tape<S>;
 }
 
 /// [Translate] is a trait that allows for the translation of a machine's memory

@@ -42,8 +42,12 @@ impl Move {
             Self::Stay => Self::Stay,
         }
     }
-    pub fn apply<S: Symbolic>(&self, mut index: usize, mut tape: Tape<S>, elem: S) -> (usize, Tape<S>) {
-
+    pub fn apply<S: Symbolic>(
+        &self,
+        mut index: usize,
+        mut tape: Tape<S>,
+        elem: S,
+    ) -> (usize, Tape<S>) {
         match *self {
             // If the current position is 0, insert a new element at the top of the vector
             Move::Left if index == 0 => {

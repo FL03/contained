@@ -11,14 +11,17 @@ use contained_sdk::core::{
     State,
 };
 use contained_sdk::music::{
-    neo::triads::{Triad, Triads},
+    neo::triads::{Instance, Triad, Triads},
     Note,
 };
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
+    let tape: Tape<Note> = Tape::norm([0.into(), 3.into(), 6.into()]);
     // Setup the triad
     let triad = Triad::new(0.into(), Triads::Diminished);
+    // Initialize a new instance
+    let instance = Instance::new(triad.clone());
     //
     let instructions: Vec<Instruction<Note>> = vec![
         (
@@ -48,16 +51,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
     tracing::info!("Instructions: \n{:?}", instructions.clone());
     // Initialize a new machine
-    let mut machine = triad
-        .clone()
-        .actor(Some(Tape::norm([0.into(), 3.into(), 6.into()])));
+    let mut actor = instance.actor(Some(tape));
     // Extend the program; turn [0, 3, 6] into [6, 3, 3]
-    machine.extend(instructions);
-    tracing::info!("Success: inserted the instructions into the machine...");
-    // Execute the program
-    tracing::info!("Executing the program...");
-    assert!(machine.execute().is_ok());
-    println!("{:?}", machine.memory.as_ref());
+    actor.extend(instructions);
+    // Execute the program; assert that the program executed successfully
+    assert!(actor.execute().is_ok());
+    // Print the machine memory
+    println!("{:?}", actor.memory.as_ref());
 
     Ok(())
 }

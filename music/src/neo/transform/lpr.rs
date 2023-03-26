@@ -66,21 +66,20 @@ impl<T: Triadic> Dirac<T> for LPR {
     type Output = T;
 
     fn dirac(&self, arg: &mut T) -> Self::Output {
-        let [mut r, mut t, mut f]: [Note; 3] = arg.triad().clone();
+        let mut notes: [Note; 3] = arg.triad().clone();
         match arg.intervals().0 {
             Thirds::Major => match *self {
-                LPR::L => r -= Interval::Semitone,
-                LPR::P => t -= Interval::Semitone,
-                LPR::R => f += Interval::Tone,
+                LPR::L => notes[0] -= Interval::Semitone,
+                LPR::P => notes[1] -= Interval::Semitone,
+                LPR::R => notes[2] += Interval::Tone,
             },
             Thirds::Minor => match *self {
-                LPR::L => f += Interval::Semitone,
-                LPR::P => t += Interval::Semitone,
-                LPR::R => r -= Interval::Tone,
+                LPR::L => notes[2] += Interval::Semitone,
+                LPR::P => notes[1] += Interval::Semitone,
+                LPR::R => notes[0] -= Interval::Tone,
             },
         };
-        arg.update((r.into(), t.into(), f.into()))
-            .expect("Invalid triad");
+        arg.update(&notes).expect("Invalid triad");
         arg.clone()
     }
 }

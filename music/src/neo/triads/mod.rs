@@ -18,7 +18,7 @@ pub mod tonic;
 
 use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
-use crate::{MusicResult, Note};
+use crate::{Error, Note};
 use algae::graph::{Graph, UndirectedGraph};
 
 pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
@@ -30,7 +30,9 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
         graph.add_edge((self.fifth(), self.root(), self.intervals().2.into()).into());
         graph.clone()
     }
+    /// Returns the [Triads] enum variant that describes the [Triad]
     fn class(&self) -> Triads;
+    /// Returns true if the [Triad] contains the [Note]
     fn contains(&self, note: &Note) -> bool {
         &self.root() == note || &self.third() == note || &self.fifth() == note
     }
@@ -44,14 +46,10 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
     fn fifth(&self) -> Note {
         self.triad()[2].clone()
     }
-    fn pathfinder(&self, note: Note) -> PathFinder<Self> {
-        PathFinder::new(note).origin(self.clone())
-    }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         self.class().intervals()
     }
-
     /// Returns a vector of all the possible [Triad]s that exist at
     fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
@@ -61,6 +59,10 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
             neighbors.push(triad);
         }
         neighbors
+    }
+    /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
+    fn pathfinder(&self, note: Note) -> PathFinder<Self> {
+        PathFinder::new(note).set_origin(self.clone())
     }
     /// Returns an cloned instance of the root of the triad
     fn root(&self) -> Note {
@@ -95,7 +97,7 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
         args.reverse();
         self.walk(args);
     }
-    fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult;
+    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, Error>;
 }
 
 #[cfg(test)]

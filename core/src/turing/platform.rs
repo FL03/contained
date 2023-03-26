@@ -24,14 +24,14 @@ impl<S: Symbolic> Machine<S> {
     pub fn scope(&self) -> Driver<S> {
         self.driver.clone()
     }
-    pub fn tape(&self) -> &Tape<S> {
+    pub fn tape(&self) -> Tape<S> {
         self.driver.tape()
     }
 }
 
 impl<S: Symbolic> Extend<S> for Machine<S> {
     fn extend<T: IntoIterator<Item = S>>(&mut self, iter: T) {
-        self.driver.tape.extend(iter)
+        self.driver.memory.extend(iter)
     }
 }
 

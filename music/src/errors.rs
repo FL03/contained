@@ -29,6 +29,7 @@ pub enum Error {
     IOError(String),
     #[default]
     PitchError,
+    StdError(String),
 }
 
 impl std::error::Error for Error {}
@@ -36,5 +37,11 @@ impl std::error::Error for Error {}
 impl From<std::io::Error> for Error {
     fn from(error: std::io::Error) -> Self {
         Error::IOError(error.to_string())
+    }
+}
+
+impl From<Box<dyn std::error::Error>> for Error {
+    fn from(error: Box<dyn std::error::Error>) -> Self {
+        Error::StdError(error.to_string())
     }
 }

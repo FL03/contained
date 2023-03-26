@@ -20,10 +20,10 @@ pub struct Actor<S: Symbolic> {
 }
 
 impl<S: Symbolic> Actor<S> {
-    pub fn new(program: Program<S>, tape: Option<Tape<S>>) -> Self {
+    pub fn new(program: Program<S>, memory: Option<Tape<S>>) -> Self {
         Self {
             cursor: 0,
-            memory: tape.unwrap_or_default(),
+            memory: memory.unwrap_or_default(),
             program,
             state: Default::default(),
         }
@@ -123,8 +123,8 @@ impl<S: Symbolic> Scope<S> for Actor<S> {
         self.memory.set(self.cursor(), elem);
     }
 
-    fn tape(&self) -> &Tape<S> {
-        &self.memory
+    fn tape(&self) -> Tape<S> {
+        self.memory.clone()
     }
 }
 

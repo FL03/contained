@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Instance {
+    memory: Tape<Note>,
     state: State,
     triad: Triad,
 }
@@ -24,6 +25,7 @@ pub struct Instance {
 impl Instance {
     pub fn new(triad: Triad) -> Self {
         Self {
+            memory: Tape::new(),
             state: State::default(),
             triad,
         }
@@ -39,10 +41,14 @@ impl Instance {
             self.program(),
         )
     }
-
+    pub fn memory(&self) -> Tape<Note> {
+        self.memory.clone()
+    }
+    /// Create a new [Program] with the [Triad] as its alphabet
     pub fn program(&self) -> Program<Note> {
         Program::new(self.triad(), State::Invalid)
     }
+
     pub fn triad(&self) -> Triad {
         self.triad.clone()
     }

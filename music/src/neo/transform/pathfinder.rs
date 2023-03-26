@@ -20,12 +20,7 @@ impl<T: Triadic> PathFinder<T> {
             target,
         }
     }
-
-    pub fn origin(mut self, triad: T) -> Self {
-        self.queue.push((Vec::new(), triad));
-        self
-    }
-
+    /// Finds the shortest path to the target
     pub fn find(&mut self) -> Option<Vec<LPR>> {
         while let Some((path, triad)) = self.queue.pop() {
             if triad.contains(&self.target) {
@@ -43,5 +38,18 @@ impl<T: Triadic> PathFinder<T> {
             }
         }
         None
+    }
+    /// Resets the pathfinder
+    pub fn reset(&mut self) {
+        self.queue.clear();
+    }
+    /// Sets the origin of the pathfinder
+    pub fn set_origin(mut self, triad: T) -> Self {
+        self.queue.push((Vec::new(), triad));
+        self
+    }
+    /// Sets the target of the pathfinder
+    pub fn set_target(&mut self, target: Note) {
+        self.target = target;
     }
 }

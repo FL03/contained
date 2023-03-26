@@ -7,18 +7,14 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{Triadic, Triads};
+use super::{tonic::Tonic, Instance, Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
-    BoxedError, Gradient, MusicResult, Note,
+    Error, Gradient, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::{
-    actors::Actor,
-    turing::{Driver, Machine, Program, Tape},
-    Alphabet, State, Stateful,
-};
+use contained_core::{turing::Program, Alphabet, State};
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 
@@ -41,16 +37,13 @@ impl Triad {
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, Triads::from((a, b)))
     }
-    /// Create a new [Actor] with the [Triad] as its alphabet
-    pub fn actor(&self, tape: Option<Tape<Note>>) -> Actor<Note> {
-        Actor::new(Program::new(self.clone(), State::Invalid), tape)
+
+    pub fn instance(&self) -> Instance {
+        Instance::new(self.clone())
     }
-    /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
-        Machine::new(
-            Driver::new(State::Valid, tape.unwrap_or_default()),
-            Program::new(self.clone(), State::Invalid),
-        )
+
+    pub fn tonic(&self) -> Tonic {
+        Tonic::new(self.program(), self.instance())
     }
 
     pub fn program(&self) -> Program<Note> {
@@ -86,12 +79,14 @@ impl Triadic for Triad {
         &self.notes
     }
 
-    fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult {
-        if let Ok(t) = Self::try_from(triad) {
+    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, Error> {
+        if let Ok(t) = Self::try_from(triad.clone()) {
             *self = t;
-            return Ok(());
+            return Ok(self);
         }
-        Err("The given notes failed to contain the necessary relationships...".into())
+        Err(Error::IntervalError(
+            "The given notes failed to contain the necessary relationships...".into(),
+        ))
     }
 }
 
@@ -138,7 +133,7 @@ impl From<(Note, Thirds, Thirds)> for Triad {
 }
 
 impl TryFrom<[Note; 3]> for Triad {
-    type Error = BoxedError;
+    type Error = Error;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
         let args = data.to_vec();
@@ -160,47 +155,34 @@ impl TryFrom<[Note; 3]> for Triad {
                 }
             }
         }
-        Err("Failed to find the required relationships within the given notes...".into())
+        Err(Error::IntervalError(
+            "Failed to find the required relationships within the given notes...".into(),
+        ))
     }
 }
 
 impl TryFrom<(Note, Note, Note)> for Triad {
-    type Error = BoxedError;
+    type Error = Error;
 
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
-        let args = vec![data.0, data.1, data.2];
-        for i in 0..args.len() {
-            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
-            for j in 0..tmp.len() {
-                let (a, b, c) = (
-                    args[i].clone(),
-                    args[tmp[j]].clone(),
-                    args[tmp[(j + 1) % tmp.len()]].clone(),
-                );
-                let (ab, bc) = (
-                    Thirds::try_from((a.clone(), b.clone())),
-                    Thirds::try_from((b.clone(), c.clone())),
-                );
-                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-                if ab.is_ok() && bc.is_ok() {
-                    return Ok(Triad::build(a, ab?, bc?));
-                }
-            }
-        }
-        Err("Failed to find the required relationships within the given notes...".into())
+        Triad::try_from([data.0, data.1, data.2])
+    }
+}
+
+impl TryFrom<[i64; 3]> for Triad {
+    type Error = Error;
+
+    fn try_from(notes: [i64; 3]) -> Result<Triad, Self::Error> {
+        let notes: [Note; 3] = [notes[0].into(), notes[1].into(), notes[2].into()];
+        Triad::try_from(notes)
     }
 }
 
 impl TryFrom<(i64, i64, i64)> for Triad {
-    type Error = BoxedError;
+    type Error = Error;
 
     fn try_from(data: (i64, i64, i64)) -> Result<Triad, Self::Error> {
-        let notes: (Note, Note, Note) = (
-            data.0.pitch().into(),
-            data.1.pitch().into(),
-            data.2.pitch().into(),
-        );
-        Triad::try_from(notes)
+        Triad::try_from([data.0, data.1, data.2])
     }
 }
 
