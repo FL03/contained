@@ -15,7 +15,7 @@
 
         number of elements + freq
 */
-use super::{Dirac, Transform};
+use super::Dirac;
 use crate::neo::triads::{Triad, Triadic};
 use crate::{
     intervals::{Interval, Thirds},

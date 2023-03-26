@@ -19,8 +19,6 @@ use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{MusicResult, Note};
 use algae::graph::{Graph, UndirectedGraph};
-use itertools::Itertools;
-use std::collections::HashMap;
 
 pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
     fn as_graph(&self) -> UndirectedGraph<Note, Interval> {

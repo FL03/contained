@@ -17,6 +17,7 @@ use std::sync::{Arc, Mutex};
 pub struct Tonic {
     cursor: usize,
     memory: Arc<Mutex<Tape<Note>>>,
+    program: Program<Note>,
     triad: Arc<Mutex<Triad>>,
 }
 
