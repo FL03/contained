@@ -4,6 +4,8 @@
     Description:
 
 */
+use crate::turing::Tape;
+use crate::{ArrayLike, Symbolic};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -39,6 +41,27 @@ impl Move {
             Self::Right => Self::Left,
             Self::Stay => Self::Stay,
         }
+    }
+    pub fn apply<S: Symbolic>(&self, mut index: usize, mut tape: Tape<S>, elem: S) -> (usize, Tape<S>) {
+
+        match *self {
+            // If the current position is 0, insert a new element at the top of the vector
+            Move::Left if index == 0 => {
+                tape[index] = elem;
+            }
+            Move::Left => {
+                index -= 1;
+            }
+            Move::Right => {
+                index += 1;
+
+                if index == tape.len() {
+                    tape[index] = elem;
+                }
+            }
+            Move::Stay => {}
+        };
+        (index, tape.clone())
     }
     pub fn shift(&self, pos: usize) -> usize {
         (pos as i64 + *self as i64) as usize

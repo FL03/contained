@@ -5,9 +5,9 @@
 */
 pub use self::{constants::*, types::*};
 
-pub(crate) mod constants {}
+mod constants {}
 
-pub(crate) mod types {
+mod types {
 
     /// Type alias for a [Result]
     pub type Resultant<T = ()> = Result<T, Box<dyn std::error::Error>>;

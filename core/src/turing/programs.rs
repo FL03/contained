@@ -4,13 +4,18 @@
     Description: ... summary ...
 */
 use super::instructions::{Head, Instruction};
-use crate::states::{State, Stateful};
-use crate::{Alphabet, Include, Insert, Symbolic};
+use crate::{Alphabet, Include, Insert, State, Stateful, Symbolic};
 use serde::{Deserialize, Serialize};
-use std::mem::replace;
+use std::{
+    mem::replace,
+    ops::{Index, IndexMut},
+};
 
 pub trait Contract<S: Symbolic>:
-    Clone + Include<Instruction<S>> + Insert<usize, Instruction<S>>
+    Clone
+    + IndexMut<usize, Output = Instruction<S>>
+    + Include<Instruction<S>>
+    + Insert<usize, Instruction<S>>
 {
     fn alphabet(&self) -> Box<dyn Alphabet<S>>;
     fn final_state(&self) -> State;
@@ -35,8 +40,8 @@ pub trait Contract<S: Symbolic>:
         if self.final_state() < inst.head().state() || self.final_state() < inst.tail().state() {
             return None;
         }
-        if !self.alphabet().in_alphabet(&inst.head().symbol())
-            || !self.alphabet().in_alphabet(&inst.tail().symbol())
+        if !self.alphabet().is_viable(&inst.head().symbol())
+            || !self.alphabet().is_viable(&inst.tail().symbol())
         {
             return None;
         }
@@ -109,8 +114,8 @@ impl<S: Symbolic> Program<S> {
         if *self.final_state() < inst.head().state() || *self.final_state() < inst.tail().state() {
             return None;
         }
-        if !self.alphabet().in_alphabet(&inst.head().symbol())
-            || !self.alphabet().in_alphabet(&inst.tail().symbol())
+        if !self.alphabet().is_viable(&inst.head().symbol())
+            || !self.alphabet().is_viable(&inst.tail().symbol())
         {
             return None;
         }
@@ -127,11 +132,25 @@ impl<S: Symbolic> Program<S> {
             }
         }
     }
+    fn check_instruction(&self, inst: &Instruction<S>) -> bool {
+        if inst.head().state() == State::Invalid {
+            return false;
+        }
+        if *self.final_state() < inst.head().state() || *self.final_state() < inst.tail().state() {
+            return false;
+        }
+        if !self.alphabet().is_viable(&inst.head().symbol())
+            || !self.alphabet().is_viable(&inst.tail().symbol())
+        {
+            return false;
+        }
+        true
+    }
 }
 
 impl<S: Symbolic> Alphabet<S> for Program<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
-        self.alphabet.in_alphabet(symbol)
+    fn is_viable(&self, symbol: &S) -> bool {
+        self.alphabet.is_viable(symbol)
     }
     fn default_symbol(&self) -> S {
         self.alphabet.default_symbol()
@@ -143,6 +162,47 @@ impl<S: Symbolic> Extend<Instruction<S>> for Program<S> {
         for i in iter {
             self.insert(i);
         }
+    }
+}
+
+impl<S: Symbolic> Include<Instruction<S>> for Program<S> {
+    fn include(&mut self, inst: Instruction<S>) {
+        if self.check_instruction(&inst) {
+            match self
+                .instructions()
+                .iter()
+                .position(|cand: &Instruction<S>| cand.head() == inst.head())
+            {
+                Some(index) => {
+                    let _ = std::mem::replace(&mut self.instructions[index], inst);
+                }
+                None => {
+                    self.instructions.push(inst.clone());
+                }
+            }
+        }
+    }
+}
+
+// impl<S: Symbolic> Insert<usize, Instruction<S>> for Program<S> {
+//     fn insert(&mut self, index: usize, inst: Instruction<S>) {
+//         if self.check_instruction(&inst) {
+//             self.instructions.insert(index, inst);
+//         }
+//     }
+// }
+
+impl<S: Symbolic> Index<usize> for Program<S> {
+    type Output = Instruction<S>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.instructions[index]
+    }
+}
+
+impl<S: Symbolic> IndexMut<usize> for Program<S> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.instructions[index]
     }
 }
 

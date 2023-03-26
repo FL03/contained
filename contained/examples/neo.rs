@@ -3,16 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-extern crate contained;
+extern crate contained_sdk;
 
-use contained::core::turing::{instructions::Instruction, Tape};
-use contained::core::{actors::Execute, states::State, Resultant};
-use contained::music::{
+use contained_sdk::core::{
+    actors::Execute,
+    turing::{instructions::Instruction, Tape},
+    State,
+};
+use contained_sdk::music::{
     neo::triads::{Triad, Triads},
     Note,
 };
 
-fn main() -> Resultant {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
     // Setup the triad
     let triad = Triad::new(0.into(), Triads::Diminished);

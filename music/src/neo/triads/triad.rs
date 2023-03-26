@@ -16,9 +16,8 @@ use crate::{
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{
     actors::Actor,
-    states::{State, Stateful},
     turing::{Driver, Machine, Program, Tape},
-    Alphabet,
+    Alphabet, State, Stateful,
 };
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
@@ -28,7 +27,6 @@ use serde::{Deserialize, Serialize};
 pub struct Triad {
     class: Triads,
     notes: [Note; 3],
-    state: State,
 }
 
 impl Triad {
@@ -37,7 +35,6 @@ impl Triad {
         Self {
             class,
             notes: [root.clone(), a + root.clone(), c + root],
-            state: State::Valid,
         }
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
@@ -51,7 +48,7 @@ impl Triad {
     /// Initializes a new instance of a [Machine] configured with the current alphabet
     pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
         Machine::new(
-            Driver::new(self.state(), tape.unwrap_or_default()),
+            Driver::new(State::Valid, tape.unwrap_or_default()),
             Program::new(self.clone(), State::Invalid),
         )
     }
@@ -62,7 +59,7 @@ impl Triad {
 }
 
 impl Alphabet<Note> for Triad {
-    fn in_alphabet(&self, symbol: &Note) -> bool {
+    fn is_viable(&self, symbol: &Note) -> bool {
         self.notes.contains(symbol)
     }
     fn default_symbol(&self) -> Note {
@@ -73,15 +70,6 @@ impl Alphabet<Note> for Triad {
 impl AsRef<[Note; 3]> for Triad {
     fn as_ref(&self) -> &[Note; 3] {
         self.triad()
-    }
-}
-
-impl Stateful<State> for Triad {
-    fn state(&self) -> State {
-        self.state
-    }
-    fn update_state(&mut self, state: State) {
-        self.state = state;
     }
 }
 

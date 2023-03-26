@@ -5,28 +5,28 @@
         Turing machines accept instructions in the form of a five-tuple:
             (State, Symbol, State, Symbol, Move)
 */
-pub use self::{head::*, instruction::*, moves::*, tail::*};
+pub use self::{head::*, instruction::*, iter::*, moves::*, tail::*};
 
-pub(crate) mod head;
-pub(crate) mod instruction;
-pub(crate) mod moves;
-pub(crate) mod tail;
+mod head;
+mod instruction;
+mod iter;
+mod moves;
+mod tail;
 
-use crate::states::{State, Stateful};
-use crate::turing::Symbolic;
+use crate::{State, Stateful, Symbolic};
 
-pub trait IHead<S: Symbolic>: Stateful<State> {
+pub trait InstructionHead<S: Symbolic>: Stateful<State> {
     fn symbol(&self) -> S;
 }
 
-pub trait ITail<S: Symbolic>: Stateful<State> {
+pub trait InstructionTail<S: Symbolic>: Stateful<State> {
     fn action(&self) -> Move;
     fn symbol(&self) -> S;
 }
 
 pub trait InstructionSpec<S: Symbolic>: IntoIterator<Item = Self> {
-    type Head: IHead<S>;
-    type Tail: ITail<S>;
+    type Head: InstructionHead<S>;
+    type Tail: InstructionTail<S>;
 
     fn new(head: Self::Head, tail: Self::Tail) -> Self;
     fn head(&self) -> Self::Head;
@@ -34,8 +34,8 @@ pub trait InstructionSpec<S: Symbolic>: IntoIterator<Item = Self> {
 }
 
 pub trait InstructionSet<S: Symbolic>: Iterator<Item = Instruction<S>> {
-    type Head: IHead<S>;
-    type Tail: ITail<S>;
+    type Head: InstructionHead<S>;
+    type Tail: InstructionTail<S>;
 
     fn new(head: Self::Head, tail: Self::Tail) -> Self;
     fn cursor(&self) -> usize;

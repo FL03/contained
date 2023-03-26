@@ -5,9 +5,8 @@
         The instruction head is a two-tuple (State, Symbol)
 */
 use crate::{
-    states::{State, Stateful},
     turing::{Driver, Symbolic},
-    Scope,
+    Scope, State, Stateful,
 };
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
@@ -51,7 +50,7 @@ impl<S: Symbolic> std::fmt::Display for Head<S> {
 
 impl<S: Symbolic> From<Driver<S>> for Head<S> {
     fn from(value: Driver<S>) -> Self {
-        Self::new(value.state(), value.symbol().clone())
+        Self::new(value.state(), value.current().clone())
     }
 }
 

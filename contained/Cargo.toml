@@ -1,20 +1,20 @@
 [package]
 authors.workspace = true
 categories.workspace = true
-default-run = "node"
+default-run = "contained"
 description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "contained"
+name = "contained-sdk"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
 [[bin]]
 bench = true
-name = "node"
+name = "contained"
 test = false
 
 [features]

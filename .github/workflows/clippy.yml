@@ -2,13 +2,12 @@ name: Clippy
 
 on:
   pull_request:
-    branches: [ "main", "master", "prod" ]
-    tags: [ "v*.*.*" ]
+    branches-ignore: [ "dev*", "next", "nightly*" ]
   push:
-    branches: [ "main", "master", "prod" ]
+    branches-ignore: [ "dev*", "next", "nightly*" ]
     tags: [ "v*.*.*" ]
   schedule:
-    - cron: "30 9 * * *"
+    - cron: "30 9 * * *" # 9:30 UTC
   workflow_dispatch:
 
 jobs:

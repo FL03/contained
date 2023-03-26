@@ -11,17 +11,6 @@ use crate::{
 use std::ops::{Index, IndexMut};
 use std::vec;
 
-/// [Iterable] describes the basic behaviors of an iterable structure
-pub trait Iterable<Idx, T>
-where
-    Self: Extend<T>
-        + FromIterator<T>
-        + Index<Idx, Output = T>
-        + Insert<Idx, T>
-        + IntoIterator<Item = T>,
-{
-}
-
 /// [ArrayLike] describes the basic behaviors of an array-like structure
 pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
     AsMut<Vec<T>> + AsRef<Vec<T>> + Eq + IndexMut<usize, Output = T> + Iterable<usize, T> + Ord
@@ -180,23 +169,40 @@ pub trait TryInsert<Idx, V> {
     fn try_insert<Output>(&mut self, key: Idx, elem: V) -> Result<Output, Self::Error>;
 }
 
+/// [Iterable] describes the basic behaviors of an iterable structure
+pub trait Iterable<Idx, T>
+where
+    Self: Extend<T>
+        + FromIterator<T>
+        + Index<Idx, Output = T>
+        + Insert<Idx, T>
+        + IntoIterator<Item = T>,
+{
+}
+
 /// [Scope] describes the focus of the [crate::turing::Turing]
 pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
-    /// [Scope::index] returns the current position of the [Scope] on the [Tape]
-    fn index(&self) -> usize;
+    /// [Scope::current] returns the current element of the [Scope] on the [Tape]
+    fn current(&self) -> &S {
+        self.tape()
+            .get(self.cursor())
+            .expect("Index is out of bounds...")
+    }
+    /// [Scope::cursor] returns the current position of the [Scope] on the [Tape]
+    fn cursor(&self) -> usize;
     /// [Scope::set_index] sets the current position of the [Scope] on the [Tape]
-    fn set_index(&mut self, pos: usize);
+    fn set_index(&mut self, index: usize);
     /// [Scope::set_symbol] sets the current element of the [Scope] on the [Tape]
     fn set_symbol(&mut self, elem: S);
     /// [Move::Left] inserts a new element at the start of the tape if the current position is 0
     /// [Move::Right] inserts a new element at the end of the tape if the current position equals the total number of cells
     /// [Move::Stay] does nothing
     fn shift(&mut self, shift: Move, elem: S) {
-        let index = self.index();
+        let index = self.cursor();
 
         match shift {
             // If the current position is 0, insert a new element at the top of the vector
-            Move::Left if self.index() == 0 => {
+            Move::Left if self.cursor() == 0 => {
                 self.include(elem);
             }
             Move::Left => {
@@ -205,18 +211,12 @@ pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
             Move::Right => {
                 self.set_index(index + 1);
 
-                if self.index() == self.tape().len() {
+                if self.cursor() == self.tape().len() {
                     self.include(elem);
                 }
             }
             Move::Stay => {}
         }
-    }
-    /// [Scope::symbol] returns the current element of the [Scope] on the [Tape]
-    fn symbol(&self) -> &S {
-        self.tape()
-            .get(self.index())
-            .expect("Index is out of bounds...")
     }
     /// [Scope::tape] returns the [Tape] of the [Scope]
     fn tape(&self) -> &Tape<S>;

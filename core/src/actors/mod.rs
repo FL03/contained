@@ -8,9 +8,8 @@ pub use self::actor::*;
 mod actor;
 pub mod exec;
 
-use crate::states::{State, Stateful};
-use crate::turing::instructions::Instruction;
-use crate::{Alphabet, Error, Scope, Symbolic};
+use crate::turing::{instructions::Instruction, Program};
+use crate::{Alphabet, Error, Scope, State, Stateful, Symbolic};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
 use predicates::Predicate;
@@ -58,7 +57,7 @@ pub trait Execute<S: Symbolic>:
     /// [Execute::execute]
     fn execute(&mut self) -> Result<&Self::Driver, Error> {
         // Get the default symbol
-        let default_symbol = self.clone().default_symbol();
+        let default_symbol = self.program().default_symbol();
         // Get the next instruction
         while let Some(instruction) = self.next() {
             let tail = instruction.clone().tail();
@@ -96,13 +95,15 @@ pub trait Execute<S: Symbolic>:
     /// [Execute::execute_until]
     fn execute_until(
         &mut self,
-        until: &dyn Predicate<Self::Driver>,
+        until: impl Predicate<Self::Driver>,
     ) -> Result<&Self::Driver, Error> {
         while !until.eval(&self.scope()) {
             self.execute_once()?;
         }
         Ok(self.scope())
     }
+
+    fn program(&self) -> &Program<S>;
 
     fn scope(&self) -> &Self::Driver;
 

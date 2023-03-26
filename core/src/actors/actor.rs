@@ -4,9 +4,10 @@
     Description: ... summary ...
 */
 use super::Execute;
-use crate::states::{State, Stateful};
 use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{Alphabet, ArrayLike, Error, Include, Insert, Scope, Symbolic, Translate};
+use crate::{
+    Alphabet, ArrayLike, Error, Include, Insert, Scope, State, Stateful, Symbolic, Translate,
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -30,8 +31,8 @@ impl<S: Symbolic> Actor<S> {
 }
 
 impl<S: Symbolic> Alphabet<S> for Actor<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
-        self.program.in_alphabet(symbol)
+    fn is_viable(&self, symbol: &S) -> bool {
+        self.program.is_viable(symbol)
     }
     fn default_symbol(&self) -> S {
         self.program.default_symbol()
@@ -103,10 +104,14 @@ impl<S: Symbolic> Execute<S> for Actor<S> {
     fn scope_mut(&mut self) -> &mut Self::Driver {
         self
     }
+
+    fn program(&self) -> &Program<S> {
+        &self.program
+    }
 }
 
 impl<S: Symbolic> Scope<S> for Actor<S> {
-    fn index(&self) -> usize {
+    fn cursor(&self) -> usize {
         self.cursor
     }
 
@@ -115,10 +120,10 @@ impl<S: Symbolic> Scope<S> for Actor<S> {
     }
 
     fn set_symbol(&mut self, elem: S) {
-        self.memory.set(self.index(), elem);
+        self.memory.set(self.cursor(), elem);
     }
 
-    fn tape(&self) -> &crate::turing::Tape<S> {
+    fn tape(&self) -> &Tape<S> {
         &self.memory
     }
 }

@@ -4,8 +4,7 @@
     Description: ... Summary ...
 */
 use super::Tape;
-use crate::states::{State, Stateful};
-use crate::{ArrayLike, Include, Insert, Scope, Symbolic};
+use crate::{ArrayLike, Include, Insert, Scope, State, Stateful, Symbolic};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -49,7 +48,7 @@ impl<S: Symbolic> ExactSizeIterator for Driver<S> {
 
 impl<S: Symbolic> Include<S> for Driver<S> {
     fn include(&mut self, elem: S) {
-        self.tape.insert(self.index(), elem);
+        self.tape.insert(self.cursor(), elem);
     }
 }
 
@@ -63,8 +62,8 @@ impl<S: Symbolic> Iterator for Driver<S> {
     type Item = S;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(cur) = self.tape.get(self.index()).cloned() {
-            self.index.replace(self.index() + 1);
+        if let Some(cur) = self.tape.get(self.cursor()).cloned() {
+            self.index.replace(self.cursor() + 1);
             Some(cur)
         } else {
             None
@@ -73,12 +72,12 @@ impl<S: Symbolic> Iterator for Driver<S> {
 }
 
 impl<S: Symbolic> Scope<S> for Driver<S> {
-    fn index(&self) -> usize {
+    fn cursor(&self) -> usize {
         *self.index.borrow()
     }
 
     fn set_symbol(&mut self, elem: S) {
-        self.tape.set(self.index(), elem);
+        self.tape.set(self.cursor(), elem);
     }
 
     fn tape(&self) -> &Tape<S> {
@@ -102,7 +101,7 @@ impl<S: Symbolic> Stateful<State> for Driver<S> {
 
 impl<S: Ord + Symbolic> std::fmt::Display for Driver<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, {}, {:?}", self.index(), self.state, self.tape)
+        write!(f, "{}, {}, {:?}", self.cursor(), self.state, self.tape)
     }
 }
 
@@ -129,7 +128,7 @@ impl<S: Symbolic> TryFrom<(usize, State, Tape<S>)> for Driver<S> {
 
 impl<S: Symbolic> From<Driver<S>> for (usize, State, Tape<S>) {
     fn from(d: Driver<S>) -> Self {
-        (d.index(), d.state, d.tape)
+        (d.cursor(), d.state, d.tape)
     }
 }
 

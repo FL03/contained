@@ -3,20 +3,20 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{errors::*, primitives::*, specs::*, utils::*};
+pub use self::{errors::*, primitives::*, specs::*, states::*, utils::*};
 
 pub(crate) mod errors;
 pub(crate) mod primitives;
 pub(crate) mod specs;
+pub(crate) mod states;
 pub(crate) mod utils;
 
 pub mod actors;
-pub mod states;
 pub mod turing;
 
-use states::Stateful;
 use turing::instructions::Instruction;
 
+use predicates::Predicate;
 use std::collections::{BTreeSet, HashSet};
 
 /// [Executable] is a trait that allows for the execution of a program.
@@ -59,7 +59,7 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
     fn execute_until(
         &mut self,
         driver: &mut Self::Driver,
-        until: impl Fn(&Self::Driver) -> bool,
+        until: impl Predicate<Self::Driver>,
     ) -> Result<Self::Driver, Self::Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
@@ -72,7 +72,7 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
             driver.set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
             driver.shift(tail.action(), default_symbol.clone());
-            if until(driver) {
+            if until.eval(driver) {
                 break;
             }
         }
@@ -83,15 +83,16 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
 pub trait Alphabet<S: Symbolic> {
-    fn in_alphabet(&self, symbol: &S) -> bool;
     /// [Alphabet::default_symbol]
     fn default_symbol(&self) -> S {
         Default::default()
     }
+    /// Returns true if the symbol is in the alphabet
+    fn is_viable(&self, symbol: &S) -> bool;
 }
 
 impl<S: Symbolic> Alphabet<S> for Vec<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
+    fn is_viable(&self, symbol: &S) -> bool {
         self.contains(symbol)
     }
 
@@ -105,7 +106,7 @@ impl<S: Symbolic> Alphabet<S> for Vec<S> {
 }
 
 impl<S: Symbolic> Alphabet<S> for BTreeSet<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
+    fn is_viable(&self, symbol: &S) -> bool {
         self.contains(symbol)
     }
     fn default_symbol(&self) -> S {
@@ -118,7 +119,7 @@ impl<S: Symbolic> Alphabet<S> for BTreeSet<S> {
 }
 
 impl<S: Symbolic> Alphabet<S> for HashSet<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
+    fn is_viable(&self, symbol: &S) -> bool {
         self.contains(symbol)
     }
 

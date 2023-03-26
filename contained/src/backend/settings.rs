@@ -7,7 +7,6 @@ use config::{Config, Environment};
 use decanter::prelude::{hasher, Hashable, H256};
 use scsys::prelude::{try_collect_config_files, ConfigResult, SerdeDisplay};
 use serde::{Deserialize, Serialize};
-use tracing::Level;
 
 #[derive(
     Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
@@ -37,7 +36,7 @@ impl Logger {
 
 impl Default for Logger {
     fn default() -> Self {
-        Self::from(Level::INFO)
+        Self::from(tracing::Level::INFO)
     }
 }
 
@@ -47,8 +46,8 @@ impl Hashable for Logger {
     }
 }
 
-impl From<Level> for Logger {
-    fn from(value: Level) -> Self {
+impl From<tracing::Level> for Logger {
+    fn from(value: tracing::Level) -> Self {
         Self {
             level: value.to_string(),
         }
