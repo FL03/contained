@@ -10,7 +10,7 @@ pub use contained_music as music;
 
 pub use self::{primitives::*, utils::*};
 
-pub(crate) mod primitives;
-pub(crate) mod utils;
+mod primitives;
+mod utils;
 
 pub mod backend;

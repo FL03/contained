@@ -26,8 +26,12 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Opts {
+    Setup {
+        #[clap(long, short)]
+        addr: String,
+    },
     #[default]
-    Run {
+    Start {
         #[clap(long, short)]
         release: bool,
     },
