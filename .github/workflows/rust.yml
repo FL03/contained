@@ -38,6 +38,7 @@ jobs:
       - name: Build (workspace)
         run: cargo build --release -v --workspace
       - name: Bench (workspace)
+        if: ${{ matrix.toolchain == 'nightly' }}
         run: cargo bench -v --workspace
       - name: Test (all)
         run: cargo test --all --all-features -v
