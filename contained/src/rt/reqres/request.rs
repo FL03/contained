@@ -25,11 +25,24 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum Request {
-    AddTriad(u32, i32),
-    RemoveTriad(u32),
-    AddWorkload(WorkloadId, u32),
-    RemoveWorkload(WorkloadId),
-    RunWorkload(WorkloadId, u32),
+    AddTriad {
+        id: u32,
+        value: u32,
+    },
+    RemoveTriad {
+        id: u32,
+    },
+    AddWorkload {
+        id: WorkloadId,
+        module: u32,
+    },
+    RemoveWorkload {
+        id: WorkloadId,
+    },
+    RunWorkload {
+        triad_id: u32,
+        workload_id: WorkloadId,
+    },
     #[default]
     None,
 }

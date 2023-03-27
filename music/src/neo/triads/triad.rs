@@ -7,7 +7,7 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{tonic::Tonic, Instance, Triadic, Triads};
+use super::{tonic::Tonic, Surface, Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
@@ -38,8 +38,8 @@ impl Triad {
         Self::new(root, Triads::from((a, b)))
     }
 
-    pub fn instance(&self) -> Instance {
-        Instance::new(self.clone())
+    pub fn instance(&self) -> Surface {
+        Surface::new(self.clone())
     }
 
     pub fn tonic(&self) -> Tonic {

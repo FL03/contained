@@ -14,6 +14,7 @@ mod primitives;
 mod utils;
 
 pub mod backend;
+pub mod clients;
 pub mod connect;
 pub mod rt;
 

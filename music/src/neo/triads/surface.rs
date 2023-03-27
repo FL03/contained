@@ -15,55 +15,42 @@ use contained_core::{State, Stateful};
 
 use serde::{Deserialize, Serialize};
 
-pub trait Surface<T> {
+pub trait Surfaced<T> {
+    
+    fn edges(&self) -> Vec<(T, T)>;
     fn vertices(&self) -> Vec<T>;
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Instance {
-    memory: Tape<Note>,
+pub struct Surface {
     state: State,
     triad: Triad,
 }
 
-impl Instance {
+impl Surface {
     pub fn new(triad: Triad) -> Self {
         Self {
-            memory: Tape::new(),
             state: State::default(),
             triad,
         }
     }
-    /// Create a new [Actor] with the [Triad] as its alphabet
-    pub fn actor(&self, tape: Option<Tape<Note>>) -> Actor<Note> {
-        Actor::new(self.program(), tape)
-    }
-    /// Initializes a new instance of a [Machine] configured with the current alphabet
-    pub fn machine(&self, tape: Option<Tape<Note>>) -> Machine<Note> {
-        Machine::new(
-            Driver::new(State::Valid, tape.unwrap_or_default()),
-            self.program(),
-        )
-    }
-    pub fn memory(&self) -> Tape<Note> {
-        self.memory.clone()
-    }
-    /// Create a new [Program] with the [Triad] as its alphabet
-    pub fn program(&self) -> Program<Note> {
-        Program::new(self.triad(), State::Invalid)
-    }
-
     pub fn triad(&self) -> Triad {
         self.triad.clone()
     }
 }
 
-impl Stateful<State> for Instance {
+impl Stateful<State> for Surface {
     fn state(&self) -> State {
         self.state
     }
 
     fn update_state(&mut self, state: State) {
         self.state = state;
+    }
+}
+
+impl From<Surface> for Program<Note> {
+    fn from(surface: Surface) -> Program<Note> {
+        Program::new(surface.triad(), State::Invalid)
     }
 }

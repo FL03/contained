@@ -25,11 +25,22 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum Response {
-    TriadAdded(u32),
-    TriadRemoved(u32),
-    WorkloadAdded(WorkloadId),
-    WorkloadRemoved(WorkloadId),
-    WorkloadRun(WorkloadId, u32),
+    TriadAdded {
+        id: u32
+    },
+    TriadRemoved {
+        id: u32
+    },
+    WorkloadAdded {
+        id: WorkloadId
+    },
+    WorkloadRemoved {
+        id: WorkloadId
+    },
+    WorkloadRun {
+        triad_id: u32,
+        workload_id: WorkloadId,
+    },
     #[default]
     None,
 }

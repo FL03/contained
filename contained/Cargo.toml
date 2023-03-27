@@ -47,8 +47,8 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 tokio.workspace = true
-tracing = { features = ["log"], version = "0.1" }
-tracing-subscriber = { features = ["fmt"], version = "0.3" }
+tracing.workspace = true
+tracing-subscriber.workspace = true
 wasmer.workspace = true
 
 [dev-dependencies]

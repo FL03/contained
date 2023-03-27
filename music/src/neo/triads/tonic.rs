@@ -6,7 +6,7 @@
         to describe the subset of notes that are contained within the surface. That being said it is important to consider that each surface is better understood
         as the environment in-which a WASM machine is operating.
 */
-use super::{Instance, Triadic};
+use super::{Surface, Triadic};
 use crate::{MusicResult, Note};
 use contained_core::turing::{instructions::Instruction, Program, Tape};
 use contained_core::{
@@ -19,11 +19,11 @@ pub struct Tonic {
     cursor: usize,
     memory: Arc<Mutex<Tape<Note>>>,
     program: Program<Note>,
-    surface: Arc<Mutex<Instance>>,
+    surface: Arc<Mutex<Surface>>,
 }
 
 impl Tonic {
-    pub fn new(program: Program<Note>, surface: Instance) -> Self {
+    pub fn new(program: Program<Note>, surface: Surface) -> Self {
         Self {
             cursor: 0,
             memory: Arc::new(Mutex::new(Tape::new())),
@@ -68,7 +68,7 @@ impl Tonic {
         }
         Ok(())
     }
-    pub fn surface(&self) -> &Arc<Mutex<Instance>> {
+    pub fn surface(&self) -> &Arc<Mutex<Surface>> {
         &self.surface
     }
 }
@@ -204,7 +204,7 @@ mod tests {
         // Initialize a new triad
         let triad = Triad::new(0.into(), Triads::Major);
         // Initialize a new, stateful instance
-        let instance = Instance::new(triad.clone());
+        let instance = Surface::new(triad.clone());
         // Initialize a new tape
         let tape: Tape<Note> = Tape::norm([0.into(), 1.into(), 3.into()]);
 
