@@ -18,7 +18,7 @@ pub mod tonic;
 
 use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
-use crate::{Error, Note};
+use crate::{MusicError, Note};
 use algae::graph::{Graph, UndirectedGraph};
 
 pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
@@ -97,7 +97,7 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
         args.reverse();
         self.walk(args);
     }
-    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, Error>;
+    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError>;
 }
 
 #[cfg(test)]

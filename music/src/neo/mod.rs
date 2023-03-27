@@ -9,8 +9,8 @@ pub use self::{pathfinder::*, transform::*};
 mod pathfinder;
 mod transform;
 
-pub mod triads;
 pub mod tonnetz;
+pub mod triads;
 
 #[cfg(test)]
 mod tests {

@@ -8,7 +8,8 @@ pub use self::{constants::*, types::*};
 mod constants {}
 
 mod types {
+    use crate::Error;
 
     /// Type alias for a [Result]
-    pub type Resultant<T = ()> = Result<T, Box<dyn std::error::Error>>;
+    pub type Resultant<T = (), E = Error> = Result<T, E>;
 }

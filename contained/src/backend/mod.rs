@@ -5,8 +5,8 @@ pub(crate) mod settings;
 
 pub mod cli;
 
-use cli::{Cli, Opts};
 use crate::AsyncResult;
+use cli::{Cli, Opts};
 use std::sync::Arc;
 
 pub struct Backend {
@@ -21,14 +21,12 @@ impl Backend {
         &self.ctx
     }
     pub async fn handle_cli(&mut self, cli: Cli) -> AsyncResult {
-
         if let Some(opts) = cli.opts {
             match opts {
                 Opts::Setup { .. } => {
                     self.setup();
-                },
-                Opts::Start { .. } => {
                 }
+                Opts::Start { .. } => {}
             }
         };
 

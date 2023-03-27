@@ -25,10 +25,15 @@ use strum::{Display, EnumString, EnumVariantNames};
 #[strum(serialize_all = "title_case")]
 pub enum Error {
     AsyncError(String),
+    ConnectionError(String),
     Custom(String),
     #[default]
     Error(String),
     ExecutionError(String),
+    Incomplete(String),
+    InvalidData,
+    InvalidLength,
+    InvalidType,
     IOError(String),
     StateError,
     StoreError,
@@ -51,8 +56,20 @@ impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
     }
 }
 
+impl From<anyhow::Error> for Error {
+    fn from(error: anyhow::Error) -> Self {
+        Error::Custom(error.to_string())
+    }
+}
+
 impl From<std::io::Error> for Error {
     fn from(error: std::io::Error) -> Self {
         Error::IOError(error.to_string())
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(error: serde_json::Error) -> Self {
+        Error::Custom(error.to_string())
     }
 }

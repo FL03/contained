@@ -100,7 +100,6 @@ impl From<PitchClass> for Pitch {
     }
 }
 
-
 impl std::ops::Add<Interval> for PitchClass {
     type Output = PitchClass;
 

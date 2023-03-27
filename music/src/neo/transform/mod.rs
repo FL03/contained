@@ -25,4 +25,3 @@ pub trait Transform: Sized {
         dirac.dirac(self)
     }
 }
-

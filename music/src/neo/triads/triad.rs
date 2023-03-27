@@ -11,7 +11,7 @@ use super::{tonic::Tonic, Instance, Triadic, Triads};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
-    Error, Gradient, Note,
+    Gradient, MusicError, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{turing::Program, Alphabet, State};
@@ -79,12 +79,12 @@ impl Triadic for Triad {
         &self.notes
     }
 
-    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, Error> {
+    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
         if let Ok(t) = Self::try_from(triad.clone()) {
             *self = t;
             return Ok(self);
         }
-        Err(Error::IntervalError(
+        Err(MusicError::IntervalError(
             "The given notes failed to contain the necessary relationships...".into(),
         ))
     }
@@ -133,7 +133,7 @@ impl From<(Note, Thirds, Thirds)> for Triad {
 }
 
 impl TryFrom<[Note; 3]> for Triad {
-    type Error = Error;
+    type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
         let args = data.to_vec();
@@ -155,14 +155,14 @@ impl TryFrom<[Note; 3]> for Triad {
                 }
             }
         }
-        Err(Error::IntervalError(
+        Err(MusicError::IntervalError(
             "Failed to find the required relationships within the given notes...".into(),
         ))
     }
 }
 
 impl TryFrom<(Note, Note, Note)> for Triad {
-    type Error = Error;
+    type Error = MusicError;
 
     fn try_from(data: (Note, Note, Note)) -> Result<Triad, Self::Error> {
         Triad::try_from([data.0, data.1, data.2])
@@ -170,7 +170,7 @@ impl TryFrom<(Note, Note, Note)> for Triad {
 }
 
 impl TryFrom<[i64; 3]> for Triad {
-    type Error = Error;
+    type Error = MusicError;
 
     fn try_from(notes: [i64; 3]) -> Result<Triad, Self::Error> {
         let notes: [Note; 3] = [notes[0].into(), notes[1].into(), notes[2].into()];
@@ -179,7 +179,7 @@ impl TryFrom<[i64; 3]> for Triad {
 }
 
 impl TryFrom<(i64, i64, i64)> for Triad {
-    type Error = Error;
+    type Error = MusicError;
 
     fn try_from(data: (i64, i64, i64)) -> Result<Triad, Self::Error> {
         Triad::try_from([data.0, data.1, data.2])

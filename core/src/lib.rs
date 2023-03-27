@@ -5,11 +5,11 @@
 */
 pub use self::{errors::*, primitives::*, specs::*, states::*, utils::*};
 
-pub(crate) mod errors;
-pub(crate) mod primitives;
-pub(crate) mod specs;
-pub(crate) mod states;
-pub(crate) mod utils;
+mod errors;
+mod primitives;
+mod specs;
+mod states;
+mod utils;
 
 pub mod actors;
 pub mod turing;

@@ -40,7 +40,6 @@ pub trait Tonnetz {
             .add_edge((triad.third(), triad.fifth(), b).into());
         self.tonnetz_mut()
             .add_edge((triad.root(), triad.fifth(), c).into());
-        
     }
     fn scope(&self) -> &Arc<Mutex<Triad>>;
     fn tonnetz(&self) -> &UndirectedGraph<Note, Interval>;

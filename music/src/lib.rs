@@ -21,7 +21,9 @@ use crate::classes::PitchClass;
 use std::ops::{AddAssign, SubAssign};
 
 /// [Gradient] provides a numerical interpretation of a given object
-pub trait Gradient: Clone + Eq + Ord + Into<i64> + AddAssign<intervals::Interval> + SubAssign<intervals::Interval> {
+pub trait Gradient:
+    Clone + Eq + Ord + Into<i64> + AddAssign<intervals::Interval> + SubAssign<intervals::Interval>
+{
     const MODULUS: i64;
 
     fn class(&self) -> PitchClass {

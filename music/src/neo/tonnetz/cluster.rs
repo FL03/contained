@@ -5,7 +5,7 @@
         This module is dedicated to the proposed harmonic computational fabric;
         A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
         The cluster is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
-        
+
         If a tonnetz is a topological computer, then a cluster is a topological computer that is used to orchestrate a set of topological computers.
         Locally, a tonnetz is typically fragemented only persisting as many triads as the host device allows for. However, as a network the cluster
         glues together these framents into a single, cohesive, and complete experience orchestrated according to a single originator.
