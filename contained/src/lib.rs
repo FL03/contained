@@ -14,7 +14,7 @@ mod primitives;
 mod utils;
 
 pub mod backend;
-pub mod handle;
+pub mod connect;
 pub mod rt;
 
 pub mod prelude {

@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use crate::WorkloadId;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -26,9 +27,9 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub enum Request {
     AddTriad(u32, i32),
     RemoveTriad(u32),
-    AddWorkload(u32, u32),
-    RemoveWorkload(u32),
-    RunWorkload(u32, u32),
+    AddWorkload(WorkloadId, u32),
+    RemoveWorkload(WorkloadId),
+    RunWorkload(WorkloadId, u32),
     #[default]
     None,
 }

@@ -5,6 +5,7 @@
 */
 use super::reqres::*;
 use super::Workload;
+use crate::connect::Connection;
 use crate::core::Error;
 use crate::music::neo::triads::Triad;
 
@@ -13,10 +14,11 @@ use std::sync::RwLock;
 
 pub struct RuntimeState {
     pub triads: RwLock<HashMap<u32, Triad>>,
-    pub workloads: RwLock<HashMap<u32, Workload>>,
+    pub workloads: RwLock<HashMap<String, Workload>>,
 }
 
 pub struct Runtime {
+    con: Connection,
     state: RuntimeState,
 }
 
