@@ -4,8 +4,7 @@
     Description: ... Summary ...
 */
 use super::Tape;
-use crate::states::{State, Stateful};
-use crate::{Include, Insert, Scope, Symbolic};
+use crate::{ArrayLike, Include, Insert, Scope, State, Stateful, Symbolic};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -16,15 +15,15 @@ use std::cell::RefCell;
 pub struct Driver<S: Symbolic = String> {
     index: RefCell<usize>,
     state: State,
-    pub tape: Tape<S>,
+    pub memory: Tape<S>,
 }
 
 impl<S: Symbolic> Driver<S> {
-    pub fn new(state: State, tape: Tape<S>) -> Self {
+    pub fn new(state: State, memory: Tape<S>) -> Self {
         Self {
             index: 0.into(),
             state,
-            tape,
+            memory,
         }
     }
 }
@@ -43,19 +42,19 @@ impl<S: Symbolic> AsRef<Driver<S>> for Driver<S> {
 
 impl<S: Symbolic> ExactSizeIterator for Driver<S> {
     fn len(&self) -> usize {
-        self.tape.len()
+        self.memory.len()
     }
 }
 
 impl<S: Symbolic> Include<S> for Driver<S> {
     fn include(&mut self, elem: S) {
-        self.tape.insert(self.index(), elem);
+        self.memory.insert(self.cursor(), elem);
     }
 }
 
 impl<S: Symbolic> Insert<usize, S> for Driver<S> {
     fn insert(&mut self, index: usize, elem: S) {
-        self.tape.insert(index, elem);
+        self.memory.insert(index, elem);
     }
 }
 
@@ -63,8 +62,8 @@ impl<S: Symbolic> Iterator for Driver<S> {
     type Item = S;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(cur) = self.tape.get(self.index()).cloned() {
-            self.index.replace(self.index() + 1);
+        if let Some(cur) = self.memory.get(self.cursor()).cloned() {
+            self.index.replace(self.cursor() + 1);
             Some(cur)
         } else {
             None
@@ -73,16 +72,16 @@ impl<S: Symbolic> Iterator for Driver<S> {
 }
 
 impl<S: Symbolic> Scope<S> for Driver<S> {
-    fn index(&self) -> usize {
+    fn cursor(&self) -> usize {
         *self.index.borrow()
     }
 
     fn set_symbol(&mut self, elem: S) {
-        self.tape.set(self.index(), elem);
+        self.memory.set(self.cursor(), elem);
     }
 
-    fn tape(&self) -> &Tape<S> {
-        &self.tape
+    fn tape(&self) -> Tape<S> {
+        self.memory.clone()
     }
 
     fn set_index(&mut self, pos: usize) {
@@ -102,7 +101,7 @@ impl<S: Symbolic> Stateful<State> for Driver<S> {
 
 impl<S: Ord + Symbolic> std::fmt::Display for Driver<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}, {}, {:?}", self.index(), self.state, self.tape)
+        write!(f, "{}, {}, {:?}", self.cursor(), self.state, self.memory)
     }
 }
 
@@ -122,14 +121,14 @@ impl<S: Symbolic> TryFrom<(usize, State, Tape<S>)> for Driver<S> {
         Ok(Self {
             index: d.0.into(),
             state: d.1,
-            tape: d.2,
+            memory: d.2,
         })
     }
 }
 
 impl<S: Symbolic> From<Driver<S>> for (usize, State, Tape<S>) {
     fn from(d: Driver<S>) -> Self {
-        (d.index(), d.state, d.tape)
+        (d.cursor(), d.state, d.memory)
     }
 }
 
@@ -150,10 +149,10 @@ mod tests {
         let mut actor = Driver::new(State::Valid, tape);
 
         actor.shift(Move::Left, "b");
-        assert_eq!(actor.tape(), &Tape::from_iter(["b", "a", "b", "c"]));
+        assert_eq!(actor.tape(), Tape::from_iter(["b", "a", "b", "c"]));
         for _ in 0..actor.tape().len() {
             actor.shift(Move::Right, "b");
         }
-        assert_eq!(actor.tape(), &Tape::from_iter(["b", "a", "b", "c", "b"]));
+        assert_eq!(actor.tape(), Tape::from_iter(["b", "a", "b", "c", "b"]));
     }
 }

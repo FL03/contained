@@ -5,8 +5,7 @@
 */
 use super::instructions::Instruction;
 use super::{Driver, Program, Tape, Turing};
-use crate::states::{State, Stateful};
-use crate::{Alphabet, Error, Scope, Symbolic};
+use crate::{Alphabet, ArrayLike, Error, Scope, State, Stateful, Symbolic, Translate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
@@ -25,14 +24,14 @@ impl<S: Symbolic> Machine<S> {
     pub fn scope(&self) -> Driver<S> {
         self.driver.clone()
     }
-    pub fn tape(&self) -> &Tape<S> {
+    pub fn tape(&self) -> Tape<S> {
         self.driver.tape()
     }
 }
 
 impl<S: Symbolic> Extend<S> for Machine<S> {
     fn extend<T: IntoIterator<Item = S>>(&mut self, iter: T) {
-        self.driver.tape.extend(iter)
+        self.driver.memory.extend(iter)
     }
 }
 
@@ -46,7 +45,7 @@ impl<S: Symbolic> Iterator for Machine<S> {
     type Item = Instruction<S>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(cur) = self.clone().driver.tape().get(self.driver.index()) {
+        if let Some(cur) = self.clone().driver.tape().get(self.driver.cursor()) {
             // Get the instruction
             self.program
                 .get((self.state(), cur.clone()).into())
@@ -58,8 +57,8 @@ impl<S: Symbolic> Iterator for Machine<S> {
 }
 
 impl<S: Symbolic> Alphabet<S> for Machine<S> {
-    fn in_alphabet(&self, symbol: &S) -> bool {
-        self.program.in_alphabet(symbol)
+    fn is_viable(&self, symbol: &S) -> bool {
+        self.program.is_viable(symbol)
     }
     fn default_symbol(&self) -> S {
         self.program.default_symbol()
@@ -77,7 +76,6 @@ impl<S: Symbolic> Stateful<State> for Machine<S> {
 }
 
 impl<S: Symbolic> Turing<S> for Machine<S> {
-    type Error = Error;
     type Scope = Driver<S>;
 
     fn execute(&mut self) -> Result<&Self, Self::Error> {
@@ -104,6 +102,10 @@ impl<S: Symbolic> Turing<S> for Machine<S> {
         }
         Ok(self)
     }
+}
+
+impl<S: Symbolic> Translate<S> for Machine<S> {
+    type Error = Error;
 
     fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
         self.driver = Driver::from(tape);

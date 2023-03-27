@@ -25,6 +25,6 @@ updates:
     schedule:
         interval: daily
   - package-ecosystem: cargo
-    directory: /net
+    directory: /xtask
     schedule:
         interval: daily

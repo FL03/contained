@@ -8,20 +8,34 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
 
-pub use self::{class::*, triad::*};
+pub use self::{class::*, instance::*, triad::*};
 
-pub(crate) mod class;
-pub(crate) mod triad;
+mod class;
+mod instance;
+mod triad;
 
 pub mod tonic;
 
-use super::LPR;
+use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
-use crate::{MusicResult, Note};
+use crate::{MusicError, Note};
+use algae::graph::{Graph, UndirectedGraph};
 
-pub trait Triadic: Clone {
+pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
+    fn as_graph(&self) -> UndirectedGraph<Note, Interval> {
+        let mut graph = UndirectedGraph::new();
+
+        graph.add_edge((self.root(), self.third(), self.intervals().0.into()).into());
+        graph.add_edge((self.third(), self.fifth(), self.intervals().1.into()).into());
+        graph.add_edge((self.fifth(), self.root(), self.intervals().2.into()).into());
+        graph.clone()
+    }
+    /// Returns the [Triads] enum variant that describes the [Triad]
     fn class(&self) -> Triads;
-
+    /// Returns true if the [Triad] contains the [Note]
+    fn contains(&self, note: &Note) -> bool {
+        &self.root() == note || &self.third() == note || &self.fifth() == note
+    }
     /// Endlessly applies the described transformations to the [Triad]
     fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
         for i in Vec::from_iter(iter).iter().cycle() {
@@ -30,48 +44,51 @@ pub trait Triadic: Clone {
     }
     /// Returns an cloned instance of the note occupying the fifth
     fn fifth(&self) -> Note {
-        self.clone().triad().2
+        self.triad()[2].clone()
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         self.class().intervals()
     }
+    /// Returns a vector of all the possible [Triad]s that exist at
+    fn neighbors(&self) -> Vec<Self> {
+        let mut neighbors = Vec::with_capacity(3);
+        for i in LPR::transformations() {
+            let mut triad = self.clone();
+            triad.transform(i);
+            neighbors.push(triad);
+        }
+        neighbors
+    }
+    /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
+    fn pathfinder(&self, note: Note) -> PathFinder<Self> {
+        PathFinder::new(note).set_origin(self.clone())
+    }
     /// Returns an cloned instance of the root of the triad
     fn root(&self) -> Note {
-        self.clone().triad().0
+        self.triad()[0].clone()
     }
     /// Returns an cloned instance of the note occupying the third
     fn third(&self) -> Note {
-        self.clone().triad().1
-    }
-    /// Apply a single [LPR] transformation onto the active machine
-    /// For convenience, [std::ops::Mul] was implemented as a means of applying the transformation
-    fn transform(&mut self, dirac: LPR) {
-        let (mut r, mut t, mut f): (i64, i64, i64) =
-            (self.root().into(), self.third().into(), self.fifth().into());
-        match self.intervals().0 {
-            Thirds::Major => match dirac {
-                LPR::L => r -= Interval::Semitone,
-                LPR::P => t -= Interval::Semitone,
-                LPR::R => f += Interval::Tone,
-            },
-            Thirds::Minor => match dirac {
-                LPR::L => f += Interval::Semitone,
-                LPR::P => t += Interval::Semitone,
-                LPR::R => r -= Interval::Tone,
-            },
-        };
-        self.update((r.into(), t.into(), f.into()))
-            .expect("Invalid triad");
+        self.triad()[1].clone()
     }
     ///
-    fn triad(self) -> (Note, Note, Note);
+    fn triad(&self) -> &[Note; 3];
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
     fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
         for dirac in iter {
             self.transform(dirac);
         }
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad] and returns a vector all the previous [Triad]
+    fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
+        let mut triads = Vec::new();
+        for i in iter {
+            triads.push(self.clone());
+            self.transform(i);
+        }
+        triads
     }
     /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
     fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
@@ -80,7 +97,7 @@ pub trait Triadic: Clone {
         args.reverse();
         self.walk(args);
     }
-    fn update(&mut self, triad: (Note, Note, Note)) -> MusicResult;
+    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError>;
 }
 
 #[cfg(test)]

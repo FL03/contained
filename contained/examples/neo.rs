@@ -3,19 +3,25 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-extern crate contained;
+extern crate contained_sdk;
 
-use contained::core::turing::{instructions::Instruction, Tape, Turing};
-use contained::core::{actors::Execute, states::State, Resultant, Scope};
-use contained::music::{
-    neo::triads::{Triad, Triads},
+use contained_sdk::core::{
+    actors::Execute,
+    turing::{instructions::Instruction, Tape},
+    State,
+};
+use contained_sdk::music::{
+    neo::triads::{Instance, Triad, Triads},
     Note,
 };
 
-fn main() -> Resultant {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
+    let tape: Tape<Note> = Tape::norm([0.into(), 3.into(), 6.into()]);
     // Setup the triad
     let triad = Triad::new(0.into(), Triads::Diminished);
+    // Initialize a new instance
+    let instance = Instance::new(triad.clone());
     //
     let instructions: Vec<Instruction<Note>> = vec![
         (
@@ -45,16 +51,13 @@ fn main() -> Resultant {
     ];
     tracing::info!("Instructions: \n{:?}", instructions.clone());
     // Initialize a new machine
-    let mut machine = triad
-        .clone()
-        .actor(Some(Tape::norm([0.into(), 3.into(), 6.into()])));
+    let mut actor = instance.actor(Some(tape));
     // Extend the program; turn [0, 3, 6] into [6, 3, 3]
-    machine.extend(instructions);
-    tracing::info!("Success: inserted the instructions into the machine...");
-    // Execute the program
-    tracing::info!("Executing the program...");
-    assert!(machine.execute().is_ok());
-    println!("{:?}", machine.memory.tape());
+    actor.extend(instructions);
+    // Execute the program; assert that the program executed successfully
+    assert!(actor.execute().is_ok());
+    // Print the machine memory
+    println!("{:?}", actor.memory.as_ref());
 
     Ok(())
 }

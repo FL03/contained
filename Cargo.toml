@@ -27,7 +27,7 @@ serde_json = "1"
 smart-default = "0.6"
 strum = { features = ["derive"], version = "0.24" }
 tokio = { features = ["full"], version = "1" }
-tokio-stream = "0.1"
+wasmer = { features = [], version = "3.1" }
 
 [workspace]
 default-members = [
@@ -39,8 +39,7 @@ exclude = [
 members = [
     "contained",
     "core",
-    "music",
-    "net"
+    "music"
 ]
 
 [profile.dev]

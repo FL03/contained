@@ -176,27 +176,18 @@ impl Future for Frequency {
     type Output = Self;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        // Stores the current cycle count.
-        let cycle = self.cursor;
-        // Increment the cycle count.
-        self.cursor += 1;
-        // Find the time at which the next cycle will complete.
-        let when = Instant::now() + Duration::from_secs_f64(self.freq());
-        // Clone a thread-safe waker for use in the timer thread.
-        let waker = Arc::new(Mutex::new(cx.waker().clone()));
-
-        // Spawn a new timer thread that will notify the current task when compelte
+        let now = Instant::now();
+        // Get a handle to the waker for the current task
+        let waker = cx.waker().clone();
+        let period = self.period.clone();
+        // Spawn a timer thread.
         thread::spawn(move || {
-            let now = Instant::now();
+            thread::sleep(period);
 
-            if now < when {
-                thread::sleep(when - now);
-            }
-            //
-            waker.lock().unwrap().wake_by_ref();
+            waker.wake();
         });
-
-        if Instant::now() >= when {
+        if Instant::now() >= now {
+            self.cursor += 1;
             Poll::Ready(self.clone())
         } else {
             Poll::Pending

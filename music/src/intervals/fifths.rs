@@ -6,7 +6,7 @@
         Fifths:
             Augmented (8)
             Perfect (7)
-            Diminished (9)
+            Diminished (6)
 */
 use crate::{BoxedError, Gradient, Note};
 use decanter::prelude::{hasher, Hashable, H256};

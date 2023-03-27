@@ -29,6 +29,9 @@ impl Note {
             octave: octave.unwrap_or(1),
         }
     }
+    pub fn interval(&self, other: &Self) -> Interval {
+        Interval::new(self.clone(), other.clone())
+    }
     pub fn octave(&self) -> i64 {
         self.octave
     }

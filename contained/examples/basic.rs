@@ -3,13 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-extern crate contained;
+extern crate contained_sdk as contained;
 
 use contained::core::turing::{
     instructions::{Instruction, Move},
     Driver, Machine, Program, Tape, Turing,
 };
-use contained::core::{states::State, Resultant};
+use contained::core::{Resultant, State};
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 

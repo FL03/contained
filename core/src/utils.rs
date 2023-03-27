@@ -4,8 +4,8 @@
     Description: ... summary ...
 */
 
-/// [ordered_sets] is a function for creating subsets of a given [Vec] and set size
-pub fn ordered_sets<T: Clone>(args: Vec<T>, size: usize) -> Vec<Vec<T>> {
+/// [subspace] is a function for creating subsets of a given [Vec] and set size
+pub fn subspace<T: Clone>(args: Vec<T>, size: usize) -> Vec<Vec<T>> {
     let mut res = Vec::<Vec<T>>::new();
     for i in 0..args.len() {
         let tmp = (1..size)

@@ -24,6 +24,7 @@ wasm = []
 
 [dependencies]
 algae.workspace = true
+anyhow.workspace = true
 async-trait.workspace = true
 decanter.workspace = true
 futures.workspace = true

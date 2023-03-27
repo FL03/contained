@@ -8,19 +8,21 @@ pub use self::actor::*;
 mod actor;
 pub mod exec;
 
-use crate::states::{State, Stateful};
-use crate::turing::{instructions::Instruction, Tape};
-use crate::{Alphabet, Error, Scope, Symbolic};
+use crate::turing::{instructions::Instruction, Program};
+use crate::{Alphabet, Error, Scope, State, Stateful, Symbolic};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
+use predicates::Predicate;
+use std::sync::{Arc, Mutex};
 
 #[async_trait]
 pub trait AsyncExecute<S: Symbolic + Send + Sync>:
     Alphabet<S> + StreamExt<Item = Instruction<S>> + Stateful<State> + Unpin
 {
-    type Driver: Future + Scope<S>;
+    type Driver: Future + Scope<S> + Send + Sync;
+    type Error: Send + Sync;
 
-    async fn execute(&mut self) -> Result<Self::Driver, Error> {
+    async fn execute(&mut self) -> Result<&Arc<Mutex<Self::Driver>>, Self::Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
@@ -28,20 +30,22 @@ pub trait AsyncExecute<S: Symbolic + Send + Sync>:
             // Get the tail of the instruction
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
-            self.scope_mut().set_symbol(tail.symbol());
+            self.scope_mut().lock().unwrap().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
             self.scope_mut()
+                .lock()
+                .unwrap()
                 .shift(tail.action(), default_symbol.clone());
         }
         // Return the actor
         Ok(self.scope())
     }
-
-    fn scope(&self) -> Self::Driver;
-
-    fn scope_mut(&mut self) -> &mut Self::Driver;
+    /// Returns a reference to the scope
+    fn scope(&self) -> &Arc<Mutex<Self::Driver>>;
+    /// Returns a mutable reference to the scope
+    fn scope_mut(&mut self) -> &mut Arc<Mutex<Self::Driver>>;
 }
 
 /// [Execute] is a trait that allows for the execution of a program.
@@ -51,14 +55,14 @@ pub trait Execute<S: Symbolic>:
     type Driver: Scope<S>;
 
     /// [Execute::execute]
-    fn execute(&mut self) -> Result<Self::Driver, Error> {
+    fn execute(&mut self) -> Result<&Self::Driver, Error> {
         // Get the default symbol
-        let default_symbol = self.clone().default_symbol();
+        let default_symbol = self.program().default_symbol();
         // Get the next instruction
         while let Some(instruction) = self.next() {
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
             self.scope_mut().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
@@ -69,14 +73,14 @@ pub trait Execute<S: Symbolic>:
         Ok(self.scope())
     }
     /// [Execute::execute_once]
-    fn execute_once(&mut self) -> Result<Self::Driver, Error> {
+    fn execute_once(&mut self) -> Result<&Self::Driver, Error> {
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
         if let Some(instruction) = self.next() {
             let tail = instruction.clone().tail();
             // Update the current state
-            self.scope_mut().update_state(tail.state());
+            self.update_state(tail.state());
             // Update the tape
             self.scope_mut().set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
@@ -91,22 +95,19 @@ pub trait Execute<S: Symbolic>:
     /// [Execute::execute_until]
     fn execute_until(
         &mut self,
-        until: impl Fn(&Self::Driver) -> bool,
-    ) -> Result<Self::Driver, Error> {
-        while !until(&self.scope()) {
+        until: impl Predicate<Self::Driver>,
+    ) -> Result<&Self::Driver, Error> {
+        while !until.eval(&self.scope()) {
             self.execute_once()?;
         }
         Ok(self.scope())
     }
 
-    fn scope(&self) -> Self::Driver;
+    fn program(&self) -> &Program<S>;
+
+    fn scope(&self) -> &Self::Driver;
 
     fn scope_mut(&mut self) -> &mut Self::Driver;
-}
-
-/// [Translate] is a trait that allows for the translation of a machine's memory
-pub trait Translate<S: Symbolic> {
-    fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Error>;
 }
 
 #[cfg(test)]
