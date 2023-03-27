@@ -14,7 +14,10 @@ pub struct Backend {
 }
 
 impl Backend {
-    pub fn new(ctx: Context) -> Self {
+    pub fn new() -> Self {
+        let cnf = Settings::default();
+        let ctx = Context::new(cnf);
+
         Self { ctx }
     }
     pub fn context(&self) -> &Context {
@@ -43,5 +46,26 @@ impl Backend {
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
         tokio::spawn(self.run())
+    }
+}
+
+impl Default for Backend {
+    fn default() -> Self {
+        let ctx = Context::default();
+        Self { ctx }
+    }
+}
+
+impl From<Context> for Backend {
+    fn from(ctx: Context) -> Self {
+        Self {
+            ctx
+        }
+    }
+}
+
+impl From<Settings> for Backend {
+    fn from(cnf: Settings) -> Self {
+        Self::from(Context::new(cnf))
     }
 }

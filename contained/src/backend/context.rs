@@ -22,3 +22,11 @@ impl Context {
         self.cnf.logger.init_tracing();
     }
 }
+
+impl Default for Context {
+    fn default() -> Self {
+        Self {
+            cnf: Settings::default(),
+        }
+    }
+}

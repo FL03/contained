@@ -4,16 +4,15 @@
     Description: ... summary ...
 */
 use super::reqres::*;
-use super::Workload;
+use super::{Space, Workload};
 use crate::connect::Connection;
 use crate::core::Error;
-use crate::music::neo::triads::Triad;
 
 use std::collections::HashMap;
 use std::sync::RwLock;
 
 pub struct RuntimeState {
-    pub triads: RwLock<HashMap<u32, Triad>>,
+    pub spaces: RwLock<HashMap<u32, Space>>,
     pub workloads: RwLock<HashMap<String, Workload>>,
 }
 
@@ -27,7 +26,7 @@ impl Runtime {
         match request {
             Request::AddTriad { id, .. } => Ok(Response::TriadAdded { id }),
             Request::RemoveTriad { id } => {
-                self.state.triads.write().unwrap().remove(&id);
+                self.state.spaces.write().unwrap().remove(&id);
                 Ok(Response::TriadRemoved { id })
             }
             Request::AddWorkload { id, .. } => Ok(Response::WorkloadAdded { id }),
@@ -43,7 +42,7 @@ impl Runtime {
                     .unwrap()
                     .get(&workload_id)
                     .unwrap();
-                let triad = self.state.triads.read().unwrap().get(&triad_id).unwrap();
+                let triad = self.state.spaces.read().unwrap().get(&triad_id).unwrap();
                 Ok(Response::WorkloadRun{ triad_id, workload_id })
             }
             Request::None => Ok(Response::None),

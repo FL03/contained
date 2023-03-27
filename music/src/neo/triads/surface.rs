@@ -10,7 +10,7 @@
 use super::Triad;
 use crate::Note;
 use contained_core::actors::Actor;
-use contained_core::turing::{Driver, Machine, Program, Tape};
+use contained_core::turing::Program;
 use contained_core::{State, Stateful};
 
 use serde::{Deserialize, Serialize};
@@ -54,3 +54,5 @@ impl From<Surface> for Program<Note> {
         Program::new(surface.triad(), State::Invalid)
     }
 }
+
+

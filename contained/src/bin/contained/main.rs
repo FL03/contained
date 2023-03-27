@@ -9,5 +9,6 @@ use contained_sdk::prelude::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let mut app = Backend::new();
     Ok(())
 }
