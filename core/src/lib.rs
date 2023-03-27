@@ -12,6 +12,7 @@ mod states;
 mod utils;
 
 pub mod actors;
+pub mod delay;
 pub mod turing;
 
 use turing::instructions::Instruction;

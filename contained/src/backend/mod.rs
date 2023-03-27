@@ -5,7 +5,7 @@ pub(crate) mod settings;
 
 pub mod cli;
 
-use crate::AsyncResult;
+use crate::prelude::Resultant;
 use cli::{Cli, Opts};
 use std::sync::Arc;
 
@@ -23,7 +23,7 @@ impl Backend {
     pub fn context(&self) -> &Context {
         &self.ctx
     }
-    pub async fn handle_cli(&mut self, cli: Cli) -> AsyncResult {
+    pub async fn handle_cli(&mut self, cli: Cli) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
                 Opts::Setup { .. } => {
@@ -35,7 +35,7 @@ impl Backend {
 
         Ok(())
     }
-    pub async fn run(mut self) -> AsyncResult {
+    pub async fn run(mut self) -> Resultant {
         loop {}
     }
     pub fn settings(&self) -> &Settings {
@@ -44,7 +44,7 @@ impl Backend {
     pub fn setup(&self) {
         self.ctx.setup();
     }
-    pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
+    pub fn spawn(self) -> tokio::task::JoinHandle<Resultant> {
         tokio::spawn(self.run())
     }
 }

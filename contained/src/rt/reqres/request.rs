@@ -3,10 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::WorkloadId;
+use super::Operation;
+use crate::{SpaceId, WorkloadId};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
+
+pub struct Request {
+    pub operation: Operation,
+    pub payload: Requests,
+}
 
 #[derive(
     Clone,
@@ -24,13 +30,13 @@ use strum::{Display, EnumString, EnumVariantNames};
     SmartDefault,
 )]
 #[strum(serialize_all = "title_case")]
-pub enum Request {
+pub enum Requests {
     AddTriad {
-        id: u32,
+        id: SpaceId,
         value: u32,
     },
     RemoveTriad {
-        id: u32,
+        id: SpaceId,
     },
     AddWorkload {
         id: WorkloadId,
@@ -40,9 +46,32 @@ pub enum Request {
         id: WorkloadId,
     },
     RunWorkload {
-        triad_id: u32,
+        triad_id: SpaceId,
         workload_id: WorkloadId,
     },
     #[default]
     None,
 }
+
+impl Requests {
+    pub fn add_triad(id: SpaceId, value: u32) -> Self {
+        Self::AddTriad { id, value }
+    }
+    pub fn remove_triad(id: SpaceId) -> Self {
+        Self::RemoveTriad { id }
+    }
+    pub fn add_workload(id: WorkloadId, module: u32) -> Self {
+        Self::AddWorkload { id, module }
+    }
+    pub fn remove_workload(id: WorkloadId) -> Self {
+        Self::RemoveWorkload { id }
+    }
+    pub fn run_workload(triad_id: SpaceId, workload_id: WorkloadId) -> Self {
+        Self::RunWorkload {
+            triad_id,
+            workload_id,
+        }
+    }
+}
+
+

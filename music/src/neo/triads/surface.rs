@@ -9,7 +9,6 @@
 */
 use super::Triad;
 use crate::Note;
-use contained_core::actors::Actor;
 use contained_core::turing::Program;
 use contained_core::{State, Stateful};
 

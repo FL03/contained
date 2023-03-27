@@ -3,9 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use crate::Shared;
 use decanter::prelude::{hasher, Hashable, H256};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
+
+pub trait AsyncStateful<S: StateSpec>: Clone {
+    fn state(&self) -> Shared<S>;
+    fn update_state(&mut self, state: Shared<S>);
+}
 
 /// [Stateful] describes a stateful object
 pub trait Stateful<S: StateSpec>: Clone {

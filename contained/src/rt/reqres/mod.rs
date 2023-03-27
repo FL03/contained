@@ -8,3 +8,13 @@ pub use self::{request::*, response::*};
 
 mod request;
 mod response;
+
+
+
+pub enum Operation {
+    Add,
+    Get,
+    Remove,
+    Run,
+    Update
+}

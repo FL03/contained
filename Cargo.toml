@@ -19,6 +19,7 @@ scsys = { features = ["derive"], git = "https://github.com/scattered-systems/scs
 # Standard dependencies
 anyhow = "1"
 async-trait = "0.1"
+bytes = "1"
 chrono = { features = ["serde"], version = "0.4" }
 futures = "0.3"
 itertools = "0.10"

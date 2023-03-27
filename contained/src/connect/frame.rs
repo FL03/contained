@@ -5,15 +5,22 @@
         This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for 
         the `Connection` type.
 */
-use crate::core::Error;
-use crate::WorkloadId;
+use crate::prelude::{Error, SpaceId, WorkloadId};
 use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Message<Id = String, Dt = String> {
+    pub id: Id,
+    pub data: Dt,
+    pub timestamp: i64,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Frame {
     Empty,
-    Triad { id: u32, value: i32 },
+    Error(Error),
+    Triad { id: SpaceId, value: i32 },
     Workload { id: WorkloadId, module: u32 },
 }
 
@@ -58,18 +65,24 @@ impl Frame {
         match frame_type {
             0 => Ok(Self::Empty),
             1 => {
+                // Parse the error
+                let error = serde_json::from_slice::<Error>(&data)?;
+
+                Ok(Self::Error(error))
+            }
+            2 => {
                 // Parse the triad
-                let (id, value) = serde_json::from_slice::<(u32, i32)>(&data)?;
+                let (id, value) = serde_json::from_slice::<(SpaceId, i32)>(&data)?;
 
                 Ok(Self::Triad { id, value })
             }
-            2 => {
+            3 => {
                 // Parse the workload
                 let (id, module) = serde_json::from_slice::<(WorkloadId, u32)>(&data)?;
 
                 Ok(Self::Workload { id, module })
             }
-            _ => Err(Error::InvalidType),
+            _ => Err(Error::TypeError),
         }
     }
 }

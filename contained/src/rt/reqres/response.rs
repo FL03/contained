@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::WorkloadId;
+use crate::{SpaceId, WorkloadId};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -24,12 +24,12 @@ use strum::{Display, EnumString, EnumVariantNames};
     SmartDefault,
 )]
 #[strum(serialize_all = "title_case")]
-pub enum Response {
+pub enum Responses {
     TriadAdded {
-        id: u32
+        id: SpaceId
     },
     TriadRemoved {
-        id: u32
+        id: SpaceId
     },
     WorkloadAdded {
         id: WorkloadId
@@ -38,9 +38,31 @@ pub enum Response {
         id: WorkloadId
     },
     WorkloadRun {
-        triad_id: u32,
+        triad_id: SpaceId,
         workload_id: WorkloadId,
     },
     #[default]
     None,
 }
+
+impl Responses {
+    pub fn triad_added(id: SpaceId) -> Self {
+        Self::TriadAdded { id }
+    }
+    pub fn triad_removed(id: SpaceId) -> Self {
+        Self::TriadRemoved { id }
+    }
+    pub fn workload_added(id: WorkloadId) -> Self {
+        Self::WorkloadAdded { id }
+    }
+    pub fn workload_removed(id: WorkloadId) -> Self {
+        Self::WorkloadRemoved { id }
+    }
+    pub fn workload_run(triad_id: SpaceId, workload_id: WorkloadId) -> Self {
+        Self::WorkloadRun {
+            triad_id,
+            workload_id,
+        }
+    }
+}
+
