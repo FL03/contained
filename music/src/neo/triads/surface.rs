@@ -15,7 +15,6 @@ use contained_core::{State, Stateful};
 use serde::{Deserialize, Serialize};
 
 pub trait Surfaced<T> {
-    
     fn edges(&self) -> Vec<(T, T)>;
     fn vertices(&self) -> Vec<T>;
 }
@@ -53,5 +52,3 @@ impl From<Surface> for Program<Note> {
         Program::new(surface.triad(), State::Invalid)
     }
 }
-
-

@@ -73,6 +73,16 @@ impl Interval {
         let interval: i64 = self.clone().into();
         (note.pitch() - interval).into()
     }
+    pub fn intervals(iter: impl IntoIterator<Item = Note>) -> Vec<Self> {
+        let mut intervals = Vec::new();
+        let mut iter = iter.into_iter();
+        let mut prev = iter.next().unwrap();
+        for note in iter {
+            intervals.push(Interval::new(prev, note.clone()));
+            prev = note;
+        }
+        intervals
+    }
 }
 
 impl Hashable for Interval {

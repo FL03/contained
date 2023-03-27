@@ -5,7 +5,6 @@
 */
 use tokio::sync::mpsc;
 
-
 pub struct Client {
     request: mpsc::Sender<String>,
 }

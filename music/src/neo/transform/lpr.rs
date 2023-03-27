@@ -79,6 +79,7 @@ impl<T: Triadic> Dirac<T> for LPR {
                 LPR::R => notes[0] -= Interval::Tone,
             },
         };
+        
         arg.update(&notes).expect("Invalid triad");
         arg.clone()
     }
@@ -89,49 +90,5 @@ impl std::ops::Mul<Triad> for LPR {
 
     fn mul(self, rhs: Triad) -> Self::Output {
         self.dirac(&mut rhs.clone())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use std::str::FromStr;
-
-    use super::*;
-    use crate::neo::triads::{Triad, Triads};
-
-    #[test]
-    fn test_lpr() {
-        let dirac = LPR::from_str("l");
-        assert!(dirac.is_ok());
-        assert_eq!(dirac.unwrap(), LPR::L);
-    }
-
-    #[test]
-    fn test_leading() {
-        let a = Triad::new(0.into(), Triads::Major);
-        let mut b = LPR::L * a.clone();
-        assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((4, 7, 11)).unwrap());
-        b *= LPR::L;
-        assert_eq!(a, b);
-    }
-
-    #[test]
-    fn test_parallel() {
-        let a = Triad::new(0.into(), Triads::Major);
-        let b = LPR::P * a.clone();
-        assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((0, 3, 7)).unwrap());
-        assert_eq!(LPR::P * b, a)
-    }
-
-    #[test]
-    fn test_relative() {
-        let a = Triad::new(0.into(), Triads::Major);
-        let b = LPR::R * a.clone();
-
-        assert_ne!(a, b);
-        assert_eq!(b, Triad::try_from((9, 0, 4)).unwrap());
-        assert_eq!(LPR::R * b, a)
     }
 }

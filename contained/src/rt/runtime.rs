@@ -30,9 +30,13 @@ impl Runtime {
         match request {
             Requests::AddTriad { id, .. } => {
                 let triad = Triad::new(0.into(), Triads::Major);
-                self.state.spaces.write().unwrap().insert(id.clone(), Space::new(triad));
+                self.state
+                    .spaces
+                    .write()
+                    .unwrap()
+                    .insert(id.clone(), Space::new(triad));
                 Ok(Responses::TriadAdded { id })
-            },
+            }
             Requests::RemoveTriad { id } => {
                 self.state.spaces.write().unwrap().remove(&id);
                 Ok(Responses::TriadRemoved { id })
@@ -40,12 +44,15 @@ impl Runtime {
             Requests::AddWorkload { id, module } => {
                 // self.state.workloads.write().unwrap().insert(id.clone(), Workload::new(module, Module::new(vec![])));
                 Ok(Responses::WorkloadAdded { id })
-            },
+            }
             Requests::RemoveWorkload { id } => {
                 self.state.workloads.write().unwrap().remove(&id);
                 Ok(Responses::WorkloadRemoved { id })
             }
-            Requests::RunWorkload { triad_id, workload_id } => {
+            Requests::RunWorkload {
+                triad_id,
+                workload_id,
+            } => {
                 let workload = self
                     .state
                     .workloads
@@ -54,7 +61,10 @@ impl Runtime {
                     .get(&workload_id)
                     .unwrap();
                 let triad = self.state.spaces.read().unwrap().get(&triad_id).unwrap();
-                Ok(Responses::WorkloadRun{ triad_id, workload_id })
+                Ok(Responses::WorkloadRun {
+                    triad_id,
+                    workload_id,
+                })
             }
             Requests::None => Ok(Responses::None),
         }
@@ -68,7 +78,6 @@ impl Runtime {
                     self.response.send(res).await.expect("");
                 }
             }
-
         }
     }
 }

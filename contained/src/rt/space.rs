@@ -8,7 +8,7 @@ use crate::core::{AsyncStateful, Shared, State};
 use crate::music::neo::triads::*;
 
 use std::sync::{Arc, Mutex};
-use wasmer::{FunctionEnv, AsStoreMut};
+use wasmer::{AsStoreMut, FunctionEnv};
 
 #[derive(Clone, Debug, Default)]
 pub struct Space {

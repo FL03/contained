@@ -73,5 +73,3 @@ impl Requests {
         }
     }
 }
-
-

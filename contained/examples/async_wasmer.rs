@@ -2,11 +2,9 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use wasmer::{Function, Instance, Module, Store, imports, wat2wasm};
+use wasmer::{imports, wat2wasm, Function, Instance, Module, Store};
 
 use tokio::sync::mpsc;
-
-
 
 pub static COUNTER_MODULE: &'static [u8] = br#"
 (module
@@ -26,7 +24,6 @@ pub static COUNTER_MODULE: &'static [u8] = br#"
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    
     // Define the number of WASM instances to create
     let num_instances = 3;
 
@@ -37,10 +34,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Create a channel to send messages to the WASM tasks
     let (tx, mut rx) = mpsc::channel::<Message>(num_instances);
 
-
     Ok(())
 }
-
 
 pub struct Message {
     pub id: usize,

@@ -42,6 +42,25 @@ pub enum Triads {
 }
 
 impl Triads {
+    pub fn classes() -> Vec<Self> {
+        vec![
+            Triads::Augmented,
+            Triads::Diminished,
+            Triads::Major,
+            Triads::Minor,
+        ]
+    }
+    pub fn others(&self) -> Vec<Self> {
+        vec![
+            Triads::Augmented,
+            Triads::Diminished,
+            Triads::Major,
+            Triads::Minor,
+        ]
+        .into_iter()
+        .filter(|x| x != self)
+        .collect()
+    }
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         match self {
             Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
@@ -95,6 +114,29 @@ impl TryFrom<(Thirds, Fifths)> for Triads {
                 ),
                 Fifths::Diminished => Ok(Triads::Diminished),
                 Fifths::Perfect => Ok(Triads::Minor),
+            },
+        }
+    }
+}
+
+impl TryFrom<[Note; 3]> for Triads {
+    type Error = BoxedError;
+
+    fn try_from(data: [Note; 3]) -> Result<Self, Self::Error> {
+        let [r, t, f]: [Note; 3] = data;
+        let ab = Thirds::try_from((r.clone(), t))?;
+        let bc = Fifths::try_from((r, f))?;
+
+        match ab {
+            Thirds::Major => match bc {
+                Fifths::Augmented => Ok(Self::Augmented),
+                Fifths::Perfect => Ok(Self::Major),
+                _ => Err("".into()),
+            },
+            Thirds::Minor => match bc {
+                Fifths::Diminished => Ok(Self::Diminished),
+                Fifths::Perfect => Ok(Self::Minor),
+                _ => Err("".into()),
             },
         }
     }

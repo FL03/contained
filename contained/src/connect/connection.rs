@@ -11,7 +11,6 @@ use std::io::Cursor;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpStream;
 
-
 // Struct for handling incoming connections
 pub struct Connection {
     buffer: BytesMut,

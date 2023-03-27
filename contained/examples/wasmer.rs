@@ -1,5 +1,8 @@
 use std::sync::{Arc, Mutex};
-use wasmer::{Instance, Module, Store, Function, FunctionEnv, FunctionEnvMut, imports, TypedFunction, wat2wasm};
+use wasmer::{
+    imports, wat2wasm, Function, FunctionEnv, FunctionEnvMut, Instance, Module, Store,
+    TypedFunction,
+};
 
 pub type Sharded<T> = Arc<Mutex<T>>;
 pub type ShardedCounter = Sharded<i32>;
@@ -19,7 +22,6 @@ pub static COUNTER_MODULE: &'static [u8] = br#"
       call $get_counter)
     (export "increment_counter_loop" (func $increment_f)))
 "#;
-
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Let's declare the Wasm module.
@@ -50,18 +52,10 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let env = Env::new(0);
     let func_env = env.function_env(&mut store);
 
-    let get_counter_func = Function::new_typed_with_env(
-        &mut store, 
-        &func_env, 
-        get_counter
-    );
-    
-    let add_to_counter_func = Function::new_typed_with_env(
-        &mut store, 
-        &func_env, 
-        add_to_counter
-    );
-    
+    let get_counter_func = Function::new_typed_with_env(&mut store, &func_env, get_counter);
+
+    let add_to_counter_func = Function::new_typed_with_env(&mut store, &func_env, add_to_counter);
+
     let import_object = imports! {
         "env" => {
             "get_counter" => get_counter_func,
@@ -100,9 +94,6 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
-
-
-
 #[derive(Clone)]
 pub struct Env {
     pub value: Arc<Mutex<i32>>,
@@ -115,7 +106,7 @@ impl Env {
         }
     }
     pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
-        FunctionEnv::new(store,self.clone())
+        FunctionEnv::new(store, self.clone())
     }
 }
 

@@ -1,8 +1,8 @@
 /*
     Appellation: frame <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A frame is used to describe units of data shared between two peers. Implementing a custom framing layer is useful for managing the various types of data that can be sent between peers. 
-        This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for 
+    Description: A frame is used to describe units of data shared between two peers. Implementing a custom framing layer is useful for managing the various types of data that can be sent between peers.
+        This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for
         the `Connection` type.
 */
 use crate::prelude::{Error, SpaceId, WorkloadId};

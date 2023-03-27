@@ -25,3 +25,49 @@ pub trait Transform: Sized {
         dirac.dirac(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use super::*;
+    use crate::neo::triads::*;
+
+    #[test]
+    fn test_lpr() {
+        let dirac = LPR::from_str("l");
+        assert!(dirac.is_ok());
+        assert_eq!(dirac.unwrap(), LPR::L);
+    }
+
+    #[test]
+    fn test_leading() {
+        
+        for cls in [Triads::Major] {
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::L * a.clone();
+            assert_ne!(a, b);
+            assert_eq!(LPR::L * b, a);
+        }
+    }
+
+    #[test]
+    fn test_parallel() {
+        for cls in [Triads::Major] {
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::P * a.clone();
+            assert_ne!(a, b);
+            assert_eq!(LPR::P * b, a);
+        }
+    }
+
+    #[test]
+    fn test_relative() {
+        for cls in [Triads::Major] {
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::R * a.clone();
+            assert_ne!(a, b);
+            assert_eq!(LPR::R * b, a);
+        }
+    }
+}

@@ -133,7 +133,6 @@ impl PartialEq for Delay {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;

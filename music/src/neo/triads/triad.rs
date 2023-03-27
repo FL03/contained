@@ -78,12 +78,14 @@ impl Triadic for Triad {
     fn triad(&self) -> &[Note; 3] {
         &self.notes
     }
-
+    // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
     fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
+        let class = self.class();
         if let Ok(t) = Self::try_from(triad.clone()) {
             *self = t;
             return Ok(self);
         }
+        
         Err(MusicError::IntervalError(
             "The given notes failed to contain the necessary relationships...".into(),
         ))

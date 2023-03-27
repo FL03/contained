@@ -58,9 +58,7 @@ impl Default for Backend {
 
 impl From<Context> for Backend {
     fn from(ctx: Context) -> Self {
-        Self {
-            ctx
-        }
+        Self { ctx }
     }
 }
 
