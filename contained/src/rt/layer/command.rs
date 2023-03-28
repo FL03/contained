@@ -11,7 +11,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 
 pub struct Request {
     pub operation: Operation,
-    pub payload: Requests,
+    pub payload: Command,
 }
 
 #[derive(
@@ -30,7 +30,7 @@ pub struct Request {
     SmartDefault,
 )]
 #[strum(serialize_all = "title_case")]
-pub enum Requests {
+pub enum Command {
     AddTriad {
         id: SpaceId,
         value: u32,
@@ -53,7 +53,7 @@ pub enum Requests {
     None,
 }
 
-impl Requests {
+impl Command {
     pub fn add_triad(id: SpaceId, value: u32) -> Self {
         Self::AddTriad { id, value }
     }

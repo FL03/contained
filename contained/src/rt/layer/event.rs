@@ -24,7 +24,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     SmartDefault,
 )]
 #[strum(serialize_all = "title_case")]
-pub enum Responses {
+pub enum SystemEvent {
     TriadAdded {
         id: SpaceId,
     },
@@ -45,7 +45,7 @@ pub enum Responses {
     None,
 }
 
-impl Responses {
+impl SystemEvent {
     pub fn triad_added(id: SpaceId) -> Self {
         Self::TriadAdded { id }
     }

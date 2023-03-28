@@ -10,6 +10,7 @@
         Locally, a tonnetz is typically fragemented only persisting as many triads as the host device allows for. However, as a network the cluster
         glues together these framents into a single, cohesive, and complete experience orchestrated according to a single originator.
 */
+use super::Tonnetz;
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
@@ -22,28 +23,26 @@ pub struct Cluster {
 }
 
 impl Cluster {
-    pub fn fulfilled(&self) -> bool {
-        self.cluster.nodes().len() == MODULUS as usize
-    }
-    pub fn insert(&mut self, triad: Triad) {
-        // determine the intervals used to create the given triad
-        let (a, b, c): (Interval, Interval, Interval) = triad.clone().into();
 
-        self.cluster
-            .add_edge((triad.root(), triad.third(), a).into());
-        self.cluster
-            .add_edge((triad.third(), triad.fifth(), b).into());
-        self.cluster
-            .add_edge((triad.root(), triad.fifth(), c).into());
-    }
-    pub fn scope(&self) -> &Arc<Mutex<Triad>> {
-        &self.scope
-    }
 }
 
 impl std::fmt::Display for Cluster {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.cluster)
+    }
+}
+
+impl Tonnetz for Cluster {
+    fn scope(&self) -> &Arc<Mutex<Triad>> {
+        &self.scope
+    }
+
+    fn tonnetz(&self) -> &UndirectedGraph<Note, Interval> {
+        &self.cluster
+    }
+
+    fn tonnetz_mut(&mut self) -> &mut UndirectedGraph<Note, Interval> {
+        &mut self.cluster
     }
 }
 

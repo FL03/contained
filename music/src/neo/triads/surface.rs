@@ -1,11 +1,8 @@
 /*
-    Appellation: instance <module>
+    Appellation: surface <triads>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: An instance is a stateful, self-contained, and self-executing machine that is used to describe a computable surface.
-        Generally, for a surface to be computable it must contain a set of vertices connected by edges where the surface contained within or area of the shape is stateful.
-
-        The surface of the triad is described by its states while the triad itself is used to describe the subset of notes that are contained within the surface.
-        That being said it is important to consider that each surface is better understood as the environment in-which a WASM machine is operating.
+    Description: A surface is used to describe the actual environment in-which the WebAssembly engines are running in. 
+        Each surface is a stateful instance of a triad 
 */
 use super::Triad;
 use crate::Note;

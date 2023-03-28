@@ -25,23 +25,7 @@ pub static COUNTER_MODULE: &'static [u8] = br#"
 
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // Let's declare the Wasm module.
-    let wasm_bytes = wat2wasm(
-        br#"
-(module
-  (func $get_counter (import "env" "get_counter") (result i32))
-  (func $add_to_counter (import "env" "add_to_counter") (param i32) (result i32))
-  (type $increment_t (func (param i32) (result i32)))
-  (func $increment_f (type $increment_t) (param $x i32) (result i32)
-    (block
-      (loop
-        (call $add_to_counter (i32.const 1))
-        (set_local $x (i32.sub (get_local $x) (i32.const 1)))
-        (br_if 1 (i32.eq (get_local $x) (i32.const 0)))
-        (br 0)))
-    call $get_counter)
-  (export "increment_counter_loop" (func $increment_f)))
-"#,
-    )?;
+    let wasm_bytes = wat2wasm(COUNTER_MODULE)?;
     // Create a store, that holds the engine.
     let mut store = Store::default();
 

@@ -4,10 +4,10 @@
     Description: ... summary ...
 */
 
-pub use self::{request::*, response::*};
+pub use self::{command::*, event::*};
 
-mod request;
-mod response;
+mod command;
+mod event;
 
 pub enum Operation {
     Add,

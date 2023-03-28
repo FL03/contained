@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{reqres::*, Space, Workload};
+use super::{layer::*, Space, Workload};
 use crate::connect::Connection;
 use crate::music::neo::triads::*;
 use crate::prelude::{Error, SpaceId, WorkloadId};
@@ -20,36 +20,36 @@ pub struct RuntimeState {
 
 pub struct Runtime {
     con: Connection,
-    request: mpsc::Receiver<Requests>,
-    response: mpsc::Sender<Responses>,
+    command: mpsc::Receiver<Command>,
+    event: mpsc::Sender<SystemEvent>,
     state: RuntimeState,
 }
 
 impl Runtime {
-    pub async fn handle_request(&self, request: Requests) -> Result<Responses, Error> {
+    pub async fn handle_request(&self, request: Command) -> Result<SystemEvent, Error> {
         match request {
-            Requests::AddTriad { id, .. } => {
+            Command::AddTriad { id, .. } => {
                 let triad = Triad::new(0.into(), Triads::Major);
                 self.state
                     .spaces
                     .write()
                     .unwrap()
                     .insert(id.clone(), Space::new(triad));
-                Ok(Responses::TriadAdded { id })
+                Ok(SystemEvent::TriadAdded { id })
             }
-            Requests::RemoveTriad { id } => {
+            Command::RemoveTriad { id } => {
                 self.state.spaces.write().unwrap().remove(&id);
-                Ok(Responses::TriadRemoved { id })
+                Ok(SystemEvent::TriadRemoved { id })
             }
-            Requests::AddWorkload { id, module } => {
+            Command::AddWorkload { id, module } => {
                 // self.state.workloads.write().unwrap().insert(id.clone(), Workload::new(module, Module::new(vec![])));
-                Ok(Responses::WorkloadAdded { id })
+                Ok(SystemEvent::WorkloadAdded { id })
             }
-            Requests::RemoveWorkload { id } => {
+            Command::RemoveWorkload { id } => {
                 self.state.workloads.write().unwrap().remove(&id);
-                Ok(Responses::WorkloadRemoved { id })
+                Ok(SystemEvent::WorkloadRemoved { id })
             }
-            Requests::RunWorkload {
+            Command::RunWorkload {
                 triad_id,
                 workload_id,
             } => {
@@ -61,21 +61,21 @@ impl Runtime {
                     .get(&workload_id)
                     .unwrap();
                 let triad = self.state.spaces.read().unwrap().get(&triad_id).unwrap();
-                Ok(Responses::WorkloadRun {
+                Ok(SystemEvent::WorkloadRun {
                     triad_id,
                     workload_id,
                 })
             }
-            Requests::None => Ok(Responses::None),
+            Command::None => Ok(SystemEvent::None),
         }
     }
 
     pub async fn run(mut self) -> Result<(), Error> {
         loop {
             tokio::select! {
-                Some(req) = self.request.recv() => {
+                Some(req) = self.command.recv() => {
                     let res = self.handle_request(req).await?;
-                    self.response.send(res).await.expect("");
+                    self.event.send(res).await.expect("");
                 }
             }
         }
