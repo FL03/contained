@@ -5,14 +5,14 @@
         def. A note is a symbolic representation of a particular pitch; also called a pitch class
 
 */
-pub use self::{note::*, pitch::*};
+pub use self::{aspn::*, classes::*, note::*, pitch::*};
 
-pub mod classes;
-pub(crate) mod note;
-pub(crate) mod pitch;
+mod aspn;
+mod classes;
+mod note;
+mod pitch;
 
 use crate::Gradient;
-use classes::NaturalNote;
 
 /// [detect_accidentals] is a function for quickly determining the 'accidental' variations of the natural note
 /// Given a [NaturalNote] find its optional sharp and flat variations

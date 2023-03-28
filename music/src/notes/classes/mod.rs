@@ -13,6 +13,12 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
+pub enum Classes {
+    Flat,
+    Sharp,
+    Natural
+}
+
 #[derive(
     Clone,
     Copy,

@@ -28,5 +28,5 @@ pub mod prelude {
     #[cfg(feature = "core")]
     pub use super::core::*;
     #[cfg(feature = "music")]
-    pub use super::music::{classes::*, intervals::*, neo::*};
+    pub use super::music::{chords::*, intervals::*, neo::*};
 }

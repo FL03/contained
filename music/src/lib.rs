@@ -5,7 +5,7 @@
 */
 pub use self::{errors::*, notes::*, primitives::*, utils::*};
 
-pub mod chord;
+pub mod chords;
 pub mod clef;
 pub mod epoch;
 pub mod frequency;
@@ -17,12 +17,12 @@ pub(crate) mod notes;
 pub(crate) mod primitives;
 pub(crate) mod utils;
 
-use crate::classes::PitchClass;
+use intervals::Interval;
 use std::ops::{AddAssign, SubAssign};
 
 /// [Gradient] provides a numerical interpretation of a given object
 pub trait Gradient:
-    Clone + Eq + Ord + Into<i64> + AddAssign<intervals::Interval> + SubAssign<intervals::Interval>
+    Clone + Eq + Ord + Into<i64> + AddAssign<Interval> + SubAssign<Interval>
 {
     const MODULUS: i64;
 

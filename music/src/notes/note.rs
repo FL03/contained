@@ -8,7 +8,7 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use super::{classes::PitchClass, Pitch};
+use super::{ASPN, PitchClass, Pitch};
 use crate::{intervals::Interval, Gradient};
 use algae::graph::cmp::Node;
 use contained_core::Symbolic;
@@ -28,6 +28,9 @@ impl Note {
             class,
             octave: octave.unwrap_or(1),
         }
+    }
+    pub fn aspn(&self) -> ASPN {
+        ASPN::new(self.class, Some(self.octave))
     }
     pub fn interval(&self, other: &Self) -> Interval {
         Interval::new(self.clone(), other.clone())
@@ -145,7 +148,7 @@ impl From<Note> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{classes::NaturalNote, Gradient};
+    use crate::NaturalNote;
 
     #[test]
     fn test_notes() {

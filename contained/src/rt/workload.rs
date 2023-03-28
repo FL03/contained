@@ -14,7 +14,8 @@ pub struct Workload {
 }
 
 impl Workload {
-    pub fn new(id: WorkloadId, module: Module) -> Self {
+    pub fn new(module: Module) -> Self {
+        let id = BsonOid::new().to_hex();
         Self { id, module }
     }
 
@@ -29,7 +30,6 @@ impl Workload {
 
 impl From<Module> for Workload {
     fn from(module: Module) -> Self {
-        let id = BsonOid::new().to_hex();
-        Self::new(id, module)
+        Self::new(module)
     }
 }
