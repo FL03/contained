@@ -5,8 +5,8 @@
 
 */
 use crate::music::neo::triads::*;
-use crate::prelude::{EnvId, Shared, State};
-use scsys::prelude::BsonOid;
+use crate::prelude::{EnvId, Shared};
+use scsys::prelude::{BsonOid, Timestamp};
 use std::sync::{Arc, Mutex};
 use wasmer::{AsStoreMut, FunctionEnv};
 
@@ -14,6 +14,25 @@ pub struct Snapshot {
     id: EnvId,
     surface: Surface,
     ts: i64,
+}
+
+impl Snapshot {
+    pub fn new(env: &Environment) -> Self {
+        Self {
+            id: env.id.clone(),
+            surface: env.surface.lock().unwrap().clone(),
+            ts: Timestamp::default().into(),
+        }
+    }
+    pub fn id(&self) -> &EnvId {
+        &self.id
+    }
+    pub fn surface(&self) -> &Surface {
+        &self.surface
+    }
+    pub fn ts(&self) -> i64 {
+        self.ts
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -31,6 +50,9 @@ impl Environment {
     }
     pub fn function_env(&self, store: &mut impl AsStoreMut) -> FunctionEnv<Self> {
         FunctionEnv::new(store, self.clone())
+    }
+    pub fn snapshot(&self) -> Snapshot {
+        Snapshot::new(self)
     }
     pub fn surface(&self) -> &Shared<Surface> {
         &self.surface

@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use crate::turing::{instructions::Instruction, Program};
-use crate::{Executable, Symbolic};
+use crate::Symbolic;
 
 pub struct Executor<S: Symbolic> {
     program: Program<S>,

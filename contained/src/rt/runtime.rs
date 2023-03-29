@@ -3,8 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{layer::*, Space, Stack, Workload};
-use crate::music::neo::triads::*;
+use super::{layer::*, Stack};
 use crate::prelude::Error;
 
 use tokio::sync::{mpsc, oneshot};
@@ -43,9 +42,7 @@ impl Runtime {
                 Ok(SystemEvent::WorkloadRemoved { id })
             }
             Command::RunWorkload {
-                env: triad_id,
-                workload_id,
-                ..
+                env, workload_id, ..
             } => {
                 let workload = self
                     .stack
@@ -54,9 +51,9 @@ impl Runtime {
                     .unwrap()
                     .get(&workload_id)
                     .unwrap();
-                let triad = self.stack.envs.read().unwrap().get(&triad_id).unwrap();
+                let triad = self.stack.envs.read().unwrap().get(&env).unwrap();
                 Ok(SystemEvent::WorkloadRun {
-                    triad_id,
+                    triad_id: env,
                     workload_id,
                 })
             }
