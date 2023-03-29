@@ -79,7 +79,7 @@ impl<T: Triadic> Dirac<T> for LPR {
                 LPR::R => notes[0] -= Interval::Tone,
             },
         };
-        
+
         arg.update(&notes).expect("Invalid triad");
         arg.clone()
     }

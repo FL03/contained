@@ -42,8 +42,7 @@ mod tests {
 
     #[test]
     fn test_leading() {
-        
-        for cls in [Triads::Major] {
+        for cls in [TriadClass::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::L * a.clone();
             assert_ne!(a, b);
@@ -53,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_parallel() {
-        for cls in [Triads::Major] {
+        for cls in [TriadClass::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::P * a.clone();
             assert_ne!(a, b);
@@ -63,7 +62,7 @@ mod tests {
 
     #[test]
     fn test_relative() {
-        for cls in [Triads::Major] {
+        for cls in [TriadClass::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::R * a.clone();
             assert_ne!(a, b);

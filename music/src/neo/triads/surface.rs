@@ -1,8 +1,8 @@
 /*
     Appellation: surface <triads>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A surface is used to describe the actual environment in-which the WebAssembly engines are running in. 
-        Each surface is a stateful instance of a triad 
+    Description: A surface is used to describe the actual environment in-which the WebAssembly engines are running in.
+        Each surface is a stateful instance of a triad
 */
 use super::Triad;
 use crate::Note;

@@ -4,7 +4,6 @@
     Description: ... summary ...
 */
 use super::{layer::*, Space, Workload};
-use crate::connect::Connection;
 use crate::music::neo::triads::*;
 use crate::prelude::{Error, SpaceId, WorkloadId};
 
@@ -13,24 +12,39 @@ use std::sync::RwLock;
 use tokio::sync::mpsc;
 use wasmer::Module;
 
-pub struct RuntimeState {
+pub struct Stack {
     pub spaces: RwLock<HashMap<SpaceId, Space>>,
     pub workloads: RwLock<HashMap<WorkloadId, Workload>>,
 }
 
+impl Stack {
+    pub fn new() -> Self {
+        Self {
+            spaces: RwLock::new(HashMap::new()),
+            workloads: RwLock::new(HashMap::new()),
+        }
+    }
+}
+
 pub struct Runtime {
-    con: Connection,
     command: mpsc::Receiver<Command>,
     event: mpsc::Sender<SystemEvent>,
-    state: RuntimeState,
+    stack: Stack,
 }
 
 impl Runtime {
-    pub async fn handle_request(&self, request: Command) -> Result<SystemEvent, Error> {
+    pub fn new(command: mpsc::Receiver<Command>, event: mpsc::Sender<SystemEvent>) -> Self {
+        Self {
+            command,
+            event,
+            stack: Stack::new(),
+        }
+    }
+    pub async fn handle_command(&self, request: Command) -> Result<SystemEvent, Error> {
         match request {
             Command::AddTriad { id, .. } => {
-                let triad = Triad::new(0.into(), Triads::Major);
-                self.state
+                let triad = Triad::new(0.into(), TriadClass::Major);
+                self.stack
                     .spaces
                     .write()
                     .unwrap()
@@ -38,7 +52,7 @@ impl Runtime {
                 Ok(SystemEvent::TriadAdded { id })
             }
             Command::RemoveTriad { id } => {
-                self.state.spaces.write().unwrap().remove(&id);
+                self.stack.spaces.write().unwrap().remove(&id);
                 Ok(SystemEvent::TriadRemoved { id })
             }
             Command::AddWorkload { id, module } => {
@@ -46,7 +60,7 @@ impl Runtime {
                 Ok(SystemEvent::WorkloadAdded { id })
             }
             Command::RemoveWorkload { id } => {
-                self.state.workloads.write().unwrap().remove(&id);
+                self.stack.workloads.write().unwrap().remove(&id);
                 Ok(SystemEvent::WorkloadRemoved { id })
             }
             Command::RunWorkload {
@@ -54,13 +68,13 @@ impl Runtime {
                 workload_id,
             } => {
                 let workload = self
-                    .state
+                    .stack
                     .workloads
                     .read()
                     .unwrap()
                     .get(&workload_id)
                     .unwrap();
-                let triad = self.state.spaces.read().unwrap().get(&triad_id).unwrap();
+                let triad = self.stack.spaces.read().unwrap().get(&triad_id).unwrap();
                 Ok(SystemEvent::WorkloadRun {
                     triad_id,
                     workload_id,
@@ -69,15 +83,23 @@ impl Runtime {
             Command::None => Ok(SystemEvent::None),
         }
     }
-
     pub async fn run(mut self) -> Result<(), Error> {
         loop {
             tokio::select! {
                 Some(req) = self.command.recv() => {
-                    let res = self.handle_request(req).await?;
+                    let res = self.handle_command(req).await?;
                     self.event.send(res).await.expect("");
                 }
             }
         }
+    }
+    pub fn spawn(self) -> tokio::task::JoinHandle<Result<(), Error>> {
+        tokio::spawn(self.run())
+    }
+}
+
+impl Default for Runtime {
+    fn default() -> Self {
+        Self::new(mpsc::channel(100).1, mpsc::channel(100).0)
     }
 }

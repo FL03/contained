@@ -5,7 +5,7 @@
 */
 use futures::Stream;
 use serde::{Deserialize, Serialize};
-use std::task::{Context, Poll,};
+use std::task::{Context, Poll};
 use std::time::{Duration, Instant};
 use std::{future::Future, pin::Pin, thread};
 

@@ -8,7 +8,7 @@
         That being said, we will also adopt a note representation similar to that of the
         American Scientific Pitch Notation which denotes a certain octave for the given pitch-class.
 */
-use super::{ASPN, PitchClass, Pitch};
+use super::{Pitch, PitchClass, ASPN};
 use crate::{intervals::Interval, Gradient};
 use algae::graph::cmp::Node;
 use contained_core::Symbolic;

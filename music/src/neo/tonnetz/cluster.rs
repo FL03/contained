@@ -22,9 +22,7 @@ pub struct Cluster {
     scope: Arc<Mutex<Triad>>,
 }
 
-impl Cluster {
-
-}
+impl Cluster {}
 
 impl std::fmt::Display for Cluster {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -68,15 +66,19 @@ mod tests {
 
     #[test]
     fn test_cluster() {
-        let triad = Triad::new(0.into(), Triads::Major);
+        let triad = Triad::new(0.into(), TriadClass::Major);
 
         let mut cluster = Cluster::from(triad.clone());
         assert!(cluster.fulfilled() == false);
         for i in 1..MODULUS {
-            cluster.insert(Triad::new(i.into(), Triads::Major));
+            cluster.insert(Triad::new(i.into(), TriadClass::Major));
         }
         assert!(cluster.fulfilled() == true);
-        for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
+        for class in [
+            TriadClass::Minor,
+            TriadClass::Augmented,
+            TriadClass::Diminished,
+        ] {
             for i in 0..MODULUS {
                 cluster.insert(Triad::new(i.into(), class));
             }

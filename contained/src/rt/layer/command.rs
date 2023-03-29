@@ -1,18 +1,12 @@
 /*
-    Appellation: request <module>
+    Appellation: command <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::Operation;
 use crate::{SpaceId, WorkloadId};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub struct Request {
-    pub operation: Operation,
-    pub payload: Command,
-}
 
 #[derive(
     Clone,

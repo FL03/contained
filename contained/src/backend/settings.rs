@@ -16,10 +16,15 @@ pub struct Logger {
 }
 
 impl Logger {
-    pub fn new(level: String) -> Self {
-        Self { level }
+    pub fn new() -> Self {
+        Self {
+            level: tracing::Level::INFO.to_string(),
+        }
     }
-    pub fn setup_env(&mut self, level: Option<&str>) -> &Self {
+    pub fn set_level(mut self, level: impl ToString) {
+        self.level = level.to_string();
+    }
+    pub fn setup_env(mut self, level: Option<&str>) -> Self {
         let key = level.unwrap_or("RUST_LOG");
         if let Some(v) = std::env::var_os(key) {
             self.level = v.into_string().expect("Failed to convert into string...");
@@ -28,7 +33,7 @@ impl Logger {
         }
         self
     }
-    pub fn init_tracing(&self) {
+    pub fn init_tracing(self) {
         tracing_subscriber::fmt::init();
         tracing::debug!("Success: tracing layer initialized...");
     }
@@ -36,7 +41,7 @@ impl Logger {
 
 impl Default for Logger {
     fn default() -> Self {
-        Self::from(tracing::Level::INFO)
+        Self::new()
     }
 }
 
@@ -47,9 +52,9 @@ impl Hashable for Logger {
 }
 
 impl From<tracing::Level> for Logger {
-    fn from(value: tracing::Level) -> Self {
+    fn from(level: tracing::Level) -> Self {
         Self {
-            level: value.to_string(),
+            level: level.to_string(),
         }
     }
 }

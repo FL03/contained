@@ -26,6 +26,12 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Opts {
+    Execute {
+        #[clap(long, short)]
+        space: Option<String>,
+        #[clap(long, short)]
+        workload: String,
+    },
     Setup {
         #[clap(long, short)]
         addr: String,

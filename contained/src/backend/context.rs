@@ -18,9 +18,6 @@ impl Context {
     pub fn settings(&self) -> &Settings {
         &self.cnf
     }
-    pub fn setup(&self) {
-        self.cnf.logger.init_tracing();
-    }
 }
 
 impl Default for Context {

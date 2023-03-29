@@ -1,13 +1,15 @@
+extern crate contained_sdk as contained;
+
+use contained::prelude::Shared;
 use std::sync::{Arc, Mutex};
 use wasmer::{
     imports, wat2wasm, Function, FunctionEnv, FunctionEnvMut, Instance, Module, Store,
     TypedFunction,
 };
 
-pub type Sharded<T> = Arc<Mutex<T>>;
-pub type ShardedCounter = Sharded<i32>;
+type SharedCounter = Shared<i32>;
 
-pub static COUNTER_MODULE: &'static [u8] = br#"
+static COUNTER_MODULE: &'static [u8] = br#"
 (module
     (func $get_counter (import "env" "get_counter") (result i32))
     (func $add_to_counter (import "env" "add_to_counter") (param i32) (result i32))
@@ -78,6 +80,17 @@ fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Ok(())
 }
 
+fn get_counter(env: FunctionEnvMut<Env>) -> i32 {
+    *env.data().value.lock().unwrap()
+}
+
+fn add_to_counter(env: FunctionEnvMut<Env>, add: i32) -> i32 {
+    let mut counter_ref = env.data().value.lock().unwrap();
+
+    *counter_ref += add;
+    *counter_ref
+}
+
 #[derive(Clone)]
 pub struct Env {
     pub value: Arc<Mutex<i32>>,
@@ -102,19 +115,8 @@ impl Default for Env {
     }
 }
 
-impl From<Sharded<i32>> for Env {
-    fn from(value: Sharded<i32>) -> Self {
+impl From<Shared<i32>> for Env {
+    fn from(value: Shared<i32>) -> Self {
         Self { value }
     }
-}
-
-fn get_counter(env: FunctionEnvMut<Env>) -> i32 {
-    *env.data().value.lock().unwrap()
-}
-
-fn add_to_counter(env: FunctionEnvMut<Env>, add: i32) -> i32 {
-    let mut counter_ref = env.data().value.lock().unwrap();
-
-    *counter_ref += add;
-    *counter_ref
 }
