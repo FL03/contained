@@ -9,7 +9,6 @@ use crate::clients::Client;
 use crate::prelude::Resultant;
 use crate::rt::Runtime;
 use cli::{Cli, Opts};
-use std::sync::Arc;
 
 pub struct Backend {
     client: Client,
@@ -66,7 +65,6 @@ impl Backend {
 
 impl Default for Backend {
     fn default() -> Self {
-        let ctx = Context::default();
         Self::new()
     }
 }

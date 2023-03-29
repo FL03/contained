@@ -3,28 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{layer::*, Space, Workload};
+use super::{layer::*, Space, Stack, Workload};
 use crate::music::neo::triads::*;
-use crate::prelude::{Error, SpaceId, WorkloadId};
+use crate::prelude::Error;
 
-use std::collections::HashMap;
-use std::sync::RwLock;
-use tokio::sync::mpsc;
-use wasmer::Module;
-
-pub struct Stack {
-    pub spaces: RwLock<HashMap<SpaceId, Space>>,
-    pub workloads: RwLock<HashMap<WorkloadId, Workload>>,
-}
-
-impl Stack {
-    pub fn new() -> Self {
-        Self {
-            spaces: RwLock::new(HashMap::new()),
-            workloads: RwLock::new(HashMap::new()),
-        }
-    }
-}
+use tokio::sync::{mpsc, oneshot};
 
 pub struct Runtime {
     command: mpsc::Receiver<Command>,
@@ -43,29 +26,26 @@ impl Runtime {
     pub async fn handle_command(&self, request: Command) -> Result<SystemEvent, Error> {
         match request {
             Command::AddTriad { id, .. } => {
-                let triad = Triad::new(0.into(), TriadClass::Major);
-                self.stack
-                    .spaces
-                    .write()
-                    .unwrap()
-                    .insert(id.clone(), Space::new(triad));
+                let sender = oneshot::channel().0;
+                self.stack.envs.write().unwrap().insert(id.clone(), sender);
                 Ok(SystemEvent::TriadAdded { id })
             }
-            Command::RemoveTriad { id } => {
-                self.stack.spaces.write().unwrap().remove(&id);
+            Command::RemoveTriad { id, .. } => {
+                self.stack.envs.write().unwrap().remove(&id);
                 Ok(SystemEvent::TriadRemoved { id })
             }
-            Command::AddWorkload { id, module } => {
+            Command::AddWorkload { id, .. } => {
                 // self.state.workloads.write().unwrap().insert(id.clone(), Workload::new(module, Module::new(vec![])));
                 Ok(SystemEvent::WorkloadAdded { id })
             }
-            Command::RemoveWorkload { id } => {
+            Command::RemoveWorkload { id, .. } => {
                 self.stack.workloads.write().unwrap().remove(&id);
                 Ok(SystemEvent::WorkloadRemoved { id })
             }
             Command::RunWorkload {
-                triad_id,
+                env: triad_id,
                 workload_id,
+                ..
             } => {
                 let workload = self
                     .stack
@@ -74,13 +54,13 @@ impl Runtime {
                     .unwrap()
                     .get(&workload_id)
                     .unwrap();
-                let triad = self.stack.spaces.read().unwrap().get(&triad_id).unwrap();
+                let triad = self.stack.envs.read().unwrap().get(&triad_id).unwrap();
                 Ok(SystemEvent::WorkloadRun {
                     triad_id,
                     workload_id,
                 })
             }
-            Command::None => Ok(SystemEvent::None),
+            _ => Ok(SystemEvent::None),
         }
     }
     pub async fn run(mut self) -> Result<(), Error> {

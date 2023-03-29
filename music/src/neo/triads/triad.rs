@@ -7,7 +7,7 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{tonic::Tonic, Surface, TriadClass, Triadic};
+use super::{Surface, Tonic, TriadClass, Triadic};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
@@ -16,6 +16,7 @@ use crate::{
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{turing::Program, Alphabet, State};
 use decanter::prelude::{hasher, Hashable, H256};
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
@@ -117,17 +118,14 @@ impl TryFrom<[Note; 3]> for Triads {
     type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Self, Self::Error> {
-        let intervals = Interval::intervals(data.clone());
-        if intervals.len() != 3 {
-            return Err(MusicError::IntervalError(
-                "The given notes failed to contain the necessary relationships...".into(),
-            ));
-        } else {
-            // if intervals.contains(&Interval::MajorThird) && intervals.contains(&Interval::MinorThird) {
-            //     return Ok(Triads::Major(data));
-            // }
-            return Ok(Triads::Major(data));
+        for (a, b, c) in data.into_iter().circular_tuple_windows() {
+            if let Ok(class) = TriadClass::try_from((a.clone(), b.clone(), c.clone())) {
+                return Ok(Self::new(a.clone(), class));
+            }
         }
+        Err(MusicError::IntervalError(
+            "Failed to find the required relationships within the given notes...".into(),
+        ))
     }
 }
 
@@ -182,6 +180,12 @@ impl Alphabet<Note> for Triad {
     }
     fn default_symbol(&self) -> Note {
         self.root()
+    }
+}
+
+impl AsMut<[Note; 3]> for Triad {
+    fn as_mut(&mut self) -> &mut [Note; 3] {
+        &mut self.notes
     }
 }
 
@@ -263,23 +267,9 @@ impl TryFrom<[Note; 3]> for Triad {
     type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
-        let args = data.to_vec();
-        for i in 0..args.len() {
-            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
-            for j in 0..tmp.len() {
-                let (a, b, c) = (
-                    args[i].clone(),
-                    args[tmp[j]].clone(),
-                    args[tmp[(j + 1) % tmp.len()]].clone(),
-                );
-                let (ab, bc) = (
-                    Thirds::try_from((a.clone(), b.clone())),
-                    Thirds::try_from((b.clone(), c.clone())),
-                );
-                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-                if ab.is_ok() && bc.is_ok() {
-                    return Ok(Triad::build(a, ab?, bc?));
-                }
+        for (a, b, c) in data.into_iter().circular_tuple_windows() {
+            if let Ok(class) = TriadClass::try_from((a.clone(), b.clone(), c.clone())) {
+                return Ok(Triad::new(a.clone(), class));
             }
         }
         Err(MusicError::IntervalError(

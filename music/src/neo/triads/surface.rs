@@ -1,20 +1,11 @@
 /*
     Appellation: surface <triads>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A surface is used to describe the actual environment in-which the WebAssembly engines are running in.
-        Each surface is a stateful instance of a triad
+    Description: Generically, a surface describes a type of topological compute surface. Here we implement a surface for triads, which are the fundamental unit of computation in contained.
 */
 use super::Triad;
-use crate::Note;
-use contained_core::turing::Program;
 use contained_core::{State, Stateful};
-
 use serde::{Deserialize, Serialize};
-
-pub trait Surfaced<T> {
-    fn edges(&self) -> Vec<(T, T)>;
-    fn vertices(&self) -> Vec<T>;
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Surface {
@@ -41,11 +32,5 @@ impl Stateful<State> for Surface {
 
     fn update_state(&mut self, state: State) {
         self.state = state;
-    }
-}
-
-impl From<Surface> for Program<Note> {
-    fn from(surface: Surface) -> Program<Note> {
-        Program::new(surface.triad(), State::Invalid)
     }
 }

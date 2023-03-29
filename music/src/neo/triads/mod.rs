@@ -8,13 +8,12 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
 
-pub use self::{class::*, surface::*, triad::*};
+pub use self::{class::*, surface::*, tonic::*, triad::*};
 
 mod class;
 mod surface;
+mod tonic;
 mod triad;
-
-pub mod tonic;
 
 use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};

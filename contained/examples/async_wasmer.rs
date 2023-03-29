@@ -1,8 +1,6 @@
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
-use wasmer::{imports, wat2wasm, Function, Instance, Module, Store};
+use wasmer::{wat2wasm, Module, Store};
 
 use tokio::sync::mpsc;
 

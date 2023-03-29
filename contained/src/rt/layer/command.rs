@@ -3,67 +3,54 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{SpaceId, WorkloadId};
-use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use crate::prelude::{EnvId, Resultant, WorkloadId};
+use tokio::sync::oneshot::Sender;
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[strum(serialize_all = "title_case")]
+#[derive(Debug)]
 pub enum Command {
     AddTriad {
-        id: SpaceId,
+        id: EnvId,
         value: u32,
+        sender: Sender<Resultant>,
     },
     RemoveTriad {
-        id: SpaceId,
+        id: EnvId,
+        sender: Sender<Resultant>,
     },
     AddWorkload {
         id: WorkloadId,
         module: u32,
+        sender: Sender<Resultant>,
     },
     RemoveWorkload {
         id: WorkloadId,
+        sender: Sender<Resultant>,
     },
     RunWorkload {
-        triad_id: SpaceId,
+        env: EnvId,
         workload_id: WorkloadId,
+        sender: Sender<Resultant>,
     },
-    #[default]
-    None,
 }
 
 impl Command {
-    pub fn add_triad(id: SpaceId, value: u32) -> Self {
-        Self::AddTriad { id, value }
+    pub fn add_triad(id: EnvId, value: u32, sender: Sender<Resultant>) -> Self {
+        Self::AddTriad { id, value, sender }
     }
-    pub fn remove_triad(id: SpaceId) -> Self {
-        Self::RemoveTriad { id }
+    pub fn remove_triad(id: EnvId, sender: Sender<Resultant>) -> Self {
+        Self::RemoveTriad { id, sender }
     }
-    pub fn add_workload(id: WorkloadId, module: u32) -> Self {
-        Self::AddWorkload { id, module }
+    pub fn add_workload(id: WorkloadId, module: u32, sender: Sender<Resultant>) -> Self {
+        Self::AddWorkload { id, module, sender }
     }
-    pub fn remove_workload(id: WorkloadId) -> Self {
-        Self::RemoveWorkload { id }
+    pub fn remove_workload(id: WorkloadId, sender: Sender<Resultant>) -> Self {
+        Self::RemoveWorkload { id, sender }
     }
-    pub fn run_workload(triad_id: SpaceId, workload_id: WorkloadId) -> Self {
+    pub fn run_workload(env: EnvId, workload_id: WorkloadId, sender: Sender<Resultant>) -> Self {
         Self::RunWorkload {
-            triad_id,
+            env,
             workload_id,
+            sender,
         }
     }
 }

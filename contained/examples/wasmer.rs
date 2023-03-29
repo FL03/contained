@@ -1,14 +1,14 @@
 extern crate contained_sdk as contained;
 
-use contained::prelude::Shared;
+use contained::prelude::{Shared, State};
+use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use wasmer::{
-    imports, wat2wasm, Function, FunctionEnv, FunctionEnvMut, Instance, Module, Store,
+    imports, wat2wasm, Function, FunctionEnv, FunctionEnvMut, Imports, Instance, Module, Store,
     TypedFunction,
 };
 
-type SharedCounter = Shared<i32>;
-
+/// A sample Wasm module that exports a function called `increment_counter_loop`.
 static COUNTER_MODULE: &'static [u8] = br#"
 (module
     (func $get_counter (import "env" "get_counter") (result i32))
@@ -25,58 +25,34 @@ static COUNTER_MODULE: &'static [u8] = br#"
     (export "increment_counter_loop" (func $increment_f)))
 "#;
 
+pub fn counter_module() -> Cow<'static, [u8]> {
+    wat2wasm(COUNTER_MODULE).unwrap()
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    // Let's declare the Wasm module.
-    let wasm_bytes = wat2wasm(COUNTER_MODULE)?;
-    // Create a store, that holds the engine.
-    let mut store = Store::default();
-
-    println!("Compiling module...");
+    let mut app = Platform::new();
     // Compile the Wasm module.
-    let module = Module::new(&store, wasm_bytes)?;
-    // Create an environment to share data between host and guest.
-    let env = Env::new(0);
-    let func_env = env.function_env(&mut store);
-
-    let get_counter_func = Function::new_typed_with_env(&mut store, &func_env, get_counter);
-
-    let add_to_counter_func = Function::new_typed_with_env(&mut store, &func_env, add_to_counter);
-
-    let import_object = imports! {
-        "env" => {
-            "get_counter" => get_counter_func,
-            "add_to_counter" => add_to_counter_func,
-        }
-    };
-
-    println!("Instantiating module...");
-    // Let's instantiate the Wasm module.
-    let instance = Instance::new(&mut store, &module, &import_object)?;
-
-    // Here we go.
-    //
-    // The Wasm module exports a function called `increment_counter_loop`. Let's get it.
+    let module = Module::new(&app.store, counter_module())?;
+    // Create an import object.
+    let host = app.env.imports(&mut app.store);
+    // Instantiate the module.
+    let instance = Instance::new(&mut app.store, &module, &host)?;
+    println!(
+        "Original counter value: {:?}",
+        *app.env.value.lock().unwrap()
+    );
+    // Here, we get a function called `increment_counter_loop` that was exported from the wasm module
     let increment_counter_loop: TypedFunction<i32, i32> = instance
         .exports
         .get_function("increment_counter_loop")?
-        .typed(&mut store)?;
-
-    let counter_value: i32 = *env.value.lock().unwrap();
-    println!("Initial ounter value: {:?}", counter_value);
-
-    println!("Calling `increment_counter_loop` function...");
+        .typed(&mut app.store)?;
     // Let's call the `increment_counter_loop` exported function.
-    //
-    // It will loop five times thus incrementing our counter five times.
-    let result = increment_counter_loop.call(&mut store, 5)?;
-
-    let counter_value: i32 = *env.value.lock().unwrap();
-    println!("New counter value (host): {:?}", counter_value);
-    assert_eq!(counter_value, 5);
-
-    println!("New counter value (guest): {:?}", result);
-    assert_eq!(result, 5);
-
+    let result = increment_counter_loop.call(&mut app.store, 5)?;
+    // Grab the host counter value.
+    let counter_value: i32 = *app.env.value.lock().unwrap();
+    assert_eq!(counter_value, result);
+    println!("Counter value (host): {:?}", counter_value);
+    println!("Counter value (guest): {:?}", result);
     Ok(())
 }
 
@@ -91,32 +67,65 @@ fn add_to_counter(env: FunctionEnvMut<Env>, add: i32) -> i32 {
     *counter_ref
 }
 
+pub struct Platform {
+    env: Env,
+    store: Store,
+}
+
+impl Platform {
+    pub fn new() -> Self {
+        Self {
+            env: Env::default(),
+            store: Store::default(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Env {
-    pub value: Arc<Mutex<i32>>,
+    pub id: String,
+    pub state: Shared<State>,
+    pub value: Shared<i32>,
 }
 
 impl Env {
     pub fn new(value: i32) -> Self {
         Self {
+            id: scsys::prelude::BsonOid::new().to_hex(),
+            state: Arc::new(Mutex::new(State::default())),
             value: Arc::new(Mutex::new(value)),
         }
     }
     pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
         FunctionEnv::new(store, self.clone())
     }
+    pub fn imports(&self, store: &mut Store) -> Imports {
+        let env = self.function_env(store);
+        let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
+
+        let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
+
+        imports! {
+            "env" => {
+                "get_counter" => get_counter_func,
+                "add_to_counter" => add_to_counter_func,
+            }
+        }
+    }
 }
 
 impl Default for Env {
     fn default() -> Self {
-        Self {
-            value: Arc::new(Mutex::new(0)),
-        }
+        Self::new(0)
     }
 }
 
 impl From<Shared<i32>> for Env {
     fn from(value: Shared<i32>) -> Self {
-        Self { value }
+        Self {
+            id: scsys::prelude::BsonOid::new().to_hex(),
+            state: Arc::new(Mutex::new(State::default())),
+            value,
+        }
     }
 }

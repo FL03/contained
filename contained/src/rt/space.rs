@@ -8,10 +8,11 @@ use crate::core::{AsyncStateful, Shared, State};
 use crate::music::neo::triads::*;
 
 use std::sync::{Arc, Mutex};
-use wasmer::{AsStoreMut, FunctionEnv};
+use wasmer::{AsStoreMut, Engine, FunctionEnv};
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone)]
 pub struct Space {
+    driver: Shared<Engine>,
     space: Shared<Triad>,
     state: Shared<State>,
 }
@@ -19,6 +20,7 @@ pub struct Space {
 impl Space {
     pub fn new(space: Triad) -> Self {
         Self {
+            driver: Arc::new(Mutex::new(Engine::headless())),
             space: Arc::new(Mutex::new(space)),
             state: Arc::new(Mutex::new(State::Valid)),
         }

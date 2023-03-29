@@ -5,13 +5,8 @@
 */
 extern crate contained_sdk as contained;
 
-use contained::core::{
-    actors::Execute,
-    turing::{instructions::Instruction, Program, Tape},
-    Scope, State,
-};
 use contained::music::{
-    neo::triads::{tonic::Tonic, Surface, Triad, TriadClass},
+    neo::triads::{Surface, Tonic, Triad, TriadClass},
     Note,
 };
 
