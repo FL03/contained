@@ -5,7 +5,7 @@
         This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for
         the `Connection` type.
 */
-use crate::prelude::{Error, SpaceId, WorkloadId};
+use crate::prelude::{EnvId, Error, WorkloadId};
 use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +20,7 @@ pub struct Message<Id = String, Dt = String> {
 pub enum Frame {
     Empty,
     Error(Error),
-    Triad { id: SpaceId, value: i32 },
+    Triad { id: EnvId, value: i32 },
     Workload { id: WorkloadId, module: u32 },
 }
 
@@ -72,7 +72,7 @@ impl Frame {
             }
             2 => {
                 // Parse the triad
-                let (id, value) = serde_json::from_slice::<(SpaceId, i32)>(&data)?;
+                let (id, value) = serde_json::from_slice::<(EnvId, i32)>(&data)?;
 
                 Ok(Self::Triad { id, value })
             }
