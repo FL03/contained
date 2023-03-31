@@ -7,15 +7,16 @@ use super::{layer::*, Stack};
 use crate::prelude::Error;
 
 use tokio::sync::{mpsc, oneshot};
+use tokio::task::JoinHandle;
 
 pub struct Runtime {
-    command: mpsc::Receiver<Command>,
-    event: mpsc::Sender<SystemEvent>,
+    command: CommandReceiver,
+    event: SysEventSender,
     stack: Stack,
 }
 
 impl Runtime {
-    pub fn new(command: mpsc::Receiver<Command>, event: mpsc::Sender<SystemEvent>) -> Self {
+    pub fn new(command: CommandReceiver, event: SysEventSender) -> Self {
         Self {
             command,
             event,
@@ -70,7 +71,7 @@ impl Runtime {
             }
         }
     }
-    pub fn spawn(self) -> tokio::task::JoinHandle<Result<(), Error>> {
+    pub fn spawn(self) -> JoinHandle<Result<(), Error>> {
         tokio::spawn(self.run())
     }
 }

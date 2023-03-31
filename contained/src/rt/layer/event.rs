@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{SpaceId, WorkloadId};
+use crate::{EnvId, WorkloadId};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -25,11 +25,12 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum SystemEvent {
+    
     TriadAdded {
-        id: SpaceId,
+        id: EnvId,
     },
     TriadRemoved {
-        id: SpaceId,
+        id: EnvId,
     },
     WorkloadAdded {
         id: WorkloadId,
@@ -38,7 +39,7 @@ pub enum SystemEvent {
         id: WorkloadId,
     },
     WorkloadRun {
-        triad_id: SpaceId,
+        triad_id: EnvId,
         workload_id: WorkloadId,
     },
     #[default]
@@ -46,10 +47,10 @@ pub enum SystemEvent {
 }
 
 impl SystemEvent {
-    pub fn triad_added(id: SpaceId) -> Self {
+    pub fn triad_added(id: EnvId) -> Self {
         Self::TriadAdded { id }
     }
-    pub fn triad_removed(id: SpaceId) -> Self {
+    pub fn triad_removed(id: EnvId) -> Self {
         Self::TriadRemoved { id }
     }
     pub fn workload_added(id: WorkloadId) -> Self {
@@ -58,7 +59,7 @@ impl SystemEvent {
     pub fn workload_removed(id: WorkloadId) -> Self {
         Self::WorkloadRemoved { id }
     }
-    pub fn workload_run(triad_id: SpaceId, workload_id: WorkloadId) -> Self {
+    pub fn workload_run(triad_id: EnvId, workload_id: WorkloadId) -> Self {
         Self::WorkloadRun {
             triad_id,
             workload_id,

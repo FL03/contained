@@ -9,17 +9,13 @@ use crate::prelude::{EnvId, Error, WorkloadId};
 use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Message<Id = String, Dt = String> {
-    pub id: Id,
-    pub data: Dt,
-    pub timestamp: i64,
-}
+
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Frame {
-    Empty,
+    Environment { id: EnvId },
     Error(Error),
+    Null,
     Triad { id: EnvId, value: i32 },
     Workload { id: WorkloadId, module: u32 },
 }
@@ -63,26 +59,31 @@ impl Frame {
 
         // Parse the frame
         match frame_type {
-            0 => Ok(Self::Empty),
-            1 => {
-                // Parse the error
-                let error = serde_json::from_slice::<Error>(&data)?;
+            0 => {
+                // Parse the environment
+                let id = serde_json::from_slice::<EnvId>(&data)?;
 
-                Ok(Self::Error(error))
-            }
-            2 => {
+                Ok(Self::Environment { id })
+            },
+            2 => Ok(Self::Null),
+            3 => {
                 // Parse the triad
                 let (id, value) = serde_json::from_slice::<(EnvId, i32)>(&data)?;
 
                 Ok(Self::Triad { id, value })
             }
-            3 => {
+            4 => {
                 // Parse the workload
                 let (id, module) = serde_json::from_slice::<(WorkloadId, u32)>(&data)?;
 
                 Ok(Self::Workload { id, module })
             }
-            _ => Err(Error::TypeError),
+            _ => {
+                // Parse the error
+                let error = serde_json::from_slice::<Error>(&data)?;
+
+                Ok(Self::Error(error))
+            },
         }
     }
 }

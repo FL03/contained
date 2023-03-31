@@ -1,10 +1,11 @@
 extern crate contained_sdk as contained;
 
 use contained::prelude::{Shared, State};
+use scsys::prelude::BsonOid;
 use std::borrow::Cow;
 use std::sync::{Arc, Mutex};
 use wasmer::{
-    imports, wat2wasm, Function, FunctionEnv, FunctionEnvMut, Imports, Instance, Module, Store,
+    imports, wat2wasm, Engine, Function, FunctionEnv, FunctionEnvMut, Imports, Instance, Module, Store,
     TypedFunction,
 };
 
@@ -79,7 +80,14 @@ impl Platform {
             store: Store::default(),
         }
     }
+    pub fn engine(&self) -> &Engine {
+        self.store.engine()
+    }
+    pub fn store(&self) -> &Store {
+        &self.store
+    }
 }
+
 
 #[derive(Clone)]
 pub struct Env {
@@ -91,7 +99,7 @@ pub struct Env {
 impl Env {
     pub fn new(value: i32) -> Self {
         Self {
-            id: scsys::prelude::BsonOid::new().to_hex(),
+            id: BsonOid::new().to_hex(),
             state: Arc::new(Mutex::new(State::default())),
             value: Arc::new(Mutex::new(value)),
         }
@@ -123,7 +131,7 @@ impl Default for Env {
 impl From<Shared<i32>> for Env {
     fn from(value: Shared<i32>) -> Self {
         Self {
-            id: scsys::prelude::BsonOid::new().to_hex(),
+            id: BsonOid::new().to_hex(),
             state: Arc::new(Mutex::new(State::default())),
             value,
         }

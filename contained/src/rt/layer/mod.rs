@@ -3,65 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-
-pub use self::{command::*, event::*};
+pub use self::{command::*, crud::*, event::*};
 
 mod command;
+mod crud;
 mod event;
 
-use crate::{SpaceId, WorkloadId};
-use serde::{Deserialize, Serialize};
-use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use tokio::sync::mpsc;
 
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
-pub enum Action {
-    Add(Operator),
-    Get(Operator),
-    #[default]
-    Ping(Operator),
-    Remove(Operator),
-    Run(Operator),
-    Update(Operator),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Display,
-    EnumString,
-    EnumVariantNames,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    SmartDefault,
-)]
-pub enum Operator {
-    #[default]
-    Triad {
-        id: SpaceId,
-    },
-    Workload {
-        id: WorkloadId,
-    },
-}
+/// Type alias for the command receiver.
+pub type CommandReceiver = mpsc::Receiver<Command>;
+/// Type alias for the command sender.
+pub type CommandSender = mpsc::Sender<Command>;
+/// Type alias for the event receiver.
+pub type SysEventReceiver = mpsc::Receiver<SystemEvent>;
+/// Type alias for the event sender.
+pub type SysEventSender = mpsc::Sender<SystemEvent>;
