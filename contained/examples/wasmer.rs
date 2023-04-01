@@ -2,12 +2,11 @@ extern crate contained_sdk as contained;
 
 use contained::prelude::{Shared, State};
 use scsys::prelude::BsonOid;
-use std::borrow::Cow;
+use std::{borrow::Cow, collections::HashMap};
 use std::sync::{Arc, Mutex};
-use wasmer::{
-    imports, wat2wasm, Engine, Function, FunctionEnv, FunctionEnvMut, Imports, Instance, Module, Store,
-    TypedFunction,
-};
+use tokio::sync::mpsc;
+use wasmer::{imports, wat2wasm, Engine, Imports, Instance, Module, Store};
+use wasmer::{Function, FunctionEnv, FunctionEnvMut, TypedFunction};
 
 /// A sample Wasm module that exports a function called `increment_counter_loop`.
 static COUNTER_MODULE: &'static [u8] = br#"
@@ -30,30 +29,20 @@ pub fn counter_module() -> Cow<'static, [u8]> {
     wat2wasm(COUNTER_MODULE).unwrap()
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let mut app = Platform::new();
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let num_instances = 3;
+
+    let mut store = Store::default();
     // Compile the Wasm module.
-    let module = Module::new(&app.store, counter_module())?;
-    // Create an import object.
-    let host = app.env.imports(&mut app.store);
-    // Instantiate the module.
-    let instance = Instance::new(&mut app.store, &module, &host)?;
-    println!(
-        "Original counter value: {:?}",
-        *app.env.value.lock().unwrap()
-    );
-    // Here, we get a function called `increment_counter_loop` that was exported from the wasm module
-    let increment_counter_loop: TypedFunction<i32, i32> = instance
-        .exports
-        .get_function("increment_counter_loop")?
-        .typed(&mut app.store)?;
-    // Let's call the `increment_counter_loop` exported function.
-    let result = increment_counter_loop.call(&mut app.store, 5)?;
-    // Grab the host counter value.
-    let counter_value: i32 = *app.env.value.lock().unwrap();
-    assert_eq!(counter_value, result);
-    println!("Counter value (host): {:?}", counter_value);
-    println!("Counter value (guest): {:?}", result);
+    let module = Module::new(&store, counter_module())?;
+
+    let mut runtime = Runtime::new();
+    runtime.add_env("env-1".to_string(), Env::new(0));
+    runtime.add_workload("counter_module".to_string(), module.clone());
+
+    let res = runtime.run("env-1".to_string(), "counter_module".to_string())?;
+    assert_eq!(res, 5);
     Ok(())
 }
 
@@ -68,25 +57,79 @@ fn add_to_counter(env: FunctionEnvMut<Env>, add: i32) -> i32 {
     *counter_ref
 }
 
-pub struct Platform {
-    env: Env,
-    store: Store,
+pub struct Stack {
+    pub envs: HashMap<String, Env>,
+    pub workloads: HashMap<String, Module>,
 }
 
-impl Platform {
+impl Stack {
     pub fn new() -> Self {
         Self {
-            env: Env::default(),
+            envs: HashMap::new(),
+            workloads: HashMap::new(),
+        }
+    }
+    pub fn add_env(&mut self, id: String, env: Env) {
+        self.envs.insert(id, env);
+    }
+    pub fn add_workload(&mut self, id: String, workload: Module) {
+        self.workloads
+            .insert(id, workload);
+    }
+}
+
+pub struct Executor {
+    pub id: String,
+    pub env: Env,
+    pub workload: Module,
+}
+
+impl Executor {
+    pub fn new(env: Env, workload: Module) -> Self {
+        Self {
+            id: BsonOid::new().to_hex(),
+            env,
+            workload,
+        }
+    }
+    pub fn instance(&self, store: &mut Store) -> Instance {
+        let host = self.env.imports(store);
+        Instance::new(store, &self.workload, &host).expect("Failed to instantiate module")
+    }
+}
+
+pub struct Runtime {
+    pub stack: Stack,
+    pub store: Store,
+}
+
+impl Runtime {
+    pub fn new() -> Self {
+        Self {
+            stack: Stack::new(),
             store: Store::default(),
         }
     }
-    pub fn engine(&self) -> &Engine {
-        self.store.engine()
+    pub fn add_env(&mut self, id: String, env: Env) {
+        self.stack.envs.insert(id, env);
     }
-    pub fn store(&self) -> &Store {
-        &self.store
+    pub fn add_workload(&mut self, id: String, workload: Module) {
+        self.stack.workloads.insert(id, workload);
+    }
+    pub fn run(&mut self, space: String, workload: String) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
+        let env = self.stack.envs.get(&space).unwrap();
+        let workload = self.stack.workloads.get(&workload).unwrap();
+        let exec = Executor::new(env.clone(), workload.clone());
+        let increment_counter_loop: TypedFunction<i32, i32> = exec.instance(&mut self.store)
+            .exports
+            .get_function("increment_counter_loop")?
+            .typed(&mut self.store)?;
+        let result = increment_counter_loop.call(&mut self.store, 5)?;
+        println!("Counter value (host): {:?}", result);
+        Ok(result)
     }
 }
+
 
 
 #[derive(Clone)]

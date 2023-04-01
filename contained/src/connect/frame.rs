@@ -9,8 +9,6 @@ use crate::prelude::{EnvId, Error, WorkloadId};
 use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
-
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Frame {
     Environment { id: EnvId },

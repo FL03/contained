@@ -69,9 +69,6 @@ mod tests {
     use super::*;
     use crate::neo::triads::*;
 
-    // Test alphabet; allows programs to be written leveraging the complete 12 note alphabet
-    const TEST_ALPHABET: [i64; 12] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-
     #[test]
     fn test_tonic() {
         // Initialize a new triad

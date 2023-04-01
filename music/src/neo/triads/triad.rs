@@ -19,128 +19,6 @@ use decanter::prelude::{hasher, Hashable, H256};
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub enum Triads {
-    Augmented([Note; 3]),
-    Diminished([Note; 3]),
-    Major([Note; 3]),
-    Minor([Note; 3]),
-}
-
-impl Triads {
-    pub fn new(root: Note, class: TriadClass) -> Self {
-        let (a, b, c): (Thirds, Thirds, Fifths) = class.into();
-        let notes = [root.clone(), a + root.clone(), c + root];
-        match a {
-            Thirds::Major => match b {
-                Thirds::Major => Self::Augmented(notes),
-                Thirds::Minor => Self::Major(notes),
-            },
-            Thirds::Minor => match b {
-                Thirds::Major => Self::Minor(notes),
-                Thirds::Minor => Self::Diminished(notes),
-            },
-        }
-    }
-    pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
-        let notes = [root.clone(), a + root.clone(), b + (a + root)];
-        match a {
-            Thirds::Major => match b {
-                Thirds::Major => Self::Augmented(notes),
-                Thirds::Minor => Self::Major(notes),
-            },
-            Thirds::Minor => match b {
-                Thirds::Major => Self::Minor(notes),
-                Thirds::Minor => Self::Diminished(notes),
-            },
-        }
-    }
-}
-
-impl Transform for Triads {
-    type Dirac = LPR;
-
-    fn transform(&mut self, dirac: Self::Dirac) -> Self {
-        // let mut triad = self.clone();
-        dirac.dirac(&mut self.clone())
-    }
-}
-
-impl AsRef<[Note; 3]> for Triads {
-    fn as_ref(&self) -> &[Note; 3] {
-        match self {
-            Triads::Augmented(notes) => notes,
-            Triads::Diminished(notes) => notes,
-            Triads::Major(notes) => notes,
-            Triads::Minor(notes) => notes,
-        }
-    }
-}
-
-impl AsMut<[Note; 3]> for Triads {
-    fn as_mut(&mut self) -> &mut [Note; 3] {
-        match self {
-            Triads::Augmented(notes) => notes,
-            Triads::Diminished(notes) => notes,
-            Triads::Major(notes) => notes,
-            Triads::Minor(notes) => notes,
-        }
-    }
-}
-
-impl Triadic for Triads {
-    fn class(&self) -> TriadClass {
-        match self {
-            Triads::Augmented(_) => TriadClass::Augmented,
-            Triads::Diminished(_) => TriadClass::Diminished,
-            Triads::Major(_) => TriadClass::Major,
-            Triads::Minor(_) => TriadClass::Minor,
-        }
-    }
-
-    fn triad(&self) -> &[Note; 3] {
-        self.as_ref()
-    }
-
-    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
-        if let Ok(t) = Self::try_from(triad.clone()) {
-            *self = t;
-            return Ok(self);
-        }
-
-        Err(MusicError::IntervalError(
-            "The given notes failed to contain the necessary relationships...".into(),
-        ))
-    }
-}
-
-impl TryFrom<[Note; 3]> for Triads {
-    type Error = MusicError;
-
-    fn try_from(data: [Note; 3]) -> Result<Self, Self::Error> {
-        for (a, b, c) in data.into_iter().circular_tuple_windows() {
-            if let Ok(class) = TriadClass::try_from((a.clone(), b.clone(), c.clone())) {
-                return Ok(Self::new(a.clone(), class));
-            }
-        }
-        Err(MusicError::IntervalError(
-            "Failed to find the required relationships within the given notes...".into(),
-        ))
-    }
-}
-
-impl TryFrom<[i64; 3]> for Triads {
-    type Error = MusicError;
-
-    fn try_from(data: [i64; 3]) -> Result<Self, Self::Error> {
-        Self::try_from([
-            Note::from(data[0]),
-            Note::from(data[1]),
-            Note::from(data[2]),
-        ])
-    }
-}
-
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
@@ -209,7 +87,6 @@ impl Triadic for Triad {
     }
     // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
     fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
-        let class = self.class();
         if let Ok(t) = Self::try_from(triad.clone()) {
             *self = t;
             return Ok(self);

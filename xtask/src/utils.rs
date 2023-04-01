@@ -56,3 +56,28 @@ pub fn project_root() -> PathBuf {
         .unwrap()
         .to_path_buf()
 }
+
+pub struct Cargo {
+    queue: Vec<(String, Vec<String>)>,
+}
+
+impl Cargo {
+    pub fn new() -> Self {
+        Self {
+            queue: Vec::new(),
+        }
+    }
+    pub fn add(&mut self, command: String, args: Vec<String>) {
+        self.queue.push((command, args));
+    }
+    pub fn run(&self) -> Result<()> {
+        for (cmd, args) in self.queue.clone() {
+            let mut command = Command::new("cargo");
+            command.current_dir(project_root());
+            command.arg(cmd);
+            command.args(args);
+            command.status()?;
+        }
+        Ok(())
+    }
+}

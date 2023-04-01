@@ -119,7 +119,7 @@ mod tests {
         let a = Triad::new(0.into(), TriadClass::Major);
         assert_eq!(
             a.clone().as_ref(),
-            Triads::Major([0.into(), 4.into(), 7.into()]).as_ref()
+            &[0.into(), 4.into(), 7.into()]
         );
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));

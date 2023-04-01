@@ -3,7 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::{build::*, setup::*};
+pub use self::{auto::*, build::*, setup::*};
 
-pub(crate) mod build;
-pub(crate) mod setup;
+mod auto;
+mod build;
+mod setup;

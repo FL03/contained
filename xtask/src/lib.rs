@@ -53,7 +53,10 @@ impl Xtask {
             match opts {
                 Opts::Auto => {
                     tracing::info!("Initializing the automatic pipeline");
-                    auto()?;
+                    command("cargo", vec!["fmt", "--all"])?;
+                    command("cargo", vec!["clippy", "--all", "--allow-dirty", "--fix"])?;
+                    command("cargo", vec!["build", "--workspace"])?;
+                    command("cargo", vec!["test", "--all", "--allow-dirty"])?;
                 },
                 Opts::Build(_build) => {
                     tracing::info!("Building the target...");
