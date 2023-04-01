@@ -3,10 +3,14 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: Generically, a surface describes a type of topological compute surface. Here we implement a surface for triads, which are the fundamental unit of computation in contained.
 */
-use super::Triad;
+use super::*;
+use crate::neo::LPR;
 use contained_core::{AsyncStateful, Shared, State};
 use decanter::prelude::{Hashable, H256};
 use std::sync::{Arc, Mutex};
+use wasmer::{FunctionEnv, Imports, Store, imports};
+
+
 
 #[derive(Clone, Debug, Default, Hashable)]
 pub struct Surface {
@@ -23,8 +27,24 @@ impl Surface {
             triad: Arc::new(Mutex::new(triad)),
         }
     }
+    pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
+        FunctionEnv::new(store, self.clone())
+    }
     pub fn id(&self) -> H256 {
         self.id.clone()
+    }
+    pub fn imports(&self, store: &mut Store) -> Imports {
+        let env = self.function_env(store);
+
+        imports! {
+            "env" => {
+            }
+        }
+    }
+    pub fn transform(&mut self, lpr: LPR) {
+        self.state.lock().unwrap().invalidate();
+        self.triad.lock().unwrap().transform(lpr);
+        self.state.lock().unwrap().validate();
     }
     pub fn triad(&self) -> Shared<Triad> {
         self.triad.clone()

@@ -34,6 +34,7 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 tokio.workspace = true
+tracing.workspace = true
 wasmer.workspace = true
 
 [dev-dependencies]

@@ -18,10 +18,16 @@ mod cluster;
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
-
+use decanter::prelude::{Hashable, H256, Iter};
 use std::sync::{Arc, Mutex};
 
-pub trait Link {
+pub trait Link: Hashable {
+    /// [Link::bridge] is used to synchronize the activties of two different triads; required to seperated by a single LPR transformation
+    fn bridge(&self, with: impl Hashable) -> H256 {
+        let mut iter = Iter::new();
+        iter.extend(vec![self.hash(), with.hash()]);
+        iter.hash()
+    }
     fn interval(&self) -> Interval;
 }
 

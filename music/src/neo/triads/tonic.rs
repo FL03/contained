@@ -7,58 +7,54 @@
         as the environment in-which a WASM machine is operating.
 */
 use super::Surface;
-
+use crate::neo::triads::LPR;
+use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
-use wasmer::{Module, Store};
+use tokio::sync::mpsc;
+use wasmer::{Instance, Module, Store};
 
 #[derive(Debug)]
 pub struct Tonic {
     memory: Store,
-    program: Module,
+
+    program: mpsc::Receiver<Module>,
     surface: Arc<Mutex<Surface>>,
+    transform: mpsc::Receiver<LPR>
 }
 
 impl Tonic {
-    pub fn new(program: Module, surface: Surface) -> Self {
+    pub fn new(surface: Surface) -> Self {
         Self {
             memory: Store::default(),
-            program,
+            program: mpsc::channel(9).1,
             surface: Arc::new(Mutex::new(surface)),
+            transform: mpsc::channel(9).1,
         }
     }
-    // pub fn run(&mut self) -> MusicResult<()> {
-    //     while self.surface.lock().unwrap().state().is_valid() {
-    //         if self
-    //             .surface
-    //             .lock()
-    //             .unwrap()
-    //             .triad()
-    //             .contains(&self.current())
-    //         {
+    pub async fn run(mut self) -> AsyncResult {
+        Ok(loop {
+            tokio::select! {
+                Some(module) = self.program.recv() => {
+                    let host = self.surface.lock().unwrap().imports(&mut self.memory);
+                    let instance = Instance::new(&mut self.memory, &module, &host).expect("Failed to instantiate module");
+                    let run = instance.exports.get_function("run")?;
 
-    //         } else {
-    //             // Invalidate the triad
-    //             self.surface.lock().unwrap().state().invalidate();
-    //             // Find a path to the current note
-    //             let path = self
-    //                 .surface
-    //                 .lock()
-    //                 .unwrap()
-    //                 .triad()
-    //                 .pathfinder(self.current())
-    //                 .find();
-    //             // If a path is found, walk it
-    //             if let Some(path) = path {
-    //                 self.surface.lock().unwrap().triad().walk(path);
-    //                 // Validate the triad
-    //                 self.surface.lock().unwrap().state().validate();
-    //             } else {
-    //                 return Err("No path found".into());
-    //             }
-    //         }
-    //     }
-    //     Ok(())
-    // }
+                    let result = run.call(&mut self.memory, &[])?;
+                    println!("{:?}", result);
+                }
+                Some(transform) = self.transform.recv() => {
+                    self.surface.lock().unwrap().transform(transform);
+                }
+                _ = tokio::signal::ctrl_c() => {
+                    break;
+                }
+                else => tracing::warn!("Tonic has no more work to do"),
+            }
+        })
+    }
+    pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
+        tokio::spawn( self.run() )
+    }
     pub fn surface(&self) -> &Arc<Mutex<Surface>> {
         &self.surface
     }
@@ -75,5 +71,9 @@ mod tests {
         let triad = Triad::new(0.into(), TriadClass::Major);
         // Initialize a new, stateful instance
         let instance = Surface::new(triad.clone());
+
+        // Initialize a new tonic
+        let tonic = Tonic::new(instance);
+        
     }
 }

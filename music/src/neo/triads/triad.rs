@@ -48,8 +48,8 @@ impl Triad {
         Surface::new(self.clone())
     }
 
-    pub fn tonic(&self, module: wasmer::Module) -> Tonic {
-        Tonic::new(module, self.instance())
+    pub fn tonic(&self) -> Tonic {
+        Tonic::new(self.instance())
     }
 
     pub fn program(&self) -> Program<Note> {
