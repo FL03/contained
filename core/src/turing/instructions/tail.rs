@@ -7,11 +7,13 @@
 */
 use super::Move;
 use crate::{State, Stateful, Symbolic};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Tail<S: Symbolic> {
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+)]
+pub struct Tail<S: Symbolic = String> {
     state: State,
     symbol: S,
     action: Move,
@@ -33,12 +35,6 @@ impl<S: Symbolic> Tail<S> {
     }
     pub fn symbol(&self) -> S {
         self.symbol.clone()
-    }
-}
-
-impl<S: Symbolic> Hashable for Tail<S> {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

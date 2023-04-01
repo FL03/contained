@@ -5,10 +5,12 @@
 */
 use super::Triad;
 use contained_core::{State, Stateful};
+use scsys::prelude::BsonOid;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Surface {
+    id: String,
     state: State,
     triad: Triad,
 }
@@ -16,6 +18,7 @@ pub struct Surface {
 impl Surface {
     pub fn new(triad: Triad) -> Self {
         Self {
+            id: BsonOid::new().to_hex(),
             state: State::default(),
             triad,
         }

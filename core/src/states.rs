@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use crate::Shared;
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -49,6 +49,7 @@ impl StateSpec for i64 {}
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -77,12 +78,6 @@ impl State {
     }
     pub fn is_valid(&self) -> bool {
         *self == Self::Valid
-    }
-}
-
-impl Hashable for State {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

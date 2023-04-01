@@ -9,7 +9,7 @@
             Diminished (6)
 */
 use crate::{BoxedError, Gradient, Note};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -24,6 +24,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -44,12 +45,6 @@ impl Fourths {
             5 => Ok(Fourths::Perfect),
             _ => Err("Invalid interval".into()),
         }
-    }
-}
-
-impl Hashable for Fourths {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

@@ -16,6 +16,6 @@ pub type CommandReceiver = mpsc::Receiver<Command>;
 /// Type alias for the command sender.
 pub type CommandSender = mpsc::Sender<Command>;
 /// Type alias for the event receiver.
-pub type SysEventReceiver = mpsc::Receiver<SystemEvent>;
+pub type SysEventReceiver = mpsc::Receiver<ClusterEvent>;
 /// Type alias for the event sender.
-pub type SysEventSender = mpsc::Sender<SystemEvent>;
+pub type SysEventSender = mpsc::Sender<ClusterEvent>;

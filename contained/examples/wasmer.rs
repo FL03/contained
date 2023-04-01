@@ -2,8 +2,8 @@ extern crate contained_sdk as contained;
 
 use contained::prelude::{Shared, State};
 use scsys::prelude::BsonOid;
-use std::{borrow::Cow, collections::HashMap};
 use std::sync::{Arc, Mutex};
+use std::{borrow::Cow, collections::HashMap};
 use wasmer::{imports, wat2wasm, Imports, Instance, Module, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut, TypedFunction};
 
@@ -38,8 +38,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     runtime.add_env("env-1".to_string(), Env::new(0));
     runtime.add_env("env-2".to_string(), Env::new(1));
     runtime.add_workload("counter_module".to_string(), module.clone());
-    assert_eq!(runtime.run("env-1".to_string(), "counter_module".to_string())?, 5);
-    assert_eq!(runtime.run("env-2".to_string(), "counter_module".to_string())?, 6);
+    assert_eq!(
+        runtime.run("env-1".to_string(), "counter_module".to_string())?,
+        5
+    );
+    assert_eq!(
+        runtime.run("env-2".to_string(), "counter_module".to_string())?,
+        6
+    );
     Ok(())
 }
 
@@ -70,21 +76,18 @@ impl Stack {
         self.envs.insert(id, env);
     }
     pub fn add_workload(&mut self, id: String, workload: Module) {
-        self.workloads
-            .insert(id, workload);
+        self.workloads.insert(id, workload);
     }
 }
 
-pub struct Executor {
-    pub id: String,
+pub struct Driver {
     pub env: Env,
     pub workload: Module,
 }
 
-impl Executor {
+impl Driver {
     pub fn new(env: Env, workload: Module) -> Self {
         Self {
-            id: BsonOid::new().to_hex(),
             env,
             workload,
         }
@@ -113,11 +116,23 @@ impl Runtime {
     pub fn add_workload(&mut self, id: String, workload: Module) {
         self.stack.workloads.insert(id, workload);
     }
-    pub fn run(&mut self, space: String, workload: String) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
-        let env = self.stack.envs.get(&space).unwrap();
-        let workload = self.stack.workloads.get(&workload).unwrap();
-        let exec = Executor::new(env.clone(), workload.clone());
-        let increment_counter_loop: TypedFunction<i32, i32> = exec.instance(&mut self.store)
+    pub fn get_env(&self, id: String) -> Option<Env> {
+        self.stack.envs.get(&id).cloned()
+    }
+    pub fn get_workload(&self, id: String) -> Option<Module> {
+        self.stack.workloads.get(&id).cloned()
+    }
+
+    pub fn run(
+        &mut self,
+        space: String,
+        workload: String,
+    ) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
+        let env = self.get_env(space).unwrap();
+        let workload = self.get_workload(workload).unwrap();
+        let exec = Driver::new(env.clone(), workload.clone());
+        let increment_counter_loop: TypedFunction<i32, i32> = exec
+            .instance(&mut self.store)
             .exports
             .get_function("increment_counter_loop")?
             .typed(&mut self.store)?;
@@ -126,8 +141,6 @@ impl Runtime {
         Ok(result)
     }
 }
-
-
 
 #[derive(Clone)]
 pub struct Env {

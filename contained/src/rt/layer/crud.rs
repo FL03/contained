@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
-
 #[derive(
     Clone,
     Copy,
@@ -32,7 +31,7 @@ pub enum CRUD {
     #[default]
     Read,
     Update,
-    Delete
+    Delete,
 }
 
 #[derive(
@@ -94,7 +93,7 @@ pub struct Message<T> {
     id: String,
     method: CRUD,
     payload: Option<T>,
-    ts: i64
+    ts: i64,
 }
 
 impl<T> Message<T> {
@@ -105,7 +104,7 @@ impl<T> Message<T> {
             id,
             method,
             payload,
-            ts
+            ts,
         }
     }
     pub fn id(&self) -> &str {

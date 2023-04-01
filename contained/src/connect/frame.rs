@@ -62,7 +62,7 @@ impl Frame {
                 let id = serde_json::from_slice::<EnvId>(&data)?;
 
                 Ok(Self::Environment { id })
-            },
+            }
             2 => Ok(Self::Null),
             3 => {
                 // Parse the triad
@@ -81,7 +81,7 @@ impl Frame {
                 let error = serde_json::from_slice::<Error>(&data)?;
 
                 Ok(Self::Error(error))
-            },
+            }
         }
     }
 }

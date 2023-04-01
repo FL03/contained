@@ -3,15 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{errors::*, primitives::*, specs::*, states::*, utils::*};
+pub use self::{errors::*, primitives::*, specs::*, utils::*};
 
 mod errors;
 mod primitives;
 mod specs;
-mod states;
 mod utils;
 
-pub mod actors;
-pub mod compute;
-pub mod delay;
-pub mod turing;
+pub mod events;
+pub mod peers;
+pub mod subnet;

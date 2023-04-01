@@ -6,6 +6,7 @@
 use super::{layer::*, Stack};
 use crate::prelude::Error;
 
+use crate::music::neo::tonnetz::Cluster;
 use tokio::sync::{mpsc, oneshot};
 use tokio::task::JoinHandle;
 
@@ -23,42 +24,13 @@ impl Runtime {
             stack: Stack::new(),
         }
     }
-    pub async fn handle_command(&self, request: Command) -> Result<SystemEvent, Error> {
+    pub async fn handle_command(&self, request: Command) -> Result<ClusterEvent, Error> {
         match request {
-            Command::AddTriad { id, .. } => {
-                let sender = oneshot::channel().0;
+            Command::Register { id, sender, value } => {
                 self.stack.envs.write().unwrap().insert(id.clone(), sender);
-                Ok(SystemEvent::TriadAdded { id })
+                Ok(ClusterEvent::TriadAdded { id })
             }
-            Command::RemoveTriad { id, .. } => {
-                self.stack.envs.write().unwrap().remove(&id);
-                Ok(SystemEvent::TriadRemoved { id })
-            }
-            Command::AddWorkload { id, .. } => {
-                // self.state.workloads.write().unwrap().insert(id.clone(), Workload::new(module, Module::new(vec![])));
-                Ok(SystemEvent::WorkloadAdded { id })
-            }
-            Command::RemoveWorkload { id, .. } => {
-                self.stack.workloads.write().unwrap().remove(&id);
-                Ok(SystemEvent::WorkloadRemoved { id })
-            }
-            Command::RunWorkload {
-                env, workload_id, ..
-            } => {
-                let workload = self
-                    .stack
-                    .workloads
-                    .read()
-                    .unwrap()
-                    .get(&workload_id)
-                    .unwrap();
-                let triad = self.stack.envs.read().unwrap().get(&env).unwrap();
-                Ok(SystemEvent::WorkloadRun {
-                    triad_id: env,
-                    workload_id,
-                })
-            }
-            _ => Ok(SystemEvent::None),
+            _ => Ok(ClusterEvent::None),
         }
     }
     pub async fn run(mut self) -> Result<(), Error> {
@@ -67,6 +39,8 @@ impl Runtime {
                 Some(req) = self.command.recv() => {
                     let res = self.handle_command(req).await?;
                     self.event.send(res).await.expect("");
+                },
+                else => {
                 }
             }
         }

@@ -8,49 +8,49 @@ use tokio::sync::oneshot::Sender;
 
 #[derive(Debug)]
 pub enum Command {
-    AddTriad {
-        id: EnvId,
-        value: u32,
-        sender: Sender<Resultant>,
-    },
-    RemoveTriad {
-        id: EnvId,
-        sender: Sender<Resultant>,
-    },
-    AddWorkload {
+    Add {
         id: WorkloadId,
         module: u32,
         sender: Sender<Resultant>,
     },
-    RemoveWorkload {
+    Register {
+        id: EnvId,
+        value: u32,
+        sender: Sender<Resultant>,
+    },
+    Remove {
         id: WorkloadId,
         sender: Sender<Resultant>,
     },
-    RunWorkload {
+    Run {
         env: EnvId,
         workload_id: WorkloadId,
+        sender: Sender<Resultant>,
+    },
+    Unregister {
+        id: EnvId,
         sender: Sender<Resultant>,
     },
 }
 
 impl Command {
-    pub fn add_triad(id: EnvId, value: u32, sender: Sender<Resultant>) -> Self {
-        Self::AddTriad { id, value, sender }
-    }
-    pub fn remove_triad(id: EnvId, sender: Sender<Resultant>) -> Self {
-        Self::RemoveTriad { id, sender }
-    }
     pub fn add_workload(id: WorkloadId, module: u32, sender: Sender<Resultant>) -> Self {
-        Self::AddWorkload { id, module, sender }
+        Self::Add { id, module, sender }
+    }
+    pub fn register(id: EnvId, value: u32, sender: Sender<Resultant>) -> Self {
+        Self::Register { id, value, sender }
     }
     pub fn remove_workload(id: WorkloadId, sender: Sender<Resultant>) -> Self {
-        Self::RemoveWorkload { id, sender }
+        Self::Remove { id, sender }
     }
-    pub fn run_workload(env: EnvId, workload_id: WorkloadId, sender: Sender<Resultant>) -> Self {
-        Self::RunWorkload {
+    pub fn run(env: EnvId, workload_id: WorkloadId, sender: Sender<Resultant>) -> Self {
+        Self::Run {
             env,
             workload_id,
             sender,
         }
+    }
+    pub fn unregister(id: EnvId, sender: Sender<Resultant>) -> Self {
+        Self::Unregister { id, sender }
     }
 }

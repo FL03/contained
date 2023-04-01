@@ -36,6 +36,15 @@ impl Backend {
                         .run_workload(space.unwrap_or_else(|| "origin".to_string()), workload)
                         .await?;
                 }
+                Opts::Network { detached, up } => {
+                    if up {
+                        if detached {
+                            Runtime::default().spawn();
+                        } else {
+                            let _ = Runtime::default().spawn().await.expect("");
+                        }
+                    }
+                }
                 Opts::Setup { .. } => {}
                 Opts::Start { .. } => {}
             }
@@ -58,7 +67,6 @@ impl Backend {
         self
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<Resultant> {
-        Runtime::default().spawn();
         tokio::spawn(self.run())
     }
 }

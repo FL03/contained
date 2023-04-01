@@ -21,7 +21,7 @@ impl Client {
 
     pub async fn add_triad(&mut self, id: SpaceId, value: u32) -> Result<(), Error> {
         self.cmd
-            .send(Command::add_triad(id, value, oneshot::channel().0))
+            .send(Command::register(id, value, oneshot::channel().0))
             .await?;
         Ok(())
     }
@@ -35,7 +35,7 @@ impl Client {
 
     pub async fn remove_triad(&mut self, id: SpaceId) -> Result<(), Error> {
         self.cmd
-            .send(Command::remove_triad(id, oneshot::channel().0))
+            .send(Command::unregister(id, oneshot::channel().0))
             .await?;
         Ok(())
     }
@@ -53,11 +53,7 @@ impl Client {
         workload_id: WorkloadId,
     ) -> Result<(), Error> {
         self.cmd
-            .send(Command::run_workload(
-                triad_id,
-                workload_id,
-                oneshot::channel().0,
-            ))
+            .send(Command::run(triad_id, workload_id, oneshot::channel().0))
             .await?;
         Ok(())
     }

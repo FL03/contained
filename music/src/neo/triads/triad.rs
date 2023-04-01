@@ -15,12 +15,14 @@ use crate::{
 };
 use algae::graph::{Graph, UndirectedGraph};
 use contained_core::{turing::Program, Alphabet, State};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct Triad {
     class: TriadClass,
     notes: [Note; 3],
@@ -95,12 +97,6 @@ impl Triadic for Triad {
         Err(MusicError::IntervalError(
             "The given notes failed to contain the necessary relationships...".into(),
         ))
-    }
-}
-
-impl Hashable for Triad {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

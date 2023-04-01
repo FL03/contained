@@ -8,11 +8,13 @@ use crate::{
     turing::{Driver, Symbolic},
     Scope, State, Stateful,
 };
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub struct Head<S: Symbolic> {
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+)]
+pub struct Head<S: Symbolic = String> {
     state: State,
     symbol: S,
 }
@@ -23,12 +25,6 @@ impl<S: Symbolic> Head<S> {
     }
     pub fn symbol(&self) -> S {
         self.symbol.clone()
-    }
-}
-
-impl<S: Symbolic> Hashable for Head<S> {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

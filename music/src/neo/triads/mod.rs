@@ -117,10 +117,7 @@ mod tests {
     #[test]
     fn test_triad() {
         let a = Triad::new(0.into(), TriadClass::Major);
-        assert_eq!(
-            a.clone().as_ref(),
-            &[0.into(), 4.into(), 7.into()]
-        );
+        assert_eq!(a.clone().as_ref(), &[0.into(), 4.into(), 7.into()]);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));

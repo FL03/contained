@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use clap::Subcommand;
+use clap::{ArgAction, Subcommand};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -31,6 +31,12 @@ pub enum Opts {
         space: Option<String>,
         #[clap(long, short)]
         workload: String,
+    },
+    Network {
+        #[arg(action = ArgAction::SetTrue, long, short)]
+        detached: bool,
+        #[arg(action = ArgAction::SetTrue, long, short)]
+        up: bool,
     },
     Setup {
         #[clap(long, short)]

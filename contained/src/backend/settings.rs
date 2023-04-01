@@ -4,12 +4,22 @@
     Description: ... Summary ...
 */
 use config::{Config, Environment};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use scsys::prelude::{try_collect_config_files, ConfigResult, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 
 #[derive(
-    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
 )]
 pub struct Logger {
     pub level: String,
@@ -45,12 +55,6 @@ impl Default for Logger {
     }
 }
 
-impl Hashable for Logger {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
-    }
-}
-
 impl From<tracing::Level> for Logger {
     fn from(level: tracing::Level) -> Self {
         Self {
@@ -60,7 +64,17 @@ impl From<tracing::Level> for Logger {
 }
 
 #[derive(
-    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
 )]
 pub struct Settings {
     pub logger: Logger,
@@ -103,12 +117,6 @@ impl Settings {
 
     pub fn logger(&self) -> &Logger {
         &self.logger
-    }
-}
-
-impl Hashable for Settings {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

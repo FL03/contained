@@ -60,6 +60,7 @@ jobs:
         package:
           - contained-core
           - contained-music
+          - contained-net
     steps:
       - uses: actions/checkout@v3
       - name: Publish (${{matrix.package}})

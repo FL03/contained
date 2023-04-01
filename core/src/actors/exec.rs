@@ -106,7 +106,6 @@ pub trait Execute<S: Symbolic>:
     fn scope_mut(&mut self) -> &mut Self::Driver;
 }
 
-
 /// [Executable] describes a program that can be executed with an external driver.
 pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruction<S>> {
     type Driver: Scope<S>;
