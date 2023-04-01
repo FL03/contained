@@ -4,8 +4,7 @@ use contained::prelude::{Shared, State};
 use scsys::prelude::BsonOid;
 use std::{borrow::Cow, collections::HashMap};
 use std::sync::{Arc, Mutex};
-use tokio::sync::mpsc;
-use wasmer::{imports, wat2wasm, Engine, Imports, Instance, Module, Store};
+use wasmer::{imports, wat2wasm, Imports, Instance, Module, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut, TypedFunction};
 
 /// A sample Wasm module that exports a function called `increment_counter_loop`.
@@ -31,18 +30,16 @@ pub fn counter_module() -> Cow<'static, [u8]> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let num_instances = 3;
-
-    let mut store = Store::default();
+    let store = Store::default();
     // Compile the Wasm module.
     let module = Module::new(&store, counter_module())?;
 
     let mut runtime = Runtime::new();
     runtime.add_env("env-1".to_string(), Env::new(0));
+    runtime.add_env("env-2".to_string(), Env::new(1));
     runtime.add_workload("counter_module".to_string(), module.clone());
-
-    let res = runtime.run("env-1".to_string(), "counter_module".to_string())?;
-    assert_eq!(res, 5);
+    assert_eq!(runtime.run("env-1".to_string(), "counter_module".to_string())?, 5);
+    assert_eq!(runtime.run("env-2".to_string(), "counter_module".to_string())?, 6);
     Ok(())
 }
 
