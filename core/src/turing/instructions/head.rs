@@ -46,7 +46,7 @@ impl<S: Symbolic> std::fmt::Display for Head<S> {
 
 impl<S: Symbolic> From<Driver<S>> for Head<S> {
     fn from(value: Driver<S>) -> Self {
-        Self::new(value.state(), value.current().clone())
+        Self::new(value.state(), value.current())
     }
 }
 

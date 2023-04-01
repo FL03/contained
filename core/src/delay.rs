@@ -54,7 +54,7 @@ impl Delay {
     }
     /// Returns the `Instant` at which the delay will complete.
     pub fn when(&self) -> Instant {
-        self.when.clone()
+        self.when
     }
 }
 
@@ -144,8 +144,8 @@ mod tests {
         let start = Instant::now();
         let dur = Duration::new(1, 0);
 
-        let mut delay = Delay::new(start.clone());
-        delay.increase(dur.clone());
+        let mut delay = Delay::new(start);
+        delay.increase(dur);
         assert_eq!(delay.when, start + dur);
     }
 }

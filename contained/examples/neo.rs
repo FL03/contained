@@ -6,8 +6,7 @@
 extern crate contained_sdk as contained;
 
 use contained::music::{
-    neo::triads::{Surface, Tonic, Triad, TriadClass},
-    Note,
+    neo::triads::{Surface, Triad, TriadClass},
 };
 
 // Test alphabet; allows programs to be written leveraging the complete 12 note alphabet
@@ -17,5 +16,5 @@ fn main() {
     // Initialize a new triad
     let triad = Triad::new(0.into(), TriadClass::Major);
     // Initialize a new, stateful instance
-    let instance = Surface::new(triad.clone());
+    let _instance = Surface::new(triad);
 }

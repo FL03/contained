@@ -3,7 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
-use crate::{ArrayLike, Insert, Iterable, Symbolic};
+use super::Symbolic;
+use crate::{ArrayLike, Insert, Iterable};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 

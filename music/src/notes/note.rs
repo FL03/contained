@@ -11,7 +11,7 @@
 use super::{Pitch, PitchClass, ASPN};
 use crate::{intervals::Interval, Gradient};
 use algae::graph::cmp::Node;
-use contained_core::Symbolic;
+use contained_core::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])

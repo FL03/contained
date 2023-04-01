@@ -4,7 +4,8 @@
     Description: ... summary ...
 */
 use super::instructions::{Head, Instruction};
-use crate::{Alphabet, Include, Insert, State, Stateful, Symbolic};
+use super::{Alphabet, Symbolic};
+use crate::{Include, Insert, State, Stateful};
 use serde::{Deserialize, Serialize};
 use std::{
     mem::replace,

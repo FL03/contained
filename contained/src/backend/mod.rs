@@ -7,8 +7,9 @@ pub mod cli;
 
 use crate::clients::Client;
 use crate::net::node::Node;
-use crate::prelude::Resultant;
+use crate::prelude::{Resultant};
 use cli::{Cli, Opts};
+
 
 pub struct Backend {
     client: Client,
@@ -37,11 +38,12 @@ impl Backend {
                         .await?;
                 }
                 Opts::Network { detached, up } => {
+                    let network = Node::default();
                     if up {
                         if detached {
-                            let _ = Node::default().spawn();
+                            let _ = network.spawn();
                         } else {
-                            let _ = Node::default().spawn().await.expect("");
+                            let _ = network.spawn().await.expect("");
                         }
                     }
                 }

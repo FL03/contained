@@ -11,10 +11,10 @@ mod workload;
 
 pub mod layer;
 
-use crate::prelude::{EnvId, Resultant, Shared, WorkloadId};
+use crate::prelude::{EnvId, Shared, WorkloadId};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
-use tokio::sync::oneshot;
+
 
 /// The stack is a collection of all the running environments and workloads.
 #[derive(Debug, Default)]

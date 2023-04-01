@@ -4,8 +4,7 @@
     Description: ... Summary ...
 */
 use super::{Transform, LPR};
-use crate::neo::triads::{Triad, Triadic};
-use crate::Note;
+use crate::neo::triads::*;
 use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, Default)]

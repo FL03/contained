@@ -5,62 +5,11 @@
 */
 use crate::{
     states::{State, Stateful},
-    turing::{instructions::Move, Tape},
+    turing::{instructions::Move, Symbolic, Tape},
 };
-use std::collections::{BTreeSet, HashSet};
+
 use std::ops::{Index, IndexMut};
 use std::vec;
-
-/// [Alphabet] describes an immutable set of [Symbolic] elements
-pub trait Alphabet<S: Symbolic> {
-    /// [Alphabet::default_symbol]
-    fn default_symbol(&self) -> S {
-        Default::default()
-    }
-    /// Returns true if the symbol is in the alphabet
-    fn is_viable(&self, symbol: &S) -> bool;
-}
-
-impl<S: Symbolic> Alphabet<S> for Vec<S> {
-    fn is_viable(&self, symbol: &S) -> bool {
-        self.contains(symbol)
-    }
-
-    fn default_symbol(&self) -> S {
-        if let Some(entry) = self.first() {
-            entry.clone()
-        } else {
-            Default::default()
-        }
-    }
-}
-
-impl<S: Symbolic> Alphabet<S> for BTreeSet<S> {
-    fn is_viable(&self, symbol: &S) -> bool {
-        self.contains(symbol)
-    }
-    fn default_symbol(&self) -> S {
-        if let Some(entry) = self.first() {
-            entry.clone()
-        } else {
-            Default::default()
-        }
-    }
-}
-
-impl<S: Symbolic> Alphabet<S> for HashSet<S> {
-    fn is_viable(&self, symbol: &S) -> bool {
-        self.contains(symbol)
-    }
-
-    fn default_symbol(&self) -> S {
-        if let Some(entry) = self.iter().next() {
-            entry.clone()
-        } else {
-            Default::default()
-        }
-    }
-}
 
 /// [ArrayLike] describes the basic behaviors of an array-like structure
 pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
@@ -273,18 +222,6 @@ pub trait Scope<S: Symbolic>: Include<S> + Insert<usize, S> + Stateful<State> {
     /// [Scope::tape] returns the [Tape] of the [Scope]
     fn tape(&self) -> Tape<S>;
 }
-
-/// Simple trait for compatible symbols
-pub trait Symbolic:
-    Clone + Default + Eq + Ord + std::fmt::Debug + std::fmt::Display + std::hash::Hash
-{
-}
-
-impl Symbolic for char {}
-
-impl Symbolic for &str {}
-
-impl Symbolic for String {}
 
 /// [Translate] is a trait that allows for the translation of a machine's memory
 pub trait Translate<S: Symbolic> {

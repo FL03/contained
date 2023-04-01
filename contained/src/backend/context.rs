@@ -7,6 +7,7 @@ use super::Settings;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Default)]
 pub struct Context {
     cnf: Settings,
 }
@@ -20,10 +21,4 @@ impl Context {
     }
 }
 
-impl Default for Context {
-    fn default() -> Self {
-        Self {
-            cnf: Settings::default(),
-        }
-    }
-}
+

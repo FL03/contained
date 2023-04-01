@@ -8,7 +8,7 @@ use wasmer::{imports, wat2wasm, Imports, Instance, Module, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut, TypedFunction};
 
 /// A sample Wasm module that exports a function called `increment_counter_loop`.
-static COUNTER_MODULE: &'static [u8] = br#"
+static COUNTER_MODULE: &[u8] = br#"
 (module
     (func $get_counter (import "env" "get_counter") (result i32))
     (func $add_to_counter (import "env" "add_to_counter") (param i32) (result i32))
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut runtime = Runtime::new();
     runtime.add_env("env-1".to_string(), Env::new(0));
     runtime.add_env("env-2".to_string(), Env::new(1));
-    runtime.add_workload("counter_module".to_string(), module.clone());
+    runtime.add_workload("counter_module".to_string(), module);
     assert_eq!(
         runtime.run("env-1".to_string(), "counter_module".to_string())?,
         5
@@ -127,7 +127,7 @@ impl Runtime {
     ) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
         let env = self.get_env(space).unwrap();
         let workload = self.get_workload(workload).unwrap();
-        let exec = Driver::new(env.clone(), workload.clone());
+        let exec = Driver::new(env, workload);
         let increment_counter_loop: TypedFunction<i32, i32> = exec
             .instance(&mut self.store)
             .exports

@@ -6,7 +6,6 @@
 use super::{layer::*, Stack};
 use crate::prelude::Error;
 
-use crate::music::neo::tonnetz::Cluster;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use tokio::task::JoinHandle;

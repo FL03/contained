@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{instructions::Instruction, Program};
-use crate::{Alphabet, Error, Scope, State, Stateful, Symbolic};
+use crate::turing::{instructions::Instruction, Alphabet, Program, Symbolic};
+use crate::{Error, Scope, State, Stateful};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
 use predicates::Predicate;
@@ -74,7 +74,7 @@ pub trait Execute<S: Symbolic>:
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
         if let Some(instruction) = self.next() {
-            let tail = instruction.clone().tail();
+            let tail = instruction.tail();
             // Update the current state
             self.update_state(tail.state());
             // Update the tape
@@ -93,7 +93,7 @@ pub trait Execute<S: Symbolic>:
         &mut self,
         until: impl Predicate<Self::Driver>,
     ) -> Result<&Self::Driver, Error> {
-        while !until.eval(&self.scope()) {
+        while !until.eval(self.scope()) {
             self.execute_once()?;
         }
         Ok(self.scope())
@@ -115,7 +115,7 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
-        while let Some(instruction) = self.next() {
+        for instruction in self.by_ref() {
             let tail = instruction.clone().tail();
             // Update the current state
             driver.update_state(tail.state());
@@ -132,13 +132,13 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
         if let Some(instruction) = self.next() {
-            let tail = instruction.clone().tail();
+            let tail = instruction.tail();
             // Update the current state
             driver.update_state(tail.state());
             // Update the tape
             driver.set_symbol(tail.symbol());
             // Update the index; adjusts the index according to the direction
-            driver.shift(tail.action(), default_symbol.clone());
+            driver.shift(tail.action(), default_symbol);
         }
         // Return the actor
         Ok(driver.clone())
@@ -151,7 +151,7 @@ pub trait Executable<S: Symbolic>: Clone + Alphabet<S> + Iterator<Item = Instruc
         // Get the default symbol
         let default_symbol = self.clone().default_symbol();
         // Get the next instruction
-        while let Some(instruction) = self.next() {
+        for instruction in self.by_ref() {
             let tail = instruction.clone().tail();
             // Update the current state
             driver.update_state(tail.state());

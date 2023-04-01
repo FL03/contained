@@ -6,7 +6,7 @@
             (State, Symbol, State, Symbol, Move)
 */
 use super::Move;
-use crate::{State, Stateful, Symbolic};
+use crate::{turing::Symbolic, State, Stateful};
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 

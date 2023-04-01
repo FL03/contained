@@ -14,7 +14,19 @@ use super::Tonnetz;
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
+use decanter::prelude::H256;
 use std::sync::{Arc, Mutex};
+
+pub enum ClusterEvent {
+    TriadAdded { id: Note },
+    TriadRemoved { id: Note },
+    None,
+}
+
+pub struct Boundary {
+    pub id: H256, // the id of the triad that is the boundary
+    pub interval: Interval,
+}
 
 #[derive(Clone, Debug, Default)]
 pub struct Cluster {
