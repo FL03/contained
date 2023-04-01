@@ -24,8 +24,8 @@ impl Snapshot {
             ts: Timestamp::default().into(),
         }
     }
-    pub fn id(&self) -> &EnvId {
-        &self.id
+    pub fn id(&self) -> EnvId {
+        self.id.clone()
     }
     pub fn surface(&self) -> &Surface {
         &self.surface

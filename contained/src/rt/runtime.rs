@@ -7,7 +7,8 @@ use super::{layer::*, Stack};
 use crate::prelude::Error;
 
 use crate::music::neo::tonnetz::Cluster;
-use tokio::sync::{mpsc, oneshot};
+use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
 use tokio::task::JoinHandle;
 
 pub struct Runtime {
@@ -26,8 +27,13 @@ impl Runtime {
     }
     pub async fn handle_command(&self, request: Command) -> Result<ClusterEvent, Error> {
         match request {
-            Command::Register { id, sender, value } => {
-                self.stack.envs.write().unwrap().insert(id.clone(), sender);
+            Command::Register { env } => {
+                let id = env.clone().id;
+                self.stack
+                    .envs
+                    .write()
+                    .unwrap()
+                    .insert(id.clone(), Arc::new(Mutex::new(env)));
                 Ok(ClusterEvent::TriadAdded { id })
             }
             _ => Ok(ClusterEvent::None),

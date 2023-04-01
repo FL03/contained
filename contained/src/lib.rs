@@ -18,7 +18,6 @@ mod utils;
 pub mod backend;
 pub mod clients;
 pub mod connect;
-pub mod node;
 pub mod rt;
 
 pub mod prelude {

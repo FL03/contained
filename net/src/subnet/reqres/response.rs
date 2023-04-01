@@ -9,3 +9,17 @@ use serde::{Deserialize, Serialize};
 pub struct Response {
     pub data: String,
 }
+
+impl Response {
+    pub fn new(data: impl ToString) -> Self {
+        Self {
+            data: data.to_string(),
+        }
+    }
+}
+
+impl AsRef<[u8]> for Response {
+    fn as_ref(&self) -> &[u8] {
+        self.data.as_bytes()
+    }
+}

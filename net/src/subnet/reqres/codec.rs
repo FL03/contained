@@ -5,38 +5,47 @@
 */
 use super::{Proto, Request, Response};
 use async_trait::async_trait;
-use futures::{AsyncRead, AsyncWrite};
-use libp2p::request_response::Codec;
+use futures::{AsyncRead, AsyncWrite, AsyncWriteExt};
+use libp2p::core::upgrade::{read_length_prefixed, write_length_prefixed};
+use tokio::io;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct ReqResCodec;
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct ProtocolCodec;
 
 #[async_trait]
-impl Codec for ReqResCodec {
+impl libp2p::request_response::Codec for ProtocolCodec {
     type Protocol = Proto;
     type Request = Request;
     type Response = Response;
 
-    async fn read_request<T>(
-        &mut self,
-        _: &Self::Protocol,
-        io: &mut T,
-    ) -> Result<Self::Request, std::io::Error>
+    async fn read_request<T>(&mut self, _: &Self::Protocol, io: &mut T) -> io::Result<Self::Request>
     where
         T: AsyncRead + Unpin + Send,
     {
-        todo!()
+        let vec = read_length_prefixed(io, 1_000_000).await?;
+
+        if vec.is_empty() {
+            return Err(io::ErrorKind::UnexpectedEof.into());
+        }
+
+        Ok(Request::new(String::from_utf8(vec).unwrap()))
     }
 
     async fn read_response<T>(
         &mut self,
         _: &Self::Protocol,
         io: &mut T,
-    ) -> Result<Self::Response, std::io::Error>
+    ) -> io::Result<Self::Response>
     where
         T: AsyncRead + Unpin + Send,
     {
-        todo!()
+        let vec = read_length_prefixed(io, 500_000_000).await?; // update transfer maximum
+
+        if vec.is_empty() {
+            return Err(io::ErrorKind::UnexpectedEof.into());
+        }
+
+        Ok(Response::new(String::from_utf8(vec).unwrap()))
     }
 
     async fn write_request<T>(
@@ -44,11 +53,14 @@ impl Codec for ReqResCodec {
         _: &Self::Protocol,
         io: &mut T,
         req: Self::Request,
-    ) -> Result<(), std::io::Error>
+    ) -> io::Result<()>
     where
         T: AsyncWrite + Unpin + Send,
     {
-        todo!()
+        write_length_prefixed(io, req).await?;
+        io.close().await?;
+
+        Ok(())
     }
 
     async fn write_response<T>(
@@ -56,10 +68,13 @@ impl Codec for ReqResCodec {
         _: &Self::Protocol,
         io: &mut T,
         res: Self::Response,
-    ) -> Result<(), std::io::Error>
+    ) -> io::Result<()>
     where
         T: AsyncWrite + Unpin + Send,
     {
-        todo!()
+        write_length_prefixed(io, res).await?;
+        io.close().await?;
+
+        Ok(())
     }
 }

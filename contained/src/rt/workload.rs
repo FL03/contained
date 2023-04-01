@@ -19,8 +19,8 @@ impl Workload {
         Self { id, module }
     }
 
-    pub fn id(&self) -> &WorkloadId {
-        &self.id
+    pub fn id(&self) -> WorkloadId {
+        self.id.clone()
     }
 
     pub fn module(&self) -> &Module {

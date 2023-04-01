@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::error::*;
+pub use self::{asynchronous::*, error::*};
 
+mod asynchronous;
 mod error;

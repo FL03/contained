@@ -87,10 +87,7 @@ pub struct Driver {
 
 impl Driver {
     pub fn new(env: Env, workload: Module) -> Self {
-        Self {
-            env,
-            workload,
-        }
+        Self { env, workload }
     }
     pub fn instance(&self, store: &mut Store) -> Instance {
         let host = self.env.imports(store);

@@ -23,6 +23,8 @@ wasm = []
 [build-dependencies]
 
 [dependencies]
+contained-core = { path = "../core" }
+
 anyhow.workspace = true
 async-trait.workspace = true
 decanter.workspace = true
@@ -33,6 +35,8 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 tokio = { features = ["sync"], version = "1" }
+tracing.workspace = true
+tracing-subscriber.workspace = true
 
 [dependencies.libp2p]
 features = [

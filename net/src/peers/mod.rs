@@ -38,3 +38,11 @@ pub trait Peerable: Clone {
             .boxed()
     }
 }
+
+pub trait IntoPeer {
+    fn into_peer(self) -> Peer;
+}
+
+pub trait FromPeer {
+    fn from_peer(peer: impl Peerable) -> Self;
+}

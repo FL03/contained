@@ -4,53 +4,32 @@
     Description: ... summary ...
 */
 use crate::prelude::{EnvId, Resultant, WorkloadId};
+use crate::rt::{Environment, Workload};
 use tokio::sync::oneshot::Sender;
 
 #[derive(Debug)]
 pub enum Command {
-    Add {
-        id: WorkloadId,
-        module: u32,
-        sender: Sender<Resultant>,
-    },
-    Register {
-        id: EnvId,
-        value: u32,
-        sender: Sender<Resultant>,
-    },
-    Remove {
-        id: WorkloadId,
-        sender: Sender<Resultant>,
-    },
-    Run {
-        env: EnvId,
-        workload_id: WorkloadId,
-        sender: Sender<Resultant>,
-    },
-    Unregister {
-        id: EnvId,
-        sender: Sender<Resultant>,
-    },
+    Add { workload: Workload },
+    Register { env: Environment },
+    Remove { id: WorkloadId },
+    Run { env: EnvId, workload_id: WorkloadId },
+    Unregister { id: EnvId },
 }
 
 impl Command {
-    pub fn add_workload(id: WorkloadId, module: u32, sender: Sender<Resultant>) -> Self {
-        Self::Add { id, module, sender }
+    pub fn add_workload(workload: Workload) -> Self {
+        Self::Add { workload }
     }
-    pub fn register(id: EnvId, value: u32, sender: Sender<Resultant>) -> Self {
-        Self::Register { id, value, sender }
+    pub fn register(env: Environment) -> Self {
+        Self::Register { env }
     }
-    pub fn remove_workload(id: WorkloadId, sender: Sender<Resultant>) -> Self {
-        Self::Remove { id, sender }
+    pub fn remove_workload(id: WorkloadId) -> Self {
+        Self::Remove { id }
     }
-    pub fn run(env: EnvId, workload_id: WorkloadId, sender: Sender<Resultant>) -> Self {
-        Self::Run {
-            env,
-            workload_id,
-            sender,
-        }
+    pub fn run(env: EnvId, workload_id: WorkloadId) -> Self {
+        Self::Run { env, workload_id }
     }
-    pub fn unregister(id: EnvId, sender: Sender<Resultant>) -> Self {
-        Self::Unregister { id, sender }
+    pub fn unregister(id: EnvId) -> Self {
+        Self::Unregister { id }
     }
 }

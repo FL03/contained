@@ -6,8 +6,8 @@ pub(crate) mod settings;
 pub mod cli;
 
 use crate::clients::Client;
+use crate::net::node::Node;
 use crate::prelude::Resultant;
-use crate::rt::Runtime;
 use cli::{Cli, Opts};
 
 pub struct Backend {
@@ -33,15 +33,15 @@ impl Backend {
             match opts {
                 Opts::Execute { space, workload } => {
                     self.client
-                        .run_workload(space.unwrap_or_else(|| "origin".to_string()), workload)
+                        .run(space.unwrap_or_else(|| "origin".to_string()), workload)
                         .await?;
                 }
                 Opts::Network { detached, up } => {
                     if up {
                         if detached {
-                            Runtime::default().spawn();
+                            let _ = Node::default().spawn();
                         } else {
-                            let _ = Runtime::default().spawn().await.expect("");
+                            let _ = Node::default().spawn().await.expect("");
                         }
                     }
                 }

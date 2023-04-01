@@ -13,7 +13,8 @@ mod constants {
 mod types {
     use crate::NetworkError;
     use libp2p::core::{muxing::StreamMuxerBox, transport::Boxed};
-    use libp2p::PeerId;
+    pub use libp2p::kad::QueryId;
+    pub use libp2p::{Multiaddr, PeerId};
 
     /// Type alias for a [Boxed] two-tuple, ([PeerId], [StreamMuxerBox])
     pub type BoxedTransport = Boxed<(PeerId, StreamMuxerBox)>;

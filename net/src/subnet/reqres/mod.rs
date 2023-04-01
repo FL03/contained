@@ -9,10 +9,22 @@ mod codec;
 mod request;
 mod response;
 
-use libp2p::request_response::ProtocolName;
+use libp2p::request_response::{self, ProtocolName, ProtocolSupport};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
+
+pub type ProtoBehaviour = request_response::Behaviour<ProtocolCodec>;
+
+pub type ReqResEvent = request_response::Event<Request, Response>;
+
+pub fn new() -> ProtoBehaviour {
+    request_response::Behaviour::new(
+        ProtocolCodec::default(),
+        std::iter::once((Proto::Cluster, ProtocolSupport::Full)),
+        Default::default(),
+    )
+}
 
 #[derive(
     Clone,

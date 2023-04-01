@@ -8,11 +8,9 @@ pub use self::{constants::*, types::*};
 mod constants {}
 
 mod types {
-    use crate::Error;
+    use crate::{AsyncError, Error};
     use std::sync::{Arc, Mutex};
 
-    /// A type alias for a boxed `dyn` `std::error::Error` + `Send` + `Sync`.
-    pub type AsyncError = Box<dyn std::error::Error + Send + Sync>;
     /// A type alias for a `Result` with the error type `AsyncError`.
     pub type AsyncResult<T = ()> = std::result::Result<T, AsyncError>;
     /// Type alias for a [Result]

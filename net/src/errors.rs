@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use contained_core::{AsyncError, Error};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -24,8 +25,11 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum NetworkError {
+    AsyncError(AsyncError),
     AddrError(String),
+    ConnectionError(String),
     DecodeError(String),
+    DialError(String),
     EncodeError(String),
     #[default]
     Error(String),
@@ -37,6 +41,18 @@ pub enum NetworkError {
 }
 
 impl std::error::Error for NetworkError {}
+
+impl From<NetworkError> for Error {
+    fn from(error: NetworkError) -> Self {
+        Self::AsyncError(error.into())
+    }
+}
+
+impl From<NetworkError> for AsyncError {
+    fn from(error: NetworkError) -> Self {
+        Self::Error(error.to_string())
+    }
+}
 
 impl From<anyhow::Error> for NetworkError {
     fn from(error: anyhow::Error) -> Self {
@@ -62,12 +78,6 @@ impl From<Box<dyn std::error::Error>> for NetworkError {
     }
 }
 
-impl From<Box<dyn std::error::Error + Send + Sync>> for NetworkError {
-    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
-        Self::Error(error.to_string())
-    }
-}
-
 impl From<libp2p::core::DecodeError> for NetworkError {
     fn from(error: libp2p::core::DecodeError) -> Self {
         Self::DecodeError(error.to_string())
@@ -80,8 +90,11 @@ impl From<libp2p::core::multiaddr::Error> for NetworkError {
     }
 }
 
-impl From<libp2p::core::transport::TransportError<Self>> for NetworkError {
-    fn from(error: libp2p::core::transport::TransportError<Self>) -> Self {
+impl<E> From<libp2p::core::transport::TransportError<E>> for NetworkError
+where
+    E: std::error::Error,
+{
+    fn from(error: libp2p::core::transport::TransportError<E>) -> Self {
         Self::TransportError(error.to_string())
     }
 }
@@ -89,5 +102,35 @@ impl From<libp2p::core::transport::TransportError<Self>> for NetworkError {
 impl From<libp2p::core::upgrade::UpgradeError<Self>> for NetworkError {
     fn from(error: libp2p::core::upgrade::UpgradeError<Self>) -> Self {
         Self::UpgradeError(error.to_string())
+    }
+}
+
+impl From<libp2p::swarm::DialError> for NetworkError {
+    fn from(error: libp2p::swarm::DialError) -> Self {
+        Self::DialError(error.to_string())
+    }
+}
+
+impl From<libp2p::swarm::ConnectionError<Box<dyn std::error::Error>>> for NetworkError {
+    fn from(error: libp2p::swarm::ConnectionError<Box<dyn std::error::Error>>) -> Self {
+        Self::ConnectionError(error.to_string())
+    }
+}
+
+impl From<Box<dyn std::error::Error + Send + Sync>> for NetworkError {
+    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        Self::AsyncError(error.into())
+    }
+}
+
+impl<T> From<tokio::sync::mpsc::error::SendError<T>> for NetworkError {
+    fn from(error: tokio::sync::mpsc::error::SendError<T>) -> Self {
+        Self::AsyncError(error.into())
+    }
+}
+
+impl From<tokio::sync::oneshot::error::RecvError> for NetworkError {
+    fn from(error: tokio::sync::oneshot::error::RecvError) -> Self {
+        Self::AsyncError(error.into())
     }
 }

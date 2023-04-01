@@ -7,8 +7,12 @@
 pub use self::events::*;
 
 mod events;
+
+pub mod layer;
 pub mod reqres;
 
+use crate::peers::*;
+use crate::Conduct;
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
 use libp2p::{mdns, ping, PeerId};
@@ -20,6 +24,7 @@ pub struct Subnet {
     pub freq: ping::Behaviour,
     pub kademlia: Kademlia<MemoryStore>,
     pub mdns: mdns::tokio::Behaviour,
+    pub reqres: reqres::ProtoBehaviour,
 }
 
 impl Subnet {
@@ -28,7 +33,26 @@ impl Subnet {
             freq: Default::default(),
             kademlia,
             mdns,
+            reqres: reqres::new(),
         }
+    }
+}
+
+impl Default for Subnet {
+    fn default() -> Self {
+        Self::from_peer(Peer::default())
+    }
+}
+
+impl Conduct for Subnet {}
+
+impl FromPeer for Subnet {
+    fn from_peer(peer: impl Peerable) -> Self {
+        let kademlia = Kademlia::new(peer.pid(), MemoryStore::new(peer.pid()));
+        Self::new(
+            kademlia,
+            mdns::tokio::Behaviour::new(mdns::Config::default(), peer.pid()).unwrap(),
+        )
     }
 }
 
