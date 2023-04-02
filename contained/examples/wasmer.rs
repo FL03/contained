@@ -22,7 +22,7 @@ static COUNTER_MODULE: &[u8] = br#"
           (br_if 1 (i32.eq (get_local $x) (i32.const 0)))
           (br 0)))
       call $get_counter)
-    (export "increment_counter_loop" (func $increment_f)))
+    (export "increment" (func $increment_f)))
 "#;
 
 pub fn counter_module() -> std::borrow::Cow<'static, [u8]> {
@@ -44,12 +44,14 @@ async fn main() -> AsyncResult {
     let (tx_module, rx_module) = mpsc::channel(9);
     // Initialize new mpsc channels for sending and receiving results
     let (tx_result, rx_result) = mpsc::channel(9);
+    // Initialize new mpsc channels for sending and receiving transformations
+    let (tx_dirac, rx_dirac) = mpsc::channel(9);
     // Initialize a new computer; set the environment; then spawn it on a new thread
-    Computer::new(rx_module, tx_result)
+    Computer::new(rx_module, tx_result, rx_dirac)
         .set_environment(Env::default())
         .spawn();
     // Initialize a new client
-    let mut client = Client::new(tx_module, rx_result, mpsc::channel(9).0);
+    let mut client = Client::new(tx_module, rx_result, tx_dirac);
     // Add a workload to the client
     client.add_workload(module).await?;
     // Cache the results of the computer
@@ -79,14 +81,14 @@ fn add_to_counter(env: FunctionEnvMut<Env>, add: i32) -> i32 {
 
 #[derive(Debug)]
 pub struct Cluster {
-    pub cache: HashMap<String, BoxedWasmValue>,
+    pub clients: HashMap<String, Shared<Client>>,
     pub computers: HashMap<String, Shared<Computer>>,
 }
 
 impl Cluster {
     pub fn new() -> Self {
         Self {
-            cache: HashMap::new(),
+            clients: HashMap::new(),
             computers: HashMap::new(),
         }
     }
@@ -98,6 +100,7 @@ impl Cluster {
     }
 }
 
+#[derive(Debug)]
 pub struct Client {
     pub cache: HashMap<String, BoxedWasmValue>,
     pub program: mpsc::Sender<Module>,
@@ -136,18 +139,21 @@ pub struct Computer {
     program: mpsc::Receiver<Module>,
     results: mpsc::Sender<BoxedWasmValue>,
     store: Store,
-
     transform: mpsc::Receiver<String>,
 }
 
 impl Computer {
-    pub fn new(program: mpsc::Receiver<Module>, results: mpsc::Sender<BoxedWasmValue>) -> Self {
+    pub fn new(
+        program: mpsc::Receiver<Module>,
+        results: mpsc::Sender<BoxedWasmValue>,
+        transform: mpsc::Receiver<String>,
+    ) -> Self {
         Self {
             env: Arc::new(Mutex::new(Env::default())),
             program,
             results,
             store: Store::default(),
-            transform: mpsc::channel(9).1,
+            transform,
         }
     }
     pub async fn run(mut self) -> AsyncResult {
@@ -159,7 +165,7 @@ impl Computer {
                     tracing::info!("Instantiating module with the imported host functions");
                     let instance = Instance::new(&mut self.store, &module, &host).expect("Failed to instantiate module");
                     tracing::info!("Success: Instantiated module with the imported host functions");
-                    let run: TypedFunction<i32, i32> = instance.exports.get_function("increment_counter_loop")?.typed(&mut self.store)?;
+                    let run: TypedFunction<i32, i32> = instance.exports.get_function("increment")?.typed(&mut self.store)?;
                     tracing::info!("Success: Got the counter function from the module");
                     let result = run.call(&mut self.store, 5)?;
                     tracing::info!("Success: Ran the counter function from the module\n\tCounter value (host): {:?}", result);

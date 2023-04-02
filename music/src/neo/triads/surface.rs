@@ -6,13 +6,12 @@
 use super::*;
 use crate::neo::LPR;
 use contained_core::{AsyncStateful, Shared, State};
-use decanter::prelude::{Hashable, H256};
+use decanter::prelude::Hashable;
 use std::sync::{Arc, Mutex};
 use wasmer::{imports, FunctionEnv, Imports, Store};
 
 #[derive(Clone, Debug, Default, Hashable)]
 pub struct Surface {
-    id: H256,
     state: Shared<State>,
     triad: Shared<Triad>,
 }
@@ -20,16 +19,12 @@ pub struct Surface {
 impl Surface {
     pub fn new(triad: Triad) -> Self {
         Self {
-            id: H256::generate(),
             state: Arc::new(Mutex::new(State::default())),
             triad: Arc::new(Mutex::new(triad)),
         }
     }
     pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
         FunctionEnv::new(store, self.clone())
-    }
-    pub fn id(&self) -> H256 {
-        self.id.clone()
     }
     pub fn imports(&self, store: &mut Store) -> Imports {
         let env = self.function_env(store);
@@ -63,7 +58,6 @@ impl std::fmt::Display for Surface {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = serde_json::json!(
             {
-                "id": self.id,
                 "state": self.state.lock().unwrap().clone().to_string(),
                 "triad": self.triad.lock().unwrap().clone().to_string(),
             }

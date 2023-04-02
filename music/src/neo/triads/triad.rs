@@ -7,17 +7,14 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{Surface, Tonic, TriadClass, Triadic};
+use super::{TriadClass, Triadic};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
     Gradient, MusicError, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::{
-    turing::{Alphabet, Program},
-    State,
-};
+use contained_core::turing::Alphabet;
 use decanter::prelude::Hashable;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};

@@ -5,6 +5,7 @@
         Here, a tonic is used to describe a unit-computing machine that is capable of either executing a program or transforming its scope.
 */
 use super::{Surface, Triad, LPR};
+use contained_core::{BoxedWasmValue, Shared};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
@@ -13,12 +14,21 @@ use wasmer::{Instance, Module, Store};
 #[derive(Debug)]
 pub struct TonicChannel {
     pub program: mpsc::Receiver<Module>,
+    pub results: mpsc::Sender<BoxedWasmValue>,
     pub transform: mpsc::Receiver<LPR>,
 }
 
 impl TonicChannel {
-    pub fn new(program: mpsc::Receiver<Module>, transform: mpsc::Receiver<LPR>) -> Self {
-        Self { program, transform }
+    pub fn new(
+        program: mpsc::Receiver<Module>,
+        results: mpsc::Sender<BoxedWasmValue>,
+        transform: mpsc::Receiver<LPR>,
+    ) -> Self {
+        Self {
+            program,
+            results,
+            transform,
+        }
     }
     pub fn program(&self) -> &mpsc::Receiver<Module> {
         &self.program
@@ -27,10 +37,11 @@ impl TonicChannel {
         &self.transform
     }
     pub fn with_capacity(capacity: usize) -> Self {
-        Self {
-            program: mpsc::channel(capacity).1,
-            transform: mpsc::channel(capacity).1,
-        }
+        Self::new(
+            mpsc::channel(capacity).1,
+            mpsc::channel(capacity).0,
+            mpsc::channel(capacity).1,
+        )
     }
 }
 
@@ -42,26 +53,18 @@ impl Default for TonicChannel {
 
 #[derive(Debug)]
 pub struct Tonic {
-    pub cache: Arc<Mutex<Vec<Box<[wasmer::Value]>>>>,
     chan: TonicChannel,
     store: Store,
-    surface: Arc<Mutex<Surface>>,
+    surface: Shared<Surface>,
 }
 
 impl Tonic {
     pub fn new(chan: TonicChannel, scope: Triad) -> Self {
         Self {
-            cache: Arc::new(Mutex::new(Vec::new())),
             chan,
             store: Store::default(),
             surface: Arc::new(Mutex::new(Surface::new(scope))),
         }
-    }
-    pub fn cache(&self) -> &Arc<Mutex<Vec<Box<[wasmer::Value]>>>> {
-        &self.cache
-    }
-    pub fn depth(&self) -> usize {
-        self.cache.lock().unwrap().len()
     }
     pub async fn run(mut self) -> AsyncResult {
         Ok(loop {
@@ -79,7 +82,7 @@ impl Tonic {
                         tracing::info!("Success: Executed the program\n\t{:?}", &tmp);
                         tmp
                     };
-                    self.cache.lock().unwrap().push(result);
+                    self.chan.results.send(result).await?;
                 }
                 Some(transform) = self.chan.transform.recv() => {
                     self.surface.lock().unwrap().transform(transform);
