@@ -8,7 +8,7 @@ use tokio::sync::mpsc;
 use wasmer::{imports, wat2wasm, Imports, Instance, Module, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut, TypedFunction};
 
-/// A sample Wasm module that exports a function called `increment_counter_loop`.
+/// A sample Wasm module that exports a function called `increment`.
 static COUNTER_MODULE: &[u8] = br#"
 (module
     (func $get_counter (import "env" "get_counter") (result i32))
