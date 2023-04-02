@@ -6,7 +6,7 @@
             (State, Symbol, State, Symbol, Move)
 */
 use super::{Head, Move, Tail};
-use crate::{State, Symbolic};
+use crate::{turing::Symbolic, State};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

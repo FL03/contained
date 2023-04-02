@@ -4,10 +4,8 @@
     Description: ... summary ...
 */
 use super::Execute;
-use crate::turing::{instructions::Instruction, Program, Tape};
-use crate::{
-    Alphabet, ArrayLike, Error, Include, Insert, Scope, State, Stateful, Symbolic, Translate,
-};
+use crate::turing::{instructions::Instruction, Alphabet, Program, Symbolic, Tape};
+use crate::{ArrayLike, Error, Include, Insert, Scope, State, Stateful, Translate};
 
 use serde::{Deserialize, Serialize};
 

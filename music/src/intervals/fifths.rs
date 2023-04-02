@@ -9,7 +9,7 @@
             Diminished (6)
 */
 use crate::{BoxedError, Gradient, Note};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -24,6 +24,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -46,12 +47,6 @@ impl Fifths {
             Self::Perfect + note.clone(),
             Self::Diminished + note,
         )
-    }
-}
-
-impl Hashable for Fifths {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 

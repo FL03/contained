@@ -5,13 +5,13 @@
 */
 pub use self::{constants::*, types::*};
 
-pub(crate) mod constants {
+mod constants {
     pub const CONFIG_FNAME_PATTERN: &str = "*.config.toml";
 }
 
-pub(crate) mod types {
-    /// A type alias for a boxed `dyn` `std::error::Error` + `Send` + `Sync`.
-    pub type AsyncError = Box<dyn std::error::Error + Send + Sync>;
-    /// A type alias for a `Result` with the error type `AsyncError`.
-    pub type AsyncResult<T = ()> = std::result::Result<T, AsyncError>;
+mod types {
+    /// A type alias for an environment identifier.
+    pub type EnvId = String;
+    /// A type alias for a workload ID.
+    pub type WorkloadId = String;
 }

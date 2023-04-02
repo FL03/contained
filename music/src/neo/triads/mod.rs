@@ -8,20 +8,29 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
 
-pub use self::{class::*, instance::*, triad::*};
+pub use self::{class::*, surface::*, tonic::*, triad::*};
 
 mod class;
-mod instance;
+mod surface;
+mod tonic;
 mod triad;
-
-pub mod tonic;
 
 use super::{PathFinder, Transform, LPR};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{MusicError, Note};
 use algae::graph::{Graph, UndirectedGraph};
 
-pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
+pub trait IntoTriad {
+    fn into_triad(self) -> Triad;
+}
+
+pub trait TryIntoTriad {
+    type Error;
+
+    fn try_into_triad(self) -> Result<Triad, Self::Error>;
+}
+
+pub trait Triadic: Clone + Transform<Dirac = LPR> {
     fn as_graph(&self) -> UndirectedGraph<Note, Interval> {
         let mut graph = UndirectedGraph::new();
 
@@ -31,7 +40,7 @@ pub trait Triadic: AsRef<[Note; 3]> + Clone + Transform<Dirac = LPR> {
         graph.clone()
     }
     /// Returns the [Triads] enum variant that describes the [Triad]
-    fn class(&self) -> Triads;
+    fn class(&self) -> TriadClass;
     /// Returns true if the [Triad] contains the [Note]
     fn contains(&self, note: &Note) -> bool {
         &self.root() == note || &self.third() == note || &self.fifth() == note
@@ -107,7 +116,8 @@ mod tests {
 
     #[test]
     fn test_triad() {
-        let a = Triad::new(0.into(), Triads::Major);
+        let a = Triad::new(0.into(), TriadClass::Major);
+        assert_eq!(a.clone().as_ref(), &[0.into(), 4.into(), 7.into()]);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));
@@ -117,8 +127,8 @@ mod tests {
 
     #[test]
     fn test_walking() {
-        let expected = Triad::try_from((1, 4, 8)).unwrap();
-        let triad = Triad::new(0.into(), Triads::Major);
+        let expected = Triad::try_from([1, 4, 8]).unwrap();
+        let triad = Triad::new(0.into(), TriadClass::Major);
 
         let mut a = triad.clone();
         let mut b = triad.clone();

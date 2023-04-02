@@ -6,7 +6,7 @@
 use super::Settings;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Default)]
 pub struct Context {
     cnf: Settings,
 }
@@ -17,8 +17,5 @@ impl Context {
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
-    }
-    pub fn setup(&self) {
-        self.cnf.logger.init_tracing();
     }
 }

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A chord is any set of notes played simultaneously; for our considerations, allow a chord to represent the alphabet of a Turing machine or automata.
 */
-use super::Note;
+use crate::Note;
 use contained_core::{ArrayLike, Insert, Iterable};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};

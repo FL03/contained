@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::Tape;
-use crate::{ArrayLike, Include, Insert, Scope, State, Stateful, Symbolic};
+use super::{Symbolic, Tape};
+use crate::{ArrayLike, Include, Insert, Scope, State, Stateful};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -36,7 +36,7 @@ impl<S: Symbolic> AsMut<Driver<S>> for Driver<S> {
 
 impl<S: Symbolic> AsRef<Driver<S>> for Driver<S> {
     fn as_ref(&self) -> &Driver<S> {
-        &self
+        self
     }
 }
 
@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_builder() {
         let tape = ["a", "b", "c"];
-        assert_ne!(Tape::norm(tape.clone()), Tape::std(tape));
+        assert_ne!(Tape::norm(tape), Tape::std(tape));
     }
 
     #[test]

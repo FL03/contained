@@ -7,26 +7,29 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{tonic::Tonic, Instance, Triadic, Triads};
+use super::{TriadClass, Triadic};
 use crate::{
     intervals::{Fifths, Interval, Thirds},
     neo::{Dirac, Transform, LPR},
     Gradient, MusicError, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::{turing::Program, Alphabet, State};
-use decanter::prelude::{hasher, Hashable, H256};
+use contained_core::turing::Alphabet;
+use decanter::prelude::Hashable;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct Triad {
-    class: Triads,
+    class: TriadClass,
     notes: [Note; 3],
 }
 
 impl Triad {
-    pub fn new(root: Note, class: Triads) -> Self {
+    pub fn new(root: Note, class: TriadClass) -> Self {
         let (a, _, c): (Thirds, Thirds, Fifths) = class.into();
         Self {
             class,
@@ -35,19 +38,7 @@ impl Triad {
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
-        Self::new(root, Triads::from((a, b)))
-    }
-
-    pub fn instance(&self) -> Instance {
-        Instance::new(self.clone())
-    }
-
-    pub fn tonic(&self) -> Tonic {
-        Tonic::new(self.program(), self.instance())
-    }
-
-    pub fn program(&self) -> Program<Note> {
-        Program::new(self.clone(), State::Invalid)
+        Self::new(root, TriadClass::from((a, b)))
     }
 }
 
@@ -57,6 +48,12 @@ impl Alphabet<Note> for Triad {
     }
     fn default_symbol(&self) -> Note {
         self.root()
+    }
+}
+
+impl AsMut<[Note; 3]> for Triad {
+    fn as_mut(&mut self) -> &mut [Note; 3] {
+        &mut self.notes
     }
 }
 
@@ -71,28 +68,23 @@ impl Transform for Triad {
 }
 
 impl Triadic for Triad {
-    fn class(&self) -> Triads {
+    fn class(&self) -> TriadClass {
         self.class
     }
 
     fn triad(&self) -> &[Note; 3] {
         &self.notes
     }
-
+    // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
     fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
         if let Ok(t) = Self::try_from(triad.clone()) {
             *self = t;
             return Ok(self);
         }
+
         Err(MusicError::IntervalError(
             "The given notes failed to contain the necessary relationships...".into(),
         ))
-    }
-}
-
-impl Hashable for Triad {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 
@@ -136,23 +128,9 @@ impl TryFrom<[Note; 3]> for Triad {
     type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
-        let args = data.to_vec();
-        for i in 0..args.len() {
-            let tmp = [(i + 1) % args.len(), (i + 2) % args.len()];
-            for j in 0..tmp.len() {
-                let (a, b, c) = (
-                    args[i].clone(),
-                    args[tmp[j]].clone(),
-                    args[tmp[(j + 1) % tmp.len()]].clone(),
-                );
-                let (ab, bc) = (
-                    Thirds::try_from((a.clone(), b.clone())),
-                    Thirds::try_from((b.clone(), c.clone())),
-                );
-                // Creates a triad if the two intervals of [root, third], [third, fifth] are both considered thirds
-                if ab.is_ok() && bc.is_ok() {
-                    return Ok(Triad::build(a, ab?, bc?));
-                }
+        for (a, b, c) in data.into_iter().circular_tuple_windows() {
+            if let Ok(class) = TriadClass::try_from((a.clone(), b.clone(), c.clone())) {
+                return Ok(Triad::new(a.clone(), class));
             }
         }
         Err(MusicError::IntervalError(

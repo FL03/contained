@@ -18,10 +18,12 @@ name = "contained"
 test = false
 
 [features]
-default = ["core", "music"]
+default = ["core", "music", "net"]
+full = ["core", "music", "net"]
 
 core = ["contained-core"]
 music = ["contained-music"]
+net = ["contained-net"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -32,11 +34,12 @@ test = true
 [dependencies]
 contained-core = { features = [], optional = true, path = "../core", version = "0.1.4" }
 contained-music = { features = [], optional = true, path = "../music", version = "0.1.4" }
+contained-net = { features = [], optional = true, path = "../net", version = "0.1.4" }
 
 # Standard dependencies
 algae.workspace = true
 anyhow.workspace = true
-bytes = "1"
+bytes.workspace = true
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 config = "0.13"
 decanter.workspace = true
@@ -47,12 +50,32 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 tokio.workspace = true
-tracing = { features = ["log"], version = "0.1" }
-tracing-subscriber = { features = ["fmt"], version = "0.3" }
+tokio-stream = "0.1"
+tracing.workspace = true
+tracing-subscriber.workspace = true
 wasmer.workspace = true
+
+[dependencies.libp2p]
+features = [
+    "kad",
+    "macros",
+    "mdns",
+    "mplex",
+    "noise",
+    "ping",
+    "request-response",
+    "serde",
+    "tcp",
+    "tokio"
+]
+version = "0.51.1"
 
 [dev-dependencies]
 
 [package.metadata.docs.rs]
 all-features = true
 rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

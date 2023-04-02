@@ -3,48 +3,60 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::reqres::*;
-use super::Workload;
-use crate::core::Error;
-use crate::music::neo::triads::Triad;
+use super::{layer::*, Stack};
+use crate::prelude::Error;
 
-use std::collections::HashMap;
-use std::sync::RwLock;
-
-pub struct RuntimeState {
-    pub triads: RwLock<HashMap<u32, Triad>>,
-    pub workloads: RwLock<HashMap<u32, Workload>>,
-}
+use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
+use tokio::task::JoinHandle;
 
 pub struct Runtime {
-    state: RuntimeState,
+    command: CommandReceiver,
+    event: SysEventSender,
+    stack: Stack,
 }
 
 impl Runtime {
-    pub async fn handle_request(&self, request: Request) -> Result<Response, Error> {
-        match request {
-            Request::AddTriad(id, value) => Ok(Response::TriadAdded(id)),
-            Request::RemoveTriad(id) => {
-                self.state.triads.write().unwrap().remove(&id);
-                Ok(Response::TriadRemoved(id))
-            }
-            Request::AddWorkload(id, module) => Ok(Response::WorkloadAdded(id)),
-            Request::RemoveWorkload(id) => {
-                self.state.workloads.write().unwrap().remove(&id);
-                Ok(Response::WorkloadRemoved(id))
-            }
-            Request::RunWorkload(workload_id, triad_id) => {
-                let workload = self
-                    .state
-                    .workloads
-                    .read()
-                    .unwrap()
-                    .get(&workload_id)
-                    .unwrap();
-                let triad = self.state.triads.read().unwrap().get(&triad_id).unwrap();
-                Ok(Response::WorkloadRun(workload_id, triad_id))
-            }
-            Request::None => Ok(Response::None),
+    pub fn new(command: CommandReceiver, event: SysEventSender) -> Self {
+        Self {
+            command,
+            event,
+            stack: Stack::new(),
         }
+    }
+    pub async fn handle_command(&self, request: Command) -> Result<ClusterEvent, Error> {
+        match request {
+            Command::Register { env } => {
+                let id = env.clone().id;
+                self.stack
+                    .envs
+                    .write()
+                    .unwrap()
+                    .insert(id.clone(), Arc::new(Mutex::new(env)));
+                Ok(ClusterEvent::TriadAdded { id })
+            }
+            _ => Ok(ClusterEvent::None),
+        }
+    }
+    pub async fn run(mut self) -> Result<(), Error> {
+        loop {
+            tokio::select! {
+                Some(req) = self.command.recv() => {
+                    let res = self.handle_command(req).await?;
+                    self.event.send(res).await.expect("");
+                },
+                else => {
+                }
+            }
+        }
+    }
+    pub fn spawn(self) -> JoinHandle<Result<(), Error>> {
+        tokio::spawn(self.run())
+    }
+}
+
+impl Default for Runtime {
+    fn default() -> Self {
+        Self::new(mpsc::channel(100).1, mpsc::channel(100).0)
     }
 }

@@ -3,8 +3,23 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use crate::command;
+use anyhow::Result;
 use clap::Args;
 use serde::{Deserialize, Serialize};
+
+fn builder(release: bool, workspace: bool) -> Result<()> {
+    let mut args = vec!["build"];
+
+    if release {
+        args.push("--release");
+    }
+    if workspace {
+        args.push("--workspace");
+    }
+    command("cargo", args)?;
+    Ok(())
+}
 
 #[derive(
     Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,

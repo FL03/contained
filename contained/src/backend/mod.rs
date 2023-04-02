@@ -5,43 +5,90 @@ pub(crate) mod settings;
 
 pub mod cli;
 
-use crate::AsyncResult;
+use crate::clients::Client;
+use crate::net::node::Node;
+use crate::prelude::Resultant;
 use cli::{Cli, Opts};
-use std::sync::Arc;
 
 pub struct Backend {
+    client: Client,
     ctx: Context,
 }
 
 impl Backend {
-    pub fn new(ctx: Context) -> Self {
-        Self { ctx }
+    pub fn new() -> Self {
+        let cnf = Settings::default();
+        let ctx = Context::new(cnf);
+
+        Self {
+            client: Client::default(),
+            ctx,
+        }
     }
     pub fn context(&self) -> &Context {
         &self.ctx
     }
-    pub async fn handle_cli(&mut self, cli: Cli) -> AsyncResult {
+    pub async fn handle_cli(&mut self, cli: Cli) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
-                Opts::Setup { .. } => {
-                    self.setup();
+                Opts::Execute { space, workload } => {
+                    self.client
+                        .run(space.unwrap_or_else(|| "origin".to_string()), workload)
+                        .await?;
                 }
+                Opts::Network { detached, up } => {
+                    let network = Node::default();
+                    if up {
+                        if detached {
+                            let _ = network.spawn();
+                        } else {
+                            let _ = network.spawn().await.expect("");
+                        }
+                    }
+                }
+                Opts::Setup { .. } => {}
                 Opts::Start { .. } => {}
             }
         };
 
         Ok(())
     }
-    pub async fn run(mut self) -> AsyncResult {
-        loop {}
+    pub async fn run(mut self) -> Resultant {
+        let cli = Cli::default();
+        self.handle_cli(cli).await?;
+        Ok(())
     }
     pub fn settings(&self) -> &Settings {
         self.ctx.settings()
     }
-    pub fn setup(&self) {
-        self.ctx.setup();
+    pub fn setup(self) -> Self {
+        // Initialize tracing layer...
+        let logger = self.ctx.settings().logger.clone();
+        logger.setup_env(None).init_tracing();
+        self
     }
-    pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
+    pub fn spawn(self) -> tokio::task::JoinHandle<Resultant> {
         tokio::spawn(self.run())
+    }
+}
+
+impl Default for Backend {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl From<Context> for Backend {
+    fn from(ctx: Context) -> Self {
+        Self {
+            client: Client::default(),
+            ctx,
+        }
+    }
+}
+
+impl From<Settings> for Backend {
+    fn from(cnf: Settings) -> Self {
+        Self::from(Context::new(cnf))
     }
 }

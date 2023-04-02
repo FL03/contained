@@ -17,3 +17,14 @@ pub struct Setup {
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub wasm: bool
 }
+
+impl Setup {
+    pub fn new(platform: String, wasm: bool) -> Self {
+        Self {
+            platform,
+            wasm
+        }
+    }
+    
+    
+}

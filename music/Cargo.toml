@@ -11,12 +11,12 @@ readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 test = true
-
-[features]
-default = []
 
 [build-dependencies]
 
@@ -34,6 +34,8 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 tokio.workspace = true
+tracing.workspace = true
+wasmer.workspace = true
 
 [dev-dependencies]
 

@@ -7,6 +7,8 @@
 pub use contained_core as core;
 #[cfg(feature = "music")]
 pub use contained_music as music;
+#[cfg(feature = "net")]
+pub use contained_net as net;
 
 pub use self::{primitives::*, utils::*};
 
@@ -14,7 +16,8 @@ mod primitives;
 mod utils;
 
 pub mod backend;
-pub mod handle;
+pub mod clients;
+pub mod connect;
 pub mod rt;
 
 pub mod prelude {
@@ -27,5 +30,7 @@ pub mod prelude {
     #[cfg(feature = "core")]
     pub use super::core::*;
     #[cfg(feature = "music")]
-    pub use super::music::{classes::*, intervals::*, neo::*};
+    pub use super::music::{chords::*, intervals::*, neo::*};
+    #[cfg(feature = "net")]
+    pub use super::net::*;
 }

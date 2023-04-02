@@ -5,7 +5,7 @@
 */
 pub use self::{constants::*, types::*};
 
-pub(crate) mod constants {
+mod constants {
     /// Used to describe the total number of notes considered
     pub const MODULUS: i64 = 12;
     /// A semitone is half of a tone
@@ -14,7 +14,7 @@ pub(crate) mod constants {
     pub const TONE: i64 = 2;
 }
 
-pub(crate) mod types {
+mod types {
     use futures::Stream;
 
     pub type BoxedError = Box<dyn std::error::Error>;

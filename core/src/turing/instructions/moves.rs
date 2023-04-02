@@ -5,7 +5,7 @@
 
 */
 use crate::turing::Tape;
-use crate::{ArrayLike, Symbolic};
+use crate::{turing::Symbolic, ArrayLike};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

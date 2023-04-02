@@ -4,8 +4,8 @@
     Description: ... Summary ...
 */
 use super::instructions::Instruction;
-use super::{Driver, Program, Tape, Turing};
-use crate::{Alphabet, ArrayLike, Error, Scope, State, Stateful, Symbolic, Translate};
+use super::{Alphabet, Driver, Program, Symbolic, Tape, Turing};
+use crate::{ArrayLike, Error, Scope, State, Stateful, Translate};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]
@@ -110,6 +110,6 @@ impl<S: Symbolic> Translate<S> for Machine<S> {
     fn translate(&mut self, tape: Tape<S>) -> Result<Tape<S>, Self::Error> {
         self.driver = Driver::from(tape);
         self.execute()?;
-        Ok(self.driver.tape().clone())
+        Ok(self.driver.tape())
     }
 }

@@ -180,10 +180,7 @@ impl<P: Gradient> std::ops::SubAssign<P> for Pitch {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        classes::{Accidentals, PitchClass},
-        Gradient,
-    };
+    use crate::{Accidentals, Gradient, PitchClass};
 
     #[test]
     fn test_pitch_class() {

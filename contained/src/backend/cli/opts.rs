@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use clap::Subcommand;
+use clap::{ArgAction, Subcommand};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -26,6 +26,18 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Opts {
+    Execute {
+        #[clap(long, short)]
+        space: Option<String>,
+        #[clap(long, short)]
+        workload: String,
+    },
+    Network {
+        #[arg(action = ArgAction::SetTrue, long, short)]
+        detached: bool,
+        #[arg(action = ArgAction::SetTrue, long, short)]
+        up: bool,
+    },
     Setup {
         #[clap(long, short)]
         addr: String,

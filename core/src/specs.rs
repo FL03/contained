@@ -5,9 +5,9 @@
 */
 use crate::{
     states::{State, Stateful},
-    turing::{instructions::Move, Tape},
-    Symbolic,
+    turing::{instructions::Move, Symbolic, Tape},
 };
+
 use std::ops::{Index, IndexMut};
 use std::vec;
 

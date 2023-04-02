@@ -12,7 +12,8 @@ mod thirds;
 
 use crate::{Gradient, Note};
 
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
+use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -27,6 +28,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -49,7 +51,7 @@ pub enum Interval {
 impl Interval {
     pub fn new(from: Note, to: Note) -> Self {
         let interval = to.pitch() - from.pitch();
-        match interval {
+        match interval.abs() {
             1 => Interval::Semitone,
             2 => Interval::Tone,
             3 => Interval::Third(Thirds::Minor),
@@ -73,11 +75,13 @@ impl Interval {
         let interval: i64 = self.clone().into();
         (note.pitch() - interval).into()
     }
-}
-
-impl Hashable for Interval {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
+    pub fn intervals(iter: impl IntoIterator<Item = Note>) -> Vec<Self> {
+        let mut intervals = Vec::new();
+        let notes = Vec::from_iter(iter);
+        for (a, b) in notes.into_iter().circular_tuple_windows() {
+            intervals.push(Interval::new(a, b));
+        }
+        intervals
     }
 }
 
@@ -98,6 +102,18 @@ impl From<Interval> for i64 {
 impl From<Fifths> for Interval {
     fn from(data: Fifths) -> Interval {
         Interval::Fifth(data)
+    }
+}
+
+impl From<Fourths> for Interval {
+    fn from(data: Fourths) -> Interval {
+        Interval::Fourth(data)
+    }
+}
+
+impl From<Sevenths> for Interval {
+    fn from(data: Sevenths) -> Interval {
+        Interval::Seventh(data)
     }
 }
 
@@ -165,5 +181,18 @@ mod tests {
     #[test]
     fn test_interval() {
         assert_eq!(Interval::from(Thirds::Major) + Note::from(0), Note::from(4))
+    }
+
+    #[test]
+    fn test_intervals() {
+        let notes = vec![Note::from(0), Note::from(4), Note::from(7)];
+        assert_eq!(
+            Interval::intervals(notes),
+            vec![
+                Interval::Third(Thirds::Major),
+                Interval::Third(Thirds::Minor),
+                Interval::Fifth(Fifths::Perfect)
+            ]
+        )
     }
 }

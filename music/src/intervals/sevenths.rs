@@ -10,7 +10,7 @@
             Diminished (9)
 */
 use crate::{BoxedError, Gradient, Note};
-use decanter::prelude::{hasher, Hashable, H256};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -25,6 +25,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -61,12 +62,6 @@ impl Sevenths {
         };
         let pitch = note.pitch() + interval;
         Note::from(pitch)
-    }
-}
-
-impl Hashable for Sevenths {
-    fn hash(&self) -> H256 {
-        hasher(self).into()
     }
 }
 
