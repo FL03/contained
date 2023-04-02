@@ -7,4 +7,3 @@ pub use self::{clef::*, stave::*};
 
 mod clef;
 mod stave;
-

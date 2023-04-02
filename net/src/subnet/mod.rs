@@ -9,7 +9,7 @@ pub use self::events::*;
 mod events;
 
 pub mod layer;
-pub mod reqres;
+pub mod proto;
 
 use crate::peers::*;
 use crate::Conduct;
@@ -24,7 +24,7 @@ pub struct Subnet {
     pub freq: ping::Behaviour,
     pub kademlia: Kademlia<MemoryStore>,
     pub mdns: mdns::tokio::Behaviour,
-    pub reqres: reqres::ProtoBehaviour,
+    pub reqres: proto::reqres::ProtoBehaviour,
 }
 
 impl Subnet {
@@ -33,7 +33,7 @@ impl Subnet {
             freq: Default::default(),
             kademlia,
             mdns,
-            reqres: reqres::new(),
+            reqres: proto::reqres::new(),
         }
     }
 }

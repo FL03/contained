@@ -6,6 +6,5 @@
 use tokio::time::Interval;
 
 pub struct Measure {
-    
     interval: Interval,
 }

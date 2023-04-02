@@ -43,18 +43,6 @@ impl Triad {
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, TriadClass::from((a, b)))
     }
-
-    pub fn instance(&self) -> Surface {
-        Surface::new(self.clone())
-    }
-
-    pub fn tonic(&self) -> Tonic {
-        Tonic::new(self.instance())
-    }
-
-    pub fn program(&self) -> Program<Note> {
-        Program::new(self.clone(), State::Invalid)
-    }
 }
 
 impl Alphabet<Note> for Triad {

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: Custom Network Events
 */
-use super::reqres::ReqResEvent;
+use super::proto::reqres::ReqResEvent;
 use libp2p::{kad, mdns, ping};
 
 /// [Events] describes the events considered by the network

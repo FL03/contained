@@ -10,7 +10,7 @@ use tokio::time;
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Frequency {
     pub cycle: usize,
-    pub period: Duration
+    pub period: Duration,
 }
 
 impl Frequency {
