@@ -79,11 +79,11 @@ pub enum CRUDFrame<T: Serialize = String> {
     #[default]
     Request {
         addr: String,
-        crud: CRUD,
+        method: CRUD,
         payload: Option<T>,
     },
     Response {
-        crud: CRUD,
+        method: CRUD,
         payload: Option<T>,
         status: CRUDStatus,
     },

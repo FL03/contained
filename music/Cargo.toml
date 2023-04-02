@@ -11,12 +11,12 @@ readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
+[features]
+default = []
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 test = true
-
-[features]
-default = []
 
 [build-dependencies]
 

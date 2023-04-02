@@ -6,8 +6,7 @@
 use super::Settings;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-#[derive(Default)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Default)]
 pub struct Context {
     cnf: Settings,
 }
@@ -20,5 +19,3 @@ impl Context {
         &self.cnf
     }
 }
-
-

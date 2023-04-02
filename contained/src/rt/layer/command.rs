@@ -6,7 +6,6 @@
 use crate::prelude::{EnvId, WorkloadId};
 use crate::rt::{Environment, Workload};
 
-
 #[derive(Debug)]
 pub enum Command {
     Add { workload: Workload },

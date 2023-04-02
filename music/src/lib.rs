@@ -6,16 +6,16 @@
 pub use self::{errors::*, notes::*, primitives::*, utils::*};
 
 pub mod chords;
-pub mod clef;
-pub mod epoch;
 pub mod frequency;
 pub mod intervals;
+pub mod measure;
 pub mod neo;
+pub mod score;
 
-pub(crate) mod errors;
-pub(crate) mod notes;
-pub(crate) mod primitives;
-pub(crate) mod utils;
+mod errors;
+mod notes;
+mod primitives;
+mod utils;
 
 use intervals::Interval;
 use std::ops::{AddAssign, SubAssign};

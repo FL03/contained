@@ -48,9 +48,9 @@ impl Default for Channels {
 }
 
 pub struct Node {
-    pub chan: Channels,
-    pub queue: Queue,
-    pub swarm: Swarm<Subnet>,
+    chan: Channels,
+    queue: Queue,
+    swarm: Swarm<Subnet>,
 }
 
 impl Node {

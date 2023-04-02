@@ -8,9 +8,7 @@ use crate::neo::LPR;
 use contained_core::{AsyncStateful, Shared, State};
 use decanter::prelude::{Hashable, H256};
 use std::sync::{Arc, Mutex};
-use wasmer::{FunctionEnv, Imports, Store, imports};
-
-
+use wasmer::{imports, FunctionEnv, Imports, Store};
 
 #[derive(Clone, Debug, Default, Hashable)]
 pub struct Surface {

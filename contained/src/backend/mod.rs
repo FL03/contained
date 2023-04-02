@@ -7,9 +7,8 @@ pub mod cli;
 
 use crate::clients::Client;
 use crate::net::node::Node;
-use crate::prelude::{Resultant};
+use crate::prelude::Resultant;
 use cli::{Cli, Opts};
-
 
 pub struct Backend {
     client: Client,

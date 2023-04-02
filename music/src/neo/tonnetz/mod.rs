@@ -18,7 +18,7 @@ mod cluster;
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
 use algae::graph::{Graph, UndirectedGraph};
-use decanter::prelude::{Hashable, H256, Iter};
+use decanter::prelude::{Hashable, Iter, H256};
 use std::sync::{Arc, Mutex};
 
 pub trait Link: Hashable {
