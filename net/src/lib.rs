@@ -10,8 +10,6 @@ mod primitives;
 mod specs;
 mod utils;
 
-pub mod client;
 pub mod events;
-pub mod node;
 pub mod peers;
 pub mod subnet;

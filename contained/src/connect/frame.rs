@@ -5,20 +5,19 @@
         This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for
         the `Connection` type.
 */
-use crate::prelude::{EnvId, Error, WorkloadId};
-use bytes::Buf;
+use crate::prelude::Error;
+use bytes::{Buf, Bytes};
 use serde::{Deserialize, Serialize};
+use wasmer::Module;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Frame {
-    Environment { id: EnvId },
+    Bulk(Vec<Bytes>),
+    WasmBytes(Bytes),
     Error(Error),
-    Null,
-    Triad { id: EnvId, value: i32 },
-    Workload { id: WorkloadId, module: u32 },
 }
 
-impl Frame {
+impl Frame  {
     pub fn check(buf: &mut impl Buf) -> Result<(), Error> {
         // Check if the buffer has enough data to read the length
         if buf.remaining() < 4 {
@@ -59,22 +58,15 @@ impl Frame {
         match frame_type {
             0 => {
                 // Parse the environment
-                let id = serde_json::from_slice::<EnvId>(&data)?;
+                let data = serde_json::from_slice::<Vec<Bytes>>(&data)?;
 
-                Ok(Self::Environment { id })
+                Ok(Self::Bulk(data))
             }
-            2 => Ok(Self::Null),
-            3 => {
+            1 => {
                 // Parse the triad
-                let (id, value) = serde_json::from_slice::<(EnvId, i32)>(&data)?;
+                let workload = serde_json::from_slice::<Bytes>(&data.clone())?;
 
-                Ok(Self::Triad { id, value })
-            }
-            4 => {
-                // Parse the workload
-                let (id, module) = serde_json::from_slice::<(WorkloadId, u32)>(&data)?;
-
-                Ok(Self::Workload { id, module })
+                Ok(Self::WasmBytes(workload))
             }
             _ => {
                 // Parse the error

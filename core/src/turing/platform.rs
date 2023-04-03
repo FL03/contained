@@ -4,8 +4,8 @@
     Description: ... Summary ...
 */
 use super::instructions::Instruction;
-use super::{Alphabet, Driver, Program, Symbolic, Tape, Turing};
-use crate::{ArrayLike, Error, Scope, State, Stateful, Translate};
+use super::{Alphabet, Driver, Program, Scope, Symbolic, Tape, Translate, Turing};
+use crate::{ArrayLike, Error, State, Stateful};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]

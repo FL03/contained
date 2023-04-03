@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::turing::{instructions::Instruction, Alphabet, Program, Symbolic};
-use crate::{Error, Scope, State, Stateful};
+use super::{instructions::Instruction, Alphabet, Program, Scope, Symbolic};
+use crate::{Error, State, Stateful};
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
 use predicates::Predicate;

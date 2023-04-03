@@ -27,7 +27,9 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub enum Error {
     AsyncError(AsyncError),
     CapacityError(String),
+    CompileError(String),
     ConnectionError(String),
+    ExportError(String),
     #[default]
     Error(String),
     ExecutionError(String),
@@ -44,6 +46,7 @@ pub enum Error {
     TranslateError,
     TransformError,
     TapeError,
+    RuntimeError(String),
     ValidationError,
 }
 
@@ -88,5 +91,29 @@ impl<T> From<tokio::sync::mpsc::error::SendError<T>> for Error {
 impl From<tokio::sync::oneshot::error::RecvError> for Error {
     fn from(error: tokio::sync::oneshot::error::RecvError) -> Self {
         Error::AsyncError(error.into())
+    }
+}
+
+impl From<wasmer::CompileError> for Error {
+    fn from(error: wasmer::CompileError) -> Self {
+        Error::CompileError(error.to_string())
+    }
+}
+
+impl From<wasmer::ExportError> for Error {
+    fn from(error: wasmer::ExportError) -> Self {
+        Error::ExportError(error.to_string())
+    }
+}
+
+impl From<wasmer::RuntimeError> for AsyncError {
+    fn from(error: wasmer::RuntimeError) -> Self {
+        Self::RuntimeError(error.to_string())
+    }
+}
+
+impl From<wasmer::WasmError> for Error {
+    fn from(error: wasmer::WasmError) -> Self {
+        Error::ExecutionError(error.to_string())
     }
 }

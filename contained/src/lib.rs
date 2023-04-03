@@ -15,17 +15,15 @@ pub use self::{primitives::*, utils::*};
 mod primitives;
 mod utils;
 
+pub mod agents;
 pub mod backend;
-pub mod clients;
 pub mod connect;
-pub mod rt;
+pub mod vm;
 
 pub mod prelude {
     pub use super::backend::cli::*;
     pub use super::backend::*;
     pub use super::*;
-
-    pub use super::rt::*;
 
     #[cfg(feature = "core")]
     pub use super::core::*;

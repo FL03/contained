@@ -10,13 +10,13 @@
         Subnets or clusters are made up of physical nodes, optimized for the execution of various workloads and services. Each device registered to the system is partitioned into a set of locally persisted
         triads,
 */
-pub use self::queue::*;
+pub use self::{channels::*, queue::*};
 
+mod channels;
 mod queue;
 
-use crate::events::NetworkEvent;
+use super::{Subnet, SubnetEvent};
 use crate::peers::{Peer, Peerable};
-use crate::subnet::{layer::Command, Subnet, SubnetEvent};
 use crate::NetworkResult;
 use futures::StreamExt;
 use libp2p::kad::{self, KademliaEvent, QueryResult};
@@ -24,28 +24,7 @@ use libp2p::multiaddr::Protocol;
 use libp2p::request_response;
 use libp2p::swarm::{SwarmEvent, THandlerErr};
 use libp2p::{mdns, Swarm};
-use tokio::sync::{mpsc, oneshot};
-
-#[derive(Debug)]
-pub struct Channels {
-    pub cmd: mpsc::Receiver<Command>,
-    pub event: mpsc::Sender<NetworkEvent>,
-}
-
-impl Channels {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            cmd: mpsc::channel(capacity).1,
-            event: mpsc::channel(capacity).0,
-        }
-    }
-}
-
-impl Default for Channels {
-    fn default() -> Self {
-        Self::new(9)
-    }
-}
+use tokio::sync::oneshot;
 
 pub struct Node {
     chan: Channels,

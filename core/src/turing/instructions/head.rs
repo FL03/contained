@@ -5,8 +5,8 @@
         The instruction head is a two-tuple (State, Symbol)
 */
 use crate::{
-    turing::{Driver, Symbolic},
-    Scope, State, Stateful,
+    turing::{Driver, Scope, Symbolic},
+    State, Stateful,
 };
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};

@@ -31,6 +31,7 @@ pub enum AsyncError {
     Error(String),
     IOError(String),
     RecvError(String),
+    RuntimeError(String),
     SendError(String),
 }
 

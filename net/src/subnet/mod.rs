@@ -8,7 +8,9 @@ pub use self::events::*;
 
 mod events;
 
+pub mod client;
 pub mod layer;
+pub mod node;
 pub mod proto;
 
 use crate::peers::*;

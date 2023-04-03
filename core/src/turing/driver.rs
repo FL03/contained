@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{Symbolic, Tape};
-use crate::{ArrayLike, Include, Insert, Scope, State, Stateful};
+use super::{Scope, Symbolic, Tape};
+use crate::{ArrayLike, Include, Insert, State, Stateful};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;

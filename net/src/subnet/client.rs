@@ -3,12 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::light::*;
-
-mod light;
-
-use crate::subnet::layer::Command;
-
+use super::layer::Command;
 use crate::NetworkResult;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;

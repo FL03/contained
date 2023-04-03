@@ -5,13 +5,12 @@ pub(crate) mod settings;
 
 pub mod cli;
 
-use crate::clients::Client;
-use crate::net::node::Node;
+use crate::net::subnet::node::Node;
 use crate::prelude::Resultant;
+use crate::vm::Client;
 use cli::{Cli, Opts};
 
 pub struct Backend {
-    client: Client,
     ctx: Context,
 }
 
@@ -20,10 +19,7 @@ impl Backend {
         let cnf = Settings::default();
         let ctx = Context::new(cnf);
 
-        Self {
-            client: Client::default(),
-            ctx,
-        }
+        Self { ctx }
     }
     pub fn context(&self) -> &Context {
         &self.ctx
@@ -31,11 +27,7 @@ impl Backend {
     pub async fn handle_cli(&mut self, cli: Cli) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
-                Opts::Execute { space, workload } => {
-                    self.client
-                        .run(space.unwrap_or_else(|| "origin".to_string()), workload)
-                        .await?;
-                }
+                Opts::Execute { space, workload } => {}
                 Opts::Network { detached, up } => {
                     let network = Node::default();
                     if up {
@@ -80,10 +72,7 @@ impl Default for Backend {
 
 impl From<Context> for Backend {
     fn from(ctx: Context) -> Self {
-        Self {
-            client: Client::default(),
-            ctx,
-        }
+        Self { ctx }
     }
 }
 
