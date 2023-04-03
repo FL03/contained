@@ -4,8 +4,8 @@
     Description: A tonic is traditionally used to to describe the first degree (note) of the diatonic scale.
         Here, a tonic is used to describe a unit-computing machine that is capable of either executing a program or transforming its scope.
 */
-use super::{Surface, Triad, LPR};
-use contained_core::{BoxedWasmValue, Shared};
+use crate::music::neo::{triads::{Surface, Triad}, LPR};
+use crate::prelude::{BoxedWasmValue, Shared};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
