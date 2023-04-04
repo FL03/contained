@@ -24,26 +24,14 @@ impl VirtualEnv {
     pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
         FunctionEnv::new(store, self.clone())
     }
-    pub fn imports(&self, store: &mut Store) -> Imports {
-        let get_counter =
-            |env: FunctionEnvMut<VirtualEnv>| -> i32 { *env.data().value.lock().unwrap() };
-        let add_to_counter = |env: FunctionEnvMut<VirtualEnv>, add: i32| -> i32 {
-            let mut counter_ref = env.data().value.lock().unwrap();
-
-            *counter_ref += add;
-            *counter_ref
+    pub fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports {
+        let mut base = imports! {
+            "env" => {}
         };
-        let env = self.function_env(store);
-        let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
-
-        let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
-
-        imports! {
-            "env" => {
-                "get_counter" => get_counter_func,
-                "add_to_counter" => add_to_counter_func,
-            }
+        if let Some(with) = with {
+            base.extend(&with);
         }
+        base
     }
 }
 

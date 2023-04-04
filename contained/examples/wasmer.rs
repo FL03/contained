@@ -5,6 +5,7 @@ use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
 use tokio::sync::mpsc;
 use wasmer::{wat2wasm, Module, Store};
+use wasmer::{Function, FunctionEnvMut};
 
 /// A sample Wasm module that exports a function called `increment`.
 static COUNTER_MODULE: &[u8] = br#"
@@ -36,16 +37,42 @@ async fn main() -> AsyncResult {
     Ok(())
 }
 
+fn extra_imports(store: &mut Store, venv: VirtualEnv) -> wasmer::Imports {
+    fn get_counter(env: FunctionEnvMut<VirtualEnv>) -> i32 {
+        *env.data().value.lock().unwrap()
+    }
+    fn add_to_counter(env: FunctionEnvMut<VirtualEnv>, add: i32) -> i32 {
+        let mut counter_ref = env.data().value.lock().unwrap();
+
+        *counter_ref += add;
+        *counter_ref
+    }
+    let env = venv.function_env(store);
+    let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
+
+    let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
+
+    wasmer::imports! {
+        "env" => {
+            "get_counter" => get_counter_func,
+            "add_to_counter" => add_to_counter_func,
+        }
+    }
+}
+
 async fn agents() -> AsyncResult {
+    let venv = VirtualEnv::new(0);
     // Initialize a new store
-    let store = Store::default();
+    let mut store = Store::default();
     // Initialize a new module
     let module = Module::new(&store, counter_module()).unwrap();
+    let imports = extra_imports(&mut store, venv.clone());
     // Initialize new mpsc channels for sending and receiving commands
     let (tx_cmd, rx_cmd) = mpsc::channel(9);
     // Initialize a new agent; set the environment; then spawn it on a new thread
     Agent::new(rx_cmd)
-        .set_environment(VirtualEnv::default())
+        .set_environment(venv.clone())
+        .with_store(store)
         .spawn();
     // Initialize a new client
     let mut client = Client::new(tx_cmd);
@@ -57,6 +84,7 @@ async fn agents() -> AsyncResult {
             hasher(module.clone().serialize()?).into(),
             "sample".to_string(),
             Box::new([15.into()]),
+            Some(imports),
         )
         .await?;
     Ok(())

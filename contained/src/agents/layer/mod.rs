@@ -10,7 +10,7 @@ mod frame;
 use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
-use scsys::prelude::AsyncResult;
+use wasmer::Imports;
 
 #[derive(Debug)]
 pub enum Command {
@@ -18,6 +18,7 @@ pub enum Command {
         module: H256,
         function: String,
         args: BoxedWasmValue,
+        with: Option<Imports>,
     },
     Include {
         bytes: Vec<u8>,
@@ -29,11 +30,12 @@ pub enum Command {
 }
 
 impl Command {
-    pub fn execute(module: H256, function: String, args: BoxedWasmValue) -> Self {
+    pub fn execute(module: H256, function: String, args: BoxedWasmValue, with: Option<Imports>) -> Self {
         Self::Execute {
             module,
             function,
             args,
+            with
         }
     }
     pub fn include(bytes: Vec<u8>) -> Self {

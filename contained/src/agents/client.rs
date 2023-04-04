@@ -4,6 +4,7 @@
     Description: This module implements the client for engaging with an actor
 */
 use super::layer::Command;
+use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
 use scsys::prelude::AsyncResult;
 use tokio::sync::mpsc;
@@ -20,10 +21,11 @@ impl Client {
         &mut self,
         module: H256,
         function: String,
-        args: Box<[wasmer::Value]>,
+        args: BoxedWasmValue,
+        imports: Option<wasmer::Imports>,
     ) -> AsyncResult {
         self.cmd
-            .send(Command::execute(module, function, args))
+            .send(Command::execute(module, function, args, imports))
             .await?;
         Ok(())
     }

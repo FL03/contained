@@ -45,12 +45,13 @@ impl Agent {
                 module,
                 function,
                 args,
+                with: imports
             } => {
                 let modules = self.stack.lock().unwrap().modules.clone();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
-                let imports = self.env.lock().unwrap().imports(&mut self.store);
+                let imports = self.env.lock().unwrap().imports(&mut self.store, imports);
                 tracing::info!("Instantiating module with the imported host functions");
                 let instance = Instance::new(&mut self.store, &module, &imports)
                     .expect("Failed to instantiate module");
@@ -85,5 +86,9 @@ impl Agent {
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
         tokio::spawn(self.run())
+    }
+    pub fn with_store(mut self, store: Store) -> Self {
+        self.store = store;
+        self
     }
 }
