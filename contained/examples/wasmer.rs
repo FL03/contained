@@ -3,7 +3,6 @@ extern crate contained_sdk as contained;
 use contained::agents::{client::Client, Agent, VirtualEnv};
 use contained::prelude::BoxedWasmValue;
 use scsys::prelude::AsyncResult;
-use tokio::sync::mpsc;
 use wasmer::{wat2wasm, Store};
 use wasmer::{Function, FunctionEnvMut};
 
@@ -71,17 +70,16 @@ async fn agents(
     venv: VirtualEnv,
 ) -> AsyncResult<BoxedWasmValue> {
     let func = "sample";
-    // Initialize new mpsc channels for sending and receiving commands
-    let (tx_cmd, rx_cmd) = mpsc::channel(9);
     // Create a new imports object to be included with the provided venv
     let imports = extra_imports(&mut store, venv.clone());
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    Agent::new(rx_cmd)
+    let (agent, tx) = Agent::new(9);
+    agent
         .set_environment(venv)
         .with_store(store)
         .spawn();
     // Initialize a new client
-    let mut client = Client::new(tx_cmd);
+    let mut client = Client::new(tx);
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module

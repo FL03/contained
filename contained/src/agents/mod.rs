@@ -10,7 +10,6 @@ mod environment;
 
 pub mod client;
 pub mod layer;
-pub mod tonic;
 
 use decanter::prelude::H256;
 use std::collections::HashMap;

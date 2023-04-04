@@ -5,7 +5,6 @@
 */
 use super::{layer::Command, Stack, VirtualEnv};
 use crate::prelude::{hash_module, Shared, State};
-use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
@@ -20,14 +19,18 @@ pub struct Agent {
 }
 
 impl Agent {
-    pub fn new(cmd: mpsc::Receiver<Command>) -> Self {
-        Self {
+    pub fn new(buffer: usize) -> (Self, mpsc::Sender<Command>) {
+        let (cmd, rx) = mpsc::channel(buffer);
+        (
+            Self {
+                cmd: rx,
+                env: Arc::new(Mutex::new(VirtualEnv::default())),
+                stack: Arc::new(Mutex::new(Stack::new())),
+                state: Arc::new(Mutex::new(State::default())),
+                store: Store::default(),
+            },
             cmd,
-            env: Arc::new(Mutex::new(VirtualEnv::default())),
-            stack: Arc::new(Mutex::new(Stack::new())),
-            state: Arc::new(Mutex::new(State::default())),
-            store: Store::default(),
-        }
+        )
     }
     pub async fn handle_command(&mut self, cmd: Command) -> AsyncResult {
         match cmd {
@@ -87,6 +90,10 @@ impl Agent {
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<AsyncResult> {
         tokio::spawn(self.run())
+    }
+    pub fn with_stack(mut self, stack: Stack) -> Self {
+        self.stack = Arc::new(Mutex::new(stack));
+        self
     }
     pub fn with_store(mut self, store: Store) -> Self {
         self.store = store;
