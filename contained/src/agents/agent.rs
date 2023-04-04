@@ -3,27 +3,13 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::layer::Command;
-use super::VirtualEnv;
+use super::{layer::Command, Stack, VirtualEnv};
 use crate::prelude::{Shared, State};
-use decanter::prelude::{hasher, H256};
+use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
-use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use wasmer::{Instance, Module, Store};
-
-pub struct Stack {
-    pub modules: HashMap<H256, Module>,
-}
-
-impl Stack {
-    pub fn new() -> Self {
-        Self {
-            modules: HashMap::new(),
-        }
-    }
-}
 
 pub struct Agent {
     pub cmd: mpsc::Receiver<Command>,

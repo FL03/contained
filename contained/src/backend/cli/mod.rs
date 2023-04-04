@@ -16,7 +16,6 @@ use serde::{Deserialize, Serialize};
 pub struct Cli {
     #[clap(subcommand)]
     pub opts: Option<Opts>,
-
     #[arg(action = ArgAction::SetTrue, long, short,)]
     pub verbose: bool,
 }

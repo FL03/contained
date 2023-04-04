@@ -10,6 +10,7 @@ mod frame;
 use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
+use scsys::prelude::AsyncResult;
 
 #[derive(Debug)]
 pub enum Command {

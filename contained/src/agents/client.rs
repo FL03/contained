@@ -16,7 +16,6 @@ impl Client {
     pub fn new(cmd: mpsc::Sender<Command>) -> Self {
         Self { cmd }
     }
-
     pub async fn execute(
         &mut self,
         module: H256,

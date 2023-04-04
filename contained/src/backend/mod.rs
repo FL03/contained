@@ -5,6 +5,7 @@ pub(crate) mod settings;
 
 pub mod cli;
 
+use crate::net::peers::*;
 use crate::net::subnet::node::Node;
 use crate::prelude::Resultant;
 use cli::{Cli, Opts};
@@ -27,10 +28,19 @@ impl Backend {
         if let Some(opts) = cli.opts {
             match opts {
                 Opts::Execute { .. } => todo!("Execute command"),
-                Opts::Network { detached, up } => {
-                    let network = Node::default();
-                    if up {
-                        if detached {
+                Opts::Network(net) => {
+                    let peer = if let Some(seed) = net.seed {
+                        Peer::try_from(seed).unwrap_or_default()
+                    } else {
+                        Peer::default()
+                    };
+                    tracing::info!("Peer: {:?}", peer.pid());
+
+                    let network = Node::from(peer);
+                    if net.up {
+                        tracing::info!("Starting network...");
+                        if net.detached {
+                            tracing::info!("Spawning a detached instance of the node...");
                             let _ = network.spawn();
                         } else {
                             let _ = network.spawn().await.expect("");
@@ -38,7 +48,6 @@ impl Backend {
                     }
                 }
                 Opts::Setup { .. } => todo!("Setup command"),
-                Opts::Start { .. } => todo!("Start command"),
             }
         };
 
