@@ -5,7 +5,7 @@
         The primary motivation for this was to support operations on a custom frame
 */
 use super::Frame;
-use crate::core::Error;
+use crate::Error;
 use bytes::{Buf, BytesMut};
 use std::io::Cursor;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};

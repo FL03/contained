@@ -5,15 +5,13 @@
         This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for
         the `Connection` type.
 */
-use crate::prelude::Error;
-use bytes::{Buf, Bytes};
+use crate::Error;
+use bytes::Buf;
 use serde::{Deserialize, Serialize};
-use wasmer::Module;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd,Serialize)]
 pub enum Frame {
-    Bulk(Vec<Bytes>),
-    WasmBytes(Bytes),
     Error(Error),
 }
 
@@ -56,18 +54,6 @@ impl Frame  {
 
         // Parse the frame
         match frame_type {
-            0 => {
-                // Parse the environment
-                let data = serde_json::from_slice::<Vec<Bytes>>(&data)?;
-
-                Ok(Self::Bulk(data))
-            }
-            1 => {
-                // Parse the triad
-                let workload = serde_json::from_slice::<Bytes>(&data.clone())?;
-
-                Ok(Self::WasmBytes(workload))
-            }
             _ => {
                 // Parse the error
                 let error = serde_json::from_slice::<Error>(&data)?;

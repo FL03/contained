@@ -1,9 +1,9 @@
 extern crate contained_sdk as contained;
 
-use contained::prelude::Shared;
-use contained::vm::{Client, Computer, VirtualEnv};
+use contained::agents::{client::Client, Agent};
+use contained::vm::VirtualEnv;
+use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
-use std::collections::HashMap;
 use tokio::sync::mpsc;
 use wasmer::{wat2wasm, Module, Store};
 
@@ -33,55 +33,25 @@ async fn main() -> AsyncResult {
     // Initialize the tracing layer
     std::env::set_var("RUST_LOG", "info");
     tracing_subscriber::fmt::init();
-    // Initialize a new store
-    let store = Store::default();
-    // Initialize a new module
-    let module = Module::new(&store, counter_module())?;
-    // Initialize new mpsc channels for sending and receiving modules
-    let (tx_module, rx_module) = mpsc::channel(9);
-    // Initialize new mpsc channels for sending and receiving results
-    let (tx_result, rx_result) = mpsc::channel(9);
-    // Initialize new mpsc channels for sending and receiving transformations
-    let (tx_dirac, rx_dirac) = mpsc::channel(9);
-    // Initialize a new computer; set the environment; then spawn it on a new thread
-    Computer::new(rx_module, tx_result, rx_dirac)
-        .set_environment(VirtualEnv::default())
-        .spawn();
-    // Initialize a new client
-    let mut client = Client::new(tx_module, rx_result, tx_dirac);
-    // Add a workload to the client
-    client.add_workload(module).await?;
-    // Cache the results of the computer
-    let cache = client.cache_results().await?;
-    // Assert that a single result was returned
-    assert_eq!(cache.len(), 1);
-    // Grab the result
-    let res = {
-        let key = cache.keys().next().unwrap();
-        cache.get(key).unwrap()[0].i32().unwrap()
-    };
-    // Assert that the result is 5
-    assert_eq!(res, 5);
+    agents().await?;
     Ok(())
 }
 
-#[derive(Debug)]
-pub struct Cluster {
-    pub clients: HashMap<String, Shared<Client>>,
-    pub computers: HashMap<String, Shared<Computer>>,
-}
-
-impl Cluster {
-    pub fn new() -> Self {
-        Self {
-            clients: HashMap::new(),
-            computers: HashMap::new(),
-        }
-    }
-    pub fn add_computer(&mut self, id: String, computer: Shared<Computer>) {
-        self.computers.insert(id, computer);
-    }
-    pub fn get_computer(&self, id: String) -> Option<Shared<Computer>> {
-        self.computers.get(&id).cloned()
-    }
+async fn agents() -> AsyncResult {
+    // Initialize a new store
+    let store = Store::default();
+    // Initialize a new module
+    let module = Module::new(&store, counter_module()).unwrap();
+    // Initialize new mpsc channels for sending and receiving commands
+    let (tx_cmd, rx_cmd) = mpsc::channel(9);
+    // Initialize a new agent; set the environment; then spawn it on a new thread
+    Agent::new(rx_cmd)
+        .set_environment(VirtualEnv::default())
+        .spawn();
+    // Initialize a new client
+    let mut client = Client::new(tx_cmd);
+    // Send the module to the agent
+    client.include(COUNTER_MODULE.to_vec()).await?;
+    client.execute(hasher(module.clone().serialize()?).into(), "increment".to_string(), Box::new([5.into()])).await?;
+    Ok(())
 }

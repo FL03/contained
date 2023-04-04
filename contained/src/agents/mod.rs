@@ -7,6 +7,7 @@ pub use self::agent::*;
 
 mod agent;
 
+pub mod client;
 pub mod layer;
 pub mod tonic;
 

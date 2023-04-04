@@ -17,7 +17,7 @@ mod utils;
 
 pub mod agents;
 pub mod backend;
-pub mod connect;
+pub mod cluster;
 pub mod vm;
 
 pub mod prelude {
