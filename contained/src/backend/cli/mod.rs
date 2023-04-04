@@ -21,6 +21,9 @@ pub struct Cli {
 }
 
 impl Cli {
+    pub fn opts(&self) -> Option<Opts> {
+        self.opts.clone()
+    }
     pub fn verbose(&self) -> bool {
         self.verbose
     }

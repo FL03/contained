@@ -14,6 +14,8 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub struct Network {
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub detached: bool,
+    #[clap(long)]
+    pub dial: Option<String>,
     #[clap(long, short)]
     pub listen: Option<String>,
     #[clap(long, short)]

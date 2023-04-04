@@ -43,8 +43,8 @@ impl Node {
     pub async fn handle_event(&mut self, event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>) {
         match event {
             // Handle custom networking events
-            SwarmEvent::Behaviour(b) => match b {
-                SubnetEvent::Kademlia(k) => match k {
+            SwarmEvent::Behaviour(subnet) => match subnet {
+                SubnetEvent::Kademlia(kademlia) => match kademlia {
                     KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
                         QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {

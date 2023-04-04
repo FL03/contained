@@ -25,6 +25,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "title_case")]
 pub enum AsyncError {
+    BufError(String),
     CapacityError(String),
     ConnectionError(String),
     #[default]
@@ -33,6 +34,13 @@ pub enum AsyncError {
     RecvError(String),
     RuntimeError(String),
     SendError(String),
+    SyncError(String),
+}
+
+impl AsyncError {
+    pub fn boxed(self) -> Box<Self> {
+        Box::new(self)
+    }
 }
 
 impl std::error::Error for AsyncError {}
@@ -55,15 +63,33 @@ impl From<anyhow::Error> for AsyncError {
     }
 }
 
-impl From<std::io::Error> for AsyncError {
-    fn from(error: std::io::Error) -> Self {
+impl From<serde_json::Error> for AsyncError {
+    fn from(error: serde_json::Error) -> Self {
+        Self::Error(error.to_string())
+    }
+}
+
+impl From<tokio::io::Error> for AsyncError {
+    fn from(error: tokio::io::Error) -> Self {
         Self::IOError(error.to_string())
     }
 }
 
-impl From<serde_json::Error> for AsyncError {
-    fn from(error: serde_json::Error) -> Self {
-        Self::Error(error.to_string())
+impl From<tokio::net::tcp::ReuniteError> for AsyncError {
+    fn from(error: tokio::net::tcp::ReuniteError) -> Self {
+        Self::ConnectionError(error.to_string())
+    }
+}
+
+impl From<tokio::sync::AcquireError> for AsyncError {
+    fn from(error: tokio::sync::AcquireError) -> Self {
+        Self::ConnectionError(error.to_string())
+    }
+}
+
+impl<T> From<tokio::sync::SetError<T>> for AsyncError {
+    fn from(error: tokio::sync::SetError<T>) -> Self {
+        Self::ConnectionError(error.to_string())
     }
 }
 

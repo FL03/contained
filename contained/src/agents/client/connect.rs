@@ -10,14 +10,14 @@ use std::io::Cursor;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
-// Struct for handling incoming connections
+/// [Connect] describes a connection 
 #[derive(Debug)]
-pub struct Connection {
+pub struct Connect {
     buf: BytesMut,
     stream: TcpStream,
 }
 
-impl Connection {
+impl Connect {
     pub fn new(stream: TcpStream) -> Self {
         Self {
             // Allocate the buffer with 4kb of capacity.

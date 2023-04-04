@@ -5,7 +5,9 @@
 */
 use super::layer::Command;
 use crate::NetworkResult;
+use crate::subnet::proto::reqres::{Request, Response};
 use libp2p::{Multiaddr, PeerId};
+use libp2p::request_response::ResponseChannel;
 use std::collections::HashSet;
 use tokio::sync::{mpsc, oneshot};
 
@@ -61,6 +63,30 @@ impl Client {
             .await
             .expect("Command receiver not to be dropped.");
         rx.await.expect("Sender not to be dropped.")
+    }
+    /// Request the content of the given file from the given peer.
+    pub async fn request(
+        &mut self,
+        payload: String,
+        peer: PeerId,
+    ) -> NetworkResult<Response> {
+        let (tx, rx) = oneshot::channel();
+        self.sender()
+            .send(Command::Request {
+                payload,
+                peer,
+                tx,
+            })
+            .await?;
+        rx.await?
+    }
+
+    /// Respond with the provided file content to the given request.
+    pub async fn respond(&mut self, payload: Vec<u8>, channel: ResponseChannel<Response>) {
+        self.sender()
+            .send(Command::Respond { payload, channel })
+            .await
+            .expect("Command receiver not to be dropped.");
     }
 }
 
