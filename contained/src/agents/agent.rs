@@ -10,7 +10,6 @@ use decanter::prelude::{hasher, H256};
 use scsys::prelude::AsyncResult;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc;
 use wasmer::{Instance, Module, Store};
 
@@ -65,7 +64,7 @@ impl Agent {
                 println!("{:?}", result);
                 Ok(())
             }
-            Command::Transform { id, dirac } => todo!(),
+            Command::Transform { .. } => todo!(),
         }
     }
     pub fn set_environment(mut self, env: VirtualEnv) -> Self {
