@@ -1,16 +1,20 @@
 pub use self::{context::*, settings::*};
 
-pub(crate) mod context;
-pub(crate) mod settings;
+mod context;
+mod settings;
 
 pub mod cli;
 
 use crate::net::peers::*;
-use crate::net::subnet::node::Node;
+use crate::net::subnet::{
+    client::Client,
+    node::{Channels, NetworkEventRx, Node},
+};
 use crate::prelude::Resultant;
 use cli::{Cli, Opts};
 
 pub struct Backend {
+    client: Client,
     ctx: Context,
 }
 
@@ -19,7 +23,8 @@ impl Backend {
         let cnf = Settings::default();
         let ctx = Context::new(cnf);
 
-        Self { ctx }
+        let (client, _) = Client::with_capacity(9);
+        Self { client, ctx }
     }
     pub fn context(&self) -> &Context {
         &self.ctx
@@ -29,11 +34,8 @@ impl Backend {
             match opts {
                 Opts::Execute { .. } => todo!("Execute command"),
                 Opts::Network(net) => {
-                    let peer = if let Some(seed) = net.seed {
-                        Peer::try_from(seed).unwrap_or_default()
-                    } else {
-                        Peer::default()
-                    };
+                    self.ctx.cnf.cluster.seed = net.seed;
+                    let peer = self.ctx.peer();
                     tracing::info!("Peer: {:?}", peer.pid());
 
                     let network = Node::from(peer);
@@ -75,17 +77,5 @@ impl Backend {
 impl Default for Backend {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl From<Context> for Backend {
-    fn from(ctx: Context) -> Self {
-        Self { ctx }
-    }
-}
-
-impl From<Settings> for Backend {
-    fn from(cnf: Settings) -> Self {
-        Self::from(Context::new(cnf))
     }
 }

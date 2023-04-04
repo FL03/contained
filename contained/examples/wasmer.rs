@@ -1,10 +1,10 @@
 extern crate contained_sdk as contained;
 
 use contained::agents::{client::Client, Agent, VirtualEnv};
-use decanter::prelude::hasher;
+use contained::prelude::BoxedWasmValue;
 use scsys::prelude::AsyncResult;
 use tokio::sync::mpsc;
-use wasmer::{wat2wasm, Module, Store};
+use wasmer::{wat2wasm, Store};
 use wasmer::{Function, FunctionEnvMut};
 
 /// A sample Wasm module that exports a function called `increment`.
@@ -33,7 +33,11 @@ async fn main() -> AsyncResult {
     // Initialize the tracing layer
     std::env::set_var("RUST_LOG", "info");
     tracing_subscriber::fmt::init();
-    agents().await?;
+    // Initialize a new store
+    let store = Store::default();
+    // Initialize a new virtual environment
+    let venv = VirtualEnv::new(0);
+    agents(Box::new([15.into()]), store, venv).await?;
     Ok(())
 }
 
@@ -52,40 +56,43 @@ fn extra_imports(store: &mut Store, venv: VirtualEnv) -> wasmer::Imports {
 
     let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
 
-    wasmer::imports! {
+    let with = wasmer::imports! {
         "env" => {
             "get_counter" => get_counter_func,
             "add_to_counter" => add_to_counter_func,
         }
-    }
+    };
+    venv.imports(store, Some(with))
 }
 
-async fn agents() -> AsyncResult {
-    let venv = VirtualEnv::new(0);
-    // Initialize a new store
-    let mut store = Store::default();
-    // Initialize a new module
-    let module = Module::new(&store, counter_module()).unwrap();
-    let imports = extra_imports(&mut store, venv.clone());
+async fn agents(
+    args: BoxedWasmValue,
+    mut store: Store,
+    venv: VirtualEnv,
+) -> AsyncResult<BoxedWasmValue> {
+    let func = "sample";
     // Initialize new mpsc channels for sending and receiving commands
     let (tx_cmd, rx_cmd) = mpsc::channel(9);
+    // Create a new imports object to be included with the provided venv
+    let imports = extra_imports(&mut store, venv.clone());
     // Initialize a new agent; set the environment; then spawn it on a new thread
     Agent::new(rx_cmd)
-        .set_environment(venv.clone())
+        .set_environment(venv)
         .with_store(store)
         .spawn();
     // Initialize a new client
     let mut client = Client::new(tx_cmd);
     // Send the module to the agent
-    client.include(COUNTER_MODULE.to_vec()).await?;
+    let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module
-    client
-        .execute(
-            hasher(module.clone().serialize()?).into(),
-            "sample".to_string(),
-            Box::new([15.into()]),
-            Some(imports),
-        )
+    let res = client
+        .execute(cid.clone(), func.to_string(), args, Some(imports))
         .await?;
-    Ok(())
+    tracing::info!(
+        "Success: used the module ({}) to execute the '{}' function and returned {:?}",
+        cid,
+        func,
+        res
+    );
+    Ok(res)
 }

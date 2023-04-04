@@ -20,18 +20,20 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            cmd: mpsc::channel(capacity).0,
-        }
+    pub fn new(cmd: mpsc::Sender<Command>) -> Self {
+        Self { cmd }
     }
-    pub fn sender(self) -> mpsc::Sender<Command> {
-        self.cmd
+    pub fn with_capacity(capacity: usize) -> (Self, mpsc::Receiver<Command>) {
+        let (tx, rx) = mpsc::channel(capacity);
+        (Self::new(tx), rx)
+    }
+    pub fn sender(&self) -> &mpsc::Sender<Command> {
+        &self.cmd
     }
     /// Listen for incoming connections on the given address.
     pub async fn start_listening(&mut self, addr: Multiaddr) -> NetworkResult {
         let (tx, rx) = oneshot::channel();
-        self.cmd.send(Command::listen(addr, tx)).await?;
+        self.sender().send(Command::listen(addr, tx)).await?;
         rx.await?
     }
     /// Dial the given peer at the given address.
@@ -44,7 +46,7 @@ impl Client {
     /// Advertise the local node as the provider of the given file on the DHT.
     pub async fn start_providing(&mut self, fname: String) {
         let (tx, rx) = oneshot::channel();
-        self.cmd
+        self.sender()
             .send(Command::start_providing(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
@@ -54,7 +56,7 @@ impl Client {
     /// Find the providers for the given file on the DHT.
     pub async fn get_providers(&mut self, fname: String) -> HashSet<PeerId> {
         let (tx, rx) = oneshot::channel();
-        self.cmd
+        self.sender()
             .send(Command::get_provider(fname, tx))
             .await
             .expect("Command receiver not to be dropped.");
@@ -64,6 +66,6 @@ impl Client {
 
 impl Default for Client {
     fn default() -> Self {
-        Self::new(9)
+        Self::with_capacity(9).0
     }
 }

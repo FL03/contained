@@ -20,6 +20,12 @@ pub struct Cli {
     pub verbose: bool,
 }
 
+impl Cli {
+    pub fn verbose(&self) -> bool {
+        self.verbose
+    }
+}
+
 impl Default for Cli {
     fn default() -> Self {
         Self::parse()

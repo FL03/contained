@@ -22,6 +22,7 @@ use serde::{Deserialize, Serialize};
     Serialize,
 )]
 pub struct Settings {
+    pub cluster: ClusterConfig,
     pub logger: Logger,
     pub mode: String,
 }
@@ -29,6 +30,7 @@ pub struct Settings {
 impl Settings {
     pub fn new(mode: Option<String>) -> Self {
         Self {
+            cluster: ClusterConfig::default(),
             logger: Default::default(),
             mode: mode.unwrap_or_else(|| String::from("production")),
         }
@@ -37,22 +39,25 @@ impl Settings {
         Config::builder()
     }
     pub fn build() -> ConfigResult<Self> {
-        let mut builder = Self::builder()
-            .set_default("mode", "production")?
-            .set_default("logger.level", "info")?;
-
-        if let Ok(log) = std::env::var("RUST_LOG") {
-            builder = builder.set_override("logger.level", log)?;
+        let mut builder = {
+            Self::builder()
+                .set_default("cluster.addr", crate::net::DEFAULT_MULTIADDR)?
+                .set_default("logger.level", "info")?
+                .set_default("mode", "production")?
         };
-        if let Ok(port) = std::env::var("SERVER_PORT") {
-            builder = builder.set_override("server.port", port)?;
-        };
-        // Add in related environment variables
+        // Try loading in environment variables; prefixed with the package name and separated by "__"
         builder = builder.add_source(
             Environment::default()
                 .separator("__")
                 .prefix(env!("CARGO_PKG_NAME").to_ascii_uppercase().as_str()),
         );
+        // Try overriding configuration values with specific environment variables...
+        if let Ok(port) = std::env::var("CLUSTER_ADDR") {
+            builder = builder.set_override("cluster.addr", port)?;
+        };
+        if let Ok(log) = std::env::var("RUST_LOG") {
+            builder = builder.set_override("logger.level", log)?;
+        };
         // Try gathering valid configuration files...
         if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
             builder = builder.add_source(files);
@@ -140,7 +145,56 @@ impl From<tracing::Level> for Logger {
     SerdeDisplay,
     Serialize,
 )]
-pub struct Network {
+pub struct ClusterConfig {
     pub addr: String,
     pub seed: Option<u8>,
+}
+
+impl ClusterConfig {
+    pub fn new() -> Self {
+        Self {
+            addr: crate::net::DEFAULT_MULTIADDR.to_string(),
+            seed: None,
+        }
+    }
+    pub fn setup_env(
+        mut self,
+        addr: Option<&str>,
+        seed: Option<&str>,
+    ) -> crate::prelude::Resultant<Self> {
+        let addr_key = addr.unwrap_or("CLUSTER_ADDR");
+        let seed_key = seed.unwrap_or("CLUSTER_SEED");
+        if let Some(v) = std::env::var_os(addr_key) {
+            self.addr = v.into_string().unwrap();
+        } else {
+            std::env::set_var(addr_key, self.addr.clone());
+        }
+        if let Some(v) = std::env::var_os(seed_key) {
+            let seed = v
+                .into_string()
+                .unwrap()
+                .parse()
+                .expect("Failed to parse the seed value...");
+            self.seed = Some(seed);
+        } else {
+            let seed = self.seed.unwrap_or(0);
+            std::env::set_var(seed_key, seed.to_string());
+        }
+        Ok(self)
+    }
+    pub fn set_addr(mut self, addr: impl ToString) {
+        self.addr = addr.to_string();
+    }
+    pub fn set_seed(mut self, seed: u8) {
+        self.seed = Some(seed);
+    }
+}
+
+impl Default for ClusterConfig {
+    fn default() -> Self {
+        Self {
+            addr: crate::net::DEFAULT_MULTIADDR.to_string(),
+            seed: None,
+        }
+    }
 }

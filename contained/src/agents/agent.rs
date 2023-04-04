@@ -4,7 +4,7 @@
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
 use super::{layer::Command, Stack, VirtualEnv};
-use crate::prelude::{Shared, State};
+use crate::prelude::{hash_module, Shared, State};
 use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
@@ -31,27 +31,29 @@ impl Agent {
     }
     pub async fn handle_command(&mut self, cmd: Command) -> AsyncResult {
         match cmd {
-            Command::Include { bytes } => {
+            Command::Include { bytes, sender } => {
                 let module = Module::new(&self.store, bytes)?;
-                let hash = hasher(module.clone().serialize()?.as_ref());
+                let hash = hash_module(module.clone());
                 self.stack
                     .lock()
                     .unwrap()
                     .modules
                     .insert(hash.into(), module);
+                sender.send(Ok(hash.into())).unwrap();
                 Ok(())
             }
             Command::Execute {
                 module,
                 function,
                 args,
-                with: imports
+                with,
+                sender,
             } => {
                 let modules = self.stack.lock().unwrap().modules.clone();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
-                let imports = self.env.lock().unwrap().imports(&mut self.store, imports);
+                let imports = self.env.lock().unwrap().imports(&mut self.store, with);
                 tracing::info!("Instantiating module with the imported host functions");
                 let instance = Instance::new(&mut self.store, &module, &imports)
                     .expect("Failed to instantiate module");
@@ -59,7 +61,7 @@ impl Agent {
                 let func = instance.exports.get_function(&function)?;
                 tracing::info!("Executing the function with the provided arguments");
                 let result = func.call(&mut self.store, &args)?;
-                println!("{:?}", result);
+                sender.send(Ok(result)).unwrap();
                 Ok(())
             }
             Command::Transform { .. } => todo!(),
@@ -80,7 +82,6 @@ impl Agent {
                     tracing::warn!("Signal received, shutting down");
                     break;
                 }
-                else => tracing::warn!("Tonic has no more work to do"),
             }
         })
     }
