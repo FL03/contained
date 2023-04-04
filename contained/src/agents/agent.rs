@@ -62,7 +62,6 @@ impl Agent {
                 let func = instance.exports.get_function(&function)?;
                 tracing::info!("Executing the function with the provided arguments");
                 let result = func.call(&mut self.store, &args)?;
-                tokio::io::stdout().write_all(format!("{:?}", result).as_bytes()).await?;
                 println!("{:?}", result);
                 Ok(())
             }
