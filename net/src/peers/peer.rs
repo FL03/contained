@@ -6,14 +6,14 @@
 use super::Peerable;
 use libp2p::identity::{DecodingError, Keypair};
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug)]
 pub struct Peer {
-    keypair: [u8; 64],
+    kp: Keypair,
 }
 
 impl Peer {
-    pub fn new(keypair: [u8; 64]) -> Self {
-        Self { keypair }
+    pub fn new(kp: Keypair) -> Self {
+        Self { kp }
     }
 }
 
@@ -31,14 +31,13 @@ impl Peerable for Peer {
 
 impl From<Keypair> for Peer {
     fn from(keypair: Keypair) -> Self {
-        Self::new(keypair.into_ed25519().unwrap().encode())
+        Self::new(keypair)
     }
 }
 
 impl From<Peer> for Keypair {
     fn from(peer: Peer) -> Keypair {
-        let mut kp = peer.keypair;
-        Keypair::from_protobuf_encoding(&mut kp).unwrap()
+        peer.kp
     }
 }
 
@@ -48,7 +47,7 @@ impl TryFrom<u8> for Peer {
     fn try_from(seed: u8) -> Result<Self, Self::Error> {
         let mut bytes = [0u8; 32];
         bytes[0] = seed;
-        let res = Self::from(Keypair::ed25519_from_bytes(&mut bytes)?);
+        let res = Self::new(Keypair::ed25519_from_bytes(&mut bytes)?);
         Ok(res)
     }
 }
@@ -61,6 +60,6 @@ mod tests {
     fn test_peer() {
         let peer = Peer::try_from(9_u8);
         assert!(peer.is_ok());
-        assert_ne!(peer.unwrap(), Peer::default());
+        assert_ne!(peer.unwrap().pk(), Peer::default().pk());
     }
 }

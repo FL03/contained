@@ -12,7 +12,4 @@ pub mod client;
 pub mod layer;
 pub mod tonic;
 
-
-pub trait Actor {
-    
-}
+pub trait Actor {}

@@ -9,7 +9,21 @@ use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-#[derive(Clone, Debug, Deserialize, Display, EnumString, EnumVariantNames, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+)]
 #[strum(serialize_all = "snake_case")]
 pub enum AgentFrame {
     Dirac(LPR),

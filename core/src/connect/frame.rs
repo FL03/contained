@@ -9,13 +9,12 @@ use crate::Error;
 use bytes::Buf;
 use serde::{Deserialize, Serialize};
 
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd,Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum Frame {
     Error(Error),
 }
 
-impl Frame  {
+impl Frame {
     pub fn check(buf: &mut impl Buf) -> Result<(), Error> {
         // Check if the buffer has enough data to read the length
         if buf.remaining() < 4 {

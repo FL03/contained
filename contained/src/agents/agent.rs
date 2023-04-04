@@ -13,14 +13,15 @@ use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use wasmer::{Instance, Module, Store};
 
-
 pub struct Stack {
-    pub modules: HashMap<H256, Module>
+    pub modules: HashMap<H256, Module>,
 }
 
 impl Stack {
     pub fn new() -> Self {
-        Self { modules: HashMap::new() }
+        Self {
+            modules: HashMap::new(),
+        }
     }
 }
 
@@ -38,25 +39,35 @@ impl Agent {
             cmd,
             env: Arc::new(Mutex::new(VirtualEnv::default())),
             stack: Arc::new(Mutex::new(Stack::new())),
-            state: Arc::new(Mutex::new(State::default())), 
-            store: Store::default() }
+            state: Arc::new(Mutex::new(State::default())),
+            store: Store::default(),
+        }
     }
     pub async fn handle_command(&mut self, cmd: Command) -> AsyncResult {
         match cmd {
             Command::Include { bytes } => {
                 let module = Module::new(&self.store, bytes)?;
                 let hash = hasher(module.clone().serialize()?.as_ref());
-                self.stack.lock().unwrap().modules.insert(hash.into(), module);
+                self.stack
+                    .lock()
+                    .unwrap()
+                    .modules
+                    .insert(hash.into(), module);
                 Ok(())
-            },
-            Command::Execute { module, function, args } => {
+            }
+            Command::Execute {
+                module,
+                function,
+                args,
+            } => {
                 let modules = self.stack.lock().unwrap().modules.clone();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
                 let imports = self.env.lock().unwrap().imports(&mut self.store);
                 tracing::info!("Instantiating module with the imported host functions");
-                let instance = Instance::new(&mut self.store, &module, &imports).expect("Failed to instantiate module");
+                let instance = Instance::new(&mut self.store, &module, &imports)
+                    .expect("Failed to instantiate module");
                 tracing::info!("Fetching the function");
                 let func = instance.exports.get_function(&function)?;
                 tracing::info!("Executing the function with the provided arguments");
@@ -72,7 +83,6 @@ impl Agent {
         self
     }
     pub async fn run(mut self) -> AsyncResult {
-        
         Ok(loop {
             tokio::select! {
                 Some(cmd) = self.cmd.recv() => {

@@ -5,7 +5,6 @@ pub(crate) mod settings;
 
 pub mod cli;
 
-use crate::agents::client::Client;
 use crate::net::subnet::node::Node;
 use crate::prelude::Resultant;
 use cli::{Cli, Opts};
@@ -27,7 +26,7 @@ impl Backend {
     pub async fn handle_cli(&mut self, cli: Cli) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
-                Opts::Execute { space, workload } => {}
+                Opts::Execute { .. } => todo!("Execute command"),
                 Opts::Network { detached, up } => {
                     let network = Node::default();
                     if up {
@@ -38,8 +37,8 @@ impl Backend {
                         }
                     }
                 }
-                Opts::Setup { .. } => {}
-                Opts::Start { .. } => {}
+                Opts::Setup { .. } => todo!("Setup command"),
+                Opts::Start { .. } => todo!("Start command"),
             }
         };
 

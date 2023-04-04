@@ -22,5 +22,4 @@ pub trait TokioFrame {
 #[async_trait]
 pub trait Connector {
     type Frame: TokioFrame;
-
 }

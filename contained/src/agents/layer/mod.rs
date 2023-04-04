@@ -24,7 +24,7 @@ pub enum Command {
     Transform {
         id: H256,
         dirac: LPR,
-    }
+    },
 }
 
 impl Command {
@@ -39,4 +39,3 @@ impl Command {
         Self::Include { bytes }
     }
 }
-

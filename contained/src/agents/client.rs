@@ -17,8 +17,15 @@ impl Client {
         Self { cmd }
     }
 
-    pub async fn execute(&mut self, module: H256, function: String, args: Box<[wasmer::Value]>) -> AsyncResult {
-        self.cmd.send(Command::execute(module, function, args)).await?;
+    pub async fn execute(
+        &mut self,
+        module: H256,
+        function: String,
+        args: Box<[wasmer::Value]>,
+    ) -> AsyncResult {
+        self.cmd
+            .send(Command::execute(module, function, args))
+            .await?;
         Ok(())
     }
     pub async fn include(&mut self, bytes: Vec<u8>) -> AsyncResult {

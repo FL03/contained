@@ -52,10 +52,12 @@ async fn agents() -> AsyncResult {
     // Send the module to the agent
     client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module
-    client.execute(
-        hasher(module.clone().serialize()?).into(), 
-        "sample".to_string(), 
-        Box::new([15.into()])
-    ).await?;
+    client
+        .execute(
+            hasher(module.clone().serialize()?).into(),
+            "sample".to_string(),
+            Box::new([15.into()]),
+        )
+        .await?;
     Ok(())
 }
