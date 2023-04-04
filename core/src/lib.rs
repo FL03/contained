@@ -12,6 +12,7 @@ mod states;
 mod utils;
 
 pub mod compute;
+pub mod connect;
 pub mod delay;
 pub mod epoch;
 pub mod turing;

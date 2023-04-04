@@ -14,7 +14,6 @@ mod types {
     /// A type alias for a `Result` with the error type `AsyncError`.
     pub type AsyncResult<T = ()> = std::result::Result<T, AsyncError>;
 
-    pub type BoxedWasmValue = Box<[wasmer::Value]>;
     /// Type alias for a [Result]
     pub type Resultant<T = (), E = Error> = Result<T, E>;
     /// A type alias for a thread-safe [Vec] of [Mutex]es.

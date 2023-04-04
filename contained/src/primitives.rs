@@ -10,8 +10,6 @@ mod constants {
 }
 
 mod types {
-    /// A type alias for an environment identifier.
-    pub type EnvId = String;
-    /// A type alias for a workload ID.
-    pub type WorkloadId = String;
+    /// A type alias for a [Box] slice of [wasmer::Value]s
+    pub type BoxedWasmValue = Box<[wasmer::Value]>;
 }

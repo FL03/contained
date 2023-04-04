@@ -21,6 +21,7 @@ use crate::{
     intervals::{Interval, Thirds},
     Note,
 };
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -38,6 +39,8 @@ use strum::{Display, EnumString, EnumVariantNames};
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
+    Ord,
     PartialEq,
     PartialOrd,
     Serialize,
