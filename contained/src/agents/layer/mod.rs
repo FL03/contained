@@ -7,6 +7,7 @@ pub use self::frame::*;
 
 mod frame;
 
+use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
 
@@ -20,6 +21,10 @@ pub enum Command {
     Include {
         bytes: Vec<u8>,
     },
+    Transform {
+        id: H256,
+        dirac: LPR,
+    }
 }
 
 impl Command {

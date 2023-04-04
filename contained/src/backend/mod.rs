@@ -5,9 +5,9 @@ pub(crate) mod settings;
 
 pub mod cli;
 
+use crate::agents::client::Client;
 use crate::net::subnet::node::Node;
 use crate::prelude::Resultant;
-use crate::vm::Client;
 use cli::{Cli, Opts};
 
 pub struct Backend {

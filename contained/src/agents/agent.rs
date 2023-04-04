@@ -4,8 +4,8 @@
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
 use super::layer::Command;
+use super::VirtualEnv;
 use crate::prelude::{Shared, State};
-use crate::vm::VirtualEnv;
 use decanter::prelude::{hasher, H256};
 use scsys::prelude::AsyncResult;
 use std::collections::HashMap;
@@ -65,6 +65,7 @@ impl Agent {
                 println!("{:?}", result);
                 Ok(())
             }
+            Command::Transform { id, dirac } => todo!(),
         }
     }
     pub fn set_environment(mut self, env: VirtualEnv) -> Self {

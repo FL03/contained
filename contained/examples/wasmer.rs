@@ -1,7 +1,6 @@
 extern crate contained_sdk as contained;
 
-use contained::agents::{client::Client, Agent};
-use contained::vm::VirtualEnv;
+use contained::agents::{client::Client, Agent, VirtualEnv};
 use decanter::prelude::hasher;
 use scsys::prelude::AsyncResult;
 use tokio::sync::mpsc;
@@ -21,7 +20,7 @@ static COUNTER_MODULE: &[u8] = br#"
           (br_if 1 (i32.eq (get_local $x) (i32.const 0)))
           (br 0)))
       call $get_counter)
-    (export "increment" (func $increment_f)))
+    (export "sample" (func $increment_f)))
 "#;
 
 pub fn counter_module() -> std::borrow::Cow<'static, [u8]> {
@@ -52,6 +51,11 @@ async fn agents() -> AsyncResult {
     let mut client = Client::new(tx_cmd);
     // Send the module to the agent
     client.include(COUNTER_MODULE.to_vec()).await?;
-    client.execute(hasher(module.clone().serialize()?).into(), "increment".to_string(), Box::new([5.into()])).await?;
+    // Execute the module
+    client.execute(
+        hasher(module.clone().serialize()?).into(), 
+        "sample".to_string(), 
+        Box::new([15.into()])
+    ).await?;
     Ok(())
 }

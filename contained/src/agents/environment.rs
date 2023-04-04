@@ -8,8 +8,6 @@ use std::sync::{Arc, Mutex};
 use wasmer::{imports, Imports, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut};
 
-
-
 #[derive(Clone, Debug)]
 pub struct VirtualEnv {
     pub state: Shared<State>,
