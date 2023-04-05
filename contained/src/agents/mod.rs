@@ -27,4 +27,7 @@ impl Stack {
             modules: HashMap::new(),
         }
     }
+    pub fn modules(&self) -> &HashMap<H256, Module> {
+        &self.modules
+    }
 }
