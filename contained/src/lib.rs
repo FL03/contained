@@ -18,7 +18,6 @@ mod utils;
 pub mod agents;
 pub mod backend;
 pub mod cluster;
-pub mod vm;
 
 pub mod prelude {
     pub use super::backend::cli::*;

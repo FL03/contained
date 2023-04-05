@@ -45,7 +45,7 @@ impl libp2p::request_response::Codec for ProtocolCodec {
             return Err(io::ErrorKind::UnexpectedEof.into());
         }
 
-        Ok(Response::new(String::from_utf8(vec).unwrap()))
+        Ok(Response::new().with_data(String::from_utf8(vec).unwrap()))
     }
 
     async fn write_request<T>(

@@ -3,10 +3,26 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use clap::{ArgAction, Subcommand};
+use clap::{ArgAction, Args, Subcommand};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
+
+#[derive(
+    Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
+pub struct Network {
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    pub detached: bool,
+    #[clap(long)]
+    pub dial: Option<String>,
+    #[clap(long, short)]
+    pub listen: Option<String>,
+    #[clap(long, short)]
+    pub seed: Option<u8>,
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    pub up: bool,
+}
 
 #[derive(
     Clone,
@@ -32,19 +48,14 @@ pub enum Opts {
         #[clap(long, short)]
         workload: String,
     },
-    Network {
-        #[arg(action = ArgAction::SetTrue, long, short)]
-        detached: bool,
-        #[arg(action = ArgAction::SetTrue, long, short)]
-        up: bool,
-    },
+    #[default]
+    Network(Network),
     Setup {
         #[clap(long, short)]
-        addr: String,
-    },
-    #[default]
-    Start {
+        addr: Option<String>,
         #[clap(long, short)]
-        release: bool,
+        host: Option<String>,
+        #[clap(long, short)]
+        port: Option<u16>,
     },
 }

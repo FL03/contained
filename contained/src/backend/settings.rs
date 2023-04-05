@@ -21,6 +21,75 @@ use serde::{Deserialize, Serialize};
     SerdeDisplay,
     Serialize,
 )]
+pub struct Settings {
+    pub cluster: ClusterConfig,
+    pub logger: Logger,
+    pub mode: String,
+}
+
+impl Settings {
+    pub fn new(mode: Option<String>) -> Self {
+        Self {
+            cluster: ClusterConfig::default(),
+            logger: Default::default(),
+            mode: mode.unwrap_or_else(|| String::from("production")),
+        }
+    }
+    pub fn builder() -> config::ConfigBuilder<config::builder::DefaultState> {
+        Config::builder()
+    }
+    pub fn build() -> ConfigResult<Self> {
+        let mut builder = {
+            Self::builder()
+                .set_default("cluster.addr", crate::net::DEFAULT_MULTIADDR)?
+                .set_default("logger.level", "info")?
+                .set_default("mode", "production")?
+        };
+        // Try loading in environment variables; prefixed with the package name and separated by "__"
+        builder = builder.add_source(
+            Environment::default()
+                .separator("__")
+                .prefix(env!("CARGO_PKG_NAME").to_ascii_uppercase().as_str()),
+        );
+        // Try overriding configuration values with specific environment variables...
+        if let Ok(port) = std::env::var("CLUSTER_ADDR") {
+            builder = builder.set_override("cluster.addr", port)?;
+        };
+        if let Ok(log) = std::env::var("RUST_LOG") {
+            builder = builder.set_override("logger.level", log)?;
+        };
+        // Try gathering valid configuration files...
+        if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
+            builder = builder.add_source(files);
+        }
+        builder.build()?.try_deserialize()
+    }
+
+    pub fn logger(&self) -> &Logger {
+        &self.logger
+    }
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        let d = Self::new(None);
+        Self::build().unwrap_or(d)
+    }
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
+)]
 pub struct Logger {
     pub level: String,
 }
@@ -76,53 +145,56 @@ impl From<tracing::Level> for Logger {
     SerdeDisplay,
     Serialize,
 )]
-pub struct Settings {
-    pub logger: Logger,
-    pub mode: String,
+pub struct ClusterConfig {
+    pub addr: String,
+    pub seed: Option<u8>,
 }
 
-impl Settings {
-    pub fn new(mode: Option<String>) -> Self {
+impl ClusterConfig {
+    pub fn new() -> Self {
         Self {
-            logger: Default::default(),
-            mode: mode.unwrap_or_else(|| String::from("production")),
+            addr: crate::net::DEFAULT_MULTIADDR.to_string(),
+            seed: None,
         }
     }
-    pub fn builder() -> config::ConfigBuilder<config::builder::DefaultState> {
-        Config::builder()
-    }
-    pub fn build() -> ConfigResult<Self> {
-        let mut builder = Self::builder()
-            .set_default("mode", "production")?
-            .set_default("logger.level", "info")?;
-
-        if let Ok(log) = std::env::var("RUST_LOG") {
-            builder = builder.set_override("logger.level", log)?;
-        };
-        if let Ok(port) = std::env::var("SERVER_PORT") {
-            builder = builder.set_override("server.port", port)?;
-        };
-        // Add in related environment variables
-        builder = builder.add_source(
-            Environment::default()
-                .separator("__")
-                .prefix(env!("CARGO_PKG_NAME").to_ascii_uppercase().as_str()),
-        );
-        // Try gathering valid configuration files...
-        if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
-            builder = builder.add_source(files);
+    pub fn setup_env(
+        mut self,
+        addr: Option<&str>,
+        seed: Option<&str>,
+    ) -> crate::prelude::Resultant<Self> {
+        let addr_key = addr.unwrap_or("CLUSTER_ADDR");
+        let seed_key = seed.unwrap_or("CLUSTER_SEED");
+        if let Some(v) = std::env::var_os(addr_key) {
+            self.addr = v.into_string().unwrap();
+        } else {
+            std::env::set_var(addr_key, self.addr.clone());
         }
-        builder.build()?.try_deserialize()
+        if let Some(v) = std::env::var_os(seed_key) {
+            let seed = v
+                .into_string()
+                .unwrap()
+                .parse()
+                .expect("Failed to parse the seed value...");
+            self.seed = Some(seed);
+        } else {
+            let seed = self.seed.unwrap_or(0);
+            std::env::set_var(seed_key, seed.to_string());
+        }
+        Ok(self)
     }
-
-    pub fn logger(&self) -> &Logger {
-        &self.logger
+    pub fn set_addr(mut self, addr: impl ToString) {
+        self.addr = addr.to_string();
+    }
+    pub fn set_seed(mut self, seed: u8) {
+        self.seed = Some(seed);
     }
 }
 
-impl Default for Settings {
+impl Default for ClusterConfig {
     fn default() -> Self {
-        let d = Self::new(None);
-        Self::build().unwrap_or(d)
+        Self {
+            addr: crate::net::DEFAULT_MULTIADDR.to_string(),
+            seed: None,
+        }
     }
 }

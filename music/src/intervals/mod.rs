@@ -99,6 +99,13 @@ impl From<Interval> for i64 {
     }
 }
 
+impl From<Interval> for tokio::time::Interval {
+    fn from(interval: Interval) -> tokio::time::Interval {
+        let interval: i64 = interval.into();
+        tokio::time::interval(std::time::Duration::from_secs_f64(1.0 / interval as f64))
+    }
+}
+
 impl From<Fifths> for Interval {
     fn from(data: Fifths) -> Interval {
         Interval::Fifth(data)

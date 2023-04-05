@@ -7,23 +7,36 @@ use crate::events::NetworkEvent;
 use crate::subnet::layer::Command;
 use tokio::sync::mpsc;
 
+pub type CommandRx = mpsc::Receiver<Command>;
+pub type CommandTx = mpsc::Sender<Command>;
+pub type NetworkEventRx = mpsc::Receiver<NetworkEvent>;
+pub type NetworkEventTx = mpsc::Sender<NetworkEvent>;
+
 #[derive(Debug)]
 pub struct Channels {
-    pub cmd: mpsc::Receiver<Command>,
-    pub event: mpsc::Sender<NetworkEvent>,
+    pub cmd: CommandRx,
+    pub event: NetworkEventTx,
 }
 
 impl Channels {
-    pub fn new(capacity: usize) -> Self {
-        Self {
-            cmd: mpsc::channel(capacity).1,
-            event: mpsc::channel(capacity).0,
-        }
+    pub fn new(cmd: CommandRx, event: NetworkEventTx) -> Self {
+        Self { cmd, event }
+    }
+    pub fn with_capacity(capacity: usize) -> (Self, CommandTx, NetworkEventRx) {
+        let (cmd_tx, cmd_rx) = mpsc::channel(capacity);
+        let (event_tx, event_rx) = mpsc::channel(capacity);
+        (Self::new(cmd_rx, event_tx), cmd_tx, event_rx)
+    }
+    pub fn command(&self) -> &CommandRx {
+        &self.cmd
+    }
+    pub fn event(&self) -> &NetworkEventTx {
+        &self.event
     }
 }
 
 impl Default for Channels {
     fn default() -> Self {
-        Self::new(9)
+        Self::with_capacity(9).0
     }
 }

@@ -16,9 +16,17 @@ use serde::{Deserialize, Serialize};
 pub struct Cli {
     #[clap(subcommand)]
     pub opts: Option<Opts>,
-
     #[arg(action = ArgAction::SetTrue, long, short,)]
     pub verbose: bool,
+}
+
+impl Cli {
+    pub fn opts(&self) -> Option<Opts> {
+        self.opts.clone()
+    }
+    pub fn verbose(&self) -> bool {
+        self.verbose
+    }
 }
 
 impl Default for Cli {

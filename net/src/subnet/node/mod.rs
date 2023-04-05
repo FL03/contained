@@ -33,9 +33,9 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn new(swarm: Swarm<Subnet>) -> Self {
+    pub fn new(chan: Channels, swarm: Swarm<Subnet>) -> Self {
         Self {
-            chan: Channels::default(),
+            chan,
             queue: Queue::new(),
             swarm,
         }
@@ -43,8 +43,8 @@ impl Node {
     pub async fn handle_event(&mut self, event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>) {
         match event {
             // Handle custom networking events
-            SwarmEvent::Behaviour(b) => match b {
-                SubnetEvent::Kademlia(k) => match k {
+            SwarmEvent::Behaviour(subnet) => match subnet {
+                SubnetEvent::Kademlia(kademlia) => match kademlia {
                     KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
                         QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {
@@ -145,11 +145,25 @@ impl Default for Node {
     }
 }
 
+impl<P> From<(Channels, P)> for Node
+where
+    P: Peerable,
+{
+    fn from(data: (Channels, P)) -> Self {
+        let swarm = data.1.swarm(Subnet::from(data.1.pid()));
+
+        Self::new(data.0, swarm)
+    }
+}
+
 impl<P> From<P> for Node
 where
     P: Peerable,
 {
     fn from(peer: P) -> Self {
-        Self::new(peer.swarm(Subnet::from(peer.pid())))
+        let chan = Channels::default();
+        let swarm = peer.swarm(Subnet::from(peer.pid()));
+
+        Self::new(chan, swarm)
     }
 }

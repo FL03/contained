@@ -7,3 +7,5 @@ pub use self::{asynchronous::*, error::*};
 
 mod asynchronous;
 mod error;
+
+pub trait BaseError: std::error::Error {}
