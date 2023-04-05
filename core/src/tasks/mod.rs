@@ -20,7 +20,7 @@ impl Task {
     pub fn new(group: impl ToString, name: impl ToString) -> Self {
         Self {
             group: group.to_string(),
-            name: name.to_string()
+            name: name.to_string(),
         }
     }
 }

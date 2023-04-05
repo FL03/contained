@@ -86,19 +86,47 @@ impl Node {
                 SubnetEvent::Ping(_) => {}
                 SubnetEvent::RequestResponse(evnt) => match evnt {
                     request_response::Event::Message { message, .. } => match message {
-                        request_response::Message::Request { request, channel, .. } => {
-                            self.chan.event().send(NetworkEvent::inbound_request(request, channel)).await.expect("Receiver not to be dropped");
+                        request_response::Message::Request {
+                            request, channel, ..
+                        } => {
+                            self.chan
+                                .event()
+                                .send(NetworkEvent::inbound_request(request, channel))
+                                .await
+                                .expect("Receiver not to be dropped");
                         }
-                        request_response::Message::Response { response, request_id } => {
-                            let _ = self.queue.requests.remove(&request_id).expect("pending...").send(Ok(response));
+                        request_response::Message::Response {
+                            response,
+                            request_id,
+                        } => {
+                            let _ = self
+                                .queue
+                                .requests
+                                .remove(&request_id)
+                                .expect("pending...")
+                                .send(Ok(response));
                         }
                     },
-                    request_response::Event::OutboundFailure { request_id, error, .. } => {
-                        let _ = self.queue.requests.remove(&request_id).expect("pending...").send(Err(error.into()));
-                    },
-                    request_response::Event::InboundFailure { request_id, error, .. } => {
-                        let _ = self.queue.requests.remove(&request_id).expect("pending...").send(Err(error.into()));
-                    },
+                    request_response::Event::OutboundFailure {
+                        request_id, error, ..
+                    } => {
+                        let _ = self
+                            .queue
+                            .requests
+                            .remove(&request_id)
+                            .expect("pending...")
+                            .send(Err(error.into()));
+                    }
+                    request_response::Event::InboundFailure {
+                        request_id, error, ..
+                    } => {
+                        let _ = self
+                            .queue
+                            .requests
+                            .remove(&request_id)
+                            .expect("pending...")
+                            .send(Err(error.into()));
+                    }
                     request_response::Event::ResponseSent { .. } => todo!(),
                 },
             },

@@ -44,10 +44,9 @@ pub fn new() -> ProtoBehaviour {
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Frame {
-    
     Wasm(Vec<u8>),
     #[default]
-    Error(NetworkError)
+    Error(NetworkError),
 }
 
 #[derive(

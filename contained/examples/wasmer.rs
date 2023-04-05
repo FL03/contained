@@ -74,10 +74,7 @@ async fn agents(
     let imports = extra_imports(&mut store, venv.clone());
     // Initialize a new agent; set the environment; then spawn it on a new thread
     let (agent, tx) = Agent::new(9);
-    agent
-        .set_environment(venv)
-        .with_store(store)
-        .spawn();
+    agent.set_environment(venv).with_store(store).spawn();
     // Initialize a new client
     let mut client = Client::new(tx);
     // Send the module to the agent

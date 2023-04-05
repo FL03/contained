@@ -4,10 +4,10 @@
     Description: ... summary ...
 */
 use super::layer::Command;
-use crate::NetworkResult;
 use crate::subnet::proto::reqres::{Request, Response};
-use libp2p::{Multiaddr, PeerId};
+use crate::NetworkResult;
 use libp2p::request_response::ResponseChannel;
+use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
 use tokio::sync::{mpsc, oneshot};
 
@@ -64,18 +64,10 @@ impl Client {
         rx.await.expect("Sender not to be dropped.")
     }
     /// Request the content of the given file from the given peer.
-    pub async fn request(
-        &mut self,
-        payload: String,
-        peer: PeerId,
-    ) -> NetworkResult<Response> {
+    pub async fn request(&mut self, payload: String, peer: PeerId) -> NetworkResult<Response> {
         let (tx, rx) = oneshot::channel();
         self.sender()
-            .send(Command::Request {
-                payload,
-                peer,
-                tx,
-            })
+            .send(Command::Request { payload, peer, tx })
             .await?;
         rx.await?
     }

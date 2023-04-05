@@ -12,9 +12,7 @@ pub struct Response {
 
 impl Response {
     pub fn new() -> Self {
-        Self {
-            data: Vec::new(),
-        }
+        Self { data: Vec::new() }
     }
     pub fn with_data(mut self, data: impl AsRef<[u8]>) -> Self {
         self.data = data.as_ref().to_vec();

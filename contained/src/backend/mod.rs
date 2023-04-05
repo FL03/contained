@@ -13,7 +13,7 @@ pub mod rpc;
 
 use crate::net::subnet::{
     node::{Channels, Node},
-    Client
+    Client,
 };
 use crate::prelude::{peers::*, Resultant};
 use cli::{Cli, Opts};
@@ -26,7 +26,6 @@ impl Backend {
     pub fn new() -> Self {
         let cnf = Settings::default();
         let ctx = Context::new(cnf);
-
 
         Self { ctx }
     }
@@ -73,19 +72,17 @@ impl Backend {
         let node = Node::from((chan, self.ctx.peer()));
         let mut client = Client::new(tx_cmd);
         self.handle_cli(cli, &mut client, node).await?;
-        Ok(
-            loop {
-                tokio::select! {
-                    Some(event) = rx_evt.recv() => {
-                        tracing::info!("Received event: {:?}", event);
-                    }
-                    _ = tokio::signal::ctrl_c() => {
-                        tracing::warn!("Signal received, terminating the system...");
-                        break;
-                    }
+        Ok(loop {
+            tokio::select! {
+                Some(event) = rx_evt.recv() => {
+                    tracing::info!("Received event: {:?}", event);
+                }
+                _ = tokio::signal::ctrl_c() => {
+                    tracing::warn!("Signal received, terminating the system...");
+                    break;
                 }
             }
-        )
+        })
     }
     pub fn settings(&self) -> &Settings {
         self.ctx.settings()

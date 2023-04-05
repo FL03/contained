@@ -29,7 +29,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 pub enum Frame {
     Content {
         cid: H256,
-        content: Vec<Bytes>
+        content: Vec<Bytes>,
     },
     Dirac {
         dirac: LPR,
@@ -47,18 +47,20 @@ pub enum Frame {
 
 impl Frame {
     pub fn content(cid: H256, content: Vec<Bytes>) -> Self {
-        Self::Content{ cid, content }
+        Self::Content { cid, content }
     }
     pub fn dirac(dirac: LPR) -> Self {
-        Self::Dirac{ dirac }
+        Self::Dirac { dirac }
     }
     pub fn func_call(module: H256, function: String, args: Vec<String>) -> Self {
-        Self::FuncCall{ module, function, args }
+        Self::FuncCall {
+            module,
+            function,
+            args,
+        }
     }
     pub fn wasm_bytes(bytes: Bytes) -> Self {
-        Self::WasmBytes {
-            bytes
-        }
+        Self::WasmBytes { bytes }
     }
     pub fn check(buf: &mut impl Buf) -> Result<(), Error> {
         // Check if the buffer has enough data to read the length
@@ -107,7 +109,8 @@ impl Frame {
                 Self::dirac(dirac)
             }
             2 => {
-                let (module, function, args) = serde_json::from_slice::<(H256, String, Vec<String>)>(&data)?;
+                let (module, function, args) =
+                    serde_json::from_slice::<(H256, String, Vec<String>)>(&data)?;
                 Self::func_call(module, function, args)
             }
             3 => {

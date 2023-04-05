@@ -10,7 +10,7 @@ use std::io::Cursor;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
-/// [Connect] describes a connection 
+/// [Connect] describes a connection
 #[derive(Debug)]
 pub struct Connect {
     buf: BytesMut,

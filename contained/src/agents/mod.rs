@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-pub use self::{agent::*, environment::*, };
+pub use self::{agent::*, environment::*};
 
 mod agent;
 mod environment;

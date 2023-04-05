@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: These commands describe the possible operations of a node in the network
 */
-use crate::NetworkResult;
 use crate::subnet::proto::reqres::Response;
-use libp2p::{Multiaddr, PeerId};
+use crate::NetworkResult;
 use libp2p::request_response::ResponseChannel;
+use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
 use tokio::sync::oneshot::Sender;
 
@@ -49,7 +49,11 @@ pub enum Command {
 
 impl Command {
     pub fn dial(addr: Multiaddr, pid: PeerId, sender: Sender<NetworkResult>) -> Self {
-        Self::Dial { addr, pid, tx: sender }
+        Self::Dial {
+            addr,
+            pid,
+            tx: sender,
+        }
     }
     pub fn listen(addr: Multiaddr, sender: Sender<NetworkResult>) -> Self {
         Self::Listen { addr, tx: sender }
@@ -61,7 +65,11 @@ impl Command {
         Self::Providers { cid, tx: sender }
     }
     pub fn request(payload: String, peer: PeerId, sender: Sender<NetworkResult<Response>>) -> Self {
-        Self::Request { payload, peer, tx: sender }
+        Self::Request {
+            payload,
+            peer,
+            tx: sender,
+        }
     }
     pub fn response(payload: Vec<u8>, channel: ResponseChannel<Response>) -> Self {
         Self::Respond { payload, channel }

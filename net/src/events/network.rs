@@ -3,7 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::subnet::{self, proto::reqres::{Request, Response}};
+use crate::subnet::{
+    self,
+    proto::reqres::{Request, Response},
+};
 use libp2p::request_response::ResponseChannel;
 use scsys::prelude::AsyncResult;
 
@@ -18,7 +21,7 @@ pub enum NetworkEvent {
 impl NetworkEvent {
     pub async fn subnet_handle(&mut self, client: subnet::Client) -> AsyncResult {
         match self {
-            Self::InboundRequest { request, channel } => {},
+            Self::InboundRequest { request, channel } => {}
         }
         Ok(())
     }

@@ -10,13 +10,13 @@ use std::sync::{Arc, Mutex};
 
 #[derive(Clone, Debug, Default)]
 pub struct TaskRegistry {
-    tasks: Shared<HashMap<Task, usize>>
+    tasks: Shared<HashMap<Task, usize>>,
 }
 
 impl TaskRegistry {
     pub fn new() -> Self {
         Self {
-            tasks: Arc::new(Mutex::new(HashMap::new()))
+            tasks: Arc::new(Mutex::new(HashMap::new())),
         }
     }
     pub fn register(&mut self, task: Task) -> usize {
@@ -25,7 +25,7 @@ impl TaskRegistry {
             *cnt += 1;
             *cnt
         } else {
-           1
+            1
         };
         tasks.insert(task, count);
         count

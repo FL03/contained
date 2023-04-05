@@ -13,7 +13,6 @@ use tokio::net::TcpStream;
 async fn main() -> scsys::prelude::AsyncResult {
     // Connect to the contained server.
     let mut connection = Connect::connect("0.0.0.0:8080").await?;
-    
+
     Ok(())
 }
-
