@@ -31,7 +31,7 @@ impl Queue {
     }
     pub async fn handle(&mut self, action: Command, swarm: &mut Swarm<Subnet>) {
         match action {
-            Command::StartListening { addr, tx: sender } => {
+            Command::Listen { addr, tx: sender } => {
                 let _ = match swarm.listen_on(addr) {
                     Ok(_) => sender.send(Ok(())),
                     Err(e) => sender.send(Err(e.into())),
@@ -57,8 +57,8 @@ impl Queue {
                     }
                 }
             },
-            Command::StartProviding { .. } => {}
-            Command::GetProviders { .. } => {}
+            Command::Provide { .. } => {}
+            Command::Providers { .. } => {}
             Command::Request { payload, peer, tx } => {
                 let request_id = swarm
                     .behaviour_mut()

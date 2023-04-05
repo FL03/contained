@@ -32,34 +32,33 @@ impl Client {
     pub fn sender(&self) -> &mpsc::Sender<Command> {
         &self.cmd
     }
-    /// Listen for incoming connections on the given address.
-    pub async fn start_listening(&mut self, addr: Multiaddr) -> NetworkResult {
-        let (tx, rx) = oneshot::channel();
-        self.sender().send(Command::listen(addr, tx)).await?;
-        rx.await?
-    }
     /// Dial the given peer at the given address.
     pub async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetworkResult {
         let (tx, rx) = oneshot::channel();
         self.cmd.send(Command::dial(addr, pid, tx)).await?;
         rx.await?
     }
-
+    /// Listen for incoming connections on the given address.
+    pub async fn listen(&mut self, addr: Multiaddr) -> NetworkResult {
+        let (tx, rx) = oneshot::channel();
+        self.sender().send(Command::listen(addr, tx)).await?;
+        rx.await?
+    }
     /// Advertise the local node as the provider of the given file on the DHT.
-    pub async fn start_providing(&mut self, fname: String) {
+    pub async fn provide(&mut self, cid: String) {
         let (tx, rx) = oneshot::channel();
         self.sender()
-            .send(Command::start_providing(fname, tx))
+            .send(Command::provide(cid, tx))
             .await
             .expect("Command receiver not to be dropped.");
         rx.await.expect("Sender not to be dropped.");
     }
 
     /// Find the providers for the given file on the DHT.
-    pub async fn get_providers(&mut self, fname: String) -> HashSet<PeerId> {
+    pub async fn providers(&mut self, cid: String) -> HashSet<PeerId> {
         let (tx, rx) = oneshot::channel();
         self.sender()
-            .send(Command::get_provider(fname, tx))
+            .send(Command::providers(cid, tx))
             .await
             .expect("Command receiver not to be dropped.");
         rx.await.expect("Sender not to be dropped.")
@@ -80,7 +79,6 @@ impl Client {
             .await?;
         rx.await?
     }
-
     /// Respond with the provided file content to the given request.
     pub async fn respond(&mut self, payload: Vec<u8>, channel: ResponseChannel<Response>) {
         self.sender()

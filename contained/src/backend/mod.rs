@@ -49,7 +49,7 @@ impl Backend {
                     if let Some(addr) = net.listen {
                         let addr = addr.parse().unwrap();
                         tracing::info!("Listening on: {}", addr);
-                        client.start_listening(addr).await.expect("");
+                        client.listen(addr).await.expect("");
                     }
                     if net.up {
                         tracing::info!("Starting network...");

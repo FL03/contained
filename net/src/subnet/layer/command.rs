@@ -4,7 +4,7 @@
     Description: These commands describe the possible operations of a node in the network
 */
 use crate::NetworkResult;
-use crate::subnet::proto::reqres::{Request, Response};
+use crate::subnet::proto::reqres::Response;
 use libp2p::{Multiaddr, PeerId};
 use libp2p::request_response::ResponseChannel;
 use std::collections::HashSet;
@@ -19,7 +19,7 @@ pub enum Event {
 
 #[derive(Debug)]
 pub enum Command {
-    StartListening {
+    Listen {
         addr: Multiaddr,
         tx: Sender<NetworkResult>,
     },
@@ -28,8 +28,12 @@ pub enum Command {
         pid: PeerId,
         tx: Sender<NetworkResult>,
     },
-    GetProviders {
-        id: String,
+    Provide {
+        cid: String,
+        tx: Sender<()>,
+    },
+    Providers {
+        cid: String,
         tx: Sender<HashSet<PeerId>>,
     },
     Request {
@@ -41,10 +45,6 @@ pub enum Command {
         payload: Vec<u8>,
         channel: ResponseChannel<Response>,
     },
-    StartProviding {
-        id: String,
-        tx: Sender<()>,
-    },
 }
 
 impl Command {
@@ -52,18 +52,18 @@ impl Command {
         Self::Dial { addr, pid, tx: sender }
     }
     pub fn listen(addr: Multiaddr, sender: Sender<NetworkResult>) -> Self {
-        Self::StartListening { addr, tx: sender }
+        Self::Listen { addr, tx: sender }
     }
-    pub fn get_provider(id: String, sender: Sender<HashSet<PeerId>>) -> Self {
-        Self::GetProviders { id, tx: sender }
+    pub fn provide(cid: String, sender: Sender<()>) -> Self {
+        Self::Provide { cid, tx: sender }
+    }
+    pub fn providers(cid: String, sender: Sender<HashSet<PeerId>>) -> Self {
+        Self::Providers { cid, tx: sender }
     }
     pub fn request(payload: String, peer: PeerId, sender: Sender<NetworkResult<Response>>) -> Self {
         Self::Request { payload, peer, tx: sender }
     }
     pub fn response(payload: Vec<u8>, channel: ResponseChannel<Response>) -> Self {
         Self::Respond { payload, channel }
-    }
-    pub fn start_providing(id: String, sender: Sender<()>) -> Self {
-        Self::StartProviding { id, tx: sender }
     }
 }
