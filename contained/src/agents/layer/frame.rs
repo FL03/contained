@@ -6,7 +6,7 @@
 use crate::music::neo::LPR;
 use crate::prelude::Error;
 use bytes::{Buf, Bytes};
-use decanter::prelude::Hashable;
+use decanter::prelude::{Hashable, H256};
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
@@ -27,17 +27,38 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Frame {
-    Dirac(LPR),
-    WasmBytes(Bytes),
+    Content {
+        cid: H256,
+        content: Vec<Bytes>
+    },
+    Dirac {
+        dirac: LPR,
+    },
+    FuncCall {
+        module: H256,
+        function: String,
+        args: Vec<String>,
+    },
+    WasmBytes {
+        bytes: Bytes,
+    },
     Error(Error),
 }
 
 impl Frame {
+    pub fn content(cid: H256, content: Vec<Bytes>) -> Self {
+        Self::Content{ cid, content }
+    }
     pub fn dirac(dirac: LPR) -> Self {
-        Self::Dirac(dirac)
+        Self::Dirac{ dirac }
+    }
+    pub fn func_call(module: H256, function: String, args: Vec<String>) -> Self {
+        Self::FuncCall{ module, function, args }
     }
     pub fn wasm_bytes(bytes: Bytes) -> Self {
-        Self::WasmBytes(bytes)
+        Self::WasmBytes {
+            bytes
+        }
     }
     pub fn check(buf: &mut impl Buf) -> Result<(), Error> {
         // Check if the buffer has enough data to read the length
@@ -76,25 +97,28 @@ impl Frame {
         let data = buf.copy_to_bytes(len as usize - 1);
 
         // Parse the frame
-        match frame_type {
+        let frame = match frame_type {
             0 => {
-                // Parse the dirac
-                let dirac = serde_json::from_slice::<LPR>(&data)?;
-
-                Ok(Self::Dirac(dirac))
+                let (cid, content) = serde_json::from_slice::<(H256, Vec<Bytes>)>(&data)?;
+                Self::content(cid, content)
             }
             1 => {
-                // Parse the wasm bytes
+                let dirac = serde_json::from_slice::<LPR>(&data)?;
+                Self::dirac(dirac)
+            }
+            2 => {
+                let (module, function, args) = serde_json::from_slice::<(H256, String, Vec<String>)>(&data)?;
+                Self::func_call(module, function, args)
+            }
+            3 => {
                 let wasm_bytes = Bytes::from(data);
-
-                Ok(Self::WasmBytes(wasm_bytes))
+                Self::wasm_bytes(wasm_bytes)
             }
             _ => {
-                // Parse the error
                 let error = serde_json::from_slice::<Error>(&data)?;
-
-                Ok(Self::Error(error))
+                Self::Error(error)
             }
-        }
+        };
+        Ok(frame)
     }
 }

@@ -16,3 +16,4 @@ async fn main() -> scsys::prelude::AsyncResult {
     
     Ok(())
 }
+

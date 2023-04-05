@@ -61,26 +61,18 @@ impl Connect {
     }
     pub async fn read_frame(&mut self) -> Result<Option<Frame>, Error> {
         loop {
-            // Attempt to parse a frame from the buffered data. If
-            // enough data has been buffered, the frame is
-            // returned.
+            // Attempt to parse a frame from the buffered data.
             if let Some(frame) = self.parse_frame()? {
+                // returns when a sufficent amount of data has been buffered
                 return Ok(Some(frame));
             }
-
-            // There is not enough buffered data to read a frame.
-            // Attempt to read more data from the socket.
             //
-            // On success, the number of bytes is returned. `0`
-            // indicates "end of stream".
             if 0 == self.stream.read_buf(&mut self.buf).await? {
-                // The remote closed the connection. For this to be
-                // a clean shutdown, there should be no data in the
-                // read buffer. If there is, this means that the
-                // peer closed the socket while sending a frame.
                 if self.buf.is_empty() {
+                    // The socket was closed cleanly; there was no data left in the buffer
                     return Ok(None);
                 } else {
+                    // The peer closed the socket while sending a frame.
                     return Err(Error::Error("connection reset by peer".into()));
                 }
             }

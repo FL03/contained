@@ -1,7 +1,11 @@
 /*
     Appellation: command <agents>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: This module implements the command for the agents
+    Description: explicit commands for agents
+        Commands:
+            Execute: execute a function in a module
+            Include: include a module
+            Transform: transform a module
 */
 use super::Responder;
 use crate::music::neo::LPR;
