@@ -10,6 +10,7 @@ mod frame;
 
 use async_trait::async_trait;
 use bytes::Buf;
+use tokio::net::ToSocketAddrs;
 
 pub trait TokioFrame {
     type Error;
@@ -20,6 +21,10 @@ pub trait TokioFrame {
 }
 
 #[async_trait]
-pub trait Connector {
-    type Frame: TokioFrame;
+pub trait AsyncConnection<Frame: TokioFrame> {
+    type Error: Send + Sync;
+
+    async fn connect(addr: impl ToSocketAddrs) -> Result<Self, Self::Error> where Self: Sized;
+    fn read(&mut self) -> Result<Option<Frame>, Self::Error>;
+    async fn write(&mut self, frame: &Frame) -> Result<(), Self::Error>;
 }

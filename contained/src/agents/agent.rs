@@ -41,6 +41,8 @@ impl Agent {
                     .lock()
                     .unwrap()
                     .modules
+                    .write()
+                    .unwrap()
                     .insert(hash.into(), module);
                 sender.send(Ok(hash.into())).unwrap();
                 Ok(())
@@ -52,9 +54,10 @@ impl Agent {
                 with,
                 sender,
             } => {
-                let modules = self.stack.lock().unwrap().modules.clone();
+                let modules = &self.stack.lock().unwrap().modules;
+                let tmp = modules.read().unwrap();
                 tracing::debug!("Fetching the program...");
-                let module = modules.get(&module).unwrap();
+                let module = tmp.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
                 let imports = self.env.lock().unwrap().imports(&mut self.store, with);
                 tracing::info!("Instantiating module with the imported host functions");

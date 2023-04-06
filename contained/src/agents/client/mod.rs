@@ -8,6 +8,7 @@ pub use self::connect::*;
 mod connect;
 
 use super::layer::Command;
+use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
 use scsys::prelude::AsyncResult;
@@ -39,7 +40,7 @@ impl Client {
         self.cmd.send(Command::include(bytes, tx)).await?;
         rx.await?
     }
-    pub async fn transform(&mut self, id: H256, dirac: crate::music::neo::LPR) -> AsyncResult {
+    pub async fn transform(&mut self, id: H256, dirac: LPR) -> AsyncResult {
         let (tx, rx) = oneshot::channel();
         self.cmd.send(Command::transform(id, dirac, tx)).await?;
         rx.await?

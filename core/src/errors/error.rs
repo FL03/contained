@@ -50,6 +50,35 @@ pub enum Error {
     ValidationError,
 }
 
+impl Error {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Error::Error(e) => e.as_bytes(),
+            Error::IOError(e) => e.as_bytes(),
+            Error::AsyncError(e) => e.as_bytes(),
+            Error::CompileError(e) => e.as_bytes(),
+            Error::ConnectionError(e) => e.as_bytes(),
+            Error::ExportError(e) => e.as_bytes(),
+            Error::ExecutionError(e) => e.as_bytes(),
+            Error::Incomplete(e) => e.as_bytes(),
+            Error::MemoryError(e) => e.as_bytes(),
+            Error::RecvError(e) => e.as_bytes(),
+            Error::SendError(e) => e.as_bytes(),
+            Error::RuntimeError(e) => e.as_bytes(),
+            Error::TranslateError => b"TranslateError",
+            Error::TransformError => b"TransformError",
+            Error::TapeError => b"TapeError",
+            Error::ValidationError => b"ValidationError",
+            Error::RangeError => b"RangeError",
+            Error::TypeError => b"TypeError",
+            Error::StateError => b"StateError",
+            Error::StoreError => b"StoreError",
+            Error::CapacityError(e) => e.as_bytes(),
+            Error::NotFound => b"NotFound",
+        }
+    }
+}
+
 impl std::error::Error for Error {}
 
 impl From<Box<dyn std::error::Error>> for Error {
