@@ -1,7 +1,7 @@
 /*
     Appellation: stack <agents>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: The stack is a collection of modules and environments that are availible to the agent. 
+    Description: The stack is a collection of modules and environments that are availible to the agent.
 */
 use decanter::prelude::H256;
 use std::collections::HashMap;

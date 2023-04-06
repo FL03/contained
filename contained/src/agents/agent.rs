@@ -20,16 +20,16 @@ pub struct Agent {
 
 impl Agent {
     pub fn new(buffer: usize) -> (Self, mpsc::Sender<Command>) {
-        let (cmd, rx) = mpsc::channel(buffer);
+        let (tx, cmd) = mpsc::channel(buffer);
         (
             Self {
-                cmd: rx,
+                cmd,
                 env: Arc::new(Mutex::new(VirtualEnv::default())),
                 stack: Arc::new(Mutex::new(Stack::new())),
                 state: Arc::new(Mutex::new(State::default())),
                 store: Store::default(),
             },
-            cmd,
+            tx,
         )
     }
     pub async fn handle_command(&mut self, cmd: Command) -> AsyncResult {

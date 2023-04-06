@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
+use crate::prelude::PeerId;
 use clap::{ArgAction, Args, Subcommand};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
@@ -42,6 +43,13 @@ pub struct Network {
 )]
 #[strum(serialize_all = "snake_case")]
 pub enum Opts {
+    #[strum(disabled)]
+    Dial {
+        #[clap(long, short)]
+        addr: String,
+        #[clap(long, short)]
+        pid: PeerId,
+    },
     Execute {
         #[clap(long, short)]
         space: Option<String>,

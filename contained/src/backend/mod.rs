@@ -35,16 +35,16 @@ impl Backend {
     pub async fn handle_cli(&mut self, cli: Cli, client: &mut Client, node: Node) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
+                Opts::Dial { addr, pid } => {
+                    let addr = addr.parse().unwrap();
+                    tracing::info!("Dialing {} at {}", pid, addr);
+                    client.dial(pid, addr).await.expect("");
+                }
                 Opts::Execute { .. } => todo!("Execute command"),
                 Opts::Network(net) => {
                     self.ctx.cnf.cluster.seed = net.seed;
                     let peer = self.ctx.peer();
                     tracing::info!("Peer: {:?}", peer.pid());
-                    if let Some(addr) = net.dial {
-                        let addr = addr.parse().unwrap();
-                        tracing::info!("Dialing {} at {}", peer.pid(), addr);
-                        client.dial(peer.pid(), addr).await.expect("");
-                    }
                     if let Some(addr) = net.listen {
                         let addr = addr.parse().unwrap();
                         tracing::info!("Listening on: {}", addr);

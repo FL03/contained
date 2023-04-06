@@ -12,6 +12,4 @@ mod stack;
 pub mod client;
 pub mod layer;
 
-
 pub trait Actor {}
-
