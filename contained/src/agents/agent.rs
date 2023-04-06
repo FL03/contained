@@ -54,10 +54,10 @@ impl Agent {
                 with,
                 sender,
             } => {
-                let modules = &self.stack.lock().unwrap().modules;
-                let tmp = modules.read().unwrap();
+                let stack = &self.stack.lock().unwrap();
+                let modules = stack.modules.read().unwrap();
                 tracing::debug!("Fetching the program...");
-                let module = tmp.get(&module).unwrap();
+                let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
                 let imports = self.env.lock().unwrap().imports(&mut self.store, with);
                 tracing::info!("Instantiating module with the imported host functions");
