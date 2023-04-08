@@ -57,6 +57,13 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 wasmer.workspace = true
 
+[dependencies.libp2p]
+features = [
+    "macros",
+    "tokio"
+]
+version = "0.51.1"
+
 [dev-dependencies]
 
 [package.metadata.docs.rs]

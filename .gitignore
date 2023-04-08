@@ -6,15 +6,9 @@
 **/*.env.*
 
 # Directories
-**/__pycache__/
-**/__sapper__/
-
-**/.DS_STORE/
 **/.artifacts/data/
 **/.docker/data/
 **/.idea/
-**/.pytest_cache/
-**/.svelte-kit/
 **/.vscode/
 
 **/artifacts/

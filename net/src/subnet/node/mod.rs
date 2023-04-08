@@ -17,15 +17,26 @@ mod queue;
 
 use super::{Subnet, SubnetEvent};
 use crate::events::NetworkEvent;
-use crate::peers::{Peer, Peerable};
+use crate::peers::Peer;
 use crate::NetworkResult;
 use futures::StreamExt;
 use libp2p::kad::{self, KademliaEvent, QueryResult};
-use libp2p::multiaddr::Protocol;
-use libp2p::request_response;
 use libp2p::swarm::{SwarmEvent, THandlerErr};
-use libp2p::{mdns, Multiaddr, PeerId, Swarm};
+use libp2p::{mdns, request_response};
+use libp2p::{multiaddr::Protocol, Multiaddr, PeerId, Swarm};
 use tokio::sync::oneshot;
+
+pub struct SubnetConfig {
+    pub addr: Multiaddr,
+}
+
+impl SubnetConfig {
+    pub fn new() -> Self {
+        Self {
+            addr: "ip4/0.0.0.0/tcp/9090".parse().unwrap(),
+        }
+    }
+}
 
 pub struct Node {
     chan: Channels,
@@ -40,6 +51,11 @@ impl Node {
             queue: Queue::new(),
             swarm,
         }
+    }
+    pub fn dial(&mut self, addr: Multiaddr, pid: PeerId) -> NetworkResult<()> {
+        let opts = addr.with(Protocol::P2p((pid).into()));
+        self.swarm.dial(opts)?;
+        Ok(())
     }
     /// Handle events from the swarm; the stateful network manager
     pub async fn handle_event(&mut self, event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>) {
@@ -172,17 +188,20 @@ impl Node {
         self.swarm.local_peer_id()
     }
     pub async fn run(mut self) -> NetworkResult {
-        loop {
+        Ok(loop {
             tokio::select! {
                 Some(event) = self.swarm.next() => {
                     self.handle_event(event).await;
                 }
                 Some(cmd) = self.chan.cmd.recv() => {
-                    self.queue.handle(cmd, &mut self.swarm).await;
+                    self.queue.handle(cmd, &mut self.swarm).await.expect("Receiver not to be dropped");
                 }
-
+                _ = tokio::signal::ctrl_c() => {
+                    tracing::info!("Signal received, shutting down...");
+                    break;
+                }
             }
-        }
+        })
     }
     pub fn spawn(self) -> tokio::task::JoinHandle<NetworkResult> {
         tokio::spawn(self.run())
@@ -195,25 +214,22 @@ impl Default for Node {
     }
 }
 
-impl<P> From<(Channels, P)> for Node
-where
-    P: Peerable,
-{
-    fn from(data: (Channels, P)) -> Self {
-        let swarm = data.1.swarm(Subnet::from(data.1.pid()));
+impl From<(Channels, Peer)> for Node {
+    fn from(data: (Channels, Peer)) -> Self {
+        let swarm = data.1.swarm();
 
         Self::new(data.0, swarm)
     }
 }
 
-impl<P> From<P> for Node
-where
-    P: Peerable,
-{
-    fn from(peer: P) -> Self {
-        let chan = Channels::default();
-        let swarm = peer.swarm(Subnet::from(peer.pid()));
+impl From<Channels> for Node {
+    fn from(channels: Channels) -> Self {
+        Self::from((channels, Peer::default()))
+    }
+}
 
-        Self::new(chan, swarm)
+impl From<Peer> for Node {
+    fn from(peer: Peer) -> Self {
+        Self::from((Channels::default(), peer))
     }
 }

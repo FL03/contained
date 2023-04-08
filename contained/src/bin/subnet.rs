@@ -7,6 +7,5 @@ use contained_sdk as contained;
 
 #[tokio::main]
 async fn main() -> scsys::prelude::AsyncResult {
-
     Ok(())
 }

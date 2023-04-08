@@ -13,10 +13,15 @@ pub mod rpc;
 
 use crate::net::subnet::{
     node::{Channels, Node},
-    Client, NetworkOperator
+    Client, NetworkClient,
 };
-use crate::prelude::{peers::*, Resultant};
+use crate::prelude::{peers::*, Resultant, Shared};
 use cli::{args::NetworkOpts, Cli, Opts};
+
+pub struct Runtime {
+    pub cli: Shared<Cli>,
+    pub client: Shared<Client>,
+}
 
 pub struct Backend {
     ctx: Context,
@@ -37,21 +42,22 @@ impl Backend {
             match opts {
                 Opts::Agent(_args) => todo!("Execute command"),
                 Opts::Network(args) => {
-                    // Fix the peer seed setup
-                    self.ctx.cnf.cluster.seed = args.seed;
-                    let addr = if let Some(addr) = args.addr {
-                        addr 
-                    } else {
-                        crate::prelude::DEFAULT_MULTIADDR.parse().unwrap()
+                    // While the current setup is functional, the node needs to be able to be configured from the command line
+                    self.ctx.cnf.network.subnet.seed = args.seed;
+                    if let Some(addr) = args.addr {
+                        self.ctx.cnf.network.subnet.addr = addr;
                     };
-                    tracing::info!("Listening on: {:?}", node.listen_on(addr));
+                    tracing::info!(
+                        "Listening on: {:?}",
+                        node.listen_on(self.ctx.cnf.network.subnet.addr.clone())
+                    );
                     let peer = self.ctx.peer();
                     tracing::info!("Peer: {:?}", peer.pid());
                     if let Some(cmd) = args.cmd {
                         match cmd {
                             NetworkOpts::Dial { addr, pid } => {
                                 tracing::info!("Dialing: {:?}", &addr);
-                                client.dial(pid, addr).await.expect("");
+                                node.dial(addr, pid)?;
                             }
                             NetworkOpts::Provide { .. } => todo!("Provide command"),
                             NetworkOpts::Providers { .. } => todo!("Get providers command"),

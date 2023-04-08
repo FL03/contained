@@ -33,7 +33,7 @@ impl Queue {
             requests: HashMap::new(),
         }
     }
-    pub async fn handle(&mut self, action: Command, swarm: &mut Swarm<Subnet>) {
+    pub async fn handle(&mut self, action: Command, swarm: &mut Swarm<Subnet>) -> NetworkResult {
         match action {
             Command::Listen { addr, tx: sender } => {
                 let _ = match swarm.listen_on(addr) {
@@ -81,6 +81,7 @@ impl Queue {
                     .send_response(channel, Response::new().with_data(payload))
                     .expect("Connection to peer to be still open.");
             }
-        }
+        };
+        Ok(())
     }
 }

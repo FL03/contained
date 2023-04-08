@@ -17,7 +17,7 @@ use crate::peers::*;
 use crate::Conduct;
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
-use libp2p::{mdns, ping, PeerId};
+use libp2p::{identity::Keypair, mdns, ping, PeerId};
 
 /// [Subnet] describes the behaviour of a user owned cluster of nodes.
 #[derive(NetworkBehaviour)]
@@ -48,16 +48,6 @@ impl Default for Subnet {
 
 impl Conduct for Subnet {}
 
-impl FromPeer for Subnet {
-    fn from_peer(peer: impl Peerable) -> Self {
-        let kademlia = Kademlia::new(peer.pid(), MemoryStore::new(peer.pid()));
-        Self::new(
-            kademlia,
-            mdns::tokio::Behaviour::new(mdns::Config::default(), peer.pid()).unwrap(),
-        )
-    }
-}
-
 impl From<PeerId> for Subnet {
     fn from(pid: PeerId) -> Self {
         let kademlia = Kademlia::new(pid, MemoryStore::new(pid));
@@ -65,5 +55,18 @@ impl From<PeerId> for Subnet {
             kademlia,
             mdns::tokio::Behaviour::new(mdns::Config::default(), pid).unwrap(),
         )
+    }
+}
+
+impl FromPeer for Subnet {
+    fn from_peer(peer: Peer) -> Self {
+        Self::from(peer.pid())
+    }
+}
+
+impl From<Keypair> for Subnet {
+    fn from(kp: Keypair) -> Self {
+        let pk = kp.public();
+        Self::from(pk.to_peer_id())
     }
 }

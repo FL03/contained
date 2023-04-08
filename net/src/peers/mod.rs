@@ -7,36 +7,14 @@ pub use self::peer::*;
 
 mod peer;
 
-use crate::BoxedTransport;
-use libp2p::swarm::{NetworkBehaviour, Swarm, SwarmBuilder};
-use libp2p::{
-    core::upgrade,
-    identity::{Keypair, PublicKey},
-    mplex, noise, tcp, PeerId, Transport,
-};
+use crate::Conduct;
+use libp2p::swarm::SwarmBuilder;
+use libp2p::identity::Keypair;
+use libp2p::{PeerId, Swarm};
 
-pub trait Peerable: Clone {
-    fn keypair(self) -> Keypair;
-    fn pk(self) -> PublicKey {
-        self.keypair().public()
-    }
-    fn pid(&self) -> PeerId {
-        self.clone().pk().to_peer_id()
-    }
-    fn swarm<B: NetworkBehaviour>(&self, behaviour: B) -> Swarm<B> {
-        SwarmBuilder::with_tokio_executor(self.transport(), behaviour, self.pid()).build()
-    }
-    ///
-    fn transport(&self) -> BoxedTransport {
-        tcp::tokio::Transport::new(tcp::Config::default().nodelay(true))
-            .upgrade(upgrade::Version::V1)
-            .authenticate(
-                noise::NoiseAuthenticated::xx(&self.clone().keypair())
-                    .expect("Signing libp2p-noise static DH keypair failed."),
-            )
-            .multiplex(mplex::MplexConfig::new())
-            .boxed()
-    }
+pub fn swarm<B: Conduct + FromPeer>(peer: Peer) -> Swarm<B> {
+    let behaviour = B::from_peer(peer.clone());
+    SwarmBuilder::with_tokio_executor(peer.transport(), behaviour, peer.pid()).build()
 }
 
 pub trait IntoPeer {
@@ -44,5 +22,25 @@ pub trait IntoPeer {
 }
 
 pub trait FromPeer {
-    fn from_peer(peer: impl Peerable) -> Self;
+    fn from_peer(peer: Peer) -> Self;
+}
+
+pub trait FromPeerId {
+    fn from_pid(pid: PeerId) -> Self;
+}
+
+impl<T> FromPeerId for T where T: From<PeerId> {
+    fn from_pid(pid: PeerId) -> Self {
+        Self::from(pid)
+    }
+}
+
+pub trait FromKeypair {
+    fn from_kp(kp: Keypair) -> Self;
+}
+
+impl<T> FromKeypair for T where T: From<Keypair> {
+    fn from_kp(kp: Keypair) -> Self {
+        Self::from(kp)
+    }
 }

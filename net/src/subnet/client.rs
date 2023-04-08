@@ -12,14 +12,8 @@ use libp2p::{core::transport::ListenerId, Multiaddr, PeerId};
 use std::collections::HashSet;
 use tokio::sync::{mpsc, oneshot};
 
-pub trait NetworkClient {
-    type Command;
-
-    fn command(&self) -> &mpsc::Sender<Self::Command>;
-}
-
 #[async_trait]
-pub trait NetworkOperator: Send + Sync {
+pub trait NetworkClient: Send + Sync {
     fn sender(&self) -> &mpsc::Sender<Command>;
     /// Dial the given peer at the given address.
     async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetworkResult {
@@ -64,6 +58,12 @@ pub trait NetworkOperator: Send + Sync {
     }
 }
 
+impl NetworkClient for mpsc::Sender<Command> {
+    fn sender(&self) -> &mpsc::Sender<Command> {
+        self
+    }
+}
+
 pub struct Client {
     pub cmd: mpsc::Sender<Command>,
 }
@@ -84,7 +84,7 @@ impl Default for Client {
     }
 }
 
-impl NetworkOperator for Client {
+impl NetworkClient for Client {
     fn sender(&self) -> &mpsc::Sender<Command> {
         &self.cmd
     }
