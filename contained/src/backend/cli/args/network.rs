@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::net::{Multiaddr, PeerId, DEFAULT_MULTIADDR};
+use crate::net::{Multiaddr, PeerId};
 use clap::{ArgAction, Args, Subcommand};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -15,12 +15,16 @@ use strum::{Display, EnumVariantNames};
 pub struct NetworkArgs {
     #[clap(subcommand)]
     pub cmd: Option<NetworkOpts>,
+    /// The address to listen on
     #[clap(long, short)]
     pub addr: Option<Multiaddr>,
+    /// Spawn the node in the background
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub detached: bool,
+    /// Provide a seed to generate a deterministic peer ID
     #[clap(long, short)]
     pub seed: Option<u8>,
+    /// Start the network
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub up: bool,
 }
@@ -46,10 +50,6 @@ pub enum NetworkOpts {
         #[clap(long, short)]
         pid: PeerId,
     },
-    Listen {
-        #[clap(long, short)]
-        addr: Multiaddr,
-    },
     Provide {
         #[clap(long, short)]
         file: Option<PathBuf>,
@@ -58,12 +58,4 @@ pub enum NetworkOpts {
         #[clap(long, short)]
         cid: String,
     },
-}
-
-impl Default for NetworkOpts {
-    fn default() -> Self {
-        Self::Listen {
-            addr: DEFAULT_MULTIADDR.parse().unwrap(),
-        }
-    }
 }

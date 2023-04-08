@@ -5,6 +5,7 @@
 */
 use crate::subnet::proto::reqres::Response;
 use crate::NetworkResult;
+use libp2p::core::transport::ListenerId;
 use libp2p::request_response::ResponseChannel;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -24,7 +25,7 @@ pub enum Event {
 pub enum Command {
     Listen {
         addr: Multiaddr,
-        tx: Commander,
+        tx: Commander<ListenerId>,
     },
     Dial {
         addr: Multiaddr,
@@ -54,7 +55,7 @@ impl Command {
     pub fn dial(addr: Multiaddr, pid: PeerId, tx: Commander) -> Self {
         Self::Dial { addr, pid, tx }
     }
-    pub fn listen(addr: Multiaddr, tx: Commander) -> Self {
+    pub fn listen(addr: Multiaddr, tx: Commander<ListenerId>) -> Self {
         Self::Listen { addr, tx }
     }
     pub fn provide(cid: String, tx: Commander) -> Self {

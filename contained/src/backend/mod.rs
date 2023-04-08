@@ -13,7 +13,7 @@ pub mod rpc;
 
 use crate::net::subnet::{
     node::{Channels, Node},
-    Client,
+    Client, NetworkOperator
 };
 use crate::prelude::{peers::*, Resultant};
 use cli::{args::NetworkOpts, Cli, Opts};
@@ -38,6 +38,12 @@ impl Backend {
                 Opts::Agent(_args) => todo!("Execute command"),
                 Opts::Network(args) => {
                     self.ctx.cnf.cluster.seed = args.seed;
+                    let addr = if let Some(addr) = args.addr {
+                        addr 
+                    } else {
+                        crate::prelude::DEFAULT_MULTIADDR.parse().unwrap()
+                    };
+                    client.listen(addr).await.expect("");
                     let peer = self.ctx.peer();
                     tracing::info!("Peer: {:?}", peer.pid());
                     if let Some(cmd) = args.cmd {
@@ -45,10 +51,6 @@ impl Backend {
                             NetworkOpts::Dial { addr, pid } => {
                                 tracing::info!("Dialing: {:?}", &addr);
                                 client.dial(pid, addr).await.expect("");
-                            }
-                            NetworkOpts::Listen { addr } => {
-                                tracing::info!("Listening: {:?}", &addr);
-                                client.listen(addr).await.expect("");
                             }
                             NetworkOpts::Provide { .. } => todo!("Provide command"),
                             NetworkOpts::Providers { .. } => todo!("Get providers command"),

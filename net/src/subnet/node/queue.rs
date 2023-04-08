@@ -37,7 +37,7 @@ impl Queue {
         match action {
             Command::Listen { addr, tx: sender } => {
                 let _ = match swarm.listen_on(addr) {
-                    Ok(_) => sender.send(Ok(())),
+                    Ok(id) => sender.send(Ok(id)),
                     Err(e) => sender.send(Err(e.into())),
                 };
             }
