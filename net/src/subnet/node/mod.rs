@@ -83,7 +83,6 @@ impl Node {
                     }
                     mdns::Event::Expired(_exp) => {}
                 },
-                SubnetEvent::Ping(_) => {}
                 SubnetEvent::RequestResponse(evnt) => match evnt {
                     request_response::Event::Message { message, .. } => match message {
                         request_response::Message::Request {
@@ -129,6 +128,7 @@ impl Node {
                     }
                     request_response::Event::ResponseSent { .. } => todo!(),
                 },
+                e => tracing::warn!("Unhandled subnet event: {:?}", e),
             },
             SwarmEvent::ConnectionEstablished {
                 peer_id, endpoint, ..
@@ -154,7 +154,7 @@ impl Node {
                 );
             }
             SwarmEvent::Dialing(pid) => {
-                eprintln!("Dialing {pid}")
+                tracing::info!("Dialing peer: {}", pid);
             }
             SwarmEvent::ConnectionClosed { .. } => {}
             SwarmEvent::IncomingConnection { .. } => {}
