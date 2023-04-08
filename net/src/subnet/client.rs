@@ -4,8 +4,9 @@
     Description: ... summary ...
 */
 use super::layer::Command;
-use crate::subnet::proto::reqres::{Request, Response};
+use crate::subnet::proto::reqres::Response;
 use crate::NetworkResult;
+use async_trait::async_trait;
 use libp2p::request_response::ResponseChannel;
 use libp2p::{Multiaddr, PeerId};
 use std::collections::HashSet;
@@ -14,7 +15,53 @@ use tokio::sync::{mpsc, oneshot};
 pub trait NetworkClient {
     type Command;
 
-    fn command(self) -> mpsc::Sender<Self::Command>;
+    fn command(&self) -> &mpsc::Sender<Self::Command>;
+}
+
+#[async_trait]
+pub trait NetworkOperator: Send + Sync {
+    fn sender(&self) -> &mpsc::Sender<Command>;
+    /// Dial the given peer at the given address.
+    async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetworkResult {
+        tracing::info!("Dialing {} at {}", pid, addr);
+        let (tx, rx) = oneshot::channel();
+        self.sender().send(Command::dial(addr, pid, tx)).await?;
+        rx.await?
+    }
+    /// Listen for incoming connections on the given address.
+    async fn listen(&mut self, addr: Multiaddr) -> NetworkResult {
+        let (tx, rx) = oneshot::channel();
+        tracing::info!("Listening for incoming connections on {}", addr);
+        self.sender().send(Command::listen(addr, tx)).await?;
+        rx.await?
+    }
+    /// Advertise the local node as the provider of the given file on the DHT.
+    async fn provide(&mut self, cid: String) -> NetworkResult {
+        let (tx, rx) = oneshot::channel();
+        self.sender().send(Command::provide(cid, tx)).await?;
+        rx.await?
+    }
+    /// Find the providers for the given file on the DHT.
+    async fn providers(&mut self, cid: String) -> NetworkResult<HashSet<PeerId>> {
+        let (tx, rx) = oneshot::channel();
+        self.sender().send(Command::providers(cid, tx)).await?;
+        rx.await?
+    }
+    /// Request the content of the given file from the given peer.
+    async fn request(&mut self, payload: String, peer: PeerId) -> NetworkResult<Response> {
+        let (tx, rx) = oneshot::channel();
+        self.sender()
+            .send(Command::Request { payload, peer, tx })
+            .await?;
+        rx.await?
+    }
+    /// Respond with the provided file content to the given request.
+    async fn respond(&mut self, payload: Vec<u8>, channel: ResponseChannel<Response>) {
+        self.sender()
+            .send(Command::Respond { payload, channel })
+            .await
+            .expect("Command receiver not to be dropped.");
+    }
 }
 
 pub struct Client {
@@ -35,33 +82,28 @@ impl Client {
     /// Dial the given peer at the given address.
     pub async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetworkResult {
         let (tx, rx) = oneshot::channel();
-        self.cmd.send(Command::dial(addr, pid, tx)).await?;
+        tracing::info!("Dialing {} at {}", pid, addr);
+        self.sender().send(Command::dial(addr, pid, tx)).await?;
         rx.await?
     }
     /// Listen for incoming connections on the given address.
     pub async fn listen(&mut self, addr: Multiaddr) -> NetworkResult {
         let (tx, rx) = oneshot::channel();
+        tracing::info!("Listening for incoming connections on {}", addr);
         self.sender().send(Command::listen(addr, tx)).await?;
         rx.await?
     }
     /// Advertise the local node as the provider of the given file on the DHT.
-    pub async fn provide(&mut self, cid: String) {
+    pub async fn provide(&mut self, cid: String) -> NetworkResult {
         let (tx, rx) = oneshot::channel();
-        self.sender()
-            .send(Command::provide(cid, tx))
-            .await
-            .expect("Command receiver not to be dropped.");
-        rx.await.expect("Sender not to be dropped.");
+        self.sender().send(Command::provide(cid, tx)).await?;
+        rx.await?
     }
-
     /// Find the providers for the given file on the DHT.
-    pub async fn providers(&mut self, cid: String) -> HashSet<PeerId> {
+    pub async fn providers(&mut self, cid: String) -> NetworkResult<HashSet<PeerId>> {
         let (tx, rx) = oneshot::channel();
-        self.sender()
-            .send(Command::providers(cid, tx))
-            .await
-            .expect("Command receiver not to be dropped.");
-        rx.await.expect("Sender not to be dropped.")
+        self.sender().send(Command::providers(cid, tx)).await?;
+        rx.await?
     }
     /// Request the content of the given file from the given peer.
     pub async fn request(&mut self, payload: String, peer: PeerId) -> NetworkResult<Response> {

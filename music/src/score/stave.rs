@@ -7,6 +7,6 @@ use super::Clef;
 use crate::chords::Chord;
 
 pub struct Stave {
-    clef: Clef,
-    measures: Vec<Chord>,
+    pub clef: Clef,
+    pub measures: Vec<Chord>,
 }

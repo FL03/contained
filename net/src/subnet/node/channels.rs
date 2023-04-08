@@ -4,7 +4,7 @@
     Description: This module implements a dedicated channel manager for the node
 */
 use crate::events::NetworkEvent;
-use crate::subnet::layer::Command;
+use crate::subnet::{layer::Command, Client};
 use tokio::sync::mpsc;
 
 pub type CommandRx = mpsc::Receiver<Command>;
@@ -22,10 +22,10 @@ impl Channels {
     pub fn new(cmd: CommandRx, event: NetworkEventTx) -> Self {
         Self { cmd, event }
     }
-    pub fn with_capacity(capacity: usize) -> (Self, CommandTx, NetworkEventRx) {
+    pub fn with_capacity(capacity: usize) -> (Self, Client, NetworkEventRx) {
         let (cmd_tx, cmd_rx) = mpsc::channel(capacity);
         let (event_tx, event_rx) = mpsc::channel(capacity);
-        (Self::new(cmd_rx, event_tx), cmd_tx, event_rx)
+        (Self::new(cmd_rx, event_tx), Client::new(cmd_tx), event_rx)
     }
     pub fn command(&self) -> &CommandRx {
         &self.cmd

@@ -41,6 +41,7 @@ impl Node {
             swarm,
         }
     }
+    /// Handle events from the swarm; the stateful network manager
     pub async fn handle_event(&mut self, event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>) {
         match event {
             // Handle custom networking events
@@ -51,7 +52,6 @@ impl Node {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {
                                 if let Some(sender) = self.queue.get_providers.remove(&id) {
                                     sender.send(providers).expect("Receiver not to be dropped");
-
                                     // Finish the query. We are only interested in the first result.
                                     self.swarm
                                         .behaviour_mut()

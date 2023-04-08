@@ -5,9 +5,9 @@
 */
 pub use self::{commands::*, context::*, primitives::*, utils::*};
 
-pub(crate) mod commands;
-pub(crate) mod context;
-pub(crate) mod utils;
+mod commands;
+mod context;
+mod utils;
 
 pub mod cli;
 
@@ -25,7 +25,7 @@ macro_rules! cmd {
         {
             $(
                 let mut cmd = std::process::Command::new($x);
-                cmd.current_dir(scsys_xtask::project_root());
+                cmd.current_dir(project_root());
                 let mut tmp = Vec::new();
                 $(
                     tmp.push($y);

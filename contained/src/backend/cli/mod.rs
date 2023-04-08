@@ -7,6 +7,8 @@ pub use self::opts::*;
 
 mod opts;
 
+pub mod args;
+
 use clap::{ArgAction, Parser};
 use serde::{Deserialize, Serialize};
 
