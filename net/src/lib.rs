@@ -70,8 +70,10 @@ impl Starter {
             Overlay::Mainnet => todo!("Mainnet overlay"),
             Overlay::Subnet => subnet::node::Channels::with_capacity(9),
         };
+        let mut swarm = peer.swarm(subnet::Subnet::from_peer(peer.clone()));
+        swarm.listen_on(self.cnf.addr).unwrap();
         let node =
-            subnet::node::Node::new(chan, peer.swarm(subnet::Subnet::from_peer(peer.clone())));
+            subnet::node::Node::new(chan, swarm);
         (node, client, events)
     }
 }

@@ -24,7 +24,7 @@ use libp2p::kad::{self, KademliaEvent, QueryResult};
 use libp2p::multiaddr::Protocol;
 use libp2p::request_response;
 use libp2p::swarm::{SwarmEvent, THandlerErr};
-use libp2p::{mdns, Swarm};
+use libp2p::{mdns, Multiaddr, PeerId, Swarm};
 use tokio::sync::oneshot;
 
 pub struct Node {
@@ -164,6 +164,12 @@ impl Node {
             // SwarmEvent::ListenerError { .. } => {},
             e => tracing::warn!("Unhandled swarm event: {:?}", e),
         }
+    }
+    pub fn listen_on(&mut self, addr: Multiaddr) -> libp2p::core::transport::ListenerId {
+        self.swarm.listen_on(addr).expect("")
+    }
+    pub fn pid(&self) -> &PeerId {
+        self.swarm.local_peer_id()
     }
     pub async fn run(mut self) -> NetworkResult {
         loop {
