@@ -14,7 +14,6 @@ use crate::{
     Gradient, MusicError, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
-use contained_core::turing::Alphabet;
 use decanter::prelude::Hashable;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -39,15 +38,6 @@ impl Triad {
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, TriadClass::from((a, b)))
-    }
-}
-
-impl Alphabet<Note> for Triad {
-    fn is_viable(&self, symbol: &Note) -> bool {
-        self.notes.contains(symbol)
-    }
-    fn default_symbol(&self) -> Note {
-        self.root()
     }
 }
 

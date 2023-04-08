@@ -164,7 +164,7 @@ impl Node {
             }
             SwarmEvent::NewListenAddr { address, .. } => {
                 let local_peer_id = *self.swarm.local_peer_id();
-                eprintln!(
+                tracing::info!(
                     "Local node is listening on {:?}",
                     address.with(Protocol::P2p(local_peer_id.into()))
                 );
