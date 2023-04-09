@@ -15,4 +15,5 @@ pub mod compute;
 pub mod connect;
 pub mod delay;
 pub mod epoch;
+pub mod tasks;
 pub mod turing;

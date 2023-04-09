@@ -5,8 +5,12 @@
 */
 use crate::prelude::{Shared, State};
 use std::sync::{Arc, Mutex};
-use wasmer::{imports, Imports, Store};
 use wasmer::FunctionEnv;
+use wasmer::{imports, Imports, Store};
+
+pub trait Venv {}
+
+pub trait WasmEnv: Venv {}
 
 #[derive(Clone, Debug)]
 pub struct VirtualEnv {

@@ -38,6 +38,19 @@ pub enum AsyncError {
 }
 
 impl AsyncError {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            AsyncError::Error(e) => e.as_bytes(),
+            AsyncError::IOError(e) => e.as_bytes(),
+            AsyncError::BufError(e) => e.as_bytes(),
+            AsyncError::ConnectionError(e) => e.as_bytes(),
+            AsyncError::RecvError(e) => e.as_bytes(),
+            AsyncError::SendError(e) => e.as_bytes(),
+            AsyncError::RuntimeError(e) => e.as_bytes(),
+            AsyncError::SyncError(e) => e.as_bytes(),
+            AsyncError::CapacityError(e) => e.as_bytes(),
+        }
+    }
     pub fn boxed(self) -> Box<Self> {
         Box::new(self)
     }

@@ -8,7 +8,6 @@ use crate::neo::LPR;
 use contained_core::{AsyncStateful, Shared, State};
 use decanter::prelude::Hashable;
 use std::sync::{Arc, Mutex};
-use wasmer::{imports, FunctionEnv, Imports, Store};
 
 #[derive(Clone, Debug, Default, Hashable)]
 pub struct Surface {
@@ -21,17 +20,6 @@ impl Surface {
         Self {
             state: Arc::new(Mutex::new(State::default())),
             triad: Arc::new(Mutex::new(triad)),
-        }
-    }
-    pub fn function_env(&self, store: &mut Store) -> FunctionEnv<Self> {
-        FunctionEnv::new(store, self.clone())
-    }
-    pub fn imports(&self, store: &mut Store) -> Imports {
-        let env = self.function_env(store);
-
-        imports! {
-            "env" => {
-            }
         }
     }
     pub fn transform(&mut self, lpr: LPR) {

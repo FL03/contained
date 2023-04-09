@@ -39,6 +39,7 @@ contained-net = { features = [], optional = true, path = "../net", version = "0.
 # Standard dependencies
 algae.workspace = true
 anyhow.workspace = true
+async-trait.workspace = true
 bytes.workspace = true
 clap = { features = ["cargo", "derive", "env"], version = "4" }
 config = "0.13"
@@ -49,11 +50,19 @@ serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
+tarpc = { features = [], version = "0.31" }
 tokio.workspace = true
 tokio-stream = "0.1"
 tracing.workspace = true
 tracing-subscriber.workspace = true
 wasmer.workspace = true
+
+[dependencies.libp2p]
+features = [
+    "macros",
+    "tokio"
+]
+version = "0.51.1"
 
 [dev-dependencies]
 

@@ -40,16 +40,21 @@ tracing-subscriber.workspace = true
 
 [dependencies.libp2p]
 features = [
+    "ed25519",
+    "identify",
     "kad",
     "macros",
     "mdns",
-    "mplex",
     "noise",
     "ping",
+    "pnet",
+    "relay",
+    "rendezvous",
     "request-response",
     "serde",
     "tcp",
-    "tokio"
+    "tokio",
+    "yamux"
 ]
 version = "0.51.1"
 

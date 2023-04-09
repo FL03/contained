@@ -141,6 +141,32 @@ pub trait ArrayLike<T: Clone + PartialEq + PartialOrd>:
     }
 }
 
+pub trait AsBytes {
+    fn as_bytes(&self) -> &[u8];
+}
+
+impl<T> AsBytes for T
+where
+    T: AsRef<[u8]>,
+{
+    fn as_bytes(&self) -> &[u8] {
+        self.as_ref()
+    }
+}
+
+pub trait AsMutBytes {
+    fn as_mut_bytes(&mut self) -> &mut [u8];
+}
+
+impl<T> AsMutBytes for T
+where
+    T: AsMut<[u8]>,
+{
+    fn as_mut_bytes(&mut self) -> &mut [u8] {
+        self.as_mut()
+    }
+}
+
 /// [Include] describes the basic behaviors of a structure which can include a new element
 /// [Include] is designed to be an alternative to [ArrayLike::push] for structures which may or may not have a natural ordering
 pub trait Include<T> {

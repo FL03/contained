@@ -50,6 +50,35 @@ pub enum Error {
     ValidationError,
 }
 
+impl Error {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Error::Error(e) => e.as_bytes(),
+            Error::IOError(e) => e.as_bytes(),
+            Error::AsyncError(e) => e.as_bytes(),
+            Error::CompileError(e) => e.as_bytes(),
+            Error::ConnectionError(e) => e.as_bytes(),
+            Error::ExportError(e) => e.as_bytes(),
+            Error::ExecutionError(e) => e.as_bytes(),
+            Error::Incomplete(e) => e.as_bytes(),
+            Error::MemoryError(e) => e.as_bytes(),
+            Error::RecvError(e) => e.as_bytes(),
+            Error::SendError(e) => e.as_bytes(),
+            Error::RuntimeError(e) => e.as_bytes(),
+            Error::TranslateError => b"TranslateError",
+            Error::TransformError => b"TransformError",
+            Error::TapeError => b"TapeError",
+            Error::ValidationError => b"ValidationError",
+            Error::RangeError => b"RangeError",
+            Error::TypeError => b"TypeError",
+            Error::StateError => b"StateError",
+            Error::StoreError => b"StoreError",
+            Error::CapacityError(e) => e.as_bytes(),
+            Error::NotFound => b"NotFound",
+        }
+    }
+}
+
 impl std::error::Error for Error {}
 
 impl From<Box<dyn std::error::Error>> for Error {
@@ -91,29 +120,5 @@ impl<T> From<tokio::sync::mpsc::error::SendError<T>> for Error {
 impl From<tokio::sync::oneshot::error::RecvError> for Error {
     fn from(error: tokio::sync::oneshot::error::RecvError) -> Self {
         Error::AsyncError(error.into())
-    }
-}
-
-impl From<wasmer::CompileError> for Error {
-    fn from(error: wasmer::CompileError) -> Self {
-        Error::CompileError(error.to_string())
-    }
-}
-
-impl From<wasmer::ExportError> for Error {
-    fn from(error: wasmer::ExportError) -> Self {
-        Error::ExportError(error.to_string())
-    }
-}
-
-impl From<wasmer::RuntimeError> for AsyncError {
-    fn from(error: wasmer::RuntimeError) -> Self {
-        Self::RuntimeError(error.to_string())
-    }
-}
-
-impl From<wasmer::WasmError> for Error {
-    fn from(error: wasmer::WasmError) -> Self {
-        Error::ExecutionError(error.to_string())
     }
 }

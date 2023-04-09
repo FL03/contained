@@ -17,7 +17,7 @@ impl Context {
         Self { cnf }
     }
     pub fn peer(&self) -> Peer {
-        if let Some(seed) = self.settings().cluster.seed {
+        if let Some(seed) = self.settings().network.subnet.seed {
             Peer::try_from(seed).unwrap_or_default()
         } else {
             Peer::default()
@@ -25,5 +25,8 @@ impl Context {
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
+    }
+    pub fn settings_mut(&mut self) -> &mut Settings {
+        &mut self.cnf
     }
 }

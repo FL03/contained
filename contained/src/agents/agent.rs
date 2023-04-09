@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::{layer::Command, Stack, VirtualEnv};
+use super::{client::AgentManager, layer::Command, Stack, VirtualEnv};
 use crate::prelude::{hash_module, Shared, State};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
@@ -11,25 +11,25 @@ use tokio::sync::mpsc;
 use wasmer::{Instance, Module, Store};
 
 pub struct Agent {
-    pub cmd: mpsc::Receiver<Command>,
-    pub env: Shared<VirtualEnv>,
-    pub stack: Shared<Stack>,
-    pub state: Shared<State>,
-    pub store: Store,
+    cmd: mpsc::Receiver<Command>,
+    env: Shared<VirtualEnv>,
+    stack: Shared<Stack>,
+    state: Shared<State>,
+    store: Store,
 }
 
 impl Agent {
-    pub fn new(buffer: usize) -> (Self, mpsc::Sender<Command>) {
-        let (cmd, rx) = mpsc::channel(buffer);
+    pub fn new(buffer: usize) -> (Self, impl AgentManager) {
+        let (tx, cmd) = mpsc::channel(buffer);
         (
             Self {
-                cmd: rx,
+                cmd,
                 env: Arc::new(Mutex::new(VirtualEnv::default())),
                 stack: Arc::new(Mutex::new(Stack::new())),
                 state: Arc::new(Mutex::new(State::default())),
                 store: Store::default(),
             },
-            cmd,
+            tx,
         )
     }
     pub async fn handle_command(&mut self, cmd: Command) -> AsyncResult {
@@ -41,6 +41,8 @@ impl Agent {
                     .lock()
                     .unwrap()
                     .modules
+                    .write()
+                    .unwrap()
                     .insert(hash.into(), module);
                 sender.send(Ok(hash.into())).unwrap();
                 Ok(())
@@ -52,7 +54,8 @@ impl Agent {
                 with,
                 sender,
             } => {
-                let modules = self.stack.lock().unwrap().modules.clone();
+                let stack = &self.stack.lock().unwrap();
+                let modules = stack.modules.read().unwrap();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");

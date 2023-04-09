@@ -21,23 +21,29 @@ test = true
 [build-dependencies]
 
 [dependencies]
+# Custom
+algae.workspace = true
+decanter.workspace = true
+scsys.workspace = true
+
+# Internal
 contained-core = { features = [], path = "../core", version = "0.1.4" }
 
-algae.workspace = true
+# Dependencies
 anyhow.workspace = true
-decanter.workspace = true
 futures.workspace = true
 itertools.workspace = true
-scsys.workspace = true
+petgraph = { features = [], version = "0.6" }
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-tokio.workspace = true
+tokio = { features = ["sync"], version = "1"}
 tracing.workspace = true
-wasmer.workspace = true
+
 
 [dev-dependencies]
+tokio = { features = ["macros", "rt"], version = "1"}
 
 [package.metadata.docs.rs]
 all-features = true

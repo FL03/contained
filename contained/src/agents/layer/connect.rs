@@ -3,18 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::agents::layer::Frame;
-use crate::prelude::Error;
+use super::Frame;
+use crate::prelude::{Error, Resultant};
 use bytes::{Buf, BytesMut};
 use std::io::Cursor;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, BufWriter};
 use tokio::net::{TcpStream, ToSocketAddrs};
 
-/// [Connect] describes a connection 
+/// [Connect] describes a connection
 #[derive(Debug)]
 pub struct Connect {
     buf: BytesMut,
-    stream: TcpStream,
+    stream: BufWriter<TcpStream>,
 }
 
 impl Connect {
@@ -22,14 +22,14 @@ impl Connect {
         Self {
             // Allocate the buffer with 4kb of capacity.
             buf: BytesMut::with_capacity(4096),
-            stream,
+            stream: BufWriter::new(stream),
         }
     }
-    pub async fn connect(addr: impl ToSocketAddrs) -> Result<Self, Error> {
+    pub async fn connect(addr: impl ToSocketAddrs) -> Resultant<Self> {
         let stream = TcpStream::connect(addr).await?;
         Ok(Self::new(stream))
     }
-    pub fn parse_frame(&mut self) -> Result<Option<Frame>, Error> {
+    fn parse_frame(&mut self) -> Resultant<Option<Frame>> {
         // Create the `T: Buf` type.
         let mut buf = Cursor::new(&self.buf[..]);
 
@@ -59,43 +59,70 @@ impl Connect {
             }
         }
     }
-    pub async fn read_frame(&mut self) -> Result<Option<Frame>, Error> {
+    pub async fn read_frame(&mut self) -> Resultant<Option<Frame>> {
         loop {
-            // Attempt to parse a frame from the buffered data. If
-            // enough data has been buffered, the frame is
-            // returned.
+            // Attempt to parse a frame from the buffered data.
             if let Some(frame) = self.parse_frame()? {
+                // returns when a sufficent amount of data has been buffered
                 return Ok(Some(frame));
             }
-
-            // There is not enough buffered data to read a frame.
-            // Attempt to read more data from the socket.
             //
-            // On success, the number of bytes is returned. `0`
-            // indicates "end of stream".
             if 0 == self.stream.read_buf(&mut self.buf).await? {
-                // The remote closed the connection. For this to be
-                // a clean shutdown, there should be no data in the
-                // read buffer. If there is, this means that the
-                // peer closed the socket while sending a frame.
                 if self.buf.is_empty() {
+                    // The socket was closed cleanly; there was no data left in the buffer
                     return Ok(None);
                 } else {
+                    // The peer closed the socket while sending a frame.
                     return Err(Error::Error("connection reset by peer".into()));
                 }
             }
         }
     }
-    pub async fn write_frame(&mut self, frame: Frame) -> Result<(), Error> {
+    /// Write a decimal frame to the stream
+    async fn write_decimal(&mut self, val: u64) -> Resultant {
+        use std::io::Write;
+
+        // Convert the value to a string
+        let mut buf = [0u8; 12];
+        let mut buf = Cursor::new(&mut buf[..]);
+        write!(&mut buf, "{}", val)?;
+
+        let pos = buf.position() as usize;
+        self.stream.write_all(&buf.get_ref()[..pos]).await?;
+        self.stream.write_all(b"\r\n").await?;
+
+        Ok(())
+    }
+    pub async fn write_frame(&mut self, frame: &Frame) -> Resultant {
         // Serialize the frame
-        let mut buf = serde_json::to_vec(&frame)?;
+        let mut buf = serde_json::to_vec(frame)?;
 
         // Prepend the length of the frame
         let len = buf.len() as u32;
         buf[0..4].copy_from_slice(&len.to_be_bytes());
 
-        // Write the frame to the socket
-        self.stream.write_all(&buf).await?;
+        match frame {
+            Frame::Content { cid, content } => {
+                self.stream.write_all(&buf).await?;
+            }
+            _ => {
+                self.stream.write_all(&buf).await?;
+            }
+        }
+
+        self.stream.flush().await?;
+        Ok(())
+    }
+    /// Write a frame literal to the stream
+    async fn write_value(&mut self, frame: &Frame) -> Resultant {
+        match frame {
+            Frame::Error(val) => {
+                self.stream.write_u8(b'-').await?;
+                self.stream.write_all(val.as_bytes()).await?;
+                self.stream.write_all(b"\r\n").await?;
+            }
+            _ => unreachable!("unimplemented"),
+        }
 
         Ok(())
     }

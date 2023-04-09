@@ -105,6 +105,18 @@ impl From<libp2p::core::upgrade::UpgradeError<Self>> for NetworkError {
     }
 }
 
+impl From<libp2p::request_response::InboundFailure> for NetworkError {
+    fn from(error: libp2p::request_response::InboundFailure) -> Self {
+        Self::ReqResError(error.to_string())
+    }
+}
+
+impl From<libp2p::request_response::OutboundFailure> for NetworkError {
+    fn from(error: libp2p::request_response::OutboundFailure) -> Self {
+        Self::ReqResError(error.to_string())
+    }
+}
+
 impl From<libp2p::swarm::DialError> for NetworkError {
     fn from(error: libp2p::swarm::DialError) -> Self {
         Self::DialError(error.to_string())

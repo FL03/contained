@@ -8,7 +8,6 @@ pub use self::{errors::*, notes::*, primitives::*, utils::*};
 pub mod chords;
 pub mod frequency;
 pub mod intervals;
-pub mod measure;
 pub mod neo;
 pub mod score;
 
