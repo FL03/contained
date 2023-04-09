@@ -17,24 +17,33 @@ use crate::peers::*;
 use crate::Conduct;
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
-use libp2p::{identity::Keypair, mdns, ping, PeerId};
+use libp2p::{identify, identity::Keypair, mdns, ping, PeerId};
 
 /// [Subnet] describes the behaviour of a user owned cluster of nodes.
 #[derive(NetworkBehaviour)]
 #[behaviour(out_event = "SubnetEvent")]
 pub struct Subnet {
-    pub freq: ping::Behaviour,
+    pub identify: identify::Behaviour,
     pub kademlia: Kademlia<MemoryStore>,
     pub mdns: mdns::tokio::Behaviour,
+    pub ping: ping::Behaviour,
     pub reqres: proto::reqres::ProtoBehaviour,
 }
 
 impl Subnet {
-    pub fn new(kademlia: Kademlia<MemoryStore>, mdns: mdns::tokio::Behaviour) -> Self {
+    pub fn new(peer: Peer) -> Self {
+        let pid = peer.pid();
+        let identify = identify::Behaviour::new(identify::Config::new(
+            "/flow/id/0.0.1".to_string(),
+            peer.pk(),
+        ));
+        let kademlia = Kademlia::new(pid, MemoryStore::new(pid));
+        let mdns = mdns::tokio::Behaviour::new(mdns::Config::default(), pid).unwrap();
         Self {
-            freq: Default::default(),
+            identify,
             kademlia,
             mdns,
+            ping: Default::default(),
             reqres: proto::reqres::new(),
         }
     }
@@ -48,25 +57,14 @@ impl Default for Subnet {
 
 impl Conduct for Subnet {}
 
-impl From<PeerId> for Subnet {
-    fn from(pid: PeerId) -> Self {
-        let kademlia = Kademlia::new(pid, MemoryStore::new(pid));
-        Self::new(
-            kademlia,
-            mdns::tokio::Behaviour::new(mdns::Config::default(), pid).unwrap(),
-        )
-    }
-}
-
 impl FromPeer for Subnet {
     fn from_peer(peer: Peer) -> Self {
-        Self::from(peer.pid())
+        Self::new(peer)
     }
 }
 
 impl From<Keypair> for Subnet {
     fn from(kp: Keypair) -> Self {
-        let pk = kp.public();
-        Self::from(pk.to_peer_id())
+        Self::from_peer(Peer::new(kp))
     }
 }

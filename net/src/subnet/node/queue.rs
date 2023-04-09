@@ -35,11 +35,9 @@ impl Queue {
     }
     pub async fn handle(&mut self, action: Command, swarm: &mut Swarm<Subnet>) -> NetworkResult {
         match action {
-            Command::Listen { addr, tx: sender } => {
-                let _ = match swarm.listen_on(addr) {
-                    Ok(id) => sender.send(Ok(id)),
-                    Err(e) => sender.send(Err(e.into())),
-                };
+            Command::Listen { addr, tx } => {
+                let msg = swarm.listen_on(addr).map_err(|e| e.into());
+                tx.send(msg).expect("Receiver to be still open.");
             }
             Command::Dial {
                 addr,

@@ -15,8 +15,9 @@ use crate::net::subnet::{
     node::{Channels, Node},
     Client, NetworkClient,
 };
-use crate::prelude::{peers::*, Resultant, Shared};
+use crate::prelude::{Resultant, Shared};
 use cli::{args::NetworkOpts, Cli, Opts};
+
 
 pub struct Runtime {
     pub cli: Shared<Cli>,
@@ -42,8 +43,6 @@ impl Backend {
             match opts {
                 Opts::Agent(_args) => todo!("Execute command"),
                 Opts::Network(args) => {
-                    // While the current setup is functional, the node needs to be able to be configured from the command line
-                    self.ctx.cnf.network.subnet.seed = args.seed;
                     if let Some(addr) = args.addr {
                         self.ctx.cnf.network.subnet.addr = addr;
                     };
@@ -51,13 +50,11 @@ impl Backend {
                         "Listening on: {:?}",
                         node.listen_on(self.ctx.cnf.network.subnet.addr.clone())
                     );
-                    let peer = self.ctx.peer();
-                    tracing::info!("Peer: {:?}", peer.pid());
                     if let Some(cmd) = args.cmd {
                         match cmd {
                             NetworkOpts::Dial { addr, pid } => {
                                 tracing::info!("Dialing: {:?}", &addr);
-                                node.dial(addr, pid)?;
+                                client.dial(addr, pid).await?;
                             }
                             NetworkOpts::Provide { .. } => todo!("Provide command"),
                             NetworkOpts::Providers { .. } => todo!("Get providers command"),

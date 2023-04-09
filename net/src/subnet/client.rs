@@ -16,7 +16,7 @@ use tokio::sync::{mpsc, oneshot};
 pub trait NetworkClient: Send + Sync {
     fn sender(&self) -> &mpsc::Sender<Command>;
     /// Dial the given peer at the given address.
-    async fn dial(&mut self, pid: PeerId, addr: Multiaddr) -> NetworkResult {
+    async fn dial(&mut self, addr: Multiaddr, pid: PeerId) -> NetworkResult {
         tracing::info!("Dialing {} at {}", pid, addr);
         let (tx, rx) = oneshot::channel();
         self.sender().send(Command::dial(addr, pid, tx)).await?;

@@ -5,9 +5,9 @@
 */
 use super::FromPeer;
 use crate::{BoxedTransport, Conduct};
-use libp2p::{core::upgrade, mplex, noise, tcp, PeerId, Transport,};
 use libp2p::identity::{DecodingError, Keypair, PublicKey};
 use libp2p::swarm::{Swarm, SwarmBuilder};
+use libp2p::{core::upgrade, noise, tcp, yamux, PeerId, Transport};
 
 #[derive(Clone, Debug)]
 pub struct Peer {
@@ -39,7 +39,7 @@ impl Peer {
                 noise::NoiseAuthenticated::xx(&self.clone().keypair())
                     .expect("Signing libp2p-noise static DH keypair failed."),
             )
-            .multiplex(mplex::MplexConfig::new())
+            .multiplex(yamux::YamuxConfig::default())
             .boxed()
     }
 }

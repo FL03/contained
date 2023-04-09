@@ -7,5 +7,7 @@ use contained_sdk as contained;
 
 #[tokio::main]
 async fn main() -> scsys::prelude::AsyncResult {
+    let settings = contained::backend::Settings::build()?;
+    println!("Settings: {:?}", settings);
     Ok(())
 }

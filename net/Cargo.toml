@@ -45,7 +45,6 @@ features = [
     "kad",
     "macros",
     "mdns",
-    "mplex",
     "noise",
     "ping",
     "pnet",
@@ -54,7 +53,8 @@ features = [
     "request-response",
     "serde",
     "tcp",
-    "tokio"
+    "tokio",
+    "yamux"
 ]
 version = "0.51.1"
 
