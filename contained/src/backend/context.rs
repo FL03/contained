@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use super::Settings;
-use crate::net::peers::*;
+use crate::net::Peer;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

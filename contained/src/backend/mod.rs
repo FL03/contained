@@ -13,14 +13,11 @@ pub mod rpc;
 
 use crate::net::subnet::{
     node::{Channels, Node},
-    Client, NetworkClient,
+    NetworkClient,
 };
 use crate::prelude::{Resultant, Shared};
 use cli::{args::NetworkOpts, Cli, Opts};
-
-pub struct Runtime {
-    pub cli: Shared<Cli>,
-}
+use tokio::runtime;
 
 pub struct Backend {
     ctx: Context,
@@ -36,7 +33,12 @@ impl Backend {
     pub fn context(&self) -> &Context {
         &self.ctx
     }
-    pub async fn handle_cli(&mut self, cli: Cli, client: &mut Client, mut node: Node) -> Resultant {
+    pub async fn handle_cli(
+        &mut self,
+        cli: Cli,
+        client: &mut impl NetworkClient,
+        mut node: Node,
+    ) -> Resultant {
         if let Some(opts) = cli.opts {
             match opts {
                 Opts::Agent(_args) => todo!("Execute command"),
@@ -101,8 +103,11 @@ impl Backend {
         logger.setup_env(None).init_tracing();
         self
     }
-    pub fn spawn(self) -> tokio::task::JoinHandle<Resultant> {
-        tokio::spawn(self.run())
+    pub fn spawn(
+        self,
+        rt: &runtime::Handle,
+    ) -> tokio::task::JoinHandle<Result<Resultant, tokio::task::JoinError>> {
+        rt.spawn(tokio::spawn(self.run()))
     }
 }
 

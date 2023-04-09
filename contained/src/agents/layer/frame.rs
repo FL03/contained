@@ -39,6 +39,7 @@ pub enum Frame {
         function: String,
         args: Vec<String>,
     },
+    Hash(H256),
     WasmBytes {
         bytes: Bytes,
     },
@@ -114,6 +115,10 @@ impl Frame {
                 Self::func_call(module, function, args)
             }
             3 => {
+                let hash = serde_json::from_slice::<H256>(&data)?;
+                Self::Hash(hash)
+            }
+            4 => {
                 let wasm_bytes = Bytes::from(data);
                 Self::wasm_bytes(wasm_bytes)
             }

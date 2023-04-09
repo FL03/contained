@@ -4,7 +4,7 @@
     Description: Generically, a surface describes a type of topological compute surface. Here we implement a surface for triads, which are the fundamental unit of computation in contained.
 */
 use super::*;
-use crate::neo::LPR;
+use crate::neo::{Transform, LPR};
 use contained_core::{AsyncStateful, Shared, State};
 use decanter::prelude::Hashable;
 use std::sync::{Arc, Mutex};

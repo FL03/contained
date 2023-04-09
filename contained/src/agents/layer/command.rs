@@ -20,16 +20,16 @@ pub enum Command {
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
-        sender: Responder<BoxedWasmValue>,
+        tx: Responder<BoxedWasmValue>,
     },
     Include {
         bytes: Vec<u8>,
-        sender: Responder<H256>,
+        tx: Responder<H256>,
     },
     Transform {
         id: H256,
         dirac: LPR,
-        sender: Responder,
+        tx: Responder,
     },
 }
 
@@ -39,20 +39,20 @@ impl Command {
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
-        sender: Responder<BoxedWasmValue>,
+        tx: Responder<BoxedWasmValue>,
     ) -> Self {
         Self::Execute {
             module,
             function,
             args,
             with,
-            sender,
+            tx,
         }
     }
-    pub fn include(bytes: Vec<u8>, sender: Responder<H256>) -> Self {
-        Self::Include { bytes, sender }
+    pub fn include(bytes: Vec<u8>, tx: Responder<H256>) -> Self {
+        Self::Include { bytes, tx }
     }
-    pub fn transform(id: H256, dirac: LPR, sender: Responder) -> Self {
-        Self::Transform { id, dirac, sender }
+    pub fn transform(id: H256, dirac: LPR, tx: Responder) -> Self {
+        Self::Transform { id, dirac, tx }
     }
 }

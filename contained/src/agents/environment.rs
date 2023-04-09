@@ -10,7 +10,16 @@ use wasmer::{imports, Imports, Store};
 
 pub trait Venv {}
 
-pub trait WasmEnv: Venv {}
+pub trait WasmEnv: Venv {
+    fn state(&self) -> Shared<State>;
+    fn value(&self) -> Shared<i32>;
+    fn function_env(&self, store: &mut Store) -> FunctionEnv<Self>
+    where
+        Self: Sized;
+    fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports
+    where
+        Self: Sized;
+}
 
 #[derive(Clone, Debug)]
 pub struct VirtualEnv {

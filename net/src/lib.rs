@@ -3,27 +3,49 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{errors::*, primitives::*, specs::*, utils::*};
+pub use self::{errors::*, peers::*, primitives::*, specs::*, utils::*};
 
 mod errors;
+mod peers;
 mod primitives;
 mod specs;
 mod utils;
 
 pub mod events;
-pub mod peers;
 pub mod subnet;
 
-use peers::*;
-
+use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
+use strum::{Display, EnumString, EnumVariantNames};
 
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    SmartDefault,
+)]
+#[strum(serialize_all = "snake_case")]
 pub enum Overlay {
     Mainnet,
+    #[default]
+    #[strum(serialize = "subnet", serialize = "cluster")]
     Subnet,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
+)]
 pub struct NetworkConfig {
     pub addr: Multiaddr,
     pub seed: Option<u8>,
@@ -32,6 +54,21 @@ pub struct NetworkConfig {
 impl NetworkConfig {
     pub fn new(addr: Multiaddr, seed: Option<u8>) -> Self {
         Self { addr, seed }
+    }
+    pub fn set_address(mut self, addr: Multiaddr) -> Self {
+        self.addr = addr;
+        self
+    }
+    pub fn set_seed(mut self, seed: Option<u8>) -> Self {
+        self.seed = seed;
+        self
+    }
+    pub fn peer(&self) -> Peer {
+        if let Some(seed) = self.seed {
+            Peer::try_from(seed).unwrap_or_default()
+        } else {
+            Peer::default()
+        }
     }
 }
 
@@ -50,8 +87,19 @@ pub struct Starter {
 }
 
 impl Starter {
-    pub fn new(cnf: NetworkConfig, overlay: Overlay) -> Self {
-        Self { cnf, overlay }
+    pub fn new() -> Self {
+        Self {
+            cnf: NetworkConfig::default(),
+            overlay: Overlay::default(),
+        }
+    }
+    pub fn set_overlay(mut self, overlay: Overlay) -> Self {
+        self.overlay = overlay;
+        self
+    }
+    pub fn with_config(mut self, cnf: NetworkConfig) -> Self {
+        self.cnf = cnf;
+        self
     }
 
     pub fn start(
@@ -61,18 +109,17 @@ impl Starter {
         subnet::Client,
         tokio::sync::mpsc::Receiver<events::NetworkEvent>,
     ) {
-        let peer = if let Some(seed) = self.cnf.seed {
-            Peer::try_from(seed).unwrap_or_default()
-        } else {
-            Peer::default()
-        };
-        let (chan, client, events) = match self.overlay {
+        let peer = self.cnf.peer();
+        let (chan, cmd, events) = match self.overlay {
             Overlay::Mainnet => todo!("Mainnet overlay"),
             Overlay::Subnet => subnet::node::Channels::with_capacity(9),
         };
-        let mut swarm = peer.swarm();
+        let mut swarm = libp2p::Swarm::from_peer(peer);
         swarm.listen_on(self.cnf.addr).unwrap();
-        let node = subnet::node::Node::new(chan, swarm);
-        (node, client, events)
+        (
+            subnet::node::Node::new(chan, swarm),
+            subnet::Client::new(cmd),
+            events,
+        )
     }
 }

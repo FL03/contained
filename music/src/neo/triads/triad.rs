@@ -7,10 +7,10 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::{TriadClass, Triadic};
+use super::TriadClass;
 use crate::{
     intervals::{Fifths, Interval, Thirds},
-    neo::{Dirac, Transform, LPR},
+    neo::{Dirac, PathFinder, Transform, LPR},
     Gradient, MusicError, Note,
 };
 use algae::graph::{Graph, UndirectedGraph};
@@ -39,6 +39,86 @@ impl Triad {
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, TriadClass::from((a, b)))
     }
+    pub fn class(&self) -> TriadClass {
+        self.class
+    }
+    /// Returns true if the [Triad] contains the [Note]
+    pub fn contains(&self, note: &Note) -> bool {
+        &self.root() == note || &self.third() == note || &self.fifth() == note
+    }
+    /// Endlessly applies the described transformations to the [Triad]
+    pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for i in Vec::from_iter(iter).iter().cycle() {
+            self.transform(*i);
+        }
+    }
+    /// Returns an cloned instance of the note occupying the fifth
+    pub fn fifth(&self) -> Note {
+        self.triad()[2].clone()
+    }
+    /// Classifies the [Triad] by describing the intervals that connect the notes
+    pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
+        self.class().intervals()
+    }
+    /// Returns a vector of all the possible [Triad]s that exist at
+    pub fn neighbors(&self) -> Vec<Self> {
+        let mut neighbors = Vec::with_capacity(3);
+        for i in LPR::transformations() {
+            let mut triad = self.clone();
+            triad.transform(i);
+            neighbors.push(triad);
+        }
+        neighbors
+    }
+    /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
+    pub fn pathfinder(&self, note: Note) -> PathFinder {
+        PathFinder::new(note).set_origin(self.clone())
+    }
+    /// Returns an cloned instance of the root of the triad
+    pub fn root(&self) -> Note {
+        self.triad()[0].clone()
+    }
+    /// Returns an cloned instance of the note occupying the third
+    pub fn third(&self) -> Note {
+        self.triad()[1].clone()
+    }
+    // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
+    pub fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
+        if let Ok(t) = Self::try_from(triad.clone()) {
+            *self = t;
+            return Ok(self);
+        }
+
+        Err(MusicError::IntervalError(
+            "The given notes failed to contain the necessary relationships...".into(),
+        ))
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad]
+    /// The goal here is to allow the machine to work on and in the scope
+    pub fn walk(&mut self, iter: impl IntoIterator<Item = LPR>) {
+        for dirac in iter {
+            self.transform(dirac);
+        }
+    }
+    /// Applies multiple [LPR] transformations onto the scoped [Triad] and returns a vector all the previous [Triad]
+    pub fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
+        let mut triads = Vec::new();
+        for i in iter {
+            triads.push(self.clone());
+            self.transform(i);
+        }
+        triads
+    }
+    /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
+    pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
+        self.walk(iter.clone());
+        let mut args = Vec::from_iter(iter);
+        args.reverse();
+        self.walk(args);
+    }
+    pub fn triad(&self) -> &[Note; 3] {
+        &self.notes
+    }
 }
 
 impl AsMut<[Note; 3]> for Triad {
@@ -55,27 +135,6 @@ impl AsRef<[Note; 3]> for Triad {
 
 impl Transform for Triad {
     type Dirac = LPR;
-}
-
-impl Triadic for Triad {
-    fn class(&self) -> TriadClass {
-        self.class
-    }
-
-    fn triad(&self) -> &[Note; 3] {
-        &self.notes
-    }
-    // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
-    fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
-        if let Ok(t) = Self::try_from(triad.clone()) {
-            *self = t;
-            return Ok(self);
-        }
-
-        Err(MusicError::IntervalError(
-            "The given notes failed to contain the necessary relationships...".into(),
-        ))
-    }
 }
 
 impl IntoIterator for Triad {

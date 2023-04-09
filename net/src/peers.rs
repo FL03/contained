@@ -3,11 +3,28 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::FromPeer;
 use crate::{BoxedTransport, Conduct};
 use libp2p::identity::{DecodingError, Keypair, PublicKey};
 use libp2p::swarm::{Swarm, SwarmBuilder};
 use libp2p::{core::upgrade, noise, tcp, yamux, PeerId, Transport};
+
+pub trait IntoPeer {
+    fn into_peer(self) -> Peer;
+}
+
+pub trait FromPeer {
+    fn from_peer(peer: Peer) -> Self;
+}
+
+impl<B> FromPeer for Swarm<B>
+where
+    B: Conduct,
+{
+    fn from_peer(peer: Peer) -> Self {
+        let behaviour = B::from_peer(peer.clone());
+        SwarmBuilder::with_tokio_executor(peer.transport(), behaviour, peer.pid()).build()
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Peer {
@@ -21,15 +38,11 @@ impl Peer {
     pub fn keypair(self) -> Keypair {
         self.kp
     }
-    pub fn pk(self) -> PublicKey {
-        self.keypair().public()
+    pub fn pk(&self) -> PublicKey {
+        self.kp.public()
     }
     pub fn pid(&self) -> PeerId {
-        self.clone().pk().to_peer_id()
-    }
-    pub fn swarm<B: FromPeer + Conduct>(&self) -> Swarm<B> {
-        let behaviour = B::from_peer(self.clone());
-        SwarmBuilder::with_tokio_executor(self.transport(), behaviour, self.pid()).build()
+        self.pk().to_peer_id()
     }
     ///
     pub fn transport(&self) -> BoxedTransport {
@@ -72,6 +85,16 @@ impl TryFrom<u8> for Peer {
 impl From<Peer> for Keypair {
     fn from(peer: Peer) -> Keypair {
         peer.kp
+    }
+}
+
+impl<C> From<Peer> for Swarm<C>
+where
+    C: Conduct,
+{
+    fn from(peer: Peer) -> Self {
+        let behaviour = C::from_peer(peer.clone());
+        SwarmBuilder::with_tokio_executor(peer.transport(), behaviour, peer.pid()).build()
     }
 }
 
