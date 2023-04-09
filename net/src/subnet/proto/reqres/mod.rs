@@ -15,6 +15,8 @@ use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
+pub use libp2p::request_response::RequestId;
+
 pub type ProtoBehaviour = request_response::Behaviour<ProtocolCodec>;
 
 pub type ReqResEvent = request_response::Event<Request, Response>;

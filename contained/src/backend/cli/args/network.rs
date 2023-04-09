@@ -5,12 +5,26 @@
 */
 use crate::net::{Multiaddr, PeerId};
 use clap::{ArgAction, Args, Subcommand};
+use decanter::prelude::Hashable;
+use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use strum::{Display, EnumVariantNames};
 
 #[derive(
-    Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+    Args,
+    Clone,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    SerdeDisplay,
+    Serialize,
 )]
 pub struct NetworkArgs {
     #[clap(subcommand)]
@@ -37,6 +51,7 @@ pub struct NetworkArgs {
     EnumVariantNames,
     Eq,
     Hash,
+    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
@@ -45,16 +60,23 @@ pub struct NetworkArgs {
 )]
 pub enum NetworkOpts {
     Dial {
+        /// The address to dial
         #[clap(long, short)]
         addr: Multiaddr,
+        /// The peer ID to dial
         #[clap(long, short)]
         pid: PeerId,
     },
     Provide {
+        /// The cid of the file to be provided
         #[clap(long, short)]
-        file: Option<PathBuf>,
+        cid: Option<String>,
+        /// The path to the file to be provided
+        #[clap(long, short)]
+        path: Option<PathBuf>,
     },
     Providers {
+        /// The CID of the file to find providers for
         #[clap(long, short)]
         cid: String,
     },

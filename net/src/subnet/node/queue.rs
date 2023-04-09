@@ -1,22 +1,22 @@
 /*
     Appellation: queue <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: This module implements a queue for the network, which is used to store pending requests.
+    Description: This module implements a queue for the network, which is used to store pending workloads
 */
-use crate::subnet::proto::reqres;
-use crate::NetworkResult;
-use libp2p::request_response::RequestId;
+use crate::subnet::{
+    layer::Commander,
+    proto::reqres::{self, RequestId},
+};
 use libp2p::{kad::QueryId, PeerId};
 use std::collections::{HashMap, HashSet};
-use tokio::sync::oneshot::Sender;
 
 /// The queue is a collection of all the pending requests.
 #[derive(Debug, Default)]
 pub struct Queue {
-    pub dial: HashMap<PeerId, Sender<NetworkResult>>,
-    pub start_providing: HashMap<QueryId, Sender<()>>,
-    pub get_providers: HashMap<QueryId, Sender<HashSet<PeerId>>>,
-    pub requests: HashMap<RequestId, Sender<NetworkResult<reqres::Response>>>,
+    pub dial: HashMap<PeerId, Commander>,
+    pub start_providing: HashMap<QueryId, Commander>,
+    pub get_providers: HashMap<QueryId, Commander<HashSet<PeerId>>>,
+    pub requests: HashMap<RequestId, Commander<reqres::Response>>,
 }
 
 impl Queue {

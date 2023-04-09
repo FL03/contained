@@ -1,6 +1,6 @@
 extern crate contained_sdk as contained;
 
-use contained::agents::{client::Client, Agent, VirtualEnv};
+use contained::agents::{client::AgentManager, Agent, VirtualEnv};
 use contained::prelude::BoxedWasmValue;
 use scsys::prelude::AsyncResult;
 use wasmer::{wat2wasm, Store};
@@ -73,10 +73,8 @@ async fn agents(
     // Create a new imports object to be included with the provided venv
     let imports = extra_imports(&mut store, venv.clone());
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    let (agent, tx) = Agent::new(9);
+    let (agent, mut client) = Agent::new(9);
     agent.set_environment(venv).with_store(store).spawn();
-    // Initialize a new client
-    let mut client = Client::new(tx);
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module

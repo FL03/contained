@@ -39,7 +39,10 @@ impl Settings {
                 .set_default("logger.level", "info")?
                 .set_default("mode", "production")?
                 .set_default("network.subnet.addr", DEFAULT_MULTIADDR)?
-                .set_default("system.workdir", scsys::prelude::project_root().to_str().unwrap())?
+                .set_default(
+                    "system.workdir",
+                    scsys::prelude::project_root().to_str().unwrap(),
+                )?
         };
         // Try loading in environment variables; prefixed with the package name and separated by "__"
         builder = builder.add_source(

@@ -26,4 +26,7 @@ impl Context {
     pub fn settings(&self) -> &Settings {
         &self.cnf
     }
+    pub fn settings_mut(&mut self) -> &mut Settings {
+        &mut self.cnf
+    }
 }

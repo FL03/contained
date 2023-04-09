@@ -18,10 +18,8 @@ use crate::net::subnet::{
 use crate::prelude::{Resultant, Shared};
 use cli::{args::NetworkOpts, Cli, Opts};
 
-
 pub struct Runtime {
     pub cli: Shared<Cli>,
-    pub client: Shared<Client>,
 }
 
 pub struct Backend {

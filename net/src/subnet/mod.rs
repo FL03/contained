@@ -17,7 +17,7 @@ use crate::peers::*;
 use crate::Conduct;
 use libp2p::kad::{record::store::MemoryStore, Kademlia};
 use libp2p::swarm::NetworkBehaviour;
-use libp2p::{identify, identity::Keypair, mdns, ping, PeerId};
+use libp2p::{identify, identity::Keypair, mdns, ping};
 
 /// [Subnet] describes the behaviour of a user owned cluster of nodes.
 #[derive(NetworkBehaviour)]

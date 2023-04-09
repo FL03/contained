@@ -20,11 +20,12 @@ use crate::events::NetworkEvent;
 use crate::peers::Peer;
 use crate::NetworkResult;
 use futures::StreamExt;
+use libp2p::core::transport::ListenerId;
 use libp2p::kad::{self, KademliaEvent, QueryResult};
 use libp2p::swarm::{SwarmEvent, THandlerErr};
-use libp2p::{mdns, request_response};
+use libp2p::{identify, mdns, request_response};
 use libp2p::{multiaddr::Protocol, Multiaddr, PeerId, Swarm};
-use tokio::sync::oneshot;
+use std::collections::hash_map::Entry;
 
 pub struct SubnetConfig {
     pub addr: Multiaddr,
@@ -37,8 +38,6 @@ impl SubnetConfig {
         }
     }
 }
-
-
 
 pub struct Node {
     chan: Channels,
@@ -54,7 +53,7 @@ impl Node {
             swarm,
         }
     }
-    pub fn dial(&mut self, addr: Multiaddr, pid: PeerId) -> NetworkResult<()> {
+    pub fn dial(&mut self, addr: Multiaddr, pid: PeerId) -> NetworkResult {
         let opts = addr.with(Protocol::P2p((pid).into()));
         self.swarm.dial(opts)?;
         Ok(())
@@ -65,60 +64,73 @@ impl Node {
                 let msg = self.swarm.listen_on(addr).map_err(|e| e.into());
                 tx.send(msg).expect("Receiver to be still open.");
             }
-            Command::Dial {
-                addr,
-                pid,
-                tx,
-            } => match self.queue.dial.entry(pid) {
-                std::collections::hash_map::Entry::Occupied(_) => {
+            Command::Dial { addr, pid, tx } => match self.queue.dial.entry(pid) {
+                Entry::Occupied(_) => {
                     tracing::warn!("The peer ({}) is already being dialed", pid);
                 }
-                std::collections::hash_map::Entry::Vacant(e) => {
+                Entry::Vacant(entry) => {
                     self.swarm
                         .behaviour_mut()
                         .kademlia
                         .add_address(&pid, addr.clone());
                     let dialopts = addr.with(Protocol::P2p((pid).into()));
                     match self.swarm.dial(dialopts) {
-                        Ok(_) => {
-                            e.insert(tx);
-                        }
                         Err(e) => {
                             let _ = tx.send(Err(e.into()));
+                        }
+                        Ok(_) => {
+                            entry.insert(tx);
                         }
                     }
                 }
             },
-            Command::Provide { .. } => {}
+            Command::Provide { cid, tx } => {
+                let key = kad::record::Key::new(&cid.as_bytes());
+                let query_id = self
+                    .swarm
+                    .behaviour_mut()
+                    .kademlia
+                    .start_providing(key)
+                    .expect("Kademlia to be running");
+                self.queue.start_providing.insert(query_id, tx);
+            }
             Command::Providers { .. } => {}
             Command::Request { payload, peer, tx } => {
-                let request_id = self.swarm
-                    .behaviour_mut()
-                    .reqres
-                    .send_request(&peer, reqres::Request::new(payload));
+                let req = reqres::Request::new(payload);
+                let request_id = self.swarm.behaviour_mut().reqres.send_request(&peer, req);
                 self.queue.requests.insert(request_id, tx);
             }
             Command::Respond { payload, channel } => {
+                let res = reqres::Response::new().with_data(payload);
                 self.swarm
                     .behaviour_mut()
                     .reqres
-                    .send_response(channel, reqres::Response::new().with_data(payload))
+                    .send_response(channel, res)
                     .expect("Connection to peer to be still open.");
             }
         };
         Ok(())
     }
     /// Handle events from the swarm; the stateful network manager
-    pub async fn handle_event(&mut self, event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>) {
+    pub async fn handle_event(
+        &mut self,
+        event: SwarmEvent<SubnetEvent, THandlerErr<Subnet>>,
+    ) -> NetworkResult {
         match event {
             // Handle custom networking events
             SwarmEvent::Behaviour(subnet) => match subnet {
+                SubnetEvent::Identify(identify) => match identify {
+                    identify::Event::Received { peer_id, .. } => {
+                        tracing::info!("Identified peer: {}", peer_id);
+                    }
+                    e => tracing::warn!("Unhandled identify event: {:?}", e),
+                },
                 SubnetEvent::Kademlia(kademlia) => match kademlia {
                     KademliaEvent::OutboundQueryProgressed { id, result, .. } => match result {
                         QueryResult::GetProviders(Ok(get_providers)) => match get_providers {
                             kad::GetProvidersOk::FoundProviders { providers, .. } => {
-                                if let Some(sender) = self.queue.get_providers.remove(&id) {
-                                    sender.send(providers).expect("Receiver not to be dropped");
+                                if let Some(tx) = self.queue.get_providers.remove(&id) {
+                                    tx.send(Ok(providers)).expect("Receiver not to be dropped");
                                     // Finish the query. We are only interested in the first result.
                                     self.swarm
                                         .behaviour_mut()
@@ -128,29 +140,29 @@ impl Node {
                                         .finish();
                                 }
                             }
-                            kad::GetProvidersOk::FinishedWithNoAdditionalRecord { .. } => {}
+                            e => tracing::warn!("Unhandled get providers result: {:?}", e),
                         },
                         QueryResult::StartProviding(_) => {
-                            let sender: oneshot::Sender<()> = self
+                            let sender = self
                                 .queue
                                 .start_providing
                                 .remove(&id)
                                 .expect("Completed query to be previously pending.");
-                            let _ = sender.send(());
+                            let _ = sender.send(Ok(()));
                         }
-                        _ => {}
+                        e => tracing::warn!("Unhandled query result: {:?}", e),
                     },
                     _ => {}
                 },
-                SubnetEvent::Mdns(mdns_event) => match mdns_event {
+                SubnetEvent::Mdns(mdns) => match mdns {
                     mdns::Event::Discovered(disc) => {
                         for (pid, addr) in disc {
                             tracing::info!("Discovered peer: {} at {}", pid, addr);
                         }
                     }
-                    mdns::Event::Expired(_exp) => {}
+                    e => tracing::warn!("Unhandled mdns event: {:?}", e),
                 },
-                SubnetEvent::RequestResponse(evnt) => match evnt {
+                SubnetEvent::RequestResponse(reqres) => match reqres {
                     request_response::Event::Message { message, .. } => match message {
                         request_response::Message::Request {
                             request, channel, ..
@@ -201,38 +213,33 @@ impl Node {
                 peer_id, endpoint, ..
             } => {
                 if let libp2p::core::ConnectedPoint::Dialer { .. } = endpoint {
-                    if let Some(sender) = self.queue.dial.remove(&peer_id) {
-                        let _ = sender.send(Ok(()));
+                    if let Some(tx) = self.queue.dial.remove(&peer_id) {
+                        tx.send(Ok(())).expect("Receiver not to be dropped");
                     }
                 }
-            }
-            SwarmEvent::OutgoingConnectionError { peer_id, error } => {
-                if let Some(pid) = peer_id {
-                    if let Some(sender) = self.queue.dial.remove(&pid) {
-                        let _ = sender.send(Err(error.into()));
-                    }
-                }
-            }
-            SwarmEvent::NewListenAddr { address, .. } => {
-                let local_peer_id = *self.swarm.local_peer_id();
-                tracing::info!(
-                    "Local node is listening on {:?}",
-                    address.with(Protocol::P2p(local_peer_id.into()))
-                );
             }
             SwarmEvent::Dialing(pid) => {
                 tracing::info!("Dialing peer: {}", pid);
             }
-            SwarmEvent::ConnectionClosed { .. } => {}
-            SwarmEvent::IncomingConnection { .. } => {}
-            SwarmEvent::IncomingConnectionError { .. } => {}
-            SwarmEvent::ExpiredListenAddr { .. } => {}
-            SwarmEvent::ListenerClosed { .. } => {}
-            // SwarmEvent::ListenerError { .. } => {},
+            SwarmEvent::NewListenAddr { address, .. } => {
+                let pid = *self.swarm.local_peer_id();
+                tracing::info!(
+                    "Local node is listening on {:?}",
+                    address.with(Protocol::P2p(pid.into()))
+                );
+            }
+            SwarmEvent::OutgoingConnectionError { peer_id, error } => {
+                if let Some(pid) = peer_id {
+                    if let Some(tx) = self.queue.dial.remove(&pid) {
+                        let _ = tx.send(Err(error.into()));
+                    }
+                }
+            }
             e => tracing::warn!("Unhandled swarm event: {:?}", e),
-        }
+        };
+        Ok(())
     }
-    pub fn listen_on(&mut self, addr: Multiaddr) -> libp2p::core::transport::ListenerId {
+    pub fn listen_on(&mut self, addr: Multiaddr) -> ListenerId {
         self.swarm.listen_on(addr).expect("")
     }
     pub fn pid(&self) -> &PeerId {
@@ -242,7 +249,7 @@ impl Node {
         Ok(loop {
             tokio::select! {
                 Some(event) = self.swarm.next() => {
-                    self.handle_event(event).await;
+                    self.handle_event(event).await.expect("");
                 }
                 Some(cmd) = self.chan.cmd.recv() => {
                     self.handle_command(cmd).await.expect("Receiver not to be dropped");

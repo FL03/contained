@@ -25,3 +25,5 @@ level = "info"
 [network.subnet]
 addr = "/ip4/0.0.0.0/tcp/9001"
 seed = 9
+
+[system]

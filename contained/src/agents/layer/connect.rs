@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::agents::layer::Frame;
+use super::Frame;
 use crate::prelude::{Error, Resultant};
 use bytes::{Buf, BytesMut};
 use std::io::Cursor;

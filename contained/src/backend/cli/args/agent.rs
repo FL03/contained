@@ -13,13 +13,33 @@ use strum::{Display, EnumVariantNames};
 #[derive(
     Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
+pub struct ConnectionParams {
+    #[clap(long, short)]
+    pub host: Option<String>,
+    #[clap(long, short)]
+    pub port: Option<u16>,
+}
+
+#[derive(
+    Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
+pub struct RunParams {
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    pub detached: bool,
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    pub up: bool,
+}
+
+#[derive(
+    Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct AgentArgs {
     #[clap(subcommand)]
     pub cmd: Option<AgentOpts>,
+    #[clap(flatten)]
+    pub con: Option<ConnectionParams>,
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub detached: bool,
-    #[clap(long, short)]
-    pub port: Option<u16>,
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub up: bool,
 }
