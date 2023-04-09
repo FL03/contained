@@ -15,7 +15,7 @@ pub use self::{channels::*, queue::*};
 mod channels;
 mod queue;
 
-use super::{Subnet, SubnetEvent};
+use super::{layer::Command, proto::reqres, Subnet, SubnetEvent};
 use crate::events::NetworkEvent;
 use crate::peers::Peer;
 use crate::NetworkResult;
@@ -38,6 +38,8 @@ impl SubnetConfig {
     }
 }
 
+
+
 pub struct Node {
     chan: Channels,
     queue: Queue,
@@ -55,6 +57,55 @@ impl Node {
     pub fn dial(&mut self, addr: Multiaddr, pid: PeerId) -> NetworkResult<()> {
         let opts = addr.with(Protocol::P2p((pid).into()));
         self.swarm.dial(opts)?;
+        Ok(())
+    }
+    pub async fn handle_command(&mut self, action: Command) -> NetworkResult {
+        match action {
+            Command::Listen { addr, tx } => {
+                let msg = self.swarm.listen_on(addr).map_err(|e| e.into());
+                tx.send(msg).expect("Receiver to be still open.");
+            }
+            Command::Dial {
+                addr,
+                pid,
+                tx,
+            } => match self.queue.dial.entry(pid) {
+                std::collections::hash_map::Entry::Occupied(_) => {
+                    tracing::warn!("The peer ({}) is already being dialed", pid);
+                }
+                std::collections::hash_map::Entry::Vacant(e) => {
+                    self.swarm
+                        .behaviour_mut()
+                        .kademlia
+                        .add_address(&pid, addr.clone());
+                    let dialopts = addr.with(Protocol::P2p((pid).into()));
+                    match self.swarm.dial(dialopts) {
+                        Ok(_) => {
+                            e.insert(tx);
+                        }
+                        Err(e) => {
+                            let _ = tx.send(Err(e.into()));
+                        }
+                    }
+                }
+            },
+            Command::Provide { .. } => {}
+            Command::Providers { .. } => {}
+            Command::Request { payload, peer, tx } => {
+                let request_id = self.swarm
+                    .behaviour_mut()
+                    .reqres
+                    .send_request(&peer, reqres::Request::new(payload));
+                self.queue.requests.insert(request_id, tx);
+            }
+            Command::Respond { payload, channel } => {
+                self.swarm
+                    .behaviour_mut()
+                    .reqres
+                    .send_response(channel, reqres::Response::new().with_data(payload))
+                    .expect("Connection to peer to be still open.");
+            }
+        };
         Ok(())
     }
     /// Handle events from the swarm; the stateful network manager
@@ -194,7 +245,7 @@ impl Node {
                     self.handle_event(event).await;
                 }
                 Some(cmd) = self.chan.cmd.recv() => {
-                    self.queue.handle(cmd, &mut self.swarm).await.expect("Receiver not to be dropped");
+                    self.handle_command(cmd).await.expect("Receiver not to be dropped");
                 }
                 _ = tokio::signal::ctrl_c() => {
                     tracing::info!("Signal received, shutting down...");
