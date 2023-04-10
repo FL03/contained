@@ -4,7 +4,8 @@
     Description:
         The instruction head is a two-tuple (State, Symbol)
 */
-use crate::turing::{machine::Driver, Scope, State, Stateful, Symbolic};
+use crate::turing::{machine::Driver, Scope, State, Symbolic};
+use crate::states::Stateful;
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 

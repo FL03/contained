@@ -7,7 +7,7 @@
             Include: include a module
             Transform: transform a module
 */
-use super::Responder;
+use super::OneshotSender;
 use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
 use decanter::prelude::H256;
@@ -20,16 +20,16 @@ pub enum Command {
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
-        tx: Responder<BoxedWasmValue>,
+        tx: OneshotSender<BoxedWasmValue>,
     },
     Include {
         bytes: Vec<u8>,
-        tx: Responder<H256>,
+        tx: OneshotSender<H256>,
     },
     Transform {
         id: H256,
         dirac: LPR,
-        tx: Responder,
+        tx: OneshotSender,
     },
 }
 
@@ -39,7 +39,7 @@ impl Command {
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
-        tx: Responder<BoxedWasmValue>,
+        tx: OneshotSender<BoxedWasmValue>,
     ) -> Self {
         Self::Execute {
             module,
@@ -49,10 +49,10 @@ impl Command {
             tx,
         }
     }
-    pub fn include(bytes: Vec<u8>, tx: Responder<H256>) -> Self {
+    pub fn include(bytes: Vec<u8>, tx: OneshotSender<H256>) -> Self {
         Self::Include { bytes, tx }
     }
-    pub fn transform(id: H256, dirac: LPR, tx: Responder) -> Self {
+    pub fn transform(id: H256, dirac: LPR, tx: OneshotSender) -> Self {
         Self::Transform { id, dirac, tx }
     }
 }

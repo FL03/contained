@@ -13,7 +13,8 @@ mod iter;
 mod moves;
 mod tail;
 
-use super::{State, Stateful, Symbolic};
+use super::{State, Symbolic};
+use crate::states::Stateful;
 
 pub trait InstructionHead<S: Symbolic>: Stateful<State> {
     fn symbol(&self) -> S;

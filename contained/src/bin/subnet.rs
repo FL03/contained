@@ -21,6 +21,5 @@ async fn main() -> scsys::prelude::AsyncResult {
         .set_overlay(Overlay::Subnet)
         .start();
     node.spawn();
-    let mut cli = Cli::new();
     Ok(())
 }

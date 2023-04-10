@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::{client::AgentManager, layer::Command, Stack, VirtualEnv};
+use super::{client::AgentManager, layer::Command, Stack, VirtualEnv, WasmVenv};
 use crate::prelude::{hash_module, Shared, State};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
@@ -12,19 +12,19 @@ use wasmer::{Instance, Module, Store};
 
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
-    env: Shared<VirtualEnv>,
+    env: Shared<Box<dyn WasmVenv>>,
     stack: Shared<Stack>,
     state: Shared<State>,
     store: Store,
 }
 
 impl Agent {
-    pub fn new(buffer: usize) -> (Self, impl AgentManager) {
+    pub fn new(buffer: usize, env: Box<dyn WasmVenv>) -> (Self, impl AgentManager) {
         let (tx, cmd) = mpsc::channel(buffer);
         (
             Self {
                 cmd,
-                env: Arc::new(Mutex::new(VirtualEnv::default())),
+                env: Arc::new(Mutex::new(env)),
                 stack: Arc::new(Mutex::new(Stack::new())),
                 state: Arc::new(Mutex::new(State::default())),
                 store: Store::default(),
@@ -71,9 +71,10 @@ impl Agent {
                 Ok(())
             }
             Command::Transform { .. } => todo!(),
+            
         }
     }
-    pub fn set_environment(mut self, env: VirtualEnv) -> Self {
+    pub fn set_environment(mut self, env: Box<dyn WasmVenv>) -> Self {
         self.env = Arc::new(Mutex::new(env));
         self
     }

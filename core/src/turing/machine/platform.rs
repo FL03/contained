@@ -4,8 +4,9 @@
     Description: ... Summary ...
 */
 use super::Driver;
+use crate::states::Stateful;
 use crate::turing::instructions::Instruction;
-use crate::turing::{Alphabet, Program, Scope, State, Stateful, Symbolic, Tape, Translate, Turing};
+use crate::turing::{Alphabet, Program, Scope, State, Symbolic, Tape, Translate, Turing};
 use crate::{ArrayLike, Error};
 use serde::{Deserialize, Serialize};
 

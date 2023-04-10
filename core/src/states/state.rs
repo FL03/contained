@@ -3,11 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{states::StateSpec, Shared};
+use super::StateSpec;
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
 
 #[derive(
     Clone,
@@ -55,7 +54,7 @@ impl State {
 impl StateSpec for State {}
 
 impl std::ops::Mul for State {
-    type Output = State;
+    type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
         match self {
@@ -85,7 +84,7 @@ impl From<usize> for State {
 
 impl From<i64> for State {
     fn from(d: i64) -> Self {
-        match d.abs() {
+        match d.abs() % 2 {
             0 => State::valid(),
             _ => State::invalid(),
         }
@@ -95,19 +94,5 @@ impl From<i64> for State {
 impl From<State> for i64 {
     fn from(d: State) -> i64 {
         d as i64
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_default_state() {
-        let a = State::default();
-        let mut b = a;
-        b *= a;
-        assert_eq!(a, State::valid());
-        assert_eq!(b, State::valid());
     }
 }

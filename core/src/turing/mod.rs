@@ -14,6 +14,7 @@ mod states;
 mod tape;
 
 use crate::{ArrayLike, Include, Insert};
+use crate::states::Stateful;
 use instructions::Move;
 use std::collections::{BTreeSet, HashSet};
 

@@ -4,7 +4,8 @@
     Description: ... summary ...
 */
 use super::instructions::{Head, Instruction};
-use super::{Alphabet, State, Stateful, Symbolic};
+use super::{Alphabet, State, Symbolic};
+use crate::states::Stateful;
 use crate::{Include, Insert};
 use serde::{Deserialize, Serialize};
 use std::{

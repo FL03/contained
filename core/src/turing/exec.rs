@@ -3,7 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{instructions::Instruction, Alphabet, Program, Scope, State, Stateful, Symbolic};
+use super::{instructions::Instruction, Alphabet, Program, Scope, State, Symbolic};
+use crate::states::Stateful;
 use crate::Error;
 use async_trait::async_trait;
 use futures::{Future, StreamExt};

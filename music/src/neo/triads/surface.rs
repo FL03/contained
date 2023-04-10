@@ -5,7 +5,7 @@
 */
 use super::*;
 use crate::neo::{Transform, LPR};
-use contained_core::{turing::State, Shared};
+use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
 use scsys::prelude::AsyncResult;
@@ -27,6 +27,10 @@ impl Surface {
             state: State::default(),
             triad,
         }
+    }
+    pub fn set_state(mut self, state: State) -> Self {
+        self.state = state;
+        self
     }
     pub fn state(&self) -> State {
         self.state

@@ -25,7 +25,7 @@ pub mod prelude {
     pub use super::*;
 
     #[cfg(feature = "core")]
-    pub use super::core::turing::{AsyncStateful, State, StateSpec, Stateful};
+    pub use super::core::states::*;
     #[cfg(feature = "core")]
     pub use super::core::*;
     #[cfg(feature = "music")]
