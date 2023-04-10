@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{instructions::Instruction, Alphabet, Program, Scope, Symbolic};
-use crate::{Error, State, Stateful};
+use super::{instructions::Instruction, Alphabet, Program, Scope, State, Stateful, Symbolic};
+use crate::Error;
 use async_trait::async_trait;
 use futures::{Future, StreamExt};
 use predicates::Predicate;

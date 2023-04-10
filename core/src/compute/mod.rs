@@ -4,6 +4,7 @@
     Description: This module implements a basic framework for building dynamic, multiway systems
 */
 
+pub mod fsm;
 pub mod surface;
 
 use crate::Error;

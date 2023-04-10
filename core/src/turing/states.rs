@@ -31,10 +31,7 @@ impl Stateful<i64> for i64 {
 }
 
 /// [StateSpec] is used by [Stateful] to describe a specific state
-pub trait StateSpec:
-    Copy + Default + Eq + Ord + std::fmt::Display + std::ops::Add<Output = Self>
-{
-}
+pub trait StateSpec: Copy + Default + Eq + Ord + std::fmt::Display + std::ops::MulAssign {}
 
 impl StateSpec for i64 {}
 
@@ -83,10 +80,10 @@ impl State {
 
 impl StateSpec for State {}
 
-impl std::ops::Add for State {
+impl std::ops::Mul for State {
     type Output = State;
 
-    fn add(self, rhs: Self) -> Self::Output {
+    fn mul(self, rhs: Self) -> Self::Output {
         match self {
             Self::Invalid => match rhs {
                 Self::Invalid => Self::Invalid,
@@ -100,9 +97,9 @@ impl std::ops::Add for State {
     }
 }
 
-impl std::ops::AddAssign for State {
-    fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs;
+impl std::ops::MulAssign for State {
+    fn mul_assign(&mut self, rhs: Self) {
+        *self = *self * rhs;
     }
 }
 
@@ -135,7 +132,7 @@ mod tests {
     fn test_default_state() {
         let a = State::default();
         let mut b = a;
-        b += a;
+        b *= a;
         assert_eq!(a, State::valid());
         assert_eq!(b, State::valid());
     }

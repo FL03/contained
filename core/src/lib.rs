@@ -3,12 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{errors::*, primitives::*, specs::*, states::*, utils::*};
+pub use self::{errors::*, primitives::*, specs::*, utils::*};
 
 mod errors;
 mod primitives;
 mod specs;
-mod states;
 mod utils;
 
 pub mod compute;

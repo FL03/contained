@@ -5,40 +5,57 @@
 */
 use super::*;
 use crate::neo::{Transform, LPR};
-use contained_core::{AsyncStateful, Shared, State};
+use contained_core::{turing::State, Shared};
 use decanter::prelude::Hashable;
-use std::sync::{Arc, Mutex};
+use futures::Future;
+use scsys::prelude::AsyncResult;
+use std::{
+    pin::Pin,
+    sync::{Arc, Mutex},
+    task::Poll,
+};
 
 #[derive(Clone, Debug, Default, Hashable)]
 pub struct Surface {
-    state: Shared<State>,
-    triad: Shared<Triad>,
+    state: State,
+    triad: Triad,
 }
 
 impl Surface {
     pub fn new(triad: Triad) -> Self {
         Self {
-            state: Arc::new(Mutex::new(State::default())),
-            triad: Arc::new(Mutex::new(triad)),
+            state: State::default(),
+            triad,
         }
     }
-    pub fn transform(&mut self, lpr: LPR) {
-        self.state.lock().unwrap().invalidate();
-        self.triad.lock().unwrap().transform(lpr);
-        self.state.lock().unwrap().validate();
+    pub fn state(&self) -> State {
+        self.state
     }
-    pub fn triad(&self) -> Shared<Triad> {
-        self.triad.clone()
+    pub async fn transform(&mut self, lpr: LPR) -> AsyncResult<Triad> {
+        match self.clone().await.state() {
+            State::Invalid => Err("Invalid state".into()),
+            State::Valid => {
+                let next = self.triad.transform(lpr);
+                self.triad = next.clone();
+                Ok(next)
+            }
+        }
+    }
+    pub fn triad(&self) -> &Triad {
+        &self.triad
     }
 }
 
-impl AsyncStateful<State> for Surface {
-    fn state(&self) -> Shared<State> {
-        self.state.clone()
-    }
+impl Future for Surface {
+    type Output = Self;
 
-    fn update_state(&mut self, state: Shared<State>) {
-        self.state = state;
+    fn poll(self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        if self.state() == State::Invalid {
+            cx.waker().wake_by_ref();
+            return Poll::Pending;
+        } else {
+            return Poll::Ready(self.clone());
+        }
     }
 }
 
@@ -46,8 +63,8 @@ impl std::fmt::Display for Surface {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = serde_json::json!(
             {
-                "state": self.state.lock().unwrap().clone().to_string(),
-                "triad": self.triad.lock().unwrap().clone().to_string(),
+                "state": self.state.to_string(),
+                "triad": self.triad.to_string(),
             }
         );
         write!(f, "{}", msg)

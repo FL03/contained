@@ -13,7 +13,7 @@ mod iter;
 mod moves;
 mod tail;
 
-use crate::{turing::Symbolic, State, Stateful};
+use super::{State, Stateful, Symbolic};
 
 pub trait InstructionHead<S: Symbolic>: Stateful<State> {
     fn symbol(&self) -> S;
