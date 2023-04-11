@@ -14,7 +14,7 @@ pub trait AsyncStateful<S: StateSpec>: Clone {
     fn update_state(&mut self, state: Shared<S>);
 }
 
-/// [Stateful] describes a stateful object
+/// [Stateful] describes a stateful object capable of assuming any state defined by [StateSpec]
 pub trait Stateful<S: StateSpec>: Clone {
     /// [Stateful::state] is used to get the state of the object
     fn state(&self) -> S;

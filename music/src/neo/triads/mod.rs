@@ -14,6 +14,10 @@ mod class;
 mod surface;
 mod triad;
 
+pub trait Update {
+    fn update(self: &mut Self);
+}
+
 pub trait IntoTriad {
     fn into_triad(self) -> Triad;
 }
