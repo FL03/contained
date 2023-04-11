@@ -38,7 +38,7 @@ jobs:
       - name: Build
         run: cargo build -F full --release -v --workspace
       - name: Cache build
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/registry
