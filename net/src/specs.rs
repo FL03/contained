@@ -3,32 +3,62 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use libp2p::{
-    identity::{Keypair, PublicKey},
-    PeerId,
-};
+use crate::peers::FromPeer;
+use async_trait::async_trait;
+use libp2p::identity::{Keypair, PublicKey};
+use libp2p::swarm::NetworkBehaviour;
+use libp2p::PeerId;
 
-pub trait Peerable: Clone {
-    fn keypair(self) -> Keypair;
-    fn pk(self) -> PublicKey {
-        self.clone().keypair().public()
-    }
-    fn pid(&self) -> PeerId {
-        PeerId::from(self.clone().pk())
-    }
+#[async_trait]
+pub trait AsyncHandle<T: Send + Sync> {
+    type Output: Send + Sync;
+
+    async fn handle(&mut self, msg: T) -> Self::Output;
 }
 
 pub trait Handle<T> {
-    type Error;
-    type Output: std::convert::From<T>;
+    type Output;
 
-    fn handle(&mut self, msg: T) -> Result<Self::Output, Self::Error>;
+    fn handle(&mut self, msg: T) -> Self::Output;
 }
 
-#[async_trait::async_trait]
-pub trait AsyncHandle<T: Send + Sync> {
-    type Error: Send + Sync;
-    type Output: std::convert::From<T>;
+pub trait Conduct: FromPeer + NetworkBehaviour {}
 
-    async fn handle(&mut self, msg: T) -> Result<Self::Output, Self::Error>;
+pub trait FromPeerId {
+    fn from_pid(pid: PeerId) -> Self;
+}
+
+impl<T> FromPeerId for T
+where
+    T: From<PeerId>,
+{
+    fn from_pid(pid: PeerId) -> Self {
+        Self::from(pid)
+    }
+}
+
+pub trait FromPublicKey {
+    fn from_pk(pk: PublicKey) -> Self;
+}
+
+impl<T> FromPublicKey for T
+where
+    T: From<PublicKey>,
+{
+    fn from_pk(pk: PublicKey) -> Self {
+        Self::from(pk)
+    }
+}
+
+pub trait FromKeypair {
+    fn from_kp(kp: Keypair) -> Self;
+}
+
+impl<T> FromKeypair for T
+where
+    T: From<Keypair>,
+{
+    fn from_kp(kp: Keypair) -> Self {
+        Self::from(kp)
+    }
 }

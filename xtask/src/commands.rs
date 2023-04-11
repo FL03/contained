@@ -6,14 +6,7 @@
 use crate::{command, dist_dir, rustup};
 use anyhow::Result;
 
-pub fn auto() -> Result<()> {
-    command("cargo", vec!["fmt", "--all"])?;
-    command("cargo", vec!["clippy", "--all", "--allow-dirty", "--fix"])?;
-    for i in [true, false] {
-        builder(i, true)?;
-    }
-    Ok(())
-}
+
 
 pub fn builder(release: bool, workspace: bool) -> Result<()> {
     let mut args = vec!["build"];

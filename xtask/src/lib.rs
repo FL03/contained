@@ -1,11 +1,19 @@
 /*
-    Appellation: scsys-xtask <library>
+    Appellation: xtask <library>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-pub use self::{commands::*, primitives::*, utils::*};
+pub use self::{commands::*, context::*, primitives::*, utils::*};
 
-pub(crate) mod commands;
+mod commands;
+mod context;
+mod utils;
+
+pub mod cli;
+
+use cli::{CommandLineInterface, Opts};
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
 
 ///
 #[macro_export]
@@ -17,7 +25,7 @@ macro_rules! cmd {
         {
             $(
                 let mut cmd = std::process::Command::new($x);
-                cmd.current_dir(scsys_xtask::project_root());
+                cmd.current_dir(project_root());
                 let mut tmp = Vec::new();
                 $(
                     tmp.push($y);
@@ -28,63 +36,65 @@ macro_rules! cmd {
     };
 }
 
-pub(crate) mod primitives {
-    ///
-    pub type Bundle<T = String> = std::collections::HashMap<T, Vec<Vec<T>>>;
+
+#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Xtask {
+    ctx: Context
 }
 
-pub(crate) mod utils {
-    use anyhow::Result;
-    use std::path::{Path, PathBuf};
-    use std::{collections::HashMap, fs, io, process::Command};
-
-    ///
-    pub fn command(program: &str, args: Vec<&str>) -> Result<()> {
-        let mut cmd = Command::new(program);
-        cmd.current_dir(project_root());
-        cmd.args(args.as_slice()).status()?;
-        Ok(())
+impl Xtask {
+    pub fn new(ctx: Context) -> Self {
+        Self { ctx }
     }
-    ///
-    pub fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
-        fs::create_dir_all(&dst)?;
-        for entry in fs::read_dir(src)? {
-            let entry = entry?;
-            let ty = entry.file_type()?;
-            if ty.is_dir() {
-                copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
-            } else {
-                fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+    pub fn handle_cli(&self, cli: CommandLineInterface) -> Result<()> {
+        let release = cli.release();
+        let workspace = cli.workspace();
+        if let Some(opts) = cli.cmd().clone() {
+            match opts {
+                Opts::Auto => {
+                    tracing::info!("Initializing the automatic pipeline");
+                    command("cargo", vec!["fmt", "--all"])?;
+                    command("cargo", vec!["clippy", "--all", "--allow-dirty", "--fix"])?;
+                    command("cargo", vec!["build", "--workspace"])?;
+                    command("cargo", vec!["test", "--all", "--allow-dirty"])?;
+                },
+                Opts::Build(_build) => {
+                    tracing::info!("Building the target...");
+                    let mut args = vec!["build"];
+
+                    if release {
+                        args.push("--release");
+                    }
+                    if workspace {
+                        args.push("--workspace");
+                    }
+                    command("cargo", args)?;
+                },
+                Opts::Setup(_setup) => {
+                    tracing::info!("Setting up the workspace");
+                    setup(true, false)?;
+                },
+                Opts::Test { .. } => {
+                    tracing::info!("Testing the target(s)");
+                }
             }
         }
         Ok(())
     }
-    ///
-    pub fn dist_dir() -> PathBuf {
-        project_root().join(".artifacts/dist")
+    pub fn init(&self) {
+        tracing_subscriber::fmt::init();
     }
-    ///
-    pub fn execute_bundle(bundle: HashMap<&str, Vec<Vec<&str>>>) -> Result<()> {
-        for k in bundle.keys() {
-            // Step 1: Rustup
-            for i in 0..bundle[k].len() {
-                let mut cmd = Command::new(k);
-                cmd.current_dir(project_root());
-                cmd.args(bundle[k][i].clone().as_slice()).status()?;
-            }
-        }
+    pub async fn run(&self) -> Result<()> {
+        self.init();
+        self.handle_cli(Default::default())?;
+        
         Ok(())
     }
+}
 
-    pub fn rustup(args: Vec<&str>) -> Result<()> {
-        command("rustup", args)
-    }
-    /// Fetch the project root unless specified otherwise with a CARGO_MANIFEST_DIR env variable
-    pub fn project_root() -> PathBuf {
-        Path::new(&env!("CARGO_MANIFEST_DIR"))
-            .ancestors()
-            .nth(1)
-            .unwrap()
-            .to_path_buf()
-    }
+
+
+mod primitives {
+    ///
+    pub type Bundle<T = String> = std::collections::HashMap<T, Vec<Vec<T>>>;
 }
