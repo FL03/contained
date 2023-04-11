@@ -16,14 +16,11 @@
         number of elements + freq
 */
 use super::Dirac;
-use crate::neo::triads::Triad;
-use crate::{
-    intervals::{Interval, Thirds},
-    Note,
-};
+use crate::intervals::{Interval, Thirds};
+use crate::neo::triads::{ChordFactor, Triad};
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -35,6 +32,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Default,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -55,36 +53,33 @@ pub enum LPR {
 
 impl LPR {
     pub fn others(&self) -> Vec<Self> {
-        vec![LPR::L, LPR::P, LPR::R]
-            .into_iter()
-            .filter(|x| x != self)
-            .collect()
+        Self::iter().filter(|x| x != self).collect()
     }
     pub fn transformations() -> Vec<Self> {
-        vec![LPR::L, LPR::P, LPR::R]
+        Self::iter().collect()
     }
 }
 
 impl Dirac<Triad> for LPR {
     type Output = Triad;
 
-    fn dirac(&self, arg: &mut Triad) -> Self::Output {
-        let mut notes: [Note; 3] = arg.triad().clone();
-        match arg.intervals().0 {
+    fn dirac(&self, triad: &mut Triad) -> Self::Output {
+        use ChordFactor::*;
+        match triad.intervals().0 {
             Thirds::Major => match *self {
-                LPR::L => notes[0] -= Interval::Semitone,
-                LPR::P => notes[1] -= Interval::Semitone,
-                LPR::R => notes[2] += Interval::Tone,
+                LPR::L => triad[Root] -= Interval::Semitone,
+                LPR::P => triad[Third] -= Interval::Semitone,
+                LPR::R => triad[Fifth] += Interval::Tone,
             },
             Thirds::Minor => match *self {
-                LPR::L => notes[2] += Interval::Semitone,
-                LPR::P => notes[1] += Interval::Semitone,
-                LPR::R => notes[0] -= Interval::Tone,
+                LPR::L => triad[Fifth] += Interval::Semitone,
+                LPR::P => triad[Third] += Interval::Semitone,
+                LPR::R => triad[Root] -= Interval::Tone,
             },
         };
 
-        arg.update(&notes).expect("Invalid triad");
-        arg.clone()
+        triad.update().expect("Invalid triad");
+        triad.clone()
     }
 }
 

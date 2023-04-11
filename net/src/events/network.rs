@@ -3,12 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::subnet::{
-    self,
-    proto::reqres::{Request, Response},
-};
+use crate::subnet::proto::reqres::{Request, Response};
 use libp2p::request_response::ResponseChannel;
-use scsys::prelude::AsyncResult;
 
 #[derive(Debug)]
 pub enum NetworkEvent {

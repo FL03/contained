@@ -5,6 +5,7 @@
         This module provides a `Frame` enum that can be used to describe the various types of data that can be sent between peers. The `Frame` enum is used to implement a custom framing layer for
         the `Connection` type.
 */
+use crate::Error;
 use bytes::{Buf, Bytes};
 use std::convert::TryInto;
 use std::io::Cursor;
@@ -23,17 +24,17 @@ pub enum Frame {
 }
 
 #[derive(Debug)]
-pub enum Error {
+pub enum FrameError {
     /// Not enough data is available to parse a message
     Incomplete,
 
     /// Invalid message encoding
-    Other(crate::Error),
+    Other(Error),
 }
 
 impl Frame {
     /// Returns an empty array
-    pub(crate) fn array() -> Frame {
+    pub fn array() -> Frame {
         Frame::Array(vec![])
     }
 
@@ -42,7 +43,7 @@ impl Frame {
     /// # Panics
     ///
     /// panics if `self` is not an array
-    pub(crate) fn push_bulk(&mut self, bytes: Bytes) {
+    pub fn push_bulk(&mut self, bytes: Bytes) {
         match self {
             Frame::Array(vec) => {
                 vec.push(Frame::Bulk(bytes));
@@ -56,7 +57,7 @@ impl Frame {
     /// # Panics
     ///
     /// panics if `self` is not an array
-    pub(crate) fn push_int(&mut self, value: u64) {
+    pub fn push_int(&mut self, value: u64) {
         match self {
             Frame::Array(vec) => {
                 vec.push(Frame::Integer(value));
@@ -66,7 +67,7 @@ impl Frame {
     }
 
     /// Checks if an entire message can be decoded from `src`
-    pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), Error> {
+    pub fn check(src: &mut Cursor<&[u8]>) -> Result<(), FrameError> {
         match get_u8(src)? {
             b'+' => {
                 get_line(src)?;
@@ -106,7 +107,7 @@ impl Frame {
     }
 
     /// The message has already been validated with `scan`.
-    pub fn parse(src: &mut Cursor<&[u8]>) -> Result<Frame, Error> {
+    pub fn parse(src: &mut Cursor<&[u8]>) -> Result<Frame, FrameError> {
         match get_u8(src)? {
             b'+' => {
                 // Read the line and convert it to `Vec<u8>`
@@ -145,7 +146,7 @@ impl Frame {
                     let n = len + 2;
 
                     if src.remaining() < n {
-                        return Err(Error::Incomplete);
+                        return Err(FrameError::Incomplete);
                     }
 
                     let data = Bytes::copy_from_slice(&src.get_ref()[..len]);
@@ -171,7 +172,7 @@ impl Frame {
     }
 
     /// Converts the frame to an "unexpected frame" error
-    pub(crate) fn to_error(&self) -> crate::Error {
+    pub fn to_error(&self) -> crate::Error {
         format!("unexpected frame: {}", self).into()
     }
 }
@@ -213,25 +214,25 @@ impl std::fmt::Display for Frame {
     }
 }
 
-fn peek_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
+fn peek_u8(src: &mut Cursor<&[u8]>) -> Result<u8, FrameError> {
     if !src.has_remaining() {
-        return Err(Error::Incomplete);
+        return Err(FrameError::Incomplete);
     }
 
     Ok(src.get_ref()[0])
 }
 
-fn get_u8(src: &mut Cursor<&[u8]>) -> Result<u8, Error> {
+fn get_u8(src: &mut Cursor<&[u8]>) -> Result<u8, FrameError> {
     if !src.has_remaining() {
-        return Err(Error::Incomplete);
+        return Err(FrameError::Incomplete);
     }
 
     Ok(src.get_u8())
 }
 
-fn skip(src: &mut Cursor<&[u8]>, n: usize) -> Result<(), Error> {
+fn skip(src: &mut Cursor<&[u8]>, n: usize) -> Result<(), FrameError> {
     if src.remaining() < n {
-        return Err(Error::Incomplete);
+        return Err(FrameError::Incomplete);
     }
 
     src.advance(n);
@@ -239,7 +240,7 @@ fn skip(src: &mut Cursor<&[u8]>, n: usize) -> Result<(), Error> {
 }
 
 /// Read a new-line terminated decimal
-fn get_decimal(src: &mut Cursor<&[u8]>) -> Result<u64, Error> {
+fn get_decimal(src: &mut Cursor<&[u8]>) -> Result<u64, FrameError> {
     use atoi::atoi;
 
     let line = get_line(src)?;
@@ -248,7 +249,7 @@ fn get_decimal(src: &mut Cursor<&[u8]>) -> Result<u64, Error> {
 }
 
 /// Find a line
-fn get_line<'a>(src: &mut Cursor<&'a [u8]>) -> Result<&'a [u8], Error> {
+fn get_line<'a>(src: &mut Cursor<&'a [u8]>) -> Result<&'a [u8], FrameError> {
     // Scan the bytes directly
     let start = src.position() as usize;
     // Scan to the second to last byte
@@ -264,58 +265,58 @@ fn get_line<'a>(src: &mut Cursor<&'a [u8]>) -> Result<&'a [u8], Error> {
         }
     }
 
-    Err(Error::Incomplete)
+    Err(FrameError::Incomplete)
 }
 
-impl From<String> for Error {
-    fn from(src: String) -> Error {
-        Error::Other(src.into())
+impl From<String> for FrameError {
+    fn from(src: String) -> FrameError {
+        FrameError::Other(src.into())
     }
 }
 
-impl From<&str> for Error {
-    fn from(src: &str) -> Error {
+impl From<&str> for FrameError {
+    fn from(src: &str) -> FrameError {
         src.to_string().into()
     }
 }
 
-impl From<Error> for crate::Error {
-    fn from(src: Error) -> crate::Error {
+impl From<FrameError> for crate::Error {
+    fn from(src: FrameError) -> crate::Error {
         crate::Error::from(src.to_string())
     }
 }
 
-impl From<Box<dyn std::error::Error>> for Error {
-    fn from(src: Box<dyn std::error::Error>) -> Error {
-        Error::Other(src.into())
+impl From<Box<dyn std::error::Error>> for FrameError {
+    fn from(src: Box<dyn std::error::Error>) -> FrameError {
+        FrameError::Other(src.into())
     }
 }
 
-impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
-    fn from(src: Box<dyn std::error::Error + Send + Sync>) -> Error {
-        Error::Other(src.into())
+impl From<Box<dyn std::error::Error + Send + Sync>> for FrameError {
+    fn from(src: Box<dyn std::error::Error + Send + Sync>) -> FrameError {
+        FrameError::Other(src.into())
     }
 }
 
-impl From<FromUtf8Error> for Error {
-    fn from(_src: FromUtf8Error) -> Error {
+impl From<FromUtf8Error> for FrameError {
+    fn from(_src: FromUtf8Error) -> FrameError {
         "protocol error; invalid frame format".into()
     }
 }
 
-impl From<TryFromIntError> for Error {
-    fn from(_src: TryFromIntError) -> Error {
+impl From<TryFromIntError> for FrameError {
+    fn from(_src: TryFromIntError) -> FrameError {
         "protocol error; invalid frame format".into()
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for FrameError {}
 
-impl std::fmt::Display for Error {
+impl std::fmt::Display for FrameError {
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            Error::Incomplete => "stream ended early".fmt(fmt),
-            Error::Other(err) => err.fmt(fmt),
+            FrameError::Incomplete => "stream ended early".fmt(fmt),
+            FrameError::Other(err) => err.fmt(fmt),
         }
     }
 }

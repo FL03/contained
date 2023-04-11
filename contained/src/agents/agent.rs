@@ -4,7 +4,7 @@
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
 use super::{client::AgentManager, layer::Command, Stack, WasmVenv};
-use crate::prelude::{hash_module, Shared, State};
+use crate::prelude::{hash_module, Shared};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
@@ -14,7 +14,6 @@ pub struct Agent {
     cmd: mpsc::Receiver<Command>,
     env: Shared<Box<dyn WasmVenv>>,
     stack: Shared<Stack>,
-    state: Shared<State>,
     store: Store,
 }
 
@@ -26,7 +25,6 @@ impl Agent {
                 cmd,
                 env: Arc::new(Mutex::new(env)),
                 stack: Arc::new(Mutex::new(Stack::new())),
-                state: Arc::new(Mutex::new(State::default())),
                 store: Store::default(),
             },
             tx,

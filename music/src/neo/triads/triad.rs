@@ -7,39 +7,55 @@
         Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
 
 */
-use super::TriadClass;
-use crate::{
-    intervals::{Fifths, Interval, Thirds},
-    neo::{Dirac, PathFinder, Transform, LPR},
-    Gradient, MusicError, Note,
-};
+use super::{ChordFactor, Triads};
+use crate::intervals::{Fifths, Interval, Thirds};
+use crate::neo::{Dirac, PathFinder, Transform, LPR};
+use crate::{Gradient, MusicError, Note};
+use algae::graph::{Graph, GraphExt, UndirectedGraph};
+use contained_core::states::State;
 use decanter::prelude::Hashable;
+use futures::Future;
 use itertools::Itertools;
 use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
+use std::ops::{Index, IndexMut, Range};
+use std::task::{self, Poll};
+
+fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
+    for (a, b, c) in data.into_iter().circular_tuple_windows() {
+        if let Ok(class) = Triads::try_from((a.clone(), b.clone(), c.clone())) {
+            return Ok(Triad::new(a.clone(), class));
+        }
+    }
+    Err(MusicError::IntervalError(
+        "Failed to find the required relationships within the given notes...".into(),
+    ))
+}
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(
     Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct Triad {
-    class: TriadClass,
+    class: Triads,
     notes: [Note; 3],
+    state: State,
 }
 
 impl Triad {
-    pub fn new(root: Note, class: TriadClass) -> Self {
+    pub fn new(root: Note, class: Triads) -> Self {
         let (a, _, c): (Thirds, Thirds, Fifths) = class.into();
         Self {
             class,
             notes: [root.clone(), a + root.clone(), c + root],
+            state: State::default(),
         }
     }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
-        Self::new(root, TriadClass::from((a, b)))
+        Self::new(root, Triads::from((a, b)))
     }
-    pub fn class(&self) -> TriadClass {
+    pub fn class(&self) -> Triads {
         self.class
     }
     /// Returns true if the [Triad] contains the [Note]
@@ -52,9 +68,14 @@ impl Triad {
             self.transform(*i);
         }
     }
+    /// Set the initial state of the [Triad]
+    pub fn default_state(mut self, state: State) -> Self {
+        self.state = state;
+        self
+    }
     /// Returns an cloned instance of the note occupying the fifth
     pub fn fifth(&self) -> Note {
-        self.triad()[2].clone()
+        self[ChordFactor::Fifth].clone()
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
@@ -76,22 +97,27 @@ impl Triad {
     }
     /// Returns an cloned instance of the root of the triad
     pub fn root(&self) -> Note {
-        self.triad()[0].clone()
+        self[ChordFactor::Root].clone()
+    }
+    /// Returns the [State] of the [Triad]
+    pub fn state(&self) -> State {
+        self.state
     }
     /// Returns an cloned instance of the note occupying the third
     pub fn third(&self) -> Note {
-        self.triad()[1].clone()
+        self[ChordFactor::Third].clone()
     }
-    // TODO: "Fix the transformations; they fail to preserve the triad class during the transformation"
-    pub fn update(&mut self, triad: &[Note; 3]) -> Result<&mut Self, MusicError> {
-        if let Ok(t) = Self::try_from(triad.clone()) {
+    /// After applying the transformation, the [Triad] is updated
+    pub fn update(&mut self) -> Result<Self, MusicError> {
+        if let Ok(t) = constructor(self.as_ref()) {
             *self = t;
-            return Ok(self);
+            return Ok(self.clone());
+        } else {
+            self.state.invalidate();
+            Err(MusicError::IntervalError(
+                "The given notes failed to contain the necessary relationships...".into(),
+            ))
         }
-
-        Err(MusicError::IntervalError(
-            "The given notes failed to contain the necessary relationships...".into(),
-        ))
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
@@ -133,6 +159,19 @@ impl AsRef<[Note; 3]> for Triad {
     }
 }
 
+impl Future for Triad {
+    type Output = Self;
+
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        if self.state.is_valid() {
+            Poll::Ready(self.clone())
+        } else {
+            cx.waker().wake_by_ref();
+            Poll::Pending
+        }
+    }
+}
+
 impl Transform for Triad {
     type Dirac = LPR;
 }
@@ -152,6 +191,44 @@ impl Unpin for Triad {}
 impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}.{}.{}", self.root(), self.third(), self.fifth())
+    }
+}
+
+impl Index<ChordFactor> for Triad {
+    type Output = Note;
+
+    fn index(&self, index: ChordFactor) -> &Self::Output {
+        use ChordFactor::*;
+        match index {
+            Root => &self.notes[Root as usize],
+            Third => &self.notes[Third as usize],
+            Fifth => &self.notes[Fifth as usize],
+        }
+    }
+}
+
+impl IndexMut<ChordFactor> for Triad {
+    fn index_mut(&mut self, index: ChordFactor) -> &mut Self::Output {
+        use ChordFactor::*;
+        match index {
+            Root => &mut self.notes[Root as usize],
+            Third => &mut self.notes[Third as usize],
+            Fifth => &mut self.notes[Fifth as usize],
+        }
+    }
+}
+
+impl Index<Range<ChordFactor>> for Triad {
+    type Output = [Note];
+
+    fn index(&self, index: Range<ChordFactor>) -> &Self::Output {
+        &self.notes[index.start as usize..index.end as usize]
+    }
+}
+
+impl IndexMut<Range<ChordFactor>> for Triad {
+    fn index_mut(&mut self, index: Range<ChordFactor>) -> &mut Self::Output {
+        &mut self.notes[index.start as usize..index.end as usize]
     }
 }
 
@@ -180,7 +257,7 @@ impl TryFrom<[Note; 3]> for Triad {
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
         for (a, b, c) in data.into_iter().circular_tuple_windows() {
-            if let Ok(class) = TriadClass::try_from((a.clone(), b.clone(), c.clone())) {
+            if let Ok(class) = Triads::try_from((a.clone(), b.clone(), c.clone())) {
                 return Ok(Triad::new(a.clone(), class));
             }
         }
@@ -215,6 +292,20 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
+impl From<Triad> for UndirectedGraph<Note, Interval> {
+    fn from(triad: Triad) -> UndirectedGraph<Note, Interval> {
+        let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
+        let mut cluster = UndirectedGraph::with_capacity(3);
+        let edges = vec![
+            (triad.root(), triad.third(), rt.into()).into(),
+            (triad.third(), triad.fifth(), tf.into()).into(),
+            (triad.root(), triad.fifth(), rf.into()).into(),
+        ];
+        cluster.add_edges(edges);
+        cluster.clone()
+    }
+}
+
 impl From<Triad> for UnGraph<Note, Interval> {
     fn from(d: Triad) -> UnGraph<Note, Interval> {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals();
@@ -233,12 +324,6 @@ impl From<Triad> for UnGraph<Note, Interval> {
 impl From<Triad> for Vec<Note> {
     fn from(d: Triad) -> Vec<Note> {
         vec![d.root(), d.third(), d.fifth()]
-    }
-}
-
-impl From<Triad> for [Note; 3] {
-    fn from(d: Triad) -> [Note; 3] {
-        d.triad().clone()
     }
 }
 

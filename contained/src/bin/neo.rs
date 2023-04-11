@@ -5,11 +5,11 @@
 */
 use contained_sdk as contained;
 
-use contained::music::neo::triads::{Surface, Triad, TriadClass};
+use contained::music::neo::triads::{Triad, Triads};
 
 #[tokio::main]
 async fn main() -> scsys::prelude::AsyncResult {
-    let triad = Triad::new(0.into(), TriadClass::Major);
-    let _surface = Surface::new(triad);
+    let _triad = Triad::new(0.into(), Triads::Major);
+
     Ok(())
 }

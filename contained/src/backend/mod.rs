@@ -15,7 +15,7 @@ use crate::net::subnet::{
     node::{Channels, Node},
     NetworkClient,
 };
-use crate::prelude::{Resultant, Shared};
+use crate::prelude::Resultant;
 use cli::{args::NetworkOpts, Cli, Opts};
 use tokio::runtime;
 

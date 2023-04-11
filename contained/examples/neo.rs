@@ -5,11 +5,9 @@
 */
 extern crate contained_sdk as contained;
 
-use contained::music::neo::triads::{Surface, Triad, TriadClass};
+use contained::music::neo::triads::*;
 
 fn main() {
     // Initialize a new triad
-    let triad = Triad::new(0.into(), TriadClass::Major);
-    // Initialize a new, stateful instance
-    let _instance = Surface::new(triad);
+    let _triad = Triad::new(0.into(), Triads::Major);
 }

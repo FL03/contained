@@ -33,6 +33,22 @@ mod tests {
     use super::*;
     use crate::neo::triads::*;
 
+    #[tokio::test]
+    async fn test_transformer() {
+        use LPR::*;
+        let iter = vec![L, P, R];
+        let triad = Triad::new(0.into(), Triads::Major);
+        let mut transformer = Transformer::new(triad.clone()).with(iter.clone());
+        let expected = {
+            let mut tmp = triad.clone();
+            tmp.walk(iter);
+            tmp
+        };
+        assert_eq!(transformer.next().unwrap(), triad * L);
+        transformer.next();
+        assert_eq!(transformer.next().unwrap(), expected);
+    }
+
     #[test]
     fn test_lpr() {
         let dirac = LPR::from_str("l");
@@ -42,7 +58,7 @@ mod tests {
 
     #[test]
     fn test_leading() {
-        for cls in [TriadClass::Major] {
+        for cls in [Triads::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::L * a.clone();
             assert_ne!(a, b);
@@ -52,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_parallel() {
-        for cls in [TriadClass::Major] {
+        for cls in [Triads::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::P * a.clone();
             assert_ne!(a, b);
@@ -62,7 +78,7 @@ mod tests {
 
     #[test]
     fn test_relative() {
-        for cls in [TriadClass::Major] {
+        for cls in [Triads::Major] {
             let a = Triad::new(0.into(), cls);
             let b = LPR::R * a.clone();
             assert_ne!(a, b);

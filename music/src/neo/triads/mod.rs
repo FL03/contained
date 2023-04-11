@@ -8,10 +8,10 @@
         For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
 
-pub use self::{class::*, surface::*, triad::*};
+pub use self::{class::*, misc::*, triad::*};
 
 mod class;
-mod surface;
+mod misc;
 mod triad;
 
 pub trait Update {
@@ -35,7 +35,7 @@ mod tests {
 
     #[test]
     fn test_triad() {
-        let a = Triad::new(0.into(), TriadClass::Major);
+        let a = Triad::new(0.into(), Triads::Major);
         assert_eq!(a.clone().as_ref(), &[0.into(), 4.into(), 7.into()]);
         let tmp: (i64, i64, i64) = a.clone().into();
         assert_eq!(tmp, (0, 4, 7));
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn test_walking() {
         let expected = Triad::try_from([1, 4, 8]).unwrap();
-        let triad = Triad::new(0.into(), TriadClass::Major);
+        let triad = Triad::new(0.into(), Triads::Major);
 
         let mut a = triad.clone();
         let mut b = triad.clone();

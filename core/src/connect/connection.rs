@@ -4,7 +4,7 @@
     Description: This module implements an explicit connection handler that supports the parsing of frames. The connection handler is used by the server and client to handle incoming connections.
         The primary motivation for this was to support operations on a custom frame
 */
-use super::{Error, Frame};
+use super::{Frame, FrameError};
 use crate::Resultant;
 use bytes::{Buf, BytesMut};
 use std::io::{self, Cursor};
@@ -96,8 +96,6 @@ impl Connection {
     /// enough data has been buffered yet, `Ok(None)` is returned. If the
     /// buffered data does not represent a valid frame, `Err` is returned.
     fn parse_frame(&mut self) -> Resultant<Option<Frame>> {
-        Error::Incomplete;
-
         // Cursor is used to track the "current" location in the
         // buffer. Cursor also implements `Buf` from the `bytes` crate
         // which provides a number of helpful utilities for working
@@ -149,8 +147,8 @@ impl Connection {
             // We do not want to return `Err` from here as this "error" is an
             // expected runtime condition.
             Err(err) => match err {
-                Error::Incomplete => Ok(None),
-                Error::Other(e) => {
+                FrameError::Incomplete => Ok(None),
+                FrameError::Other(e) => {
                     // An actual error was encountered while parsing the frame.
                     Err(e)
                 }
