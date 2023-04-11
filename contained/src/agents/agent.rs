@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::{client::AgentManager, layer::Command, Stack, VirtualEnv, WasmVenv};
+use super::{client::AgentManager, layer::Command, Stack, WasmVenv};
 use crate::prelude::{hash_module, Shared, State};
 use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
@@ -71,7 +71,6 @@ impl Agent {
                 Ok(())
             }
             Command::Transform { .. } => todo!(),
-            
         }
     }
     pub fn set_environment(mut self, env: Box<dyn WasmVenv>) -> Self {

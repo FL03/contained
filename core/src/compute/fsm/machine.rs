@@ -13,7 +13,7 @@ pub enum Event {
 
 pub enum State {
     Invalid,
-    Valid
+    Valid,
 }
 
 pub struct Machine {

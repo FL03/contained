@@ -51,7 +51,18 @@ impl State {
     }
 }
 
+impl AsRef<[u8]> for State {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Self::Invalid => b"invalid",
+            Self::Valid => b"valid",
+        }
+    }
+}
+
 impl StateSpec for State {}
+
+impl Unpin for State {}
 
 impl std::ops::Mul for State {
     type Output = Self;

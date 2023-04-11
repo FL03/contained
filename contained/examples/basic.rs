@@ -7,7 +7,8 @@ extern crate contained_sdk as contained;
 
 use contained::core::turing::{
     instructions::{Instruction, Move},
-    machine::{Driver, Machine}, Program, State, Tape, Turing,
+    machine::{Driver, Machine},
+    Program, State, Tape, Turing,
 };
 use contained::prelude::Resultant;
 

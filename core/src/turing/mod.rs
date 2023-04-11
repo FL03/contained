@@ -13,8 +13,8 @@ mod programs;
 mod states;
 mod tape;
 
-use crate::{ArrayLike, Include, Insert};
 use crate::states::Stateful;
+use crate::{ArrayLike, Include, Insert};
 use instructions::Move;
 use std::collections::{BTreeSet, HashSet};
 

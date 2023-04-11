@@ -8,7 +8,6 @@ use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 
-
 #[derive(
     Clone,
     Copy,

@@ -81,9 +81,21 @@ impl Error {
 
 impl std::error::Error for Error {}
 
+impl From<String> for Error {
+    fn from(error: String) -> Self {
+        Error::Error(error)
+    }
+}
+
 impl From<Box<dyn std::error::Error>> for Error {
     fn from(error: Box<dyn std::error::Error>) -> Self {
         Error::Error(error.to_string())
+    }
+}
+
+impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
+    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        Error::AsyncError(error.into())
     }
 }
 
@@ -102,12 +114,6 @@ impl From<std::io::Error> for Error {
 impl From<serde_json::Error> for Error {
     fn from(error: serde_json::Error) -> Self {
         Error::Error(error.to_string())
-    }
-}
-
-impl From<Box<dyn std::error::Error + Send + Sync>> for Error {
-    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
-        Error::AsyncError(error.into())
     }
 }
 

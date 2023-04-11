@@ -8,8 +8,6 @@ use std::sync::{Arc, Mutex};
 use wasmer::FunctionEnv;
 use wasmer::{imports, Imports, Store};
 
-pub trait Venv {}
-
 pub trait WasmVenv: Send + Sync {
     fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports;
 }

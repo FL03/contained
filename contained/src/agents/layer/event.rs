@@ -3,9 +3,19 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use crate::BoxedWasmValue;
+use decanter::prelude::H256;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
+
+#[derive(Debug)]
+pub enum CommandEvent {
+    Executed { cid: H256, result: BoxedWasmValue },
+    Included { cid: H256 },
+    Transformed,
+}
+
 
 #[derive(
     Clone,
@@ -17,7 +27,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Eq,
     Hash,
     Ord,
-    PartialEq, 
+    PartialEq,
     PartialOrd,
     Serialize,
 )]
@@ -26,7 +36,7 @@ pub enum AgentError {
     Error(String),
     ExecutionError(String),
     InitError(String),
-    IOError(String)
+    IOError(String),
 }
 
 impl std::error::Error for AgentError {}
@@ -55,8 +65,6 @@ impl From<std::io::Error> for AgentError {
     }
 }
 
-
-
 #[derive(
     Clone,
     Debug,
@@ -67,14 +75,12 @@ impl From<std::io::Error> for AgentError {
     Eq,
     Hash,
     Ord,
-    PartialEq, 
+    PartialEq,
     PartialOrd,
     Serialize,
 )]
 pub enum Event {
-
     Error(AgentError),
-
 }
 
 #[derive(
@@ -87,15 +93,15 @@ pub enum Event {
     Eq,
     Hash,
     Ord,
-    PartialEq, 
+    PartialEq,
     PartialOrd,
     Serialize,
-    SmartDefault
+    SmartDefault,
 )]
 pub enum ConnectionEvent {
     #[default]
     Connecting,
-    Disonnecting
+    Disonnecting,
 }
 
 pub enum RegistrationEvent {
@@ -110,6 +116,5 @@ pub enum Controls {
     Disconnect,
     Register,
     Start,
-    Terminate
+    Terminate,
 }
-
