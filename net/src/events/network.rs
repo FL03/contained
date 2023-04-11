@@ -19,12 +19,6 @@ pub enum NetworkEvent {
 }
 
 impl NetworkEvent {
-    pub async fn subnet_handle(&mut self, client: subnet::Client) -> AsyncResult {
-        match self {
-            Self::InboundRequest { request, channel } => {}
-        }
-        Ok(())
-    }
     pub fn inbound_request(request: Request, channel: ResponseChannel<Response>) -> Self {
         Self::InboundRequest { request, channel }
     }

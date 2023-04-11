@@ -23,6 +23,9 @@ pub struct Cli {
 }
 
 impl Cli {
+    pub fn new() -> Self {
+        Self::parse()
+    }
     pub fn opts(&self) -> Option<Opts> {
         self.opts.clone()
     }

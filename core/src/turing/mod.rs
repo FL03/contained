@@ -3,17 +3,18 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{driver::*, exec::*, platform::*, programs::*, tape::*};
+pub use self::{exec::*, programs::*, states::*, tape::*};
 
 pub mod instructions;
+pub mod machine;
 
-mod driver;
 mod exec;
-mod platform;
 mod programs;
+mod states;
 mod tape;
 
-use crate::{ArrayLike, Include, Insert, State, Stateful};
+use crate::states::Stateful;
+use crate::{ArrayLike, Include, Insert};
 use instructions::Move;
 use std::collections::{BTreeSet, HashSet};
 

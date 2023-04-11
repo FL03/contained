@@ -17,8 +17,7 @@ mod queue;
 
 use super::{layer::Command, proto::reqres, Subnet, SubnetEvent};
 use crate::events::NetworkEvent;
-use crate::peers::Peer;
-use crate::NetworkResult;
+use crate::{FromPeer, NetworkResult, Peer};
 use futures::StreamExt;
 use libp2p::core::transport::ListenerId;
 use libp2p::kad::{self, KademliaEvent, QueryResult};
@@ -26,18 +25,6 @@ use libp2p::swarm::{SwarmEvent, THandlerErr};
 use libp2p::{identify, mdns, request_response};
 use libp2p::{multiaddr::Protocol, Multiaddr, PeerId, Swarm};
 use std::collections::hash_map::Entry;
-
-pub struct SubnetConfig {
-    pub addr: Multiaddr,
-}
-
-impl SubnetConfig {
-    pub fn new() -> Self {
-        Self {
-            addr: "ip4/0.0.0.0/tcp/9090".parse().unwrap(),
-        }
-    }
-}
 
 pub struct Node {
     chan: Channels,
@@ -58,12 +45,8 @@ impl Node {
         self.swarm.dial(opts)?;
         Ok(())
     }
-    pub async fn handle_command(&mut self, action: Command) -> NetworkResult {
-        match action {
-            Command::Listen { addr, tx } => {
-                let msg = self.swarm.listen_on(addr).map_err(|e| e.into());
-                tx.send(msg).expect("Receiver to be still open.");
-            }
+    pub async fn handle_command(&mut self, cmd: Command) -> NetworkResult {
+        match cmd {
             Command::Dial { addr, pid, tx } => match self.queue.dial.entry(pid) {
                 Entry::Occupied(_) => {
                     tracing::warn!("The peer ({}) is already being dialed", pid);
@@ -84,6 +67,11 @@ impl Node {
                     }
                 }
             },
+            Command::Listen { addr, tx } => {
+                let msg = self.swarm.listen_on(addr).map_err(|e| e.into());
+                tracing::info!("Listening on {:?}", msg);
+                tx.send(msg).expect("Receiver to be still open.");
+            }
             Command::Provide { cid, tx } => {
                 let key = kad::record::Key::new(&cid.as_bytes());
                 let query_id = self
@@ -274,9 +262,7 @@ impl Default for Node {
 
 impl From<(Channels, Peer)> for Node {
     fn from(data: (Channels, Peer)) -> Self {
-        let swarm = data.1.swarm();
-
-        Self::new(data.0, swarm)
+        Self::new(data.0, Swarm::from_peer(data.1))
     }
 }
 

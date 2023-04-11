@@ -16,7 +16,7 @@
         number of elements + freq
 */
 use super::Dirac;
-use crate::neo::triads::{Triad, Triadic};
+use crate::neo::triads::Triad;
 use crate::{
     intervals::{Interval, Thirds},
     Note,
@@ -65,10 +65,10 @@ impl LPR {
     }
 }
 
-impl<T: Triadic> Dirac<T> for LPR {
-    type Output = T;
+impl Dirac<Triad> for LPR {
+    type Output = Triad;
 
-    fn dirac(&self, arg: &mut T) -> Self::Output {
+    fn dirac(&self, arg: &mut Triad) -> Self::Output {
         let mut notes: [Note; 3] = arg.triad().clone();
         match arg.intervals().0 {
             Thirds::Major => match *self {

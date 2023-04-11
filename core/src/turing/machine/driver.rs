@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{Scope, Symbolic, Tape};
-use crate::{ArrayLike, Include, Insert, State, Stateful};
+use crate::states::Stateful;
+use crate::turing::{Scope, State, Symbolic, Tape};
+use crate::{ArrayLike, Include, Insert};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;

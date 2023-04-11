@@ -1,10 +1,11 @@
 extern crate contained_sdk as contained;
 
-use contained::agents::{client::AgentManager, Agent, VirtualEnv};
-use contained::prelude::BoxedWasmValue;
+use contained::agents::{client::AgentManager, Agent, WasmVenv};
+use contained::prelude::{BoxedWasmValue, Shared};
 use scsys::prelude::AsyncResult;
-use wasmer::{wat2wasm, Store};
-use wasmer::{Function, FunctionEnvMut};
+use std::sync::{Arc, Mutex};
+use wasmer::{wat2wasm, Imports, Store};
+use wasmer::{Function, FunctionEnv, FunctionEnvMut};
 
 /// A sample Wasm module that exports a function called `increment`.
 static COUNTER_MODULE: &[u8] = br#"
@@ -23,6 +24,16 @@ static COUNTER_MODULE: &[u8] = br#"
     (export "sample" (func $increment_f)))
 "#;
 
+fn get_counter(env: FunctionEnvMut<CounterVenv>) -> i32 {
+    *env.data().value.lock().unwrap()
+}
+fn add_to_counter(env: FunctionEnvMut<CounterVenv>, add: i32) -> i32 {
+    let mut counter_ref = env.data().value.lock().unwrap();
+
+    *counter_ref += add;
+    *counter_ref
+}
+
 pub fn counter_module() -> std::borrow::Cow<'static, [u8]> {
     wat2wasm(COUNTER_MODULE).unwrap()
 }
@@ -35,46 +46,24 @@ async fn main() -> AsyncResult {
     // Initialize a new store
     let store = Store::default();
     // Initialize a new virtual environment
-    let venv = VirtualEnv::new(0);
+    let venv = CounterVenv::new(0);
     agents(Box::new([15.into()]), store, venv).await?;
     Ok(())
-}
-
-fn extra_imports(store: &mut Store, venv: VirtualEnv) -> wasmer::Imports {
-    fn get_counter(env: FunctionEnvMut<VirtualEnv>) -> i32 {
-        *env.data().value.lock().unwrap()
-    }
-    fn add_to_counter(env: FunctionEnvMut<VirtualEnv>, add: i32) -> i32 {
-        let mut counter_ref = env.data().value.lock().unwrap();
-
-        *counter_ref += add;
-        *counter_ref
-    }
-    let env = venv.function_env(store);
-    let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
-
-    let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
-
-    let with = wasmer::imports! {
-        "env" => {
-            "get_counter" => get_counter_func,
-            "add_to_counter" => add_to_counter_func,
-        }
-    };
-    venv.imports(store, Some(with))
 }
 
 async fn agents(
     args: BoxedWasmValue,
     mut store: Store,
-    venv: VirtualEnv,
+    venv: CounterVenv,
 ) -> AsyncResult<BoxedWasmValue> {
     let func = "sample";
     // Create a new imports object to be included with the provided venv
-    let imports = extra_imports(&mut store, venv.clone());
+    let imports = venv.imports(&mut store, None);
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    let (agent, mut client) = Agent::new(9);
-    agent.set_environment(venv).with_store(store).spawn();
+    let (agent, mut client) = Agent::new(9, Box::new(venv));
+    agent
+        .with_store(store)
+        .spawn(tokio::runtime::Handle::current());
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module
@@ -88,4 +77,43 @@ async fn agents(
         res
     );
     Ok(res)
+}
+
+#[derive(Clone, Debug)]
+pub struct CounterVenv {
+    pub value: Shared<i32>,
+}
+
+impl CounterVenv {
+    pub fn new(value: i32) -> Self {
+        Self {
+            value: Arc::new(Mutex::new(value)),
+        }
+    }
+}
+
+impl Default for CounterVenv {
+    fn default() -> Self {
+        Self::new(0)
+    }
+}
+
+impl WasmVenv for CounterVenv {
+    fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports {
+        let env = FunctionEnv::new(store, self.clone());
+        let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
+
+        let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
+
+        let mut base = wasmer::imports! {
+            "env" => {
+                "get_counter" => get_counter_func,
+                "add_to_counter" => add_to_counter_func,
+            }
+        };
+        if let Some(with) = with {
+            base.extend(&with);
+        }
+        base
+    }
 }

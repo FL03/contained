@@ -8,6 +8,10 @@ pub use self::{constants::*, types::*};
 mod constants {
     /// Default address for [libp2p::Multiaddr]
     pub const DEFAULT_MULTIADDR: &str = "/ip4/0.0.0.0/tcp/0";
+
+    pub const DEFAULT_MAINNET_ADDR: &str = "/ip4/0.0.0.0/tcp/9001";
+
+    pub const DEFAULT_SUBNET_ADDR: &str = "/ip4/0.0.0.0/tcp/9099";
 }
 
 mod types {

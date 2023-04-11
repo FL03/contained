@@ -4,10 +4,11 @@
     Description:
         Subnets describe user owned clusters of nodes. Subnets are used to provide a secure and private environment for the execution of various workloads and services.
 */
-pub use self::{client::*, events::*};
+pub use self::{client::*, events::*, settings::*};
 
 mod client;
 mod events;
+mod settings;
 
 pub mod layer;
 pub mod node;

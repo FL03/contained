@@ -3,40 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::Shared;
+use super::StateSpec;
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
-
-pub trait AsyncStateful<S: StateSpec>: Clone {
-    fn state(&self) -> Shared<S>;
-    fn update_state(&mut self, state: Shared<S>);
-}
-
-/// [Stateful] describes a stateful object
-pub trait Stateful<S: StateSpec>: Clone {
-    /// [Stateful::state] is used to get the state of the object
-    fn state(&self) -> S;
-    /// [Stateful::update_state] is used to update the state of the object
-    fn update_state(&mut self, state: S);
-}
-
-impl Stateful<i64> for i64 {
-    fn state(&self) -> i64 {
-        *self
-    }
-    fn update_state(&mut self, state: i64) {
-        *self = state;
-    }
-}
-
-/// [StateSpec] is used by [Stateful] to describe a specific state
-pub trait StateSpec:
-    Copy + Default + Eq + Ord + std::fmt::Display + std::ops::Add<Output = Self>
-{
-}
-
-impl StateSpec for i64 {}
 
 #[derive(
     Clone,
@@ -81,12 +51,23 @@ impl State {
     }
 }
 
+impl AsRef<[u8]> for State {
+    fn as_ref(&self) -> &[u8] {
+        match self {
+            Self::Invalid => b"invalid",
+            Self::Valid => b"valid",
+        }
+    }
+}
+
 impl StateSpec for State {}
 
-impl std::ops::Add for State {
-    type Output = State;
+impl Unpin for State {}
 
-    fn add(self, rhs: Self) -> Self::Output {
+impl std::ops::Mul for State {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
         match self {
             Self::Invalid => match rhs {
                 Self::Invalid => Self::Invalid,
@@ -100,9 +81,9 @@ impl std::ops::Add for State {
     }
 }
 
-impl std::ops::AddAssign for State {
-    fn add_assign(&mut self, rhs: Self) {
-        *self = *self + rhs;
+impl std::ops::MulAssign for State {
+    fn mul_assign(&mut self, rhs: Self) {
+        *self = *self * rhs;
     }
 }
 
@@ -114,7 +95,7 @@ impl From<usize> for State {
 
 impl From<i64> for State {
     fn from(d: i64) -> Self {
-        match d.abs() {
+        match d.abs() % 2 {
             0 => State::valid(),
             _ => State::invalid(),
         }
@@ -124,19 +105,5 @@ impl From<i64> for State {
 impl From<State> for i64 {
     fn from(d: State) -> i64 {
         d as i64
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_default_state() {
-        let a = State::default();
-        let mut b = a;
-        b += a;
-        assert_eq!(a, State::valid());
-        assert_eq!(b, State::valid());
     }
 }

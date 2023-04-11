@@ -3,9 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::instructions::Instruction;
-use super::{Alphabet, Driver, Program, Scope, Symbolic, Tape, Translate, Turing};
-use crate::{ArrayLike, Error, State, Stateful};
+use super::Driver;
+use crate::states::Stateful;
+use crate::turing::instructions::Instruction;
+use crate::turing::{Alphabet, Program, Scope, State, Symbolic, Tape, Translate, Turing};
+use crate::{ArrayLike, Error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]

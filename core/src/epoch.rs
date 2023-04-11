@@ -8,6 +8,12 @@ use scsys::prelude::{SerdeDisplay, Timestamp};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
+pub enum EpochPerspective {
+    Before,
+    During,
+    After,
+}
+
 /// An [Epoch] consists of a start time and optionally, a duration (seconds). If None, the system assumes an infinite duration
 #[derive(
     Clone,

@@ -3,16 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use super::{triads::*, LPR};
+use super::{triads::Triad, Transform, LPR};
 use crate::Note;
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd)]
-pub struct PathFinder<T: Triadic = Triad> {
-    queue: Vec<(Vec<LPR>, T)>,
+pub struct PathFinder {
+    queue: Vec<(Vec<LPR>, Triad)>,
     target: Note,
 }
 
-impl<T: Triadic> PathFinder<T> {
+impl PathFinder {
     pub fn new(target: Note) -> Self {
         Self {
             queue: Vec::new(),
@@ -43,7 +43,7 @@ impl<T: Triadic> PathFinder<T> {
         self.queue.clear();
     }
     /// Sets the origin of the pathfinder
-    pub fn set_origin(mut self, triad: T) -> Self {
+    pub fn set_origin(mut self, triad: Triad) -> Self {
         self.queue.push((Vec::new(), triad));
         self
     }
