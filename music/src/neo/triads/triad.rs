@@ -13,8 +13,8 @@ use crate::{
     neo::{Dirac, PathFinder, Transform, LPR},
     Gradient, MusicError, Note,
 };
-use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::Hashable;
+use petgraph::graph::UnGraph;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -215,14 +215,17 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
-impl From<Triad> for UndirectedGraph<Note, Interval> {
-    fn from(d: Triad) -> UndirectedGraph<Note, Interval> {
+impl From<Triad> for UnGraph<Note, Interval> {
+    fn from(d: Triad) -> UnGraph<Note, Interval> {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals();
 
-        let mut cluster = UndirectedGraph::with_capacity(3);
-        cluster.add_edge((d.root(), d.third(), rt.into()).into());
-        cluster.add_edge((d.third(), d.fifth(), tf.into()).into());
-        cluster.add_edge((d.root(), d.fifth(), rf.into()).into());
+        let mut cluster = UnGraph::with_capacity(3, 3);
+        let root = cluster.add_node(d.root());
+        let third = cluster.add_node(d.third());
+        let fifth = cluster.add_node(d.fifth());
+        cluster.add_edge(root, third, rt.into());
+        cluster.add_edge(third, fifth, tf.into());
+        cluster.add_edge(root, fifth, rf.into());
         cluster.clone()
     }
 }
