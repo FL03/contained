@@ -10,7 +10,7 @@
 */
 use super::{Pitch, PitchClass, ASPN};
 use crate::{intervals::Interval, Gradient};
-use algae::graph::cmp::Node;
+use algae::graph::Node;
 use contained_core::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 

@@ -1,4 +1,4 @@
-name: Rust
+name: Nightly
 
 env:
   CARGO_TERM_COLOR: always
