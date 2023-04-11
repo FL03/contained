@@ -66,7 +66,7 @@ impl From<Triad> for Cluster {
         cluster.add_edge((triad.third(), triad.fifth(), tf.into()).into());
         cluster.add_edge((triad.root(), triad.fifth(), rf.into()).into());
         Self {
-            cluster: cluster,
+            cluster,
             scope: Arc::new(Mutex::new(triad)),
         }
     }
