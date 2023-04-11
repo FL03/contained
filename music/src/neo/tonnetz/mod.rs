@@ -17,8 +17,8 @@ mod cluster;
 
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
+use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::{Hashable, Iter, H256};
-use petgraph::{Graph, graph::UnGraph};
 use std::sync::{Arc, Mutex};
 
 pub trait Link: Hashable {
@@ -33,20 +33,20 @@ pub trait Link: Hashable {
 
 pub trait Tonnetz {
     fn fulfilled(&self) -> bool {
-        self.tonnetz().node_count() == MODULUS as usize
+        self.tonnetz().nodes().len() == MODULUS as usize
     }
     fn insert(&mut self, triad: Triad) {
         // determine the intervals used to create the given triad
         let (a, b, c): (Interval, Interval, Interval) =
             triad.clone().try_into().expect("Invalid triad");
-        let root = self.tonnetz_mut().add_node(triad.root());
-        let third = self.tonnetz_mut().add_node(triad.third());
-        let fifth = self.tonnetz_mut().add_node(triad.fifth());
-        self.tonnetz_mut().add_edge(root, third, a.into());
-        self.tonnetz_mut().add_edge(third, fifth, b.into());
-        self.tonnetz_mut().add_edge(root, fifth, c.into());
+        self.tonnetz_mut()
+            .add_edge((triad.root(), triad.third(), a.into()).into());
+        self.tonnetz_mut()
+            .add_edge((triad.third(), triad.fifth(), b.into()).into());
+        self.tonnetz_mut()
+            .add_edge((triad.root(), triad.fifth(), c.into()).into());
     }
     fn scope(&self) -> &Arc<Mutex<Triad>>;
-    fn tonnetz(&self) -> &UnGraph<Note, Interval>;
-    fn tonnetz_mut(&mut self) -> &mut UnGraph<Note, Interval>;
+    fn tonnetz(&self) -> &UndirectedGraph<Note, Interval>;
+    fn tonnetz_mut(&mut self) -> &mut UndirectedGraph<Note, Interval>;
 }

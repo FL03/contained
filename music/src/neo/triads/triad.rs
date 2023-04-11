@@ -14,8 +14,8 @@ use crate::{
     Gradient, MusicError, Note,
 };
 use decanter::prelude::Hashable;
-use petgraph::graph::UnGraph;
 use itertools::Itertools;
+use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.

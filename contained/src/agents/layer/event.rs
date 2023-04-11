@@ -16,7 +16,6 @@ pub enum CommandEvent {
     Transformed,
 }
 
-
 #[derive(
     Clone,
     Debug,

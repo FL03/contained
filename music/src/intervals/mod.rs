@@ -12,6 +12,7 @@ mod thirds;
 
 use crate::{Gradient, Note};
 
+use algae::graph::Weight;
 use decanter::prelude::Hashable;
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
@@ -84,6 +85,8 @@ impl Interval {
         intervals
     }
 }
+
+impl Weight for Interval {}
 
 impl From<Interval> for i64 {
     fn from(interval: Interval) -> i64 {

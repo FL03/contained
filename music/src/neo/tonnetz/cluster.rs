@@ -11,11 +11,11 @@
         glues together these framents into a single, cohesive, and complete experience orchestrated according to a single originator.
 */
 use super::Tonnetz;
-use crate::intervals::{Thirds, Fifths};
+use crate::intervals::{Fifths, Thirds};
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note};
+use algae::graph::{Graph, GraphExt, UndirectedGraph};
 use decanter::prelude::H256;
-use petgraph::graph::UnGraph;
 use std::sync::{Arc, Mutex};
 
 pub enum ClusterEvent {
@@ -31,7 +31,7 @@ pub struct Boundary {
 
 #[derive(Clone, Debug, Default)]
 pub struct Cluster {
-    cluster: UnGraph<Note, Interval>,
+    cluster: UndirectedGraph<Note, Interval>,
     scope: Arc<Mutex<Triad>>,
 }
 
@@ -48,11 +48,11 @@ impl Tonnetz for Cluster {
         &self.scope
     }
 
-    fn tonnetz(&self) -> &UnGraph<Note, Interval> {
+    fn tonnetz(&self) -> &UndirectedGraph<Note, Interval> {
         &self.cluster
     }
 
-    fn tonnetz_mut(&mut self) -> &mut UnGraph<Note, Interval> {
+    fn tonnetz_mut(&mut self) -> &mut UndirectedGraph<Note, Interval> {
         &mut self.cluster
     }
 }
@@ -60,14 +60,11 @@ impl Tonnetz for Cluster {
 impl From<Triad> for Cluster {
     fn from(triad: Triad) -> Self {
         let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-        let mut cluster = UnGraph::new_undirected();
-        cluster.reserve_nodes(crate::MODULUS as usize);
-        let root = cluster.add_node(triad.root());
-        let third = cluster.add_node(triad.third());
-        let fifth = cluster.add_node(triad.fifth());
-        cluster.add_edge(root, third, rt.into());
-        cluster.add_edge(third, fifth, tf.into());
-        cluster.add_edge(root, fifth, rf.into());
+        let mut cluster = UndirectedGraph::with_capacity(crate::MODULUS as usize);
+
+        cluster.add_edge((triad.root(), triad.third(), rt.into()).into());
+        cluster.add_edge((triad.third(), triad.fifth(), tf.into()).into());
+        cluster.add_edge((triad.root(), triad.fifth(), rf.into()).into());
         Self {
             cluster: cluster,
             scope: Arc::new(Mutex::new(triad)),
@@ -89,7 +86,8 @@ mod tests {
         for i in 1..MODULUS {
             cluster.insert(Triad::new(i.into(), TriadClass::Major));
         }
-        // assert!(cluster.fulfilled() == true);
+        eprintln!("{:?}", cluster.tonnetz().nodes());
+        assert!(cluster.fulfilled() == true);
         for class in [
             TriadClass::Minor,
             TriadClass::Augmented,
@@ -99,6 +97,6 @@ mod tests {
                 cluster.insert(Triad::new(i.into(), class));
             }
         }
-        // assert!(cluster.fulfilled() == true);
+        assert!(cluster.fulfilled() == true);
     }
 }
