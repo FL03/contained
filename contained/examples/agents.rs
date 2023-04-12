@@ -78,6 +78,17 @@ async fn agents(
     Ok(res)
 }
 
+pub fn counter_imports(env: &FunctionEnv<CounterVenv>, store: &mut Store) -> Imports {
+    let get_counter_func = Function::new_typed_with_env(store, env, get_counter);
+    let add_to_counter_func = Function::new_typed_with_env(store, env, add_to_counter);
+    wasmer::imports! {
+        "env" => {
+            "get_counter" => get_counter_func,
+            "add_to_counter" => add_to_counter_func,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct CounterVenv {
     pub value: Shared<i32>,
@@ -100,16 +111,7 @@ impl Default for CounterVenv {
 impl WasmVenv for CounterVenv {
     fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports {
         let env = FunctionEnv::new(store, self.clone());
-        let get_counter_func = Function::new_typed_with_env(store, &env, get_counter);
-
-        let add_to_counter_func = Function::new_typed_with_env(store, &env, add_to_counter);
-
-        let mut base = wasmer::imports! {
-            "env" => {
-                "get_counter" => get_counter_func,
-                "add_to_counter" => add_to_counter_func,
-            }
-        };
+        let mut base = counter_imports(&env, store);
         if let Some(with) = with {
             base.extend(&with);
         }

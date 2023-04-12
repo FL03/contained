@@ -103,6 +103,10 @@ impl Triad {
     pub fn state(&self) -> State {
         self.state
     }
+    /// Sets the current [State] of the [Triad]
+    pub fn set_state(&mut self, state: State) {
+        self.state = state;
+    }
     /// Returns an cloned instance of the note occupying the third
     pub fn third(&self) -> Note {
         self[ChordFactor::Third].clone()
@@ -162,9 +166,13 @@ impl AsRef<[Note; 3]> for Triad {
 impl Future for Triad {
     type Output = Self;
 
-    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         if self.state.is_valid() {
-            Poll::Ready(self.clone())
+            if let Ok(t) = self.update() {
+                return Poll::Ready(t);
+            } else {
+                Poll::Pending
+            }
         } else {
             cx.waker().wake_by_ref();
             Poll::Pending
