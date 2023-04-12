@@ -6,12 +6,14 @@
 use crate::music::neo::triads::Triad;
 use wasmer::{imports, FunctionEnv, Imports, Store};
 
-
 pub trait ThreadSafe: Send + Sync {}
 
 impl<T> ThreadSafe for T where T: Send + Sync {}
 
-pub trait Venv<Env> where Env: Send + Sync {
+pub trait Venv<Env>
+where
+    Env: Send + Sync,
+{
     fn function_env(&mut self) -> FunctionEnv<Env>;
     /// Returns the imports for the environment; optionally with additional imports
     fn imports(&self, with: Option<Imports>) -> Imports;
@@ -49,14 +51,14 @@ impl WasmEnv for Triad {
 
 pub struct VirtualEnv {
     env: Box<dyn WasmEnv>,
-    store: Store
+    store: Store,
 }
 
 impl VirtualEnv {
     pub fn new(env: Box<dyn WasmEnv>) -> Self {
         Self {
             env,
-            store: Store::default()
+            store: Store::default(),
         }
     }
 

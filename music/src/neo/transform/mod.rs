@@ -40,13 +40,13 @@ mod tests {
         use LPR::*;
         let iter = vec![L, P, R];
         let triad = Triad::new(0.into(), Triads::Major);
-        let mut transformer = Transformer::new(triad.clone()).with(iter.clone());
+        let mut transformer = Transformer::new(triad).with(iter.clone());
         let expected = {
-            let mut tmp = triad.clone();
+            let mut tmp = triad;
             tmp.walk(iter);
             tmp
         };
-        assert_eq!(transformer.next().unwrap(), triad.clone() * L);
+        assert_eq!(transformer.next().unwrap(), triad * L);
         assert_eq!(transformer.next().unwrap(), (triad * L) * P);
         assert_eq!(transformer.next().unwrap(), expected);
     }
@@ -57,15 +57,15 @@ mod tests {
         use LPR::*;
         let iter = vec![L, P, R];
         let triad = Triad::new(0.into(), Triads::Major);
-        let transformer = Transformer::new(triad.clone()).with(iter.clone());
+        let transformer = Transformer::new(triad).with(iter.clone());
         let expected = {
-            let mut tmp = triad.clone();
+            let mut tmp = triad;
             tmp.walk(iter);
             tmp
         };
         let stream = stream::iter(transformer);
         let res = stream.collect::<Vec<_>>().await;
-        assert_eq!(res[0], triad.clone() * L);
+        assert_eq!(res[0], triad * L);
         assert_eq!(res[1], (triad * L) * P);
         assert_eq!(res[2], expected);
     }
@@ -77,9 +77,10 @@ mod tests {
 
     #[test]
     fn test_leading() {
-        for cls in [Triads::Major] {
+        {
+            let cls = Triads::Major;
             let a = Triad::new(0.into(), cls);
-            let b = LPR::L * a.clone();
+            let b = LPR::L * a;
             assert_ne!(a, b);
             assert_eq!(LPR::L * b, a);
         }
@@ -87,9 +88,10 @@ mod tests {
 
     #[test]
     fn test_parallel() {
-        for cls in [Triads::Major] {
+        {
+            let cls = Triads::Major;
             let a = Triad::new(0.into(), cls);
-            let b = LPR::P * a.clone();
+            let b = LPR::P * a;
             assert_ne!(a, b);
             assert_eq!(LPR::P * b, a);
         }
@@ -97,9 +99,10 @@ mod tests {
 
     #[test]
     fn test_relative() {
-        for cls in [Triads::Major] {
+        {
+            let cls = Triads::Major;
             let a = Triad::new(0.into(), cls);
-            let b = LPR::R * a.clone();
+            let b = LPR::R * a;
             assert_ne!(a, b);
             assert_eq!(LPR::R * b, a);
         }

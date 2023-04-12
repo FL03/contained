@@ -26,7 +26,7 @@ impl PathFinder {
                 return Some(path);
             }
             for i in LPR::transformations() {
-                let mut triad = triad.clone();
+                let mut triad = triad;
                 triad.transform(i);
                 let mut path = path.clone();
                 path.push(i);

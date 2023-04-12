@@ -22,9 +22,9 @@ use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
-    for (a, b, c) in data.into_iter().circular_tuple_windows() {
-        if let Ok(class) = Triads::try_from((a.clone(), b.clone(), c.clone())) {
-            return Ok(Triad::new(a.clone(), class));
+    for (a, b, c) in data.iter().circular_tuple_windows() {
+        if let Ok(class) = Triads::try_from((*a, *b, *c)) {
+            return Ok(Triad::new(*a, class));
         }
     }
     Err(MusicError::IntervalError(
@@ -34,7 +34,18 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
 
 /// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
 #[derive(
-    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    Eq,
+    Hash,
+    Hashable,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
 )]
 pub struct Triad {
     class: Triads,
@@ -47,7 +58,7 @@ impl Triad {
         let (a, _, c): (Thirds, Thirds, Fifths) = class.into();
         Self {
             class,
-            notes: [root.clone(), a + root.clone(), c + root],
+            notes: [root, a + root, c + root],
             state: State::default(),
         }
     }
@@ -60,7 +71,7 @@ impl Triad {
     }
     /// Returns true if the [Triad] contains the [Note]
     pub fn contains(&self, note: &Note) -> bool {
-        &self.root() == note || &self.third() == note || &self.fifth() == note
+        self.notes.into_iter().any(|n| n == *note)
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -75,7 +86,7 @@ impl Triad {
     }
     /// Returns an cloned instance of the note occupying the fifth
     pub fn fifth(&self) -> Note {
-        self[ChordFactor::Fifth].clone()
+        self[ChordFactor::Fifth]
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
@@ -85,19 +96,25 @@ impl Triad {
     pub fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
         for i in LPR::transformations() {
-            let mut triad = self.clone();
+            let mut triad = *self;
             triad.transform(i);
             neighbors.push(triad);
         }
         neighbors
     }
+    pub fn notes(&self) -> &[Note; 3] {
+        &self.notes
+    }
+    pub fn notes_vec(&self) -> Vec<Note> {
+        self.notes.to_vec()
+    }
     /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
     pub fn pathfinder(&self, note: Note) -> PathFinder {
-        PathFinder::new(note).set_origin(self.clone())
+        PathFinder::new(note).set_origin(*self)
     }
     /// Returns an cloned instance of the root of the triad
     pub fn root(&self) -> Note {
-        self[ChordFactor::Root].clone()
+        self[ChordFactor::Root]
     }
     /// Returns the [State] of the [Triad]
     pub fn state(&self) -> State {
@@ -109,13 +126,13 @@ impl Triad {
     }
     /// Returns an cloned instance of the note occupying the third
     pub fn third(&self) -> Note {
-        self[ChordFactor::Third].clone()
+        self[ChordFactor::Third]
     }
     /// After applying the transformation, the [Triad] is updated
     pub fn update(&mut self) -> Result<Self, MusicError> {
         if let Ok(t) = constructor(self.as_ref()) {
             *self = t;
-            return Ok(self.clone());
+            Ok(*self)
         } else {
             self.state.invalidate();
             Err(MusicError::IntervalError(
@@ -134,7 +151,7 @@ impl Triad {
     pub fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
         let mut triads = Vec::new();
         for i in iter {
-            triads.push(self.clone());
+            triads.push(*self);
             self.transform(i);
         }
         triads
@@ -146,8 +163,8 @@ impl Triad {
         args.reverse();
         self.walk(args);
     }
-    pub fn triad(&self) -> &[Note; 3] {
-        &self.notes
+    pub fn triad(&self) -> &Self {
+        self
     }
 }
 
@@ -159,7 +176,7 @@ impl AsMut<[Note; 3]> for Triad {
 
 impl AsRef<[Note; 3]> for Triad {
     fn as_ref(&self) -> &[Note; 3] {
-        self.triad()
+        &self.notes
     }
 }
 
@@ -169,7 +186,7 @@ impl Future for Triad {
     fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         if self.state.is_valid() {
             if let Ok(t) = self.update() {
-                return Poll::Ready(t);
+                Poll::Ready(t)
             } else {
                 cx.waker().wake_by_ref();
                 Poll::Pending
@@ -191,7 +208,7 @@ impl IntoIterator for Triad {
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.triad().to_vec().into_iter()
+        self.notes_vec().into_iter()
     }
 }
 
@@ -266,8 +283,8 @@ impl TryFrom<[Note; 3]> for Triad {
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
         for (a, b, c) in data.into_iter().circular_tuple_windows() {
-            if let Ok(class) = Triads::try_from((a.clone(), b.clone(), c.clone())) {
-                return Ok(Triad::new(a.clone(), class));
+            if let Ok(class) = Triads::try_from((a, b, c)) {
+                return Ok(Triad::new(a, class));
             }
         }
         Err(MusicError::IntervalError(

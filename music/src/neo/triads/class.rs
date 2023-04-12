@@ -122,7 +122,7 @@ impl TryFrom<[Note; 3]> for Triads {
 
     fn try_from(data: [Note; 3]) -> Result<Self, Self::Error> {
         let [r, t, f]: [Note; 3] = data;
-        let ab = Thirds::try_from((r.clone(), t))?;
+        let ab = Thirds::try_from((r, t))?;
         let bc = Fifths::try_from((r, f))?;
 
         match ab {
@@ -145,7 +145,7 @@ impl TryFrom<(Note, Note, Note)> for Triads {
 
     fn try_from(data: (Note, Note, Note)) -> Result<Self, Self::Error> {
         let (r, t, f): (Note, Note, Note) = (data.0, data.1, data.2);
-        let ab = Thirds::try_from((r.clone(), t))?;
+        let ab = Thirds::try_from((r, t))?;
         let bc = Fifths::try_from((r, f))?;
 
         match ab {

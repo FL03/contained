@@ -37,14 +37,13 @@ pub trait Tonnetz {
     }
     fn insert(&mut self, triad: Triad) {
         // determine the intervals used to create the given triad
-        let (a, b, c): (Interval, Interval, Interval) =
-            triad.clone().try_into().expect("Invalid triad");
+        let (a, b, c): (Interval, Interval, Interval) = triad.try_into().expect("Invalid triad");
         self.tonnetz_mut()
-            .add_edge((triad.root(), triad.third(), a.into()).into());
+            .add_edge((triad.root(), triad.third(), a).into());
         self.tonnetz_mut()
-            .add_edge((triad.third(), triad.fifth(), b.into()).into());
+            .add_edge((triad.third(), triad.fifth(), b).into());
         self.tonnetz_mut()
-            .add_edge((triad.root(), triad.fifth(), c.into()).into());
+            .add_edge((triad.root(), triad.fifth(), c).into());
     }
     fn scope(&self) -> &Arc<Mutex<Triad>>;
     fn tonnetz(&self) -> &UndirectedGraph<Note, Interval>;

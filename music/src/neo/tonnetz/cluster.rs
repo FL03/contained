@@ -16,15 +16,15 @@
 use super::Tonnetz;
 use crate::intervals::{Fifths, Thirds};
 use crate::neo::triads::*;
-use crate::{intervals::Interval, Note};
+use crate::{intervals::Interval, neo::LPR, Note};
 use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::H256;
 use std::sync::{Arc, Mutex};
 
 pub enum ClusterEvent {
-    TriadAdded { id: Note },
-    TriadRemoved { id: Note },
-    None,
+    Applied(LPR),
+    Registered { triad: Triad },
+    Unregistered { triad: Triad },
 }
 
 pub struct Boundary {
@@ -84,18 +84,18 @@ mod tests {
     fn test_cluster() {
         let triad = Triad::new(0.into(), Triads::Major);
 
-        let mut cluster = Cluster::from(triad.clone());
-        assert!(cluster.fulfilled() == false);
+        let mut cluster = Cluster::from(triad);
+        assert!(!cluster.fulfilled());
         for i in 1..MODULUS {
             cluster.insert(Triad::new(i.into(), Triads::Major));
         }
         eprintln!("{:?}", cluster.tonnetz().nodes());
-        assert!(cluster.fulfilled() == true);
+        assert!(cluster.fulfilled());
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
             for i in 0..MODULUS {
                 cluster.insert(Triad::new(i.into(), class));
             }
         }
-        assert!(cluster.fulfilled() == true);
+        assert!(cluster.fulfilled());
     }
 }

@@ -52,7 +52,7 @@ impl Iterator for Transformer {
             // Transform the scope
             self.scope.transform(*cur);
             // Return the scope
-            Some(self.scope.clone())
+            Some(self.scope)
         } else {
             None
         }

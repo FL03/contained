@@ -182,7 +182,7 @@ impl<P: Gradient> std::ops::Sub<P> for Pitch {
 
 impl<P: Gradient> std::ops::SubAssign<P> for Pitch {
     fn sub_assign(&mut self, rhs: P) {
-        *self = self.clone() - rhs.pitch();
+        *self = *self - rhs.pitch();
     }
 }
 

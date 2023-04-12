@@ -8,7 +8,9 @@ use crate::{intervals::Interval, Gradient, MODULUS};
 use serde::{Deserialize, Serialize};
 
 /// [ASPN] is a specific type of [Note] which denotes a certain octave for the given pitch-class
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct ASPN {
     class: PitchClass,
     octave: i64,

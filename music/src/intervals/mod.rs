@@ -68,11 +68,11 @@ impl Interval {
         }
     }
     pub fn increase(&self, note: Note) -> Note {
-        let interval: i64 = self.clone().into();
+        let interval: i64 = (*self).into();
         (note.pitch() + interval).into()
     }
     pub fn decrease(&self, note: Note) -> Note {
-        let interval: i64 = self.clone().into();
+        let interval: i64 = (*self).into();
         (note.pitch() - interval).into()
     }
     pub fn intervals(iter: impl IntoIterator<Item = Note>) -> Vec<Self> {

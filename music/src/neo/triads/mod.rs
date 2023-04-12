@@ -15,7 +15,7 @@ mod misc;
 mod triad;
 
 pub trait Update {
-    fn update(self: &mut Self);
+    fn update(&mut self);
 }
 
 pub trait FromTriad {
@@ -71,7 +71,7 @@ mod tests {
     fn test_triad() {
         let a = Triad::new(0.into(), Triads::Major);
         assert_eq!(a.clone().as_ref(), &[0.into(), 4.into(), 7.into()]);
-        let tmp: (i64, i64, i64) = a.clone().into();
+        let tmp: (i64, i64, i64) = a.into();
         assert_eq!(tmp, (0, 4, 7));
         let b = Triad::try_from((11, 4, 7));
         assert!(b.is_ok());
@@ -83,8 +83,8 @@ mod tests {
         let expected = Triad::try_from([1, 4, 8]).unwrap();
         let triad = Triad::new(0.into(), Triads::Major);
 
-        let mut a = triad.clone();
-        let mut b = triad.clone();
+        let mut a = triad;
+        let mut b = triad;
         // Apply three consecutive transformations to the scope
         a.walk(vec![LPR::L, LPR::P, LPR::R]);
         assert_eq!(a.clone(), expected);

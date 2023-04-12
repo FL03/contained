@@ -41,7 +41,7 @@ impl Thirds {
         Self::try_from((a, b))
     }
     pub fn compute(note: Note) -> (Note, Note) {
-        (Self::Major + note.clone(), Self::Minor + note)
+        (Self::Major + note, Self::Minor + note)
     }
     /// Functional method for creating a major third
     pub fn major() -> Self {
@@ -72,7 +72,7 @@ impl TryFrom<[Note; 2]> for Thirds {
     type Error = BoxedError;
 
     fn try_from(data: [Note; 2]) -> Result<Self, Self::Error> {
-        Thirds::try_from((data[0].clone(), data[1].clone()))
+        Thirds::try_from((data[0], data[1]))
     }
 }
 

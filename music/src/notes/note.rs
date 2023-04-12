@@ -14,7 +14,9 @@ use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
 /// This type of musical notation is adopted from the American Scientific Pitch Notation
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct Note {
     class: PitchClass,
     octave: i64,
@@ -31,7 +33,7 @@ impl Note {
         ASPN::new(self.class, Some(self.octave))
     }
     pub fn interval(&self, other: &Self) -> Interval {
-        Interval::new(self.clone(), other.clone())
+        Interval::new(*self, *other)
     }
     pub fn octave(&self) -> i64 {
         self.octave
@@ -65,7 +67,7 @@ impl<P: Gradient> std::ops::Add<P> for Note {
 
 impl<P: Gradient> std::ops::AddAssign<P> for Note {
     fn add_assign(&mut self, rhs: P) {
-        *self = self.clone() + rhs;
+        *self = *self + rhs;
     }
 }
 
@@ -79,7 +81,7 @@ impl<P: Gradient> std::ops::Sub<P> for Note {
 
 impl<P: Gradient> std::ops::SubAssign<P> for Note {
     fn sub_assign(&mut self, rhs: P) {
-        *self = self.clone() - rhs;
+        *self = *self - rhs;
     }
 }
 
