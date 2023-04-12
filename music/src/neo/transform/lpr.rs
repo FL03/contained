@@ -81,8 +81,7 @@ impl Dirac<Triad> for LPR {
             },
         };
 
-        triad.update().expect("Invalid triad");
-        triad.clone()
+        triad.update().expect("Invalid triad")
     }
 }
 
