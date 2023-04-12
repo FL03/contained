@@ -18,7 +18,7 @@ pub struct Agent {
 }
 
 impl Agent {
-    pub fn new(buffer: usize, env: Box<dyn WasmVenv>) -> (Self, impl AgentManager) {
+    pub fn new(buffer: usize, env: Box<dyn WasmVenv>) -> (Self, Client) {
         let (tx, cmd) = mpsc::channel(buffer);
         (
             Self {
@@ -27,7 +27,7 @@ impl Agent {
                 stack: Arc::new(Mutex::new(Stack::new())),
                 store: Store::default(),
             },
-            tx,
+            Client::new(tx),
         )
     }
     pub async fn process(&mut self, cmd: Command) -> AsyncResult {
