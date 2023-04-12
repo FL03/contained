@@ -42,7 +42,8 @@ members = [
     "contained",
     "core",
     "music",
-    "net"
+    "net",
+    "turing"
 ]
 
 [profile.dev]

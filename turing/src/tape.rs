@@ -4,7 +4,7 @@
     Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
 use super::Symbolic;
-use crate::{ArrayLike, Insert, Iterable};
+use contained_core::{ArrayLike, Insert, Iterable};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut};
 

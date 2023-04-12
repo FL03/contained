@@ -1,0 +1,47 @@
+[package]
+authors.workspace = true
+categories = []
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords = []
+license.workspace = true
+name = "contained-turing"
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+test = true
+
+[features]
+default = []
+wasm = []
+
+[build-dependencies]
+
+[dependencies]
+anyhow.workspace = true
+async-trait.workspace = true
+decanter.workspace = true
+futures.workspace = true
+itertools.workspace = true
+predicates = "3.0"
+serde.workspace = true
+serde_json.workspace = true
+smart-default.workspace = true
+strum.workspace = true
+
+[dependencies.contained-core]
+path = "../core"
+
+[dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = ["--cfg", "docsrs"]
+
+[target.wasm32-unknown-unknown]
+
+[target.wasm32-wasi]

@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: [ core, music, net]
+        features: [ core, music, net, turing ]
     env:
       PACKAGE_NAME: ${{ github.event.repository.name }}-${{ matrix.features }}
     steps:

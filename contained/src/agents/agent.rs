@@ -88,7 +88,10 @@ impl Agent {
             }
         })
     }
-    pub fn spawn(self, handle: tokio::runtime::Handle) -> tokio::task::JoinHandle<anyhow::Result<()>> {
+    pub fn spawn(
+        self,
+        handle: tokio::runtime::Handle,
+    ) -> tokio::task::JoinHandle<anyhow::Result<()>> {
         handle.spawn(self.run())
     }
     pub fn with_stack(mut self, stack: Stack) -> Self {

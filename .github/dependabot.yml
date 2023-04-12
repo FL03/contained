@@ -29,6 +29,10 @@ updates:
     schedule:
         interval: daily
   - package-ecosystem: cargo
+    directory: /turing
+    schedule:
+        interval: daily
+  - package-ecosystem: cargo
     directory: /xtask
     schedule:
         interval: daily

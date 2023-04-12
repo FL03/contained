@@ -1,22 +1,14 @@
 /*
-    Appellation: turing <module>
+    Appellation: specs <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
+    Description: ... Summary ...
 */
-pub use self::{exec::*, programs::*, states::*, tape::*};
-
-pub mod instructions;
-pub mod machine;
-
-mod exec;
-mod programs;
-mod states;
-mod tape;
-
-use crate::states::Stateful;
-use crate::{ArrayLike, Include, Insert};
-use instructions::Move;
+use contained_core::states::Stateful;
+use contained_core::{ArrayLike, Include, Insert};
 use std::collections::{BTreeSet, HashSet};
+
+use crate::instructions::Move;
+use crate::{State, Tape};
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
 pub trait Alphabet<S: Symbolic> {
@@ -118,11 +110,10 @@ pub trait Symbolic:
 {
 }
 
-impl Symbolic for char {}
-
-impl Symbolic for &str {}
-
-impl Symbolic for String {}
+impl<T> Symbolic for T where
+    T: Clone + Default + Eq + Ord + std::fmt::Debug + std::fmt::Display + std::hash::Hash
+{
+}
 
 /// [Translate] is a trait that allows for the translation of a machine's memory
 pub trait Translate<S: Symbolic> {

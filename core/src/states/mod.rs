@@ -22,11 +22,14 @@ pub trait Stateful<S: StateSpec>: Clone {
     fn update_state(&mut self, state: S);
 }
 
-impl Stateful<i64> for i64 {
-    fn state(&self) -> i64 {
+impl<S> Stateful<S> for S
+where
+    S: StateSpec + Copy,
+{
+    fn state(&self) -> S {
         *self
     }
-    fn update_state(&mut self, state: i64) {
+    fn update_state(&mut self, state: S) {
         *self = state;
     }
 }
@@ -34,4 +37,4 @@ impl Stateful<i64> for i64 {
 /// [StateSpec] is used by [Stateful] to describe a specific state
 pub trait StateSpec {}
 
-impl StateSpec for i64 {}
+impl<T> StateSpec for T {}

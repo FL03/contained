@@ -11,7 +11,6 @@
 use super::{Pitch, PitchClass, ASPN};
 use crate::{intervals::Interval, Gradient};
 use algae::graph::Node;
-use contained_core::turing::Symbolic;
 use serde::{Deserialize, Serialize};
 
 /// A [Note] is simply a wrapper for a [PitchClass], providing additional information such as an octave ([i64])
@@ -52,8 +51,6 @@ impl Gradient for Note {
 }
 
 impl Node for Note {}
-
-impl Symbolic for Note {}
 
 impl std::fmt::Display for Note {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
