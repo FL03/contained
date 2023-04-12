@@ -24,7 +24,6 @@ test = true
 # Custom
 algae.workspace = true
 decanter.workspace = true
-scsys.workspace = true
 
 # Internal
 contained-core = { features = [], path = "../core", version = "0.1.4" }

@@ -8,7 +8,7 @@ use contained_sdk as contained;
 use contained::net::{NetworkConfig, Overlay, Starter};
 
 #[tokio::main]
-async fn main() -> scsys::prelude::AsyncResult {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let addr = "/ip4/0.0.0.0/tcp/9099".parse().unwrap();
     let cnf = NetworkConfig::new(addr, Some(9));
     let (node, _client, _events) = Starter::new()

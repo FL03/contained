@@ -3,9 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::{client::AgentManager, layer::Command, Stack, WasmVenv};
+use super::{client::Client, layer::Command, Stack, WasmVenv};
 use crate::prelude::{hash_module, Shared};
-use scsys::prelude::AsyncResult;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use wasmer::{Instance, Module, Store};
@@ -30,7 +29,7 @@ impl Agent {
             Client::new(tx),
         )
     }
-    pub async fn process(&mut self, cmd: Command) -> AsyncResult {
+    pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
         match cmd {
             Command::Execute {
                 module,
@@ -75,7 +74,7 @@ impl Agent {
         self.env = Arc::new(Mutex::new(env));
         self
     }
-    pub async fn run(mut self) -> AsyncResult {
+    pub async fn run(mut self) -> anyhow::Result<()> {
         Ok(loop {
             tokio::select! {
                 Some(cmd) = self.cmd.recv() => {
@@ -89,7 +88,7 @@ impl Agent {
             }
         })
     }
-    pub fn spawn(self, handle: tokio::runtime::Handle) -> tokio::task::JoinHandle<AsyncResult> {
+    pub fn spawn(self, handle: tokio::runtime::Handle) -> tokio::task::JoinHandle<anyhow::Result<()>> {
         handle.spawn(self.run())
     }
     pub fn with_stack(mut self, stack: Stack) -> Self {

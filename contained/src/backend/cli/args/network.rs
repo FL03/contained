@@ -6,7 +6,6 @@
 use crate::net::{Multiaddr, PeerId};
 use clap::{ArgAction, Args, Subcommand};
 use decanter::prelude::Hashable;
-use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use strum::{Display, EnumVariantNames};
@@ -23,7 +22,6 @@ use strum::{Display, EnumVariantNames};
     Ord,
     PartialEq,
     PartialOrd,
-    SerdeDisplay,
     Serialize,
 )]
 pub struct NetworkArgs {
@@ -41,6 +39,12 @@ pub struct NetworkArgs {
     /// Start the network
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub up: bool,
+}
+
+impl std::fmt::Display for NetworkArgs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
 }
 
 #[derive(

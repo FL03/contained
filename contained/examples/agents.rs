@@ -1,8 +1,7 @@
 extern crate contained_sdk as contained;
 
 use contained::agents::{client::AgentManager, Agent, WasmVenv};
-use contained::prelude::{BoxedWasmValue, Shared};
-use scsys::prelude::AsyncResult;
+use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};
 use std::sync::{Arc, Mutex};
 use wasmer::{wat2wasm, Imports, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut};

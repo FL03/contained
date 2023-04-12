@@ -4,7 +4,6 @@
     Description: ... Summary ...
 */
 use decanter::prelude::Hashable;
-use scsys::prelude::{SerdeDisplay, Timestamp};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -16,18 +15,7 @@ pub enum EpochPerspective {
 
 /// An [Epoch] consists of a start time and optionally, a duration (seconds). If None, the system assumes an infinite duration
 #[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    Hash,
-    Hashable,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    SerdeDisplay,
-    Serialize,
+    Clone, Copy, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct Epoch {
     pub duration: Duration,
@@ -46,7 +34,7 @@ impl Epoch {
     }
     /// Returns the [Duration] of time since the [Epoch] was created
     pub fn elapsed(&self) -> Duration {
-        let now: i64 = Timestamp::default().into();
+        let now: i64 = chrono::Utc::now().timestamp();
         Duration::from_secs((now - self.start) as u64)
     }
     /// Returns the end time of the [Epoch]
@@ -71,13 +59,19 @@ impl Epoch {
 
 impl Default for Epoch {
     fn default() -> Self {
-        Self::new(Some(Duration::new(1, 0)), Timestamp::default())
+        Self::new(Some(Duration::new(1, 0)), chrono::Utc::now().timestamp())
+    }
+}
+
+impl std::fmt::Display for Epoch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }
 
 impl From<Duration> for Epoch {
     fn from(duration: Duration) -> Self {
-        Self::new(Some(duration), Timestamp::default())
+        Self::new(Some(duration), chrono::Utc::now().timestamp())
     }
 }
 

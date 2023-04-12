@@ -8,7 +8,7 @@ use contained_sdk as contained;
 use contained::music::neo::triads::{Triad, Triads};
 
 #[tokio::main]
-async fn main() -> scsys::prelude::AsyncResult {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _triad = Triad::new(0.into(), Triads::Major);
 
     Ok(())

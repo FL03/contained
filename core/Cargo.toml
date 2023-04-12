@@ -25,12 +25,12 @@ wasm = []
 [dependencies]
 algae.workspace = true
 decanter.workspace = true
-scsys.workspace = true
 
 anyhow.workspace = true
 async-trait.workspace = true
 atoi = "2"
 bytes.workspace = true
+chrono = "0.4"
 futures.workspace = true
 itertools.workspace = true
 petgraph ={ features = [], version = "0.6"  }
