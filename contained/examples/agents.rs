@@ -1,4 +1,4 @@
-extern crate contained_sdk as contained;
+extern crate contained;
 
 use contained::agents::{client::AgentManager, Agent, WasmVenv};
 use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};

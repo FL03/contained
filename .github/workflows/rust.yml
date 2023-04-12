@@ -71,6 +71,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Publish (sdk)
-        run: cargo publish --all-features -v -p contained-sdk --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish (${{ github.event.repository.name }})
+        run: cargo publish --all-features -v -p ${{ github.event.repository.name }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 

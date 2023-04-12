@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-extern crate contained_sdk as contained;
+extern crate contained;
 
 use contained::music::neo::triads::*;
 
