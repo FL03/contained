@@ -1,5 +1,5 @@
 #[cfg(test)]
-use contained_core::turing::{
+use contained_turing::{
     instructions::{Instruction, Move},
     machine::{Driver, Machine},
     Program, State, Tape, Turing,

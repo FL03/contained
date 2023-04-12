@@ -3,9 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::states::Stateful;
-use crate::turing::{Scope, State, Symbolic, Tape};
-use crate::{ArrayLike, Include, Insert};
+use crate::{Scope, State, Symbolic, Tape};
+use contained_core::states::Stateful;
+use contained_core::{ArrayLike, Include, Insert};
 
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -136,7 +136,7 @@ impl<S: Symbolic> From<Driver<S>> for (usize, State, Tape<S>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::turing::{instructions::Move, Tape};
+    use crate::instructions::Move;
 
     #[test]
     fn test_builder() {

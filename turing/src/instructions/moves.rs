@@ -2,10 +2,12 @@
     Appellation: moves <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-
+        The Move enum is used to represent the direction of a Turing machine's
+        head. It is used in the instruction set to determine the next state of
+        the machine.
 */
-use crate::turing::Tape;
-use crate::{turing::Symbolic, ArrayLike};
+use crate::{Symbolic, Tape};
+use contained_core::ArrayLike;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
 

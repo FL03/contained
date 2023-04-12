@@ -14,7 +14,6 @@ mod utils;
 pub mod events;
 pub mod subnet;
 
-use scsys::prelude::SerdeDisplay;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
@@ -43,9 +42,7 @@ pub enum Overlay {
     Subnet,
 }
 
-#[derive(
-    Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, SerdeDisplay, Serialize,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct NetworkConfig {
     pub addr: Multiaddr,
     pub seed: Option<u8>,
@@ -78,6 +75,12 @@ impl Default for NetworkConfig {
             addr: DEFAULT_MULTIADDR.parse().unwrap(),
             seed: None,
         }
+    }
+}
+
+impl std::fmt::Display for NetworkConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }
 

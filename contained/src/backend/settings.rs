@@ -6,14 +6,47 @@
 use crate::prelude::{Multiaddr, Resultant, DEFAULT_MULTIADDR};
 use config::{Config, Environment};
 use decanter::prelude::Hashable;
-use scsys::prelude::SerdeDisplay as Display;
-use scsys::prelude::{try_collect_config_files, ConfigResult};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(
-    Clone, Debug, Deserialize, Display, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
-)]
+/// Type alias for [config::File]
+type ConfigFile<Src, Fmt> = config::File<Src, Fmt>;
+/// Type alias for a collection of [crate::ConfigFile]
+type ConfigFileVec = Vec<ConfigFile<config::FileSourceFile, config::FileFormat>>;
+
+/// A generic function wrapper extending glob::glob
+pub fn collect_files_as<T>(f: &dyn Fn(PathBuf) -> T, pat: &str) -> anyhow::Result<Vec<T>> {
+    let mut files = Vec::<T>::new();
+    for r in glob::glob(pat)? {
+        files.push(f(r?))
+    }
+    Ok(files)
+}
+/// Gather configuration files following the specified pattern and collect them into a vector
+pub fn collect_config_files(pattern: &str, required: bool) -> ConfigFileVec {
+    let f = |p: std::path::PathBuf| ConfigFile::from(p).required(required);
+    collect_files_as(&f, pattern).expect("Failed to find any similar files...")
+}
+
+/// [package_name] is a simple functional wrapper for [env("CARGO_PKG_NAME")]
+pub fn package_name() -> String {
+    env!("CARGO_PKG_NAME").to_string()
+}
+/// Fetch the project root unless specified otherwise with a CARGO_MANIFEST_DIR env variable
+pub fn project_root() -> std::path::PathBuf {
+    std::path::Path::new(&env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(1)
+        .unwrap()
+        .to_path_buf()
+}
+/// Attempts to collect configuration files, following the given pattern, into a ConfigFileVec
+pub fn try_collect_config_files(pattern: &str, required: bool) -> anyhow::Result<ConfigFileVec> {
+    let f = |p: std::path::PathBuf| ConfigFile::from(p).required(required);
+    collect_files_as(&f, pattern)
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Settings {
     pub logger: Logger,
     pub mode: String,
@@ -33,16 +66,13 @@ impl Settings {
     pub fn builder() -> config::ConfigBuilder<config::builder::DefaultState> {
         Config::builder()
     }
-    pub fn build() -> ConfigResult<Self> {
+    pub fn build() -> Result<Self, config::ConfigError> {
         let mut builder = {
             Self::builder()
                 .set_default("logger.level", "info")?
                 .set_default("mode", "production")?
                 .set_default("network.subnet.addr", DEFAULT_MULTIADDR)?
-                .set_default(
-                    "system.workdir",
-                    scsys::prelude::project_root().to_str().unwrap(),
-                )?
+                .set_default("system.workdir", project_root().to_str().unwrap())?
         };
         // Try loading in environment variables; prefixed with the package name and separated by "__"
         builder = builder.add_source(
@@ -77,9 +107,13 @@ impl Default for Settings {
     }
 }
 
-#[derive(
-    Clone, Debug, Deserialize, Display, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
-)]
+impl std::fmt::Display for Settings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Logger {
     pub level: String,
 }
@@ -114,6 +148,12 @@ impl Default for Logger {
     }
 }
 
+impl std::fmt::Display for Logger {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
 impl From<tracing::Level> for Logger {
     fn from(level: tracing::Level) -> Self {
         Self {
@@ -122,9 +162,7 @@ impl From<tracing::Level> for Logger {
     }
 }
 
-#[derive(
-    Clone, Debug, Deserialize, Display, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SystemSettings {
     pub workdir: PathBuf,
 }
@@ -155,27 +193,26 @@ impl Default for SystemSettings {
     }
 }
 
+impl std::fmt::Display for SystemSettings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
 #[derive(
-    Clone,
-    Debug,
-    Default,
-    Deserialize,
-    Display,
-    Eq,
-    Hash,
-    Hashable,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
+    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct NetworkSettings {
     pub subnet: SubnetConfig,
 }
 
-#[derive(
-    Clone, Debug, Deserialize, Display, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
-)]
+impl std::fmt::Display for NetworkSettings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SubnetConfig {
     pub addr: Multiaddr,
     pub seed: Option<u8>,
@@ -220,5 +257,11 @@ impl SubnetConfig {
 impl Default for SubnetConfig {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl std::fmt::Display for SubnetConfig {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }

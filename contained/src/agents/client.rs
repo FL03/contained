@@ -5,9 +5,8 @@
 */
 use super::layer::Command;
 use crate::music::neo::LPR;
-use crate::prelude::BoxedWasmValue;
+use crate::prelude::{AsyncResult, BoxedWasmValue};
 use decanter::prelude::H256;
-use scsys::prelude::AsyncResult;
 use tokio::sync::{mpsc, oneshot};
 
 #[async_trait::async_trait]

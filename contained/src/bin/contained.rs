@@ -8,7 +8,7 @@ use contained_sdk::prelude::*;
 use tokio::runtime;
 
 #[tokio::main]
-async fn main() -> scsys::prelude::AsyncResult {
+async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let _ = Backend::new()
         .setup()
         .spawn(&runtime::Handle::current())

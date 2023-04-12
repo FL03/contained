@@ -9,6 +9,8 @@ pub use contained_core as core;
 pub use contained_music as music;
 #[cfg(feature = "net")]
 pub use contained_net as net;
+#[cfg(feature = "turing")]
+pub use contained_turing as turing;
 
 pub use self::{primitives::*, utils::*};
 
@@ -32,4 +34,6 @@ pub mod prelude {
     pub use super::music::{chords::*, intervals::*, neo::*};
     #[cfg(feature = "net")]
     pub use super::net::*;
+    #[cfg(feature = "turing")]
+    pub use super::turing::*;
 }

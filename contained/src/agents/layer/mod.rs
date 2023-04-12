@@ -8,7 +8,7 @@ pub use self::{command::*, event::*};
 mod command;
 mod event;
 
-use scsys::prelude::AsyncResult;
+use crate::prelude::AsyncResult;
 use tokio::sync::oneshot;
 
 pub type OneshotSender<T = ()> = oneshot::Sender<AsyncResult<T>>;

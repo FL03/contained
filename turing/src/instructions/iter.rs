@@ -5,7 +5,7 @@
         This module contains the implementation of the [InstructionSet] trait.
 */
 use super::*;
-use crate::turing::Symbolic;
+use crate::Symbolic;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

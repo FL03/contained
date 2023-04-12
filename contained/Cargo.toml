@@ -18,12 +18,13 @@ name = "contained"
 test = false
 
 [features]
-default = ["core", "music", "net"]
-full = ["core", "music", "net"]
+default = ["core", "music", "net", "turing"]
+full = ["core", "music", "net", "turing"]
 
 core = ["contained-core"]
 music = ["contained-music"]
 net = ["contained-net"]
+turing = ["contained-turing"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -35,6 +36,7 @@ test = true
 contained-core = { features = [], optional = true, path = "../core", version = "0.1.4" }
 contained-music = { features = [], optional = true, path = "../music", version = "0.1.4" }
 contained-net = { features = [], optional = true, path = "../net", version = "0.1.4" }
+contained-turing = { features = [], optional = true, path = "../turing", version = "0.1.4" }
 
 # Standard dependencies
 algae.workspace = true
@@ -45,7 +47,7 @@ clap = { features = ["cargo", "derive", "env"], version = "4" }
 config = "0.13"
 decanter.workspace = true
 futures.workspace = true
-scsys.workspace = true
+glob = "0.3"
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true

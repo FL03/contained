@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::StateSpec;
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -59,8 +58,6 @@ impl AsRef<[u8]> for State {
         }
     }
 }
-
-impl StateSpec for State {}
 
 impl Unpin for State {}
 

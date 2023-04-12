@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::states::StateSpec;
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumString, EnumVariantNames};
@@ -50,8 +49,6 @@ impl State {
         *self == Self::Valid
     }
 }
-
-impl StateSpec for State {}
 
 impl std::ops::Mul for State {
     type Output = State;

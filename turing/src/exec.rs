@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use super::{instructions::Instruction, Alphabet, Program, Scope, State, Symbolic};
-use crate::states::Stateful;
-use crate::Error;
+use crate::instructions::Instruction;
+use crate::{Alphabet, Program, Scope, State, Symbolic};
 use async_trait::async_trait;
+use contained_core::{states::Stateful, Error};
 use futures::{Future, StreamExt};
 use predicates::Predicate;
 use std::sync::{Arc, Mutex};

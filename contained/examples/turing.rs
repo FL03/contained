@@ -5,12 +5,12 @@
 */
 extern crate contained_sdk as contained;
 
-use contained::core::turing::{
+use contained::prelude::Resultant;
+use contained::turing::{
     instructions::{Instruction, Move},
     machine::{Driver, Machine},
     Program, State, Tape, Turing,
 };
-use contained::prelude::Resultant;
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];
 

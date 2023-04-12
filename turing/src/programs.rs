@@ -5,8 +5,7 @@
 */
 use super::instructions::{Head, Instruction};
 use super::{Alphabet, State, Symbolic};
-use crate::states::Stateful;
-use crate::{Include, Insert};
+use contained_core::{states::Stateful, Include, Insert};
 use serde::{Deserialize, Serialize};
 use std::{
     mem::replace,
@@ -211,7 +210,7 @@ impl<S: Symbolic> IndexMut<usize> for Program<S> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::turing::instructions::Move;
+    use crate::instructions::Move;
 
     #[test]
     fn test_program() {
