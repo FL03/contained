@@ -30,11 +30,13 @@ pub trait Transform: Sized {
 mod tests {
     use std::str::FromStr;
 
+    use futures::StreamExt;
+
     use super::*;
     use crate::neo::triads::*;
 
-    #[tokio::test]
-    async fn test_transformer() {
+    #[test]
+    fn test_transformer() {
         use LPR::*;
         let iter = vec![L, P, R];
         let triad = Triad::new(0.into(), Triads::Major);
@@ -44,16 +46,33 @@ mod tests {
             tmp.walk(iter);
             tmp
         };
-        assert_eq!(transformer.next().unwrap(), triad * L);
-        transformer.next();
+        assert_eq!(transformer.next().unwrap(), triad.clone() * L);
+        assert_eq!(transformer.next().unwrap(), (triad * L) * P);
         assert_eq!(transformer.next().unwrap(), expected);
+    }
+
+    #[tokio::test]
+    async fn test_stream_transformer() {
+        use futures::stream;
+        use LPR::*;
+        let iter = vec![L, P, R];
+        let triad = Triad::new(0.into(), Triads::Major);
+        let transformer = Transformer::new(triad.clone()).with(iter.clone());
+        let expected = {
+            let mut tmp = triad.clone();
+            tmp.walk(iter);
+            tmp
+        };
+        let stream = stream::iter(transformer);
+        let res = stream.collect::<Vec<_>>().await;
+        assert_eq!(res[0], triad.clone() * L);
+        assert_eq!(res[1], (triad * L) * P);
+        assert_eq!(res[2], expected);
     }
 
     #[test]
     fn test_lpr() {
-        let dirac = LPR::from_str("l");
-        assert!(dirac.is_ok());
-        assert_eq!(dirac.unwrap(), LPR::L);
+        assert_eq!(LPR::from_str("l"), LPR::from_str("leading"));
     }
 
     #[test]

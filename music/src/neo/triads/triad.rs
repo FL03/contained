@@ -11,7 +11,7 @@ use super::{ChordFactor, Triads};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
 use crate::{Gradient, MusicError, Note};
-use algae::graph::{Graph, GraphExt, UndirectedGraph};
+use algae::graph::{Graph, UndirectedGraph};
 use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;

@@ -5,18 +5,49 @@
 */
 pub use self::{accidentals::*, naturals::*};
 
-pub(crate) mod accidentals;
-pub(crate) mod naturals;
+mod accidentals;
+mod naturals;
 
 use crate::{intervals::Interval, Gradient, Pitch};
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames};
 
-pub enum Classes {
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumIter,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    SmartDefault,
+)]
+#[strum(serialize_all = "snake_case")]
+pub enum PitchOpt {
+    #[strum(serialize = "b", serialize = "♭", serialize = "flat")]
     Flat,
+    #[strum(serialize = "#", serialize = "♯", serialize = "sharp")]
     Sharp,
+    #[default]
+    #[strum(serialize = "n", serialize = "natural")]
     Natural,
+}
+
+impl PitchOpt {
+    pub fn is_accidental(&self) -> bool {
+        match self {
+            PitchOpt::Flat | PitchOpt::Sharp => true,
+            PitchOpt::Natural => false,
+        }
+    }
 }
 
 #[derive(
@@ -25,6 +56,7 @@ pub enum Classes {
     Debug,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -39,7 +71,7 @@ pub enum Classes {
 pub enum PitchClass {
     Accidental(Accidentals),
     #[default]
-    Natural(NaturalNote),
+    Natural(Naturals),
 }
 
 impl PitchClass {
@@ -47,7 +79,7 @@ impl PitchClass {
         if let Ok(v) = Accidentals::try_from(value) {
             PitchClass::from(v)
         } else {
-            PitchClass::from(NaturalNote::try_from(value).expect(""))
+            PitchClass::from(Naturals::try_from(value).expect(""))
         }
     }
 }
@@ -66,8 +98,8 @@ impl From<Accidentals> for PitchClass {
     }
 }
 
-impl From<NaturalNote> for PitchClass {
-    fn from(data: NaturalNote) -> PitchClass {
+impl From<Naturals> for PitchClass {
+    fn from(data: Naturals) -> PitchClass {
         PitchClass::Natural(data)
     }
 }
@@ -77,7 +109,7 @@ impl<G: Gradient> From<&G> for PitchClass {
         if let Ok(v) = Accidentals::try_from(value.pitch()) {
             PitchClass::from(v)
         } else {
-            PitchClass::from(NaturalNote::try_from(value.pitch()).expect(""))
+            PitchClass::from(Naturals::try_from(value.pitch()).expect(""))
         }
     }
 }

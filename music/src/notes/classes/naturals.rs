@@ -7,7 +7,7 @@ use crate::{Gradient, Pitch};
 
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames};
 
 #[derive(
     Clone,
@@ -15,6 +15,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Debug,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -27,7 +28,7 @@ use strum::{Display, EnumString, EnumVariantNames};
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
-pub enum NaturalNote {
+pub enum Naturals {
     #[default]
     C = 0,
     D = 2,
@@ -38,25 +39,33 @@ pub enum NaturalNote {
     B = 11,
 }
 
-impl From<NaturalNote> for i64 {
-    fn from(note: NaturalNote) -> i64 {
+impl Gradient for Naturals {
+    const MODULUS: i64 = 12;
+
+    fn pitch(&self) -> i64 {
+        *self as i64
+    }
+}
+
+impl From<Naturals> for i64 {
+    fn from(note: Naturals) -> i64 {
         note as i64
     }
 }
 
-impl TryFrom<Pitch> for NaturalNote {
+impl TryFrom<Pitch> for Naturals {
     type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: Pitch) -> Result<Self, Self::Error> {
-        NaturalNote::try_from(value.pitch())
+        Naturals::try_from(value.pitch())
     }
 }
 
-impl TryFrom<i64> for NaturalNote {
+impl TryFrom<i64> for Naturals {
     type Error = Box<dyn std::error::Error>;
 
     fn try_from(value: i64) -> Result<Self, Self::Error> {
-        let data = value % 12;
+        let data = value.abs() % 12;
         match data {
             0 => Ok(Self::C),
             2 => Ok(Self::D),
@@ -77,8 +86,8 @@ mod tests {
 
     #[test]
     fn test_naturals() {
-        assert!(NaturalNote::try_from(1).is_err());
-        assert_eq!(NaturalNote::try_from(5).unwrap(), NaturalNote::F);
-        assert_eq!(NaturalNote::from_str("a").unwrap(), NaturalNote::A);
+        assert!(Naturals::try_from(1).is_err());
+        assert_eq!(Naturals::try_from(5).unwrap(), Naturals::F);
+        assert_eq!(Naturals::from_str("a").unwrap(), Naturals::A);
     }
 }

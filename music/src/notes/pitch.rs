@@ -13,8 +13,9 @@
         Another possibility would be to describe natural notes as prime numbers as this would restrict their existance and remove any possible enharmonic pairings.
         More so, if we consider 1 to be a prime number
 */
-use super::Note;
-use crate::{intervals::Interval, Gradient};
+use super::{Note, PitchClass};
+use crate::intervals::Interval;
+use crate::Gradient;
 use serde::{Deserialize, Serialize};
 
 /// [Pitch] describes the modular index of a given frequency
@@ -26,6 +27,14 @@ pub struct Pitch(i64);
 impl Pitch {
     pub fn new(pitch: i64) -> Self {
         Self(pitch)
+    }
+    /// Classify the pitch into a pitch class
+    pub fn class(&self) -> PitchClass {
+        self.pitch().into()
+    }
+    /// Find the modular index of the given pitch
+    pub fn pitch(&self) -> i64 {
+        crate::absmod(self.0, crate::MODULUS)
     }
 }
 
@@ -180,7 +189,7 @@ impl<P: Gradient> std::ops::SubAssign<P> for Pitch {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Accidentals, Gradient, PitchClass};
+    use crate::Accidentals;
 
     #[test]
     fn test_pitch_class() {

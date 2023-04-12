@@ -142,11 +142,11 @@ impl From<Note> for i64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::NaturalNote;
+    use crate::Naturals;
 
     #[test]
     fn test_notes() {
-        let a = Note::new(PitchClass::Natural(NaturalNote::C), None);
+        let a = Note::new(PitchClass::Natural(Naturals::C), None);
         assert_eq!(a.pitch(), 0);
         assert_eq!(a.octave(), 1);
     }

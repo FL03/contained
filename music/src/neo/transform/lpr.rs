@@ -46,8 +46,11 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
 #[strum(serialize_all = "snake_case")]
 pub enum LPR {
     #[default]
+    #[strum(serialize = "l", serialize = "leading")]
     L = 0,
+    #[strum(serialize = "p", serialize = "parallel")]
     P = 1,
+    #[strum(serialize = "r", serialize = "relative")]
     R = 2,
 }
 

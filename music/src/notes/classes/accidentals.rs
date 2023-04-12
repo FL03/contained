@@ -4,11 +4,11 @@
     Description:
         Accidental notes are either sharp or flat
 */
-use super::NaturalNote;
-use crate::{Gradient, Pitch};
+use super::Naturals;
+use crate::Pitch;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames};
 
 #[derive(
     Clone,
@@ -16,6 +16,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Debug,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -46,7 +47,7 @@ impl TryFrom<Pitch> for Accidentals {
     type Error = Box<dyn std::error::Error>;
 
     fn try_from(data: Pitch) -> Result<Accidentals, Self::Error> {
-        if NaturalNote::try_from(data).is_err() {
+        if Naturals::try_from(data).is_err() {
             let note = if data.pitch() >= 0 {
                 Accidentals::Sharp(SharpNote::try_from(data)?)
             } else {
@@ -94,6 +95,7 @@ impl From<SharpNote> for Accidentals {
     Debug,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -152,6 +154,7 @@ impl TryFrom<Pitch> for FlatNote {
     Default,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,

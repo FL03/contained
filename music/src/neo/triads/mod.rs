@@ -18,14 +18,48 @@ pub trait Update {
     fn update(self: &mut Self);
 }
 
+pub trait FromTriad {
+    fn from_triad(triad: Triad) -> Self;
+}
+
+impl<T> FromTriad for T
+where
+    T: From<Triad>,
+{
+    fn from_triad(triad: Triad) -> Self {
+        Self::from(triad)
+    }
+}
+
 pub trait IntoTriad {
     fn into_triad(self) -> Triad;
+}
+
+impl<T> IntoTriad for T
+where
+    T: Into<Triad>,
+{
+    fn into_triad(self) -> Triad {
+        self.into()
+    }
 }
 
 pub trait TryIntoTriad {
     type Error;
 
     fn try_into_triad(self) -> Result<Triad, Self::Error>;
+}
+
+impl<T> TryIntoTriad for T
+where
+    T: TryInto<Triad>,
+    T::Error: std::error::Error,
+{
+    type Error = T::Error;
+
+    fn try_into_triad(self) -> Result<Triad, Self::Error> {
+        self.try_into()
+    }
 }
 
 #[cfg(test)]

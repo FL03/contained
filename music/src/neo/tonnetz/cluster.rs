@@ -14,7 +14,7 @@ use super::Tonnetz;
 use crate::intervals::{Fifths, Thirds};
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note};
-use algae::graph::{Graph, GraphExt, UndirectedGraph};
+use algae::graph::{Graph, UndirectedGraph};
 use decanter::prelude::H256;
 use std::sync::{Arc, Mutex};
 
