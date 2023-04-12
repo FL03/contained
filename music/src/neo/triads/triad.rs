@@ -2,10 +2,6 @@
     Appellation: triad <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
-        These chord factors are considered by position and are referenced as the root, third, and fifth.
-
-        Computationally, a triadic structure is a stateful set of three notes or symbols that are related by a specific interval.
-
 */
 use super::{ChordFactor, Triads};
 use crate::intervals::{Fifths, Interval, Thirds};
@@ -32,7 +28,12 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     ))
 }
 
-/// [Triad] is a set of three [Notable] objects, the root, third, and fifth.
+
+/// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
+/// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
+/// In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
+/// Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
+/// The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
 #[derive(
     Clone,
     Copy,
@@ -66,6 +67,7 @@ impl Triad {
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, Triads::from((a, b)))
     }
+    /// Returns the [Triads] classification of the [Triad]
     pub fn class(&self) -> Triads {
         self.class
     }
@@ -92,7 +94,7 @@ impl Triad {
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         self.class().intervals()
     }
-    /// Returns a vector of all the possible [Triad]s that exist at
+    /// Returns a [Vec] of all neighboring [Triad]s; the [Triad]s that are one [LPR] away from the current [Triad]
     pub fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
         for i in LPR::transformations() {
@@ -102,9 +104,7 @@ impl Triad {
         }
         neighbors
     }
-    pub fn notes(&self) -> &[Note; 3] {
-        &self.notes
-    }
+    /// Returns a [Vec] of all notes in the [Triad]
     pub fn notes_vec(&self) -> Vec<Note> {
         self.notes.to_vec()
     }
