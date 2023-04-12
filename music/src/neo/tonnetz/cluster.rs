@@ -9,6 +9,9 @@
         If a tonnetz is a topological computer, then a cluster is a topological computer that is used to orchestrate a set of topological computers.
         Locally, a tonnetz is typically fragemented only persisting as many triads as the host device allows for. However, as a network the cluster
         glues together these framents into a single, cohesive, and complete experience orchestrated according to a single originator.
+
+        Each triad persisted is required to maintian a set of invariants that are used to determine the state of the cluster.
+        If each edge in a traditional tonnetz is the interval between the two notes, than each edge in the cluster describes a type of seed value that encodes some information about the triad.
 */
 use super::Tonnetz;
 use crate::intervals::{Fifths, Thirds};

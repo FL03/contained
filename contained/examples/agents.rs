@@ -1,6 +1,6 @@
 extern crate contained;
 
-use contained::agents::{client::AgentManager, Agent, WasmVenv};
+use contained::agents::{client::AgentManager, Agent, WasmEnv};
 use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};
 use std::sync::{Arc, Mutex};
 use wasmer::{wat2wasm, Imports, Store};
@@ -108,7 +108,7 @@ impl Default for CounterVenv {
     }
 }
 
-impl WasmVenv for CounterVenv {
+impl WasmEnv for CounterVenv {
     fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports {
         let env = FunctionEnv::new(store, self.clone());
         let mut base = counter_imports(&env, store);

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-use super::{client::Client, layer::Command, Stack, WasmVenv};
+use super::{client::Client, layer::Command, Stack, WasmEnv};
 use crate::prelude::{hash_module, Shared};
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
@@ -11,13 +11,13 @@ use wasmer::{Instance, Module, Store};
 
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
-    env: Shared<Box<dyn WasmVenv>>,
+    env: Shared<Box<dyn WasmEnv>>,
     stack: Shared<Stack>,
     store: Store,
 }
 
 impl Agent {
-    pub fn new(buffer: usize, env: Box<dyn WasmVenv>) -> (Self, Client) {
+    pub fn new(buffer: usize, env: Box<dyn WasmEnv>) -> (Self, Client) {
         let (tx, cmd) = mpsc::channel(buffer);
         (
             Self {
@@ -70,7 +70,7 @@ impl Agent {
             Command::Transform { .. } => todo!(),
         }
     }
-    pub fn set_environment(mut self, env: Box<dyn WasmVenv>) -> Self {
+    pub fn set_environment(mut self, env: Box<dyn WasmEnv>) -> Self {
         self.env = Arc::new(Mutex::new(env));
         self
     }

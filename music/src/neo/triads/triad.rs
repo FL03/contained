@@ -171,6 +171,7 @@ impl Future for Triad {
             if let Ok(t) = self.update() {
                 return Poll::Ready(t);
             } else {
+                cx.waker().wake_by_ref();
                 Poll::Pending
             }
         } else {
