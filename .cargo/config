@@ -1,2 +1,8 @@
 [alias]
 xtask = "run --manifest-path ./xtask/Cargo.toml --"
+
+[registries]
+space-crates = { index = "sparse+https://crates.pkg.jetbrains.space/scsys/p/neo/crates/" }
+
+[unstable]
+registry-auth = true
