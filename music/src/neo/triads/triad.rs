@@ -1,8 +1,10 @@
 /*
     Appellation: triad <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A triad is a certain type of chord built with thirds. Traditionally, this means that the triad is composed of three notes called chord factors.
 */
+//! Triad
+//! 
+//! 
 use super::{ChordFactor, Triads};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
