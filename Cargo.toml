@@ -29,7 +29,7 @@ strum = { features = ["derive"], version = "0.24" }
 tokio = { features = ["full"], version = "1" }
 tracing = { features = ["log"], version = "0.1" }
 tracing-subscriber = { features = ["fmt"], version = "0.3" }
-wasmer = { features = [], version = "3.1" }
+wasmer = { features = [], version = "4.0" }
 
 [workspace]
 default-members = [
