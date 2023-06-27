@@ -57,7 +57,7 @@ features = [
     "tokio",
     "yamux"
 ]
-version = "0.51.1"
+version = "0.52.1"
 
 [dev-dependencies]
 tokio.workspace = true
