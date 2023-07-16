@@ -8,6 +8,7 @@
 use super::{Transform, LPR};
 use crate::neo::triads::*;
 use futures::Stream;
+use itertools::Itertools;
 use std::future::Future;
 use std::task::{self, Poll};
 
@@ -29,8 +30,8 @@ impl Transformer {
     pub fn push(&mut self, lpr: LPR) {
         self.iter.push(lpr);
     }
-    pub fn with(mut self, iter: Vec<LPR>) -> Self {
-        self.iter = iter;
+    pub fn with(mut self, iter: impl IntoIterator<Item = LPR>) -> Self {
+        self.iter = iter.into_iter().collect_vec();
         self
     }
 }
@@ -121,7 +122,6 @@ mod tests {
     use super::*;
     use LPR::*;
     use lazy_static::lazy_static;
-    use itertools::Itertools;
     use strum::IntoEnumIterator;
 
 
@@ -133,11 +133,26 @@ mod tests {
         };
     }
 
+    #[test]
+    fn test_transformer() {
+        let triad = Triad::default();
+        let transformer = Transformer::new(triad).with(LPR::iter());
+        let (expected, walked) = _EXPECTED.clone();
+        let walked = walked[1..].to_vec();
+        for (i, triad) in transformer.enumerate() {
+            if i >= walked.len() {
+                assert_eq!(triad, expected);
+            } else {
+                assert_eq!(triad, walked[i]);
+            }
+        }
+    }
+
     #[tokio::test]
     async fn test_transformer_future() {
         let triad = Triad::default();
         let (expected, _walked) = _EXPECTED.clone();
-        let transformer = Transformer::new(triad).with(LPR::iter().collect_vec());
+        let transformer = Transformer::new(triad).with(LPR::iter());
         assert_eq!(transformer.await, expected);
     }
 
@@ -147,7 +162,7 @@ mod tests {
         let triad = Triad::default();
         let (expected, walked) = _EXPECTED.clone();
         let walked = walked[1..].to_vec();
-        let transformer = Transformer::new(triad).with(LPR::iter().collect_vec());
+        let transformer = Transformer::new(triad).with(LPR::iter());
         let s = stream::iter(transformer);
         let res = s.collect::<Vec<_>>().await;
         for (i, triad) in res.clone().into_iter().enumerate() {
