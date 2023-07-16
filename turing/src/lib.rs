@@ -1,22 +1,26 @@
 /*
-    Appellation: actors <library>
+    Appellation: turing <library>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
-pub use self::{
-    errors::*, exec::*, primitives::*, programs::*, specs::*, states::*, tape::*, utils::*,
-};
-
-mod errors;
-
-mod primitives;
-mod specs;
-mod utils;
+/// # Turing
+pub use self::{exec::*, primitives::*, programs::*, specs::*, tape::*, utils::*};
 
 mod exec;
+mod primitives;
+
+mod programs;
+mod specs;
+mod tape;
+mod utils;
+
+pub mod errors;
 pub mod instructions;
 pub mod machine;
 
-mod programs;
-mod states;
-mod tape;
+pub mod prelude {
+
+    pub use super::{
+        exec::*, instructions::*, machine::*, primitives::*, programs::*, specs::*, tape::*,
+        utils::*,
+    };
+}

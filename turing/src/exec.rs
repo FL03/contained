@@ -1,12 +1,14 @@
 /*
     Appellation: exec <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
 use crate::instructions::Instruction;
-use crate::{Alphabet, Program, Scope, State, Symbolic};
+use crate::{Alphabet, Program, Scope, Symbolic};
 use async_trait::async_trait;
-use contained_core::{states::Stateful, Error};
+use contained_core::{
+    states::{State, Stateful},
+    Error,
+};
 use futures::{Future, StreamExt};
 use predicates::Predicate;
 use std::sync::{Arc, Mutex};

@@ -24,6 +24,7 @@ wasm = []
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
+contained-core = { path = "../core", version = "0.1.6" }
 decanter.workspace = true
 futures.workspace = true
 itertools.workspace = true
@@ -33,11 +34,8 @@ serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
 
-[dependencies.contained-core]
-path = "../core"
-version = "0.1.5"
-
 [dev-dependencies]
+contained-core = { path = "../core" }
 
 [package.metadata.docs.rs]
 all-features = true

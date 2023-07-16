@@ -4,8 +4,11 @@
     Description: ... summary ...
 */
 use super::instructions::{Head, Instruction};
-use super::{Alphabet, State, Symbolic};
-use contained_core::{states::Stateful, Include, Insert};
+use super::{Alphabet, Symbolic};
+use contained_core::{
+    states::{State, Stateful},
+    Include, Insert,
+};
 use serde::{Deserialize, Serialize};
 use std::{
     mem::replace,

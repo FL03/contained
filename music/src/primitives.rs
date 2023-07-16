@@ -20,9 +20,9 @@ mod types {
     pub type BoxedError = Box<dyn std::error::Error>;
 
     pub type MusicResult<T = ()> = Result<T, BoxedError>;
-    /// Dirac is a generic [Fn] which transforms one object into another
-    pub type Dirac<S, T> = dyn Fn(S) -> T;
+    /// [Transformation] is a generic [Fn] which transforms one object into another
+    pub type Transformation<S, T> = dyn Fn(S) -> T;
     /// A type alias for a [Stream] of [Fn] which takes in one object and transforms it into another
     /// as defined in Clifton Callender's work on continuous transformations.
-    pub type HarmonicInterpolation<S, T> = dyn Stream<Item = Dirac<S, T>>;
+    pub type HarmonicInterpolation<S, T> = dyn Stream<Item = Transformation<S, T>>;
 }

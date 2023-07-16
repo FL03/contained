@@ -21,17 +21,13 @@ pub mod agents;
 pub mod cluster;
 
 pub mod prelude {
-    pub use super::agents::*;
-    pub use super::cluster::*;
     pub use super::primitives::*;
     pub use super::utils::*;
 
     #[cfg(feature = "core")]
-    pub use super::core::states::*;
-    #[cfg(feature = "core")]
-    pub use super::core::*;
+    pub use super::core::prelude::*;
     #[cfg(feature = "music")]
-    pub use super::music::{chords::*, intervals::*, neo::*};
+    pub use super::music::prelude::*;
     #[cfg(feature = "turing")]
-    pub use super::turing::*;
+    pub use super::turing::prelude::*;
 }

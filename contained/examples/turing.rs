@@ -1,15 +1,14 @@
 /*
     Appellation: basic <example>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
 extern crate contained;
 
-use contained::prelude::Resultant;
+use contained::prelude::{Resultant, State};
 use contained::turing::{
     instructions::{Instruction, Move},
     machine::{Driver, Machine},
-    Program, State, Tape, Turing,
+    Program, Tape, Turing,
 };
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];

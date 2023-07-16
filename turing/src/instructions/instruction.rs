@@ -1,12 +1,14 @@
 /*
     Appellation: instructions <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        Turing machines accept instructions in the form of a five-tuple:
-            (State, Symbol, State, Symbol, Move)
 */
+/// # Instructions
+///
+/// Turing machines accept instructions in the form of a five-tuple:
+///    (State, Symbol, State, Symbol, Move)
 use super::{Head, Move, Tail};
-use crate::{State, Symbolic};
+use crate::Symbolic;
+use contained_core::prelude::State;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]

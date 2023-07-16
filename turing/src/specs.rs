@@ -1,14 +1,12 @@
 /*
     Appellation: specs <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
 */
-use contained_core::states::Stateful;
+use crate::instructions::Move;
+use crate::Tape;
+use contained_core::states::{State, Stateful};
 use contained_core::{ArrayLike, Include, Insert};
 use std::collections::{BTreeSet, HashSet};
-
-use crate::instructions::Move;
-use crate::{State, Tape};
 
 /// [Alphabet] describes an immutable set of [Symbolic] elements
 pub trait Alphabet<S: Symbolic> {

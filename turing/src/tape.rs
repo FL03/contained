@@ -1,8 +1,10 @@
 /*
     Appellation: tape <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: The tape structure modifies traditional vectors, restricing the ability to remove entries from the tape.
 */
+/// # Tape
+///
+/// The [Tape] represents the memory of a turing machine.
 use super::Symbolic;
 use contained_core::{ArrayLike, Insert, Iterable};
 use serde::{Deserialize, Serialize};

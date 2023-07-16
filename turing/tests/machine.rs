@@ -1,8 +1,9 @@
+use contained_core::prelude::State;
 #[cfg(test)]
 use contained_turing::{
     instructions::{Instruction, Move},
     machine::{Driver, Machine},
-    Program, State, Tape, Turing,
+    Program, Tape, Turing,
 };
 
 pub const TEST_ALPHABET: [&str; 3] = ["a", "b", "c"];

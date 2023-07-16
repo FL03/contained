@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use crate::{Scope, State, Symbolic, Tape};
-use contained_core::states::Stateful;
+use crate::{Scope, Symbolic, Tape};
+use contained_core::states::{State, Stateful};
 use contained_core::{ArrayLike, Include, Insert};
 
 use serde::{Deserialize, Serialize};

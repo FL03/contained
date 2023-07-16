@@ -1,12 +1,11 @@
 /*
     Appellation: machine <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
 */
 use super::Driver;
 use crate::instructions::Instruction;
-use crate::{Alphabet, Program, Scope, State, Symbolic, Tape, Translate, Turing};
-use contained_core::{states::Stateful, ArrayLike, Error};
+use crate::{Alphabet, Program, Scope, Symbolic, Tape, Translate, Turing};
+use contained_core::prelude::{ArrayLike, Error, State, Stateful};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Ord, PartialEq, PartialOrd, Serialize)]

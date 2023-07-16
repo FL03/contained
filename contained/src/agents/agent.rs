@@ -7,6 +7,7 @@ use super::{client::Client, layer::Command, Stack, WasmEnv};
 use crate::prelude::{hash_module, Shared};
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
+use tracing::instrument;
 use wasmer::{Instance, Module, Store};
 
 pub struct Agent {
@@ -29,6 +30,7 @@ impl Agent {
             Client::new(tx),
         )
     }
+    #[instrument(err, skip(self, cmd), name = "process", target = "agent")]
     pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
         match cmd {
             Command::Execute {

@@ -3,6 +3,7 @@ extern crate contained;
 use contained::agents::{client::AgentManager, Agent, WasmEnv};
 use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};
 use std::sync::{Arc, Mutex};
+use tracing::instrument;
 use wasmer::{wat2wasm, Imports, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut};
 
@@ -41,7 +42,11 @@ pub fn counter_module() -> std::borrow::Cow<'static, [u8]> {
 async fn main() -> AsyncResult {
     // Initialize the tracing layer
     std::env::set_var("RUST_LOG", "info");
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::fmt()
+        .compact()
+        .with_line_number(false)
+        .with_target(false)
+        .init();
     // Initialize a new store
     let store = Store::default();
     // Initialize a new virtual environment
@@ -50,6 +55,12 @@ async fn main() -> AsyncResult {
     Ok(())
 }
 
+#[instrument(
+    err,
+    skip(args, store, venv),
+    fields(module = "COUNTER_MODULE"),
+    name = "agent"
+)]
 async fn agents(
     args: BoxedWasmValue,
     mut store: Store,
