@@ -2,8 +2,6 @@
     Appellation: cluster <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        This module is dedicated to the proposed harmonic computational fabric;
-        A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
         The cluster is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
 
         If a tonnetz is a topological computer, then a cluster is a topological computer that is used to orchestrate a set of topological computers.
@@ -13,6 +11,9 @@
         Each triad persisted is required to maintian a set of invariants that are used to determine the state of the cluster.
         If each edge in a traditional tonnetz is the interval between the two notes, than each edge in the cluster describes a type of seed value that encodes some information about the triad.
 */
+/// # Cluster
+/// 
+/// A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
 use super::Tonnetz;
 use crate::intervals::{Fifths, Thirds};
 use crate::neo::triads::*;

@@ -11,6 +11,12 @@
                 (Major Third)   +/- 4 -> (E, G# / Ab)
                 (Perfect Fifth) +/- 7 -> (G, F)
 */
+/// # Tonnetz
+/// 
+/// A tonnetz is a type of topological computer that is used to orchestrate a set of local or detached triadic machines.
+/// A single tonnetz is considered to be any set of connected, non-repeating traids. Repeating triadic structures are
+/// used to create additional layers and can be used to enact more complex workloads. 
+/// 
 pub use self::cluster::*;
 
 mod cluster;
