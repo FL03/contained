@@ -12,12 +12,11 @@ use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
 use itertools::Itertools;
-use petgraph::graph::UnGraph;
+use petgraph::{Graph, Undirected};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
 
-// pub type TriadGraph = Graph<Triad, Dirac, UndirectedGraph>;
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     for (a, b, c) in data.iter().circular_tuple_windows() {
@@ -29,6 +28,8 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
         "Failed to find the required relationships within the given notes...".into(),
     ))
 }
+
+
 
 /// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
 /// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
@@ -315,32 +316,18 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
-// impl From<Triad> for UndirectedGraph<Note, Interval> {
-//     fn from(triad: Triad) -> UndirectedGraph<Note, Interval> {
-//         let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-//         let mut cluster = UndirectedGraph::with_capacity(3);
-//         let edges = vec![
-//             (triad.root(), triad.third(), rt.into()).into(),
-//             (triad.third(), triad.fifth(), tf.into()).into(),
-//             (triad.root(), triad.fifth(), rf.into()).into(),
-//         ];
-//         cluster.add_edges(edges);
-//         cluster.clone()
-//     }
-// }
-
-impl From<Triad> for UnGraph<Note, Interval> {
-    fn from(d: Triad) -> UnGraph<Note, Interval> {
+impl From<Triad> for Graph<Note, Interval, Undirected, ChordFactor> {
+    fn from(d: Triad) -> Graph<Note, Interval, Undirected, ChordFactor> {
         let (rt, tf, rf): (Interval, Interval, Interval) = d.intervals();
 
-        let mut cluster = UnGraph::with_capacity(3, 3);
-        let r = cluster.add_node(d.root());
-        let t = cluster.add_node(d.third());
-        let f = cluster.add_node(d.fifth());
-        cluster.add_edge(r, t, rt);
-        cluster.add_edge(t, f, tf);
-        cluster.add_edge(r, f, rf);
-        cluster.clone()
+        let mut graph = Graph::with_capacity(3, 3);
+        let r = graph.add_node(d.root());
+        let t = graph.add_node(d.third());
+        let f = graph.add_node(d.fifth());
+        graph.add_edge(r, t, rt);
+        graph.add_edge(t, f, tf);
+        graph.add_edge(r, f, rf);
+        graph.clone()
     }
 }
 

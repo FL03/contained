@@ -55,6 +55,36 @@ impl ChordFactor {
     }
 }
 
+impl From<usize> for ChordFactor {
+    fn from(x: usize) -> Self {
+        match x % 3 {
+            0 => ChordFactor::Root,
+            1 => ChordFactor::Third,
+            _ => ChordFactor::Fifth,
+        }
+    }
+}
+
+impl From<ChordFactor> for usize {
+    fn from(x: ChordFactor) -> Self {
+        x as usize
+    }
+}
+
+unsafe impl petgraph::graph::IndexType for ChordFactor {
+    fn new(x: usize) -> Self {
+        Self::from(x)
+    }
+
+    fn index(&self) -> usize {
+        *self as usize
+    }
+
+    fn max() -> Self {
+        Self::Fifth
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

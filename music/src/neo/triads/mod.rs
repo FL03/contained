@@ -13,10 +13,11 @@
 //! Considering a triad to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds, we can see that the triad is a (2, 3) UTM where each side or "state" is consistently allowed to be either
 //! invalid or valid.
 //!
-pub use self::{class::*, misc::*, triad::*};
+pub use self::{class::*, factors::*, graph::*, triad::*};
 
 mod class;
-mod misc;
+mod factors;
+mod graph;
 mod triad;
 
 /// [FromTriad] is a simple trait that allows for the explicit conversion of a [Triad] into any type that implements [From<Triad>].
