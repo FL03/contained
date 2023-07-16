@@ -1,23 +1,25 @@
 /*
     Appellation: triads <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        def. A triad is a set of three notes, called chord factors: root, third, and fifth
-        Generaically, triad's share two of its notes with three of its inversions.
-
-        For our purposes, a triad is said to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds.
 */
-
+//! Triad
+//! 
+//! def. A triad is a set of three notes, called chord factors
+//! 
+//! # Capabilities
+//! 
+//! Justification for considering triads to be viable topological computing environment is found with the [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23).
+//! Generally, a universal turing machine is capable of emulating any other turing machine. The (2, 3) UTM is a turing machine that can emulate any other turing machine using only two states and three symbols.
+//! Considering a triad to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds, we can see that the triad is a (2, 3) UTM where each side or "state" is consistently allowed to be either
+//! invalid or valid.
+//! 
 pub use self::{class::*, misc::*, triad::*};
 
 mod class;
 mod misc;
 mod triad;
 
-pub trait Update {
-    fn update(&mut self);
-}
-
+/// [FromTriad] is a simple trait that allows for the explicit conversion of a [Triad] into any type that implements [From<Triad>].
 pub trait FromTriad {
     fn from_triad(triad: Triad) -> Self;
 }
@@ -31,6 +33,7 @@ where
     }
 }
 
+/// [IntoTriad] is a simple trait that allows for the explicit conversion of any type that implements [Into<Triad>] into a [Triad].
 pub trait IntoTriad {
     fn into_triad(self) -> Triad;
 }
@@ -44,6 +47,7 @@ where
     }
 }
 
+/// [TryIntoTriad] is a trait for explicitly attempting to convert any type into a [Triad].
 pub trait TryIntoTriad {
     type Error;
 

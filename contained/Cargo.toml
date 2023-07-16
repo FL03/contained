@@ -33,10 +33,10 @@ test = true
 [build-dependencies]
 
 [dependencies]
-contained-core = { features = [], optional = true, path = "../core", version = "0.1.4" }
-contained-music = { features = [], optional = true, path = "../music", version = "0.1.4" }
-contained-net = { features = [], optional = true, path = "../net", version = "0.1.4" }
-contained-turing = { features = [], optional = true, path = "../turing", version = "0.1.4" }
+contained-core = { features = [], optional = true, path = "../core", version = "0.1.5" }
+contained-music = { features = [], optional = true, path = "../music", version = "0.1.5" }
+contained-net = { features = [], optional = true, path = "../net", version = "0.1.5" }
+contained-turing = { features = [], optional = true, path = "../turing", version = "0.1.5" }
 
 # Standard dependencies
 algae.workspace = true

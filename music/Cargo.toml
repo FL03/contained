@@ -39,7 +39,7 @@ tracing.workspace = true
 
 [dependencies.contained-core]
 path = "../core"
-version = "0.1.4"
+version = "0.1.5"
 
 [dev-dependencies]
 tokio = { features = ["macros", "rt"], version = "1"}
