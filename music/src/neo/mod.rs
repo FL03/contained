@@ -1,9 +1,11 @@
 /*
     Appellation: neo <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        This module is dedicated to the proposed harmonic computational fabric
 */
+//! # Neo
+//! 
+//! This module is dedicated to the neo-Riemannian theory of music and its computational implications.
+//! 
 pub use self::{pathfinder::*, transform::*};
 
 mod pathfinder;
