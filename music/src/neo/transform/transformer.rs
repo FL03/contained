@@ -1,4 +1,4 @@
-use futures::Stream;
+
 
 /*
     Appellation: transformer <module>
@@ -7,8 +7,8 @@ use futures::Stream;
 */
 use super::{Transform, LPR};
 use crate::neo::triads::*;
+use futures::Stream;
 use std::future::Future;
-
 use std::task::{self, Poll};
 
 #[derive(Clone, Debug, Default)]
