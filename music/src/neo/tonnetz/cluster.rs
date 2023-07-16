@@ -34,15 +34,15 @@ pub struct Boundary {
 
 #[derive(Clone, Debug, Default)]
 pub struct Cluster {
-    cluster: TonnetzGraph,
     scope: Arc<Mutex<Triad>>,
+    store: TonnetzGraph,
 }
 
 impl Cluster {}
 
 impl std::fmt::Display for Cluster {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.cluster)
+        write!(f, "{:?}", self.store)
     }
 }
 
@@ -51,24 +51,24 @@ impl TonnetzSpec for Cluster {
         *self.scope.lock().unwrap()
     }
 
-    fn tonnetz(&self) -> &TonnetzGraph {
-        &self.cluster
+    fn store(&self) -> &TonnetzGraph {
+        &self.store
     }
 
-    fn tonnetz_mut(&mut self) -> &mut TonnetzGraph {
-        &mut self.cluster
+    fn store_mut(&mut self) -> &mut TonnetzGraph {
+        &mut self.store
     }
 }
 
 impl AsRef<TonnetzGraph> for Cluster {
     fn as_ref(&self) -> &TonnetzGraph {
-        &self.cluster
+        &self.store
     }
 }
 
 impl AsMut<TonnetzGraph> for Cluster {
     fn as_mut(&mut self) -> &mut TonnetzGraph {
-        &mut self.cluster
+        &mut self.store
     }
 }
 
@@ -82,7 +82,7 @@ impl From<Triad> for Cluster {
         let f = cluster.add_node(triad.fifth());
         cluster.extend_with_edges([(r, t, rt), (t, f, tf), (r, f, rf)]);
         Self {
-            cluster,
+            store: cluster,
             scope: Arc::new(Mutex::new(triad)),
         }
     }
@@ -102,7 +102,7 @@ mod tests {
         for i in 1..MODULUS {
             cluster.insert(Triad::new(i.into(), Triads::Major));
         }
-        eprintln!("{:?}", cluster.tonnetz());
+        eprintln!("{:?}", cluster.store());
         assert!(cluster.fulfilled());
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
             for i in 0..MODULUS {

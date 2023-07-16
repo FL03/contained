@@ -44,19 +44,19 @@ pub trait TonnetzSpec {
     fn add_node(&mut self, note: Note) -> NodeIndex {
         // Check if the node already exists
         if let Some(index) = self
-            .tonnetz()
+            .store()
             .node_indices()
-            .find(|&i| self.tonnetz()[i] == note)
+            .find(|&i| self.store()[i] == note)
         {
             return index;
         }
 
         // Node doesn't exist, add it and return the new NodeIndex
-        self.tonnetz_mut().add_node(note)
+        self.store_mut().add_node(note)
         // self.tonnetz_mut().add_node(note)
     }
     fn fulfilled(&self) -> bool {
-        self.tonnetz().node_count() == Self::N
+        self.store().node_count() == Self::N
     }
     fn insert(&mut self, triad: Triad) {
         use ChordFactor::*;
@@ -66,10 +66,10 @@ pub trait TonnetzSpec {
         let r = self.add_node(triad[Root]);
         let t = self.add_node(triad[Third]);
         let f = self.add_node(triad[Fifth]);
-        self.tonnetz_mut()
+        self.store_mut()
             .extend_with_edges([(r, t, a), (t, f, b), (r, f, c)]);
     }
     fn scope(&self) -> Triad;
-    fn tonnetz(&self) -> &TonnetzGraph;
-    fn tonnetz_mut(&mut self) -> &mut TonnetzGraph;
+    fn store(&self) -> &TonnetzGraph;
+    fn store_mut(&mut self) -> &mut TonnetzGraph;
 }

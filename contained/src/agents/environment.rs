@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: Implements a virtual wasm environment; each environment describes a set of capabilities and is responsible for tracing the various results
 */
-use crate::music::neo::triads::Triad;
+use crate::music::prelude::triads::Triad;
 use wasmer::{imports, FunctionEnv, Imports, Store};
 
 pub trait ThreadSafe: Send + Sync {}
@@ -40,7 +40,8 @@ impl WasmEnv for () {
 impl WasmEnv for Triad {
     fn imports(&self, _store: &mut Store, with: Option<Imports>) -> Imports {
         let mut imports = imports! {
-            "env" => {}
+            "env" => {
+            }
         };
         if let Some(w) = with {
             imports.extend(&w);
