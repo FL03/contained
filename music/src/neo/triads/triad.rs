@@ -9,7 +9,7 @@ use super::{ChordFactor, Triads};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
 use crate::{Gradient, MusicError, Note};
-use algae::graph::{Graph, UndirectedGraph};
+// use algae::graph::{Graph, UndirectedGraph};
 use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
@@ -18,6 +18,8 @@ use petgraph::graph::UnGraph;
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
+
+// pub type TriadGraph = Graph<Triad, Dirac, UndirectedGraph>;
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     for (a, b, c) in data.iter().circular_tuple_windows() {
@@ -92,8 +94,9 @@ impl Triad {
         self[ChordFactor::Fifth]
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
-    pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
-        self.class().intervals()
+    pub fn intervals(&self) -> (Interval, Interval, Interval) {
+        let (rt, tf, rf) = self.class.intervals();
+        (rt.into(), tf.into(), rf.into())
     }
     /// Returns a [Vec] of all neighboring [Triad]s; the [Triad]s that are one [LPR] away from the current [Triad]
     pub fn neighbors(&self) -> Vec<Self> {
@@ -225,12 +228,7 @@ impl Index<ChordFactor> for Triad {
     type Output = Note;
 
     fn index(&self, index: ChordFactor) -> &Self::Output {
-        use ChordFactor::*;
-        match index {
-            Root => &self.notes[Root as usize],
-            Third => &self.notes[Third as usize],
-            Fifth => &self.notes[Fifth as usize],
-        }
+        &self.notes[index as usize]
     }
 }
 
@@ -249,6 +247,7 @@ impl Index<Range<ChordFactor>> for Triad {
     type Output = [Note];
 
     fn index(&self, index: Range<ChordFactor>) -> &Self::Output {
+        
         &self.notes[index.start as usize..index.end as usize]
     }
 }
@@ -319,31 +318,31 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
-impl From<Triad> for UndirectedGraph<Note, Interval> {
-    fn from(triad: Triad) -> UndirectedGraph<Note, Interval> {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-        let mut cluster = UndirectedGraph::with_capacity(3);
-        let edges = vec![
-            (triad.root(), triad.third(), rt.into()).into(),
-            (triad.third(), triad.fifth(), tf.into()).into(),
-            (triad.root(), triad.fifth(), rf.into()).into(),
-        ];
-        cluster.add_edges(edges);
-        cluster.clone()
-    }
-}
+// impl From<Triad> for UndirectedGraph<Note, Interval> {
+//     fn from(triad: Triad) -> UndirectedGraph<Note, Interval> {
+//         let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
+//         let mut cluster = UndirectedGraph::with_capacity(3);
+//         let edges = vec![
+//             (triad.root(), triad.third(), rt.into()).into(),
+//             (triad.third(), triad.fifth(), tf.into()).into(),
+//             (triad.root(), triad.fifth(), rf.into()).into(),
+//         ];
+//         cluster.add_edges(edges);
+//         cluster.clone()
+//     }
+// }
 
 impl From<Triad> for UnGraph<Note, Interval> {
     fn from(d: Triad) -> UnGraph<Note, Interval> {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals();
+        let (rt, tf, rf): (Interval, Interval, Interval) = d.intervals();
 
         let mut cluster = UnGraph::with_capacity(3, 3);
-        let root = cluster.add_node(d.root());
-        let third = cluster.add_node(d.third());
-        let fifth = cluster.add_node(d.fifth());
-        cluster.add_edge(root, third, rt.into());
-        cluster.add_edge(third, fifth, tf.into());
-        cluster.add_edge(root, fifth, rf.into());
+        let r = cluster.add_node(d.root());
+        let t = cluster.add_node(d.third());
+        let f = cluster.add_node(d.fifth());
+        cluster.add_edge(r, t, rt);
+        cluster.add_edge(t, f, tf);
+        cluster.add_edge(r, f, rf);
         cluster.clone()
     }
 }
@@ -368,7 +367,7 @@ impl From<Triad> for (i64, i64, i64) {
 
 impl From<Triad> for (Thirds, Thirds, Fifths) {
     fn from(data: Triad) -> (Thirds, Thirds, Fifths) {
-        data.intervals()
+        data.class().intervals()
     }
 }
 

@@ -22,7 +22,6 @@ test = true
 
 [dependencies]
 # Custom
-algae.workspace = true
 decanter.workspace = true
 
 # Dependencies

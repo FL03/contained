@@ -39,13 +39,13 @@ contained-music = { features = [], optional = true, path = "../music", version =
 contained-turing = { features = [], optional = true, path = "../turing", version = "0.1.6" }
 
 # Standard dependencies
-algae.workspace = true
 anyhow.workspace = true
 async-trait.workspace = true
 bytes.workspace = true
 decanter.workspace = true
 futures.workspace = true
 glob = "0.3"
+petgraph = "0.6"
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true

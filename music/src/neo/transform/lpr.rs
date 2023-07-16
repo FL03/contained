@@ -43,7 +43,7 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
     PartialOrd,
     Serialize,
 )]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum LPR {
     #[default]
     #[strum(serialize = "l", serialize = "leading")]
@@ -68,7 +68,8 @@ impl Dirac<Triad> for LPR {
 
     fn dirac(&self, triad: &mut Triad) -> Self::Output {
         use ChordFactor::*;
-        match triad.intervals().0 {
+        
+        match triad.class().intervals().0 {
             Thirds::Major => match *self {
                 LPR::L => triad[Root] -= Interval::Semitone,
                 LPR::P => triad[Third] -= Interval::Semitone,

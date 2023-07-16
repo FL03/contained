@@ -60,11 +60,12 @@ impl Triads {
         .collect()
     }
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
+        use Triads::*;
         match self {
-            Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
-            Triads::Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
-            Triads::Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
-            Triads::Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
+            Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
+            Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
+            Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
+            Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
         }
     }
 }

@@ -12,7 +12,6 @@ version = "0.1.6"
 
 [workspace.dependencies]
 # Custom crates
-algae = { default-features = false, features = ["graph"], version = "0.1.19" }
 decanter = { features = ["derive"], version = "0.1.5" }
 
 # Standard dependencies

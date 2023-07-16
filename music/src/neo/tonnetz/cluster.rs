@@ -12,14 +12,13 @@
         If each edge in a traditional tonnetz is the interval between the two notes, than each edge in the cluster describes a type of seed value that encodes some information about the triad.
 */
 //! # Cluster
-//! 
+//!
 //! A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
-use super::Tonnetz;
-use crate::intervals::{Fifths, Thirds};
+use super::{TonnetzGraph, TonnetzSpec};
 use crate::neo::triads::*;
-use crate::{intervals::Interval, neo::LPR, Note};
-use algae::graph::{Graph, UndirectedGraph};
+use crate::prelude::{Interval, Note, LPR};
 use decanter::prelude::H256;
+use petgraph::{Graph, Undirected};
 use std::sync::{Arc, Mutex};
 
 pub enum ClusterEvent {
@@ -35,7 +34,7 @@ pub struct Boundary {
 
 #[derive(Clone, Debug, Default)]
 pub struct Cluster {
-    cluster: UndirectedGraph<Note, Interval>,
+    cluster: TonnetzGraph,
     scope: Arc<Mutex<Triad>>,
 }
 
@@ -47,28 +46,41 @@ impl std::fmt::Display for Cluster {
     }
 }
 
-impl Tonnetz for Cluster {
-    fn scope(&self) -> &Arc<Mutex<Triad>> {
-        &self.scope
+impl TonnetzSpec for Cluster {
+    fn scope(&self) -> Triad {
+        *self.scope.lock().unwrap()
     }
 
-    fn tonnetz(&self) -> &UndirectedGraph<Note, Interval> {
+    fn tonnetz(&self) -> &TonnetzGraph {
         &self.cluster
     }
 
-    fn tonnetz_mut(&mut self) -> &mut UndirectedGraph<Note, Interval> {
+    fn tonnetz_mut(&mut self) -> &mut TonnetzGraph {
+        &mut self.cluster
+    }
+}
+
+impl AsRef<TonnetzGraph> for Cluster {
+    fn as_ref(&self) -> &TonnetzGraph {
+        &self.cluster
+    }
+}
+
+impl AsMut<TonnetzGraph> for Cluster {
+    fn as_mut(&mut self) -> &mut TonnetzGraph {
         &mut self.cluster
     }
 }
 
 impl From<Triad> for Cluster {
     fn from(triad: Triad) -> Self {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-        let mut cluster = UndirectedGraph::with_capacity(crate::MODULUS as usize);
+        let (rt, tf, rf): (Interval, Interval, Interval) = triad.try_into().expect("Invalid triad");
+        let mut cluster = Graph::<Note, Interval, Undirected>::new_undirected();
 
-        cluster.add_edge((triad.root(), triad.third(), rt.into()).into());
-        cluster.add_edge((triad.third(), triad.fifth(), tf.into()).into());
-        cluster.add_edge((triad.root(), triad.fifth(), rf.into()).into());
+        let r = cluster.add_node(triad.root());
+        let t = cluster.add_node(triad.third());
+        let f = cluster.add_node(triad.fifth());
+        cluster.extend_with_edges([(r, t, rt), (t, f, tf), (r, f, rf)]);
         Self {
             cluster,
             scope: Arc::new(Mutex::new(triad)),
@@ -90,7 +102,7 @@ mod tests {
         for i in 1..MODULUS {
             cluster.insert(Triad::new(i.into(), Triads::Major));
         }
-        eprintln!("{:?}", cluster.tonnetz().nodes());
+        eprintln!("{:?}", cluster.tonnetz());
         assert!(cluster.fulfilled());
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
             for i in 0..MODULUS {

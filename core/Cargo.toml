@@ -23,7 +23,6 @@ wasm = []
 [build-dependencies]
 
 [dependencies]
-algae.workspace = true
 decanter.workspace = true
 
 anyhow.workspace = true

@@ -80,10 +80,7 @@ async fn agents(
     let res = client
         .execute(cid.clone(), func.to_string(), args, Some(imports))
         .await?;
-    tracing::info!(
-        "Success: executed the function and got back {:?}",
-        res
-    );
+    tracing::info!("Success: executed the function and got back {:?}", res);
     Ok(res)
 }
 
