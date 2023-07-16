@@ -57,9 +57,9 @@ async fn main() -> AsyncResult {
 
 #[instrument(
     err,
-    skip(args, store, venv),
-    fields(module = "COUNTER_MODULE"),
-    name = "agent"
+    skip(store, venv),
+    fields(function = "sample", module = "COUNTER_MODULE"),
+    name = "example"
 )]
 async fn agents(
     args: BoxedWasmValue,
@@ -81,9 +81,7 @@ async fn agents(
         .execute(cid.clone(), func.to_string(), args, Some(imports))
         .await?;
     tracing::info!(
-        "Success: used the module ({}) to execute the '{}' function and returned {:?}",
-        cid,
-        func,
+        "Success: executed the function and got back {:?}",
         res
     );
     Ok(res)
