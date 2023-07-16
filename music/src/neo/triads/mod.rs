@@ -3,16 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! Triad
-//! 
+//!
 //! def. A triad is a set of three notes, called chord factors
-//! 
+//!
 //! # Capabilities
-//! 
+//!
 //! Justification for considering triads to be viable topological computing environment is found with the [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23).
 //! Generally, a universal turing machine is capable of emulating any other turing machine. The (2, 3) UTM is a turing machine that can emulate any other turing machine using only two states and three symbols.
 //! Considering a triad to be a three-tuple (a, b, c) where the intervals [a, b] and [b, c] are both thirds, we can see that the triad is a (2, 3) UTM where each side or "state" is consistently allowed to be either
 //! invalid or valid.
-//! 
+//!
 pub use self::{class::*, misc::*, triad::*};
 
 mod class;

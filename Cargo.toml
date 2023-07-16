@@ -8,7 +8,7 @@ keywords = []
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/contained"
-version = "0.1.5"
+version = "0.1.6"
 
 [workspace.dependencies]
 # Custom crates
@@ -21,15 +21,13 @@ async-trait = "0.1"
 bytes = "1"
 chrono = { features = ["serde"], version = "0.4" }
 futures = "0.3"
-itertools = "0.10"
+itertools = "0.11"
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
-smart-default = "0.6"
-strum = { features = ["derive"], version = "0.24" }
-tokio = { features = ["full"], version = "1" }
-tracing = { features = ["log"], version = "0.1" }
-tracing-subscriber = { features = ["fmt"], version = "0.3" }
-wasmer = { features = [], version = "3.1" }
+smart-default = "0.7"
+strum = { features = ["derive"], version = "0.25" }
+
+
 
 [workspace]
 default-members = [
@@ -42,9 +40,9 @@ members = [
     "contained",
     "core",
     "music",
-    "net",
     "turing"
 ]
+resolver = "2"
 
 [profile.dev]
 codegen-units = 256

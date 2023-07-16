@@ -3,8 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! Triad
-//! 
-//! 
+//!
+//!
 use super::{ChordFactor, Triads};
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
@@ -29,7 +29,6 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
         "Failed to find the required relationships within the given notes...".into(),
     ))
 }
-
 
 /// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
 /// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
