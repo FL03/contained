@@ -31,6 +31,8 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
 
 
 
+
+
 /// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
 /// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
 /// In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
@@ -40,7 +42,6 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     Clone,
     Copy,
     Debug,
-    Default,
     Deserialize,
     Eq,
     Hash,
@@ -65,6 +66,16 @@ impl Triad {
             state: State::default(),
         }
     }
+    pub fn from_notes(notes: [Note; 3]) -> Self {
+        if let Ok(triad) = constructor(&notes) {
+            return triad;
+        }
+        Self {
+            class: Default::default(),
+            notes,
+            state: State::Invalid,
+        }
+    }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, Triads::from((a, b)))
@@ -75,7 +86,7 @@ impl Triad {
     }
     /// Returns true if the [Triad] contains the [Note]
     pub fn contains(&self, note: &Note) -> bool {
-        self.notes.into_iter().any(|n| n == *note)
+        self.into_iter().contains(note)
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -106,10 +117,6 @@ impl Triad {
             neighbors.push(triad);
         }
         neighbors
-    }
-    /// Returns a [Vec] of all notes in the [Triad]
-    pub fn notes_vec(&self) -> Vec<Note> {
-        self.notes.to_vec()
     }
     /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
     pub fn pathfinder(&self, note: Note) -> PathFinder {
@@ -182,6 +189,12 @@ impl AsRef<[Note; 3]> for Triad {
     }
 }
 
+impl Default for Triad {
+    fn default() -> Self {
+        Self::new(0.into(), Triads::Major)
+    }
+}
+
 impl Future for Triad {
     type Output = Self;
 
@@ -207,10 +220,10 @@ impl Transform for Triad {
 impl IntoIterator for Triad {
     type Item = Note;
 
-    type IntoIter = std::vec::IntoIter<Self::Item>;
+    type IntoIter = std::array::IntoIter<Self::Item, 3>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.notes_vec().into_iter()
+        self.notes.into_iter()
     }
 }
 
@@ -280,14 +293,7 @@ impl TryFrom<[Note; 3]> for Triad {
     type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
-        for (a, b, c) in data.into_iter().circular_tuple_windows() {
-            if let Ok(class) = Triads::try_from((a, b, c)) {
-                return Ok(Triad::new(a, class));
-            }
-        }
-        Err(MusicError::IntervalError(
-            "Failed to find the required relationships within the given notes...".into(),
-        ))
+        constructor(&data)
     }
 }
 
@@ -357,7 +363,6 @@ impl From<Triad> for (Thirds, Thirds, Fifths) {
 
 impl From<Triad> for (Interval, Interval, Interval) {
     fn from(data: Triad) -> (Interval, Interval, Interval) {
-        let intervals = data.intervals();
-        (intervals.0.into(), intervals.1.into(), intervals.2.into())
+        data.intervals()
     }
 }

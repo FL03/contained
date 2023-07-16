@@ -1,3 +1,5 @@
+use futures::Stream;
+
 /*
     Appellation: transformer <module>
     Contrib: FL03 <jo3mccain@icloud.com>
@@ -5,6 +7,9 @@
 */
 use super::{Transform, LPR};
 use crate::neo::triads::*;
+use std::future::Future;
+
+use std::task::{self, Poll};
 
 #[derive(Clone, Debug, Default)]
 pub struct Transformer {
@@ -59,6 +64,32 @@ impl Iterator for Transformer {
     }
 }
 
+impl Future for Transformer {
+    type Output = Triad;
+
+    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        cx.waker().wake_by_ref();
+        if let None = self.next() {
+           return Poll::Ready(self.scope)
+        }
+        return Poll::Pending
+    }
+}
+
+impl Stream for Transformer {
+    type Item = Triad;
+
+    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Option<Self::Item>> {
+        cx.waker().wake_by_ref();
+        if let Some(cur) = self.next() {
+            Poll::Ready(Some(cur))
+        } else {
+            Poll::Ready(None)
+        }
+    }
+}
+
+
 impl Unpin for Transformer {}
 
 impl std::ops::Index<usize> for Transformer {
@@ -83,4 +114,50 @@ impl From<Triad> for Transformer {
             scope,
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use LPR::*;
+    use lazy_static::lazy_static;
+    use itertools::Itertools;
+    use strum::IntoEnumIterator;
+
+
+    lazy_static! {
+        static ref _EXPECTED: (Triad, Vec<Triad>) = {
+            let mut triad = Triad::default();
+            let prev = triad.walk_across([L, P, R]);
+            (triad, prev)
+        };
+    }
+
+    #[tokio::test]
+    async fn test_transformer_future() {
+        let triad = Triad::default();
+        let (expected, _walked) = _EXPECTED.clone();
+        let transformer = Transformer::new(triad).with(LPR::iter().collect_vec());
+        assert_eq!(transformer.await, expected);
+    }
+
+    #[tokio::test]
+    async fn test_stream_transformer() {
+        use futures::{stream, StreamExt};
+        let triad = Triad::default();
+        let (expected, walked) = _EXPECTED.clone();
+        let walked = walked[1..].to_vec();
+        let transformer = Transformer::new(triad).with(LPR::iter().collect_vec());
+        let s = stream::iter(transformer);
+        let res = s.collect::<Vec<_>>().await;
+        for (i, triad) in res.clone().into_iter().enumerate() {
+            if i >= walked.len() {
+                assert_eq!(triad, expected);
+            } else {
+                assert_eq!(triad, walked[i]);
+            }
+        }
+        
+    }
+
 }

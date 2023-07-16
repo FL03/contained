@@ -93,3 +93,52 @@ impl std::ops::Mul<Triad> for LPR {
         self.dirac(&mut rhs.clone())
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+
+    use super::*;
+    use crate::neo::triads::*;
+    
+
+    #[test]
+    fn test_lpr() {
+        assert_eq!(LPR::from_str("l"), LPR::from_str("leading"));
+    }
+
+    #[test]
+    fn test_leading() {
+        {
+            let cls = Triads::Major;
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::L * a;
+            assert_ne!(a, b);
+            assert_eq!(LPR::L * b, a);
+        }
+    }
+
+    #[test]
+    fn test_parallel() {
+        {
+            let cls = Triads::Major;
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::P * a;
+            assert_ne!(a, b);
+            assert_eq!(LPR::P * b, a);
+        }
+    }
+
+    #[test]
+    fn test_relative() {
+        {
+            let cls = Triads::Major;
+            let a = Triad::new(0.into(), cls);
+            let b = LPR::R * a;
+            assert_ne!(a, b);
+            assert_eq!(LPR::R * b, a);
+        }
+    }
+}

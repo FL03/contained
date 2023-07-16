@@ -16,9 +16,19 @@ pub type NoteGraph<E = Interval, Idx = DefaultIx> = Graph<Note, E, Undirected, I
 #[derive(
     Clone,
     Debug,
+    Default,
+    Deserialize,
+    Hashable,
+    Serialize,
 )]
 pub struct TriadGraph {
     class: Triads,
     notes: NoteGraph<Interval, ChordFactor>,
     state: State,
+}
+
+impl std::fmt::Display for TriadGraph {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(self).unwrap())
+    }
 }

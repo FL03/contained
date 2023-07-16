@@ -7,7 +7,7 @@ use super::Triad;
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{BoxedError, Note};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
 
 /// [Triads::Augmented] is a [Triad] created with [Thirds::Major], [Thirds::Major] intervals
 /// [Triads::Diminished] is a [Triad] created with [Thirds::Minor], [Thirds::Minor] intervals
@@ -20,6 +20,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Default,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -29,24 +30,19 @@ use strum::{Display, EnumString, EnumVariantNames};
     PartialOrd,
     Serialize,
 )]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
+#[repr(u8)]
+#[strum(serialize_all = "lowercase")]
 pub enum Triads {
-    Augmented,
-    Diminished,
+    Augmented = 0,
+    Diminished = 1,
     #[default]
-    Major,
-    Minor,
+    Major = 2,
+    Minor = 3,
 }
 
 impl Triads {
     pub fn classes() -> Vec<Self> {
-        vec![
-            Triads::Augmented,
-            Triads::Diminished,
-            Triads::Major,
-            Triads::Minor,
-        ]
+        Self::iter().collect()
     }
     pub fn others(&self) -> Vec<Self> {
         vec![

@@ -30,7 +30,6 @@ pub trait Transform: Sized {
 mod tests {
     use std::str::FromStr;
 
-    use futures::StreamExt;
 
     use super::*;
     use crate::neo::triads::*;
@@ -51,24 +50,9 @@ mod tests {
         assert_eq!(transformer.next().unwrap(), expected);
     }
 
-    #[tokio::test]
-    async fn test_stream_transformer() {
-        use futures::stream;
-        use LPR::*;
-        let iter = vec![L, P, R];
-        let triad = Triad::new(0.into(), Triads::Major);
-        let transformer = Transformer::new(triad).with(iter.clone());
-        let expected = {
-            let mut tmp = triad;
-            tmp.walk(iter);
-            tmp
-        };
-        let stream = stream::iter(transformer);
-        let res = stream.collect::<Vec<_>>().await;
-        assert_eq!(res[0], triad * L);
-        assert_eq!(res[1], (triad * L) * P);
-        assert_eq!(res[2], expected);
-    }
+     
+
+    
 
     #[test]
     fn test_lpr() {
