@@ -6,10 +6,8 @@
 //!
 //!
 use super::{ChordFactor, Triads};
-use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
-use crate::{Gradient, MusicError, Note};
-// use algae::graph::{Graph, UndirectedGraph};
+use crate::prelude::{Fifths, Interval, Gradient, MusicError, Note, Thirds};
 use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
@@ -136,13 +134,12 @@ impl Triad {
     pub fn update(&mut self) -> Result<Self, MusicError> {
         if let Ok(t) = constructor(self.as_ref()) {
             *self = t;
-            Ok(*self)
-        } else {
-            self.state.invalidate();
-            Err(MusicError::IntervalError(
-                "The given notes failed to contain the necessary relationships...".into(),
-            ))
+            return Ok(*self);
         }
+        self.state.invalidate();
+        Err(MusicError::IntervalError(
+            "The given notes failed to contain the necessary relationships...".into(),
+        ))
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
