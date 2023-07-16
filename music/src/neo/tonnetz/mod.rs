@@ -39,7 +39,7 @@ pub trait Link: Hashable {
 }
 
 pub trait TonnetzSpec {
-    const MODULUS: usize = MODULUS as usize;
+    const N: usize = MODULUS as usize;
 
     fn add_node(&mut self, note: Note) -> NodeIndex {
         // Check if the node already exists
@@ -56,7 +56,7 @@ pub trait TonnetzSpec {
         // self.tonnetz_mut().add_node(note)
     }
     fn fulfilled(&self) -> bool {
-        self.tonnetz().node_count() == Self::MODULUS
+        self.tonnetz().node_count() == Self::N
     }
     fn insert(&mut self, triad: Triad) {
         use ChordFactor::*;

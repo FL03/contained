@@ -68,17 +68,18 @@ impl Dirac<Triad> for LPR {
 
     fn dirac(&self, triad: &mut Triad) -> Self::Output {
         use ChordFactor::*;
+        use Interval::{Semitone, Tone};
         
         match triad.class().intervals().0 {
             Thirds::Major => match *self {
-                LPR::L => triad[Root] -= Interval::Semitone,
-                LPR::P => triad[Third] -= Interval::Semitone,
-                LPR::R => triad[Fifth] += Interval::Tone,
+                LPR::L => triad[Root] -= Semitone,
+                LPR::P => triad[Third] -= Semitone,
+                LPR::R => triad[Fifth] += Tone,
             },
             Thirds::Minor => match *self {
-                LPR::L => triad[Fifth] += Interval::Semitone,
-                LPR::P => triad[Third] += Interval::Semitone,
-                LPR::R => triad[Root] -= Interval::Tone,
+                LPR::L => triad[Fifth] += Semitone,
+                LPR::P => triad[Third] += Semitone,
+                LPR::R => triad[Root] -= Tone,
             },
         };
 
