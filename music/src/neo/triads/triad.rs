@@ -40,7 +40,6 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
 /// The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
 #[derive(
     Clone,
-    Copy,
     Debug,
     Deserialize,
     Eq,
@@ -86,7 +85,7 @@ impl Triad {
     }
     /// Returns true if the [Triad] contains the [Note]
     pub fn contains(&self, note: &Note) -> bool {
-        self.into_iter().contains(note)
+        self.clone().into_iter().contains(note)
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -112,7 +111,7 @@ impl Triad {
     pub fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
         for i in LPR::transformations() {
-            let mut triad = *self;
+            let mut triad = self.clone();
             triad.transform(i);
             neighbors.push(triad);
         }
@@ -120,7 +119,7 @@ impl Triad {
     }
     /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
     pub fn pathfinder(&self, note: Note) -> PathFinder {
-        PathFinder::new(note).set_origin(*self)
+        PathFinder::new(note).set_origin(self.clone())
     }
     /// Returns an cloned instance of the root of the triad
     pub fn root(&self) -> Note {
@@ -142,7 +141,7 @@ impl Triad {
     pub fn update(&mut self) -> Result<Self, MusicError> {
         if let Ok(t) = constructor(self.as_ref()) {
             *self = t;
-            return Ok(*self);
+            return Ok(self.clone());
         }
         self.state.invalidate();
         Err(MusicError::IntervalError(
@@ -160,7 +159,7 @@ impl Triad {
     pub fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
         let mut triads = Vec::new();
         for i in iter {
-            triads.push(*self);
+            triads.push(self.clone());
             self.transform(i);
         }
         triads

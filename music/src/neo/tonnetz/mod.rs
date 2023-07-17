@@ -61,7 +61,7 @@ pub trait TonnetzSpec {
     fn insert(&mut self, triad: Triad) {
         use ChordFactor::*;
         // determine the intervals used to create the given triad
-        let (a, b, c): (Interval, Interval, Interval) = triad.try_into().expect("Invalid triad");
+        let (a, b, c): (Interval, Interval, Interval) = triad.clone().intervals();
 
         let r = self.add_node(triad[Root]);
         let t = self.add_node(triad[Third]);

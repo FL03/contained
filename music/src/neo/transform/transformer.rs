@@ -56,7 +56,7 @@ impl Iterator for Transformer {
             // Transform the scope
             self.scope.transform(*cur);
             // Return the scope
-            Some(self.scope)
+            Some(self.scope.clone())
         } else {
             None
         }
@@ -69,7 +69,7 @@ impl Future for Transformer {
     fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         cx.waker().wake_by_ref();
         if let None = self.next() {
-           return Poll::Ready(self.scope)
+           return Poll::Ready(self.scope.clone())
         }
         return Poll::Pending
     }

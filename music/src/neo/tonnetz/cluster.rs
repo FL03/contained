@@ -48,7 +48,7 @@ impl std::fmt::Display for Cluster {
 
 impl TonnetzSpec for Cluster {
     fn scope(&self) -> Triad {
-        *self.scope.lock().unwrap()
+        self.scope.lock().unwrap().clone()
     }
 
     fn store(&self) -> &TonnetzGraph {
@@ -74,7 +74,7 @@ impl AsMut<TonnetzGraph> for Cluster {
 
 impl From<Triad> for Cluster {
     fn from(triad: Triad) -> Self {
-        let (rt, tf, rf): (Interval, Interval, Interval) = triad.try_into().expect("Invalid triad");
+        let (rt, tf, rf): (Interval, Interval, Interval) = triad.clone().intervals();
         let mut cluster = Graph::<Note, Interval, Undirected>::new_undirected();
 
         let r = cluster.add_node(triad.root());
