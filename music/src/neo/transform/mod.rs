@@ -14,7 +14,7 @@ mod transformer;
 pub trait Dirac<T> {
     type Output;
     /// The function that transforms the object
-    fn dirac(&self, arg: &mut T) -> Self::Output;
+    fn apply(&self, to: &mut T) -> Self::Output;
 }
 
 /// [Transform] is a trait used to describe a type that can be transformed by a [Dirac] function.
@@ -22,6 +22,6 @@ pub trait Transform: Sized {
     type Dirac: Dirac<Self, Output = Self>;
 
     fn transform(&mut self, dirac: Self::Dirac) -> Self {
-        dirac.dirac(self)
+        dirac.apply(self)
     }
 }

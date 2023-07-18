@@ -1,3 +1,5 @@
+use strum::IntoEnumIterator;
+
 /*
     Appellation: pathfinder <module>
     Contrib: FL03 <jo3mccain@icloud.com>
@@ -25,7 +27,7 @@ impl PathFinder {
             if triad.contains(&self.target) {
                 return Some(path);
             }
-            for i in LPR::transformations() {
+            for i in LPR::iter() {
                 let mut triad = triad.clone();
                 triad.transform(i);
                 let mut path = path.clone();

@@ -2,9 +2,9 @@
     Appellation: tape <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-/// # Tape
-///
-/// The [Tape] represents the memory of a turing machine.
+//! # Tape
+//!
+//! The [Tape] represents the memory of a turing machine.
 use super::Symbolic;
 use contained_core::{ArrayLike, Insert, Iterable};
 use serde::{Deserialize, Serialize};

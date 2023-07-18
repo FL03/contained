@@ -7,16 +7,16 @@
 //!
 use super::{ChordFactor, Triads};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
-use crate::prelude::{Fifths, Interval, Gradient, MusicError, Note, Thirds};
+use crate::prelude::{Fifths, Gradient, Interval, MusicError, Note, Thirds};
 use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
 use itertools::Itertools;
 use petgraph::{Graph, Undirected};
 use serde::{Deserialize, Serialize};
+use strum::IntoEnumIterator;
 use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
-
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     for (a, b, c) in data.iter().circular_tuple_windows() {
@@ -29,27 +29,12 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     ))
 }
 
-
-
-
-
 /// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
 /// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
 /// In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
 /// Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
 /// The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    Hash,
-    Hashable,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
     class: Triads,
     notes: [Note; 3],
@@ -110,7 +95,7 @@ impl Triad {
     /// Returns a [Vec] of all neighboring [Triad]s; the [Triad]s that are one [LPR] away from the current [Triad]
     pub fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
-        for i in LPR::transformations() {
+        for i in LPR::iter() {
             let mut triad = self.clone();
             triad.transform(i);
             neighbors.push(triad);
@@ -257,7 +242,6 @@ impl Index<Range<ChordFactor>> for Triad {
     type Output = [Note];
 
     fn index(&self, index: Range<ChordFactor>) -> &Self::Output {
-        
         &self.notes[index.start as usize..index.end as usize]
     }
 }
@@ -272,7 +256,7 @@ impl std::ops::Mul<LPR> for Triad {
     type Output = Triad;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.dirac(&mut self.clone())
+        rhs.apply(&mut self.clone())
     }
 }
 
