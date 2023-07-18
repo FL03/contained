@@ -4,7 +4,11 @@
 */
 //! Triad
 //!
-//!
+//! A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
+//! [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
+//! In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
+//! Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
+//! The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
 use super::{ChordFactor, Triads};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
 use crate::prelude::{Fifths, Gradient, Interval, MusicError, Note, Thirds};
@@ -29,11 +33,7 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     ))
 }
 
-/// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
-/// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
-/// In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
-/// Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
-/// The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
+
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
     class: Triads,
@@ -82,6 +82,10 @@ impl Triad {
     pub fn default_state(mut self, state: State) -> Self {
         self.state = state;
         self
+    }
+    /// Returns a reference to the current composition of the [Triad]
+    pub fn factors(&self) -> &[Note; 3] {
+        &self.notes
     }
     /// Returns an cloned instance of the note occupying the fifth
     pub fn fifth(&self) -> Note {
