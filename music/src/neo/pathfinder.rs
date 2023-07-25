@@ -1,12 +1,11 @@
-use strum::IntoEnumIterator;
-
 /*
     Appellation: pathfinder <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
 */
+//! # PathFinder
 use super::{triads::Triad, Transform, LPR};
 use crate::Note;
+use strum::IntoEnumIterator;
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd)]
 pub struct PathFinder {

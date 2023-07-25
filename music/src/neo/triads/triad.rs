@@ -160,9 +160,6 @@ impl Triad {
         args.reverse();
         self.walk(args);
     }
-    pub fn triad(&self) -> &Self {
-        self
-    }
 }
 
 impl AsMut<[Note; 3]> for Triad {

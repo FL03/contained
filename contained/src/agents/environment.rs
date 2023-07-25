@@ -3,18 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: Implements a virtual wasm environment; each environment describes a set of capabilities and is responsible for tracing the various results
 */
-use crate::music::prelude::triads::Triad;
+use crate::music::prelude::triads::Triadic;
 use wasmer::{imports, FunctionEnv, Imports, Store};
 
 pub trait ThreadSafe: Send + Sync {}
 
 impl<T> ThreadSafe for T where T: Send + Sync {}
 
-pub trait Venv<Env>
-where
-    Env: Send + Sync,
-{
-    fn function_env(&mut self) -> FunctionEnv<Env>;
+pub trait Venv {
+    type Env: Clone + Send + Sync + 'static;
+
     /// Returns the imports for the environment; optionally with additional imports
     fn imports(&self, with: Option<Imports>) -> Imports;
     /// Returns a reference to the store
@@ -22,22 +20,22 @@ where
     /// Returns a mutable reference to the store
     fn store_mut(&mut self) -> &mut Store;
     /// Returns a  to the environment
-    fn venv(&self) -> &Env;
+    fn venv(&self) -> Self::Env;
     /// Returns a mutable reference to the environment
-    fn venv_mut(&mut self) -> &mut Env;
+    fn venv_mut(&mut self) -> &mut Self::Env;
+}
+
+pub trait FunctionalVenv: Venv {
+    fn function_env(&mut self) -> FunctionEnv<Self::Env>;
 }
 
 pub trait WasmEnv: Send + Sync {
     fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports;
 }
 
-impl WasmEnv for () {
-    fn imports(&self, _store: &mut Store, _with: Option<Imports>) -> Imports {
-        imports! {}
-    }
-}
 
-impl WasmEnv for Triad {
+
+impl<T> WasmEnv for T where T: Triadic<Env=Box<dyn WasmEnv>, Store=Store> {
     fn imports(&self, _store: &mut Store, with: Option<Imports>) -> Imports {
         let mut imports = imports! {
             "env" => {

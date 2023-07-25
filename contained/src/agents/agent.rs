@@ -6,7 +6,7 @@
 use super::{client::Client, layer::Command, Stack, WasmEnv};
 use crate::prelude::{hash_module, Shared};
 use std::sync::{Arc, Mutex};
-use tokio::sync::mpsc;
+use tokio::{runtime as rt, sync::mpsc, task};
 use tracing::instrument;
 use wasmer::{Instance, Module, Store};
 
@@ -76,24 +76,21 @@ impl Agent {
         self.env = Arc::new(Mutex::new(env));
         self
     }
-    pub async fn run(mut self) -> anyhow::Result<()> {
-        Ok(loop {
+    pub async fn run(mut self) -> () {
+        loop {
             tokio::select! {
                 Some(cmd) = self.cmd.recv() => {
                     tracing::debug!("Processing command");
-                    self.process(cmd).await?;
+                    self.process(cmd).await.expect("Failed to process command");
                 }
                 _ = tokio::signal::ctrl_c() => {
                     tracing::warn!("Signal received, shutting down");
                     break;
                 }
             }
-        })
+        }
     }
-    pub fn spawn(
-        self,
-        handle: tokio::runtime::Handle,
-    ) -> tokio::task::JoinHandle<anyhow::Result<()>> {
+    pub fn spawn(self, handle: rt::Handle) -> task::JoinHandle<()> {
         handle.spawn(self.run())
     }
     pub fn with_stack(mut self, stack: Stack) -> Self {

@@ -1,7 +1,6 @@
 /*
     Appellation: class <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A triad can be any one of four classes: augmented, diminished, major, or minor depending on the intervals between the notes.
 */
 use super::Triad;
 use crate::intervals::{Fifths, Interval, Thirds};

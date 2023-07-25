@@ -1,7 +1,6 @@
 /*
     Appellation: neo <binary>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
 use contained::music::neo::triads::{Triad, Triads};
 
