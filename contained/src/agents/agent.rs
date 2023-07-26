@@ -3,8 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
+use super::Context;
 use super::{client::Client, layer::Command, Stack, WasmEnv};
-use crate::prelude::{hash_module, Shared};
+use crate::prelude::hash_module;
 use std::sync::{Arc, Mutex};
 use tokio::{runtime as rt, sync::mpsc, task};
 use tracing::instrument;
@@ -12,23 +13,19 @@ use wasmer::{Instance, Module, Store};
 
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
-    env: Shared<Box<dyn WasmEnv>>,
-    stack: Shared<Stack>,
-    store: Store,
+    context: Context,
 }
 
 impl Agent {
-    pub fn new(buffer: usize, env: Box<dyn WasmEnv>) -> (Self, Client) {
-        let (tx, cmd) = mpsc::channel(buffer);
-        (
-            Self {
-                cmd,
-                env: Arc::new(Mutex::new(env)),
-                stack: Arc::new(Mutex::new(Stack::new())),
-                store: Store::default(),
-            },
-            Client::new(tx),
-        )
+    pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
+        Self { cmd, context }
+    }
+    pub fn context(&self) -> &Context {
+        &self.context
+    }
+    pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
+        let (tx, cmd) = mpsc::channel(capacity);
+        (Self { cmd, context }, tx)
     }
     #[instrument(err, skip(self, cmd), name = "process", target = "agent")]
     pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
@@ -40,28 +37,32 @@ impl Agent {
                 with,
                 tx,
             } => {
-                let stack = &self.stack.lock().unwrap();
+                let stack = &self.context().stack();
                 let modules = stack.modules.read().unwrap();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
-                let imports = self.env.lock().unwrap().imports(&mut self.store, with);
+                let imports = self
+                    .context()
+                    .env()
+                    .lock()
+                    .unwrap()
+                    .imports(&mut self.context.store_mut(), with);
                 tracing::info!("Instantiating module with the imported host functions");
-                let instance = Instance::new(&mut self.store, &module, &imports)
+                let instance = Instance::new(&mut self.context.store_mut(), &module, &imports)
                     .expect("Failed to instantiate module");
                 tracing::info!("Fetching the function");
                 let func = instance.exports.get_function(&function)?;
                 tracing::info!("Executing the function with the provided arguments");
-                let result = func.call(&mut self.store, &args)?;
+                let result = func.call(&mut self.context.store_mut(), &args)?;
                 tx.send(Ok(result)).unwrap();
                 Ok(())
             }
             Command::Include { bytes, tx } => {
-                let module = Module::new(&self.store, bytes)?;
+                let module = Module::new(self.context().store(), bytes)?;
                 let hash = hash_module(module.clone());
-                self.stack
-                    .lock()
-                    .unwrap()
+                self.context
+                    .stack()
                     .modules
                     .write()
                     .unwrap()
@@ -71,10 +72,6 @@ impl Agent {
             }
             Command::Transform { .. } => todo!(),
         }
-    }
-    pub fn set_environment(mut self, env: Box<dyn WasmEnv>) -> Self {
-        self.env = Arc::new(Mutex::new(env));
-        self
     }
     pub async fn run(mut self) -> () {
         loop {
@@ -92,13 +89,5 @@ impl Agent {
     }
     pub fn spawn(self, handle: rt::Handle) -> task::JoinHandle<()> {
         handle.spawn(self.run())
-    }
-    pub fn with_stack(mut self, stack: Stack) -> Self {
-        self.stack = Arc::new(Mutex::new(stack));
-        self
-    }
-    pub fn with_store(mut self, store: Store) -> Self {
-        self.store = store;
-        self
     }
 }

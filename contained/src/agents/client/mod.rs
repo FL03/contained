@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: This module implements the client for engaging with an actor
 */
+//! # Client
 use super::layer::Command;
 use crate::music::neo::LPR;
 use crate::prelude::{AsyncResult, BoxedWasmValue};

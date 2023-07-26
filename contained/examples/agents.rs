@@ -1,6 +1,7 @@
 extern crate contained;
 
-use contained::agents::{client::AgentManager, Agent, WasmEnv};
+use contained::agents::client::{AgentManager, Client};
+use contained::agents::{Agent, Context, Stack, WasmEnv};
 use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};
 use std::sync::{Arc, Mutex};
 use tracing::instrument;
@@ -48,37 +49,38 @@ async fn main() -> AsyncResult {
         .with_target(false)
         .init();
     // Initialize a new store
-    let store = Store::default();
+    let mut store = Store::default();
     // Initialize a new virtual environment
     let venv = CounterVenv::new(0);
-    agents(Box::new([15.into()]), store, venv).await?;
+    let imports = venv.imports(&mut store, None);
+
+    let ctx = Context::new(Box::new(venv), Stack::new(), store);
+    agents(Box::new([15.into()]), ctx, Some(imports)).await?;
     Ok(())
 }
 
 #[instrument(
     err,
-    skip(store, venv),
+    skip(ctx, imports),
     fields(function = "sample", module = "COUNTER_MODULE"),
     name = "example"
 )]
 async fn agents(
     args: BoxedWasmValue,
-    mut store: Store,
-    venv: CounterVenv,
+    ctx: Context,
+    imports: Option<Imports>,
 ) -> AsyncResult<BoxedWasmValue> {
+    let (tx, rx) = tokio::sync::mpsc::channel(100);
     let func = "sample";
-    // Create a new imports object to be included with the provided venv
-    let imports = venv.imports(&mut store, None);
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    let (agent, mut client) = Agent::new(9, Box::new(venv));
-    agent
-        .with_store(store)
-        .spawn(tokio::runtime::Handle::current());
+    let agent = Agent::new(rx, ctx);
+    let mut client = Client::new(tx);
+    agent.spawn(tokio::runtime::Handle::current());
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module
     let res = client
-        .execute(cid.clone(), func.to_string(), args, Some(imports))
+        .execute(cid.clone(), func.to_string(), args, imports)
         .await?;
     tracing::info!("Success: executed the function and got back {:?}", res);
     Ok(res)

@@ -11,10 +11,8 @@ pub trait ThreadSafe: Send + Sync {}
 impl<T> ThreadSafe for T where T: Send + Sync {}
 
 pub trait Venv {
-    type Env: Clone + Send + Sync + 'static;
+    type Env: Clone + WasmEnv;
 
-    /// Returns the imports for the environment; optionally with additional imports
-    fn imports(&self, with: Option<Imports>) -> Imports;
     /// Returns a reference to the store
     fn store(&self) -> &Store;
     /// Returns a mutable reference to the store
@@ -35,7 +33,7 @@ pub trait WasmEnv: Send + Sync {
 
 
 
-impl<T> WasmEnv for T where T: Triadic<Env=Box<dyn WasmEnv>, Store=Store> {
+impl<T> WasmEnv for T where T: Triadic<Store=Store> {
     fn imports(&self, _store: &mut Store, with: Option<Imports>) -> Imports {
         let mut imports = imports! {
             "env" => {

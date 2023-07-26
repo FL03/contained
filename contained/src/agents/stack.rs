@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use wasmer::Module;
 
+#[derive(Clone)]
 pub struct Stack {
     pub modules: Arc<RwLock<HashMap<H256, Module>>>,
 }

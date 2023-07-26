@@ -1,11 +1,12 @@
 /*
     Appellation: agents <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
-pub use self::{agent::*, environment::*, stack::*};
+//! # Agents
+pub use self::{agent::*, context::*, environment::*, stack::*};
 
 mod agent;
+mod context;
 mod environment;
 mod stack;
 
