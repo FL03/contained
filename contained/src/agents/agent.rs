@@ -1,8 +1,11 @@
 /*
     Appellation: agent <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: An agent describes a persistent, stateful, and isolated virtual machine.
 */
+//! # Agent
+//! 
+//! An agent is an intelligent entity that acts autonomously, directed by its own internal state. 
+//! An agent is typically a computer system that is situated in some environment, and that is capable of autonomous action in this environment in order to meet its design objectives.
 use super::Context;
 use super::{client::Client, layer::Command, Stack, WasmEnv};
 use crate::prelude::hash_module;
@@ -10,6 +13,14 @@ use std::sync::{Arc, Mutex};
 use tokio::{runtime as rt, sync::mpsc, task};
 use tracing::instrument;
 use wasmer::{Instance, Module, Store};
+
+pub struct AgentBuilder {
+    params: Option<AgentParams>,
+}
+
+pub struct AgentParams {
+    pub name: String,
+}
 
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
@@ -20,12 +31,9 @@ impl Agent {
     pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
         Self { cmd, context }
     }
-    pub fn context(&self) -> &Context {
-        &self.context
-    }
     pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
         let (tx, cmd) = mpsc::channel(capacity);
-        (Self { cmd, context }, tx)
+        (Self::new(cmd, context), tx)
     }
     #[instrument(err, skip(self, cmd), name = "process", target = "agent")]
     pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
@@ -37,13 +45,13 @@ impl Agent {
                 with,
                 tx,
             } => {
-                let stack = &self.context().stack();
+                let stack = &self.context.stack();
                 let modules = stack.modules.read().unwrap();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
                 let imports = self
-                    .context()
+                    .context
                     .env()
                     .lock()
                     .unwrap()
@@ -59,7 +67,7 @@ impl Agent {
                 Ok(())
             }
             Command::Include { bytes, tx } => {
-                let module = Module::new(self.context().store(), bytes)?;
+                let module = Module::new(self.context.store(), bytes)?;
                 let hash = hash_module(module.clone());
                 self.context
                     .stack()
@@ -73,7 +81,8 @@ impl Agent {
             Command::Transform { .. } => todo!(),
         }
     }
-    pub async fn run(mut self) -> () {
+    #[instrument(skip(self), name = "run", target = "agent")]
+    pub async fn run(mut self) {
         loop {
             tokio::select! {
                 Some(cmd) = self.cmd.recv() => {
