@@ -6,10 +6,10 @@
 //! 
 //! An agent is an intelligent entity that acts autonomously, directed by its own internal state. 
 //! An agent is typically a computer system that is situated in some environment, and that is capable of autonomous action in this environment in order to meet its design objectives.
+//! Here, agents are described by their topological execution environments and are capable of executing arbitrary WebAssembly modules.
 use super::Context;
-use super::{client::Client, layer::Command, Stack, WasmEnv};
-use crate::prelude::hash_module;
-use std::sync::{Arc, Mutex};
+use super::layer::Command;
+
 use tokio::{runtime as rt, sync::mpsc, task};
 use tracing::instrument;
 use wasmer::{Instance, Module, Store};
@@ -25,16 +25,23 @@ pub struct AgentParams {
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
     context: Context,
+    store: Store
 }
 
 impl Agent {
-    pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
-        Self { cmd, context }
+    pub fn new(cmd: mpsc::Receiver<Command>, context: Context, store: Store) -> Self {
+        Self { cmd, context, store }
     }
-    pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
+    pub fn with_capacity(capacity: usize, context: Context, store: Store) -> (Self, mpsc::Sender<Command>) {
         let (tx, cmd) = mpsc::channel(capacity);
-        (Self::new(cmd, context), tx)
+        (Self::new(cmd, context, store), tx)
     }
+
+    pub fn context(&self) -> Context {
+        self.context.clone()
+    }
+
+
     #[instrument(err, skip(self, cmd), name = "process", target = "agent")]
     pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
         match cmd {
@@ -46,7 +53,7 @@ impl Agent {
                 tx,
             } => {
                 let stack = &self.context.stack();
-                let modules = stack.modules.read().unwrap();
+                let modules = stack.modules().read().unwrap();
                 tracing::debug!("Fetching the program...");
                 let module = modules.get(&module).unwrap();
                 tracing::debug!("Importing host functions");
@@ -55,26 +62,22 @@ impl Agent {
                     .env()
                     .lock()
                     .unwrap()
-                    .imports(&mut self.context.store_mut(), with);
+                    .imports(&mut self.store_mut(), with);
                 tracing::info!("Instantiating module with the imported host functions");
-                let instance = Instance::new(&mut self.context.store_mut(), &module, &imports)
+                let instance = Instance::new(&mut self.store_mut(), &module, &imports)
                     .expect("Failed to instantiate module");
                 tracing::info!("Fetching the function");
                 let func = instance.exports.get_function(&function)?;
                 tracing::info!("Executing the function with the provided arguments");
-                let result = func.call(&mut self.context.store_mut(), &args)?;
+                let result = func.call(&mut self.store_mut(), &args)?;
                 tx.send(Ok(result)).unwrap();
                 Ok(())
             }
             Command::Include { bytes, tx } => {
-                let module = Module::new(self.context.store(), bytes)?;
-                let hash = hash_module(module.clone());
-                self.context
+                let module = Module::new(self.store(), bytes)?;
+                let hash = self.context
                     .stack()
-                    .modules
-                    .write()
-                    .unwrap()
-                    .insert(hash.into(), module);
+                    .add_module(module);
                 tx.send(Ok(hash.into())).unwrap();
                 Ok(())
             }
@@ -99,4 +102,14 @@ impl Agent {
     pub fn spawn(self, handle: rt::Handle) -> task::JoinHandle<()> {
         handle.spawn(self.run())
     }
+
+    pub fn store(&self) -> &Store {
+        &self.store
+    }
+
+    pub fn store_mut(&mut self) -> &mut Store {
+        &mut self.store
+    }
+
+
 }

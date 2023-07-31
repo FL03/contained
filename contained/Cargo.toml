@@ -45,12 +45,13 @@ bytes.workspace = true
 decanter.workspace = true
 futures.workspace = true
 glob = "0.3"
+lazy_static = "1"
 petgraph = "0.6"
 serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-tokio = { features = ["macros", "rt", "sync", "time"], version = "1" }
+tokio = { features = ["macros", "rt", "signal", "sync", "time"], version = "1" }
 tokio-stream = "0.1"
 tracing = { features = ["log"], version = "0.1" }
 tracing-subscriber = { features = ["env-filter", "fmt"], version = "0.3" }
@@ -65,4 +66,5 @@ rustc-args = ["--cfg", "docsrs"]
 
 [target.wasm32-unknown-unknown]
 
-[target.wasm32-wasi]
+[target.wasm32-wasi.dependencies]
+tokio_wasi = { features = ["full"], version = "1" }

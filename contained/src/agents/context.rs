@@ -5,50 +5,57 @@
 use super::{Stack, WasmEnv};
 use std::sync::{Arc, Mutex};
 use tracing::instrument;
-use wasmer::Store;
+use wasmer::{Engine, Store, AsEngineRef,};
 
+#[derive(Clone)]
 pub struct Context {
+    engine: Engine, 
     env: Arc<Mutex<Box<dyn WasmEnv>>>,
-    stack: Arc<Mutex<Stack>>,
-    store: Store,
+    stack: Stack,
 }
 
 impl Context {
-    pub fn new(env: Box<dyn WasmEnv>, stack: Stack, store: Store) -> Self {
+    pub fn new(engine: impl AsEngineRef, env: Box<dyn WasmEnv>, stack: Stack) -> Self {
         Self {
+            engine: engine.as_engine_ref().engine().clone(),
             env: Arc::new(Mutex::new(env)),
-            stack: Arc::new(Mutex::new(stack)),
-            store,
+            stack,
         }
+    }
+
+    pub fn engine(&self) -> Engine {
+        self.engine.clone()
     }
 
     pub fn env(&self) -> Arc<Mutex<Box<dyn WasmEnv>>> {
         self.env.clone()
     }
+    
+    pub fn stack(&self) -> Stack {
+        self.stack.clone()
+    }
+
+    pub fn stack_mut(&mut self) -> &mut Stack {
+        &mut self.stack
+    }
+
+    pub fn store(&self) -> Store {
+        Store::new(self.engine())
+    }
+
+    pub fn with_engine(mut self, engine: Engine) -> Self {
+        self.engine = engine;
+        self
+    }
+
     #[instrument(skip(self, env), name = "environment", target = "context")]
-    pub fn set_environment(mut self, env: Box<dyn WasmEnv>) -> Self {
+    pub fn with_environment(mut self, env: Box<dyn WasmEnv>) -> Self {
         self.env = Arc::new(Mutex::new(env));
         self
     }
 
-    pub fn stack(&self) -> Stack {
-        self.stack.lock().unwrap().clone()
-    }
-
-    pub fn store(&self) -> &Store {
-        &self.store
-    }
-
-    pub fn store_mut(&mut self) -> &mut Store {
-        &mut self.store
-    }
-
     pub fn with_stack(mut self, stack: Stack) -> Self {
-        self.stack = Arc::new(Mutex::new(stack));
-        self
-    }
-    pub fn with_store(mut self, store: Store) -> Self {
-        self.store = store;
+        self.stack = stack;
         self
     }
 }
