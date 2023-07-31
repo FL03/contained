@@ -69,6 +69,12 @@ impl CounterAgent {
         let context = Context::new(&store, Box::new(venv), Stack::new());
         Self { context, store }
     }
+    pub fn build(&self, capacity: Option<usize>) -> (Agent, Client) {
+        let (tx, rx) = mpsc::channel(capacity.unwrap_or(100));
+        let agent = Agent::new(rx, self.context.clone());
+        let client = Client::new(tx);
+        (agent, client)
+    }
     pub fn channels(&self) -> (mpsc::Sender<Command>, mpsc::Receiver<Command>) {
         mpsc::channel(100)
     }
@@ -85,14 +91,15 @@ async fn agents(
     ctx: Context,
     imports: Option<Imports>,
 ) -> AsyncResult<BoxedWasmValue> {
-    let mut store = Store::new(ctx.clone().engine());
-    let imports = ctx.env().lock().unwrap().imports(&mut store, imports);
     // Initialize a new channel
     let (tx, rx) = tokio::sync::mpsc::channel(100);
+    let mut agent = Agent::new(rx, ctx.clone());
+    let mut client = Client::new(tx);
+    let imports = agent.context().env().lock().unwrap().imports(&mut agent.store_mut(), imports);
     let func = "sample";
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    let agent = Agent::new(rx, ctx, store);
-    let mut client = Client::new(tx);
+    
+    
     agent.spawn(tokio::runtime::Handle::current());
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;

@@ -29,12 +29,13 @@ pub struct Agent {
 }
 
 impl Agent {
-    pub fn new(cmd: mpsc::Receiver<Command>, context: Context, store: Store) -> Self {
+    pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
+        let store = Store::new(context.clone().engine());
         Self { cmd, context, store }
     }
-    pub fn with_capacity(capacity: usize, context: Context, store: Store) -> (Self, mpsc::Sender<Command>) {
+    pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
         let (tx, cmd) = mpsc::channel(capacity);
-        (Self::new(cmd, context, store), tx)
+        (Self::new(cmd, context), tx)
     }
 
     pub fn context(&self) -> Context {
@@ -99,6 +100,7 @@ impl Agent {
             }
         }
     }
+    #[instrument(skip(self, handle), name = "run", target = "agent")]
     pub fn spawn(self, handle: rt::Handle) -> task::JoinHandle<()> {
         handle.spawn(self.run())
     }

@@ -16,6 +16,18 @@ pub enum CommandEvent {
     Transformed,
 }
 
+pub enum RequestResponse {
+    Request,
+    Response,
+}
+
+
+pub enum AgentEvent {
+    Command(CommandEvent),
+    Connection(ConnectionEvent),
+    
+}
+
 #[derive(
     Clone,
     Debug,
