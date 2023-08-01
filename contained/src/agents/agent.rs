@@ -30,7 +30,7 @@ pub struct Agent {
 
 impl Agent {
     pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
-        let store = Store::new(context.clone().engine());
+        let store = context.clone().store();
         Self { cmd, context, store }
     }
     pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
