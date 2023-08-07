@@ -4,7 +4,7 @@
     Description: Implements a virtual wasm environment; each environment describes a set of capabilities and is responsible for tracing the various results
 */
 //! # Environments
-//! 
+//!
 //! Environments are the primary means of interacting with the WASM runtime. Each environment describes a set of capabilities and is responsible for tracing the various results.
 use crate::music::prelude::triads::Triadic;
 use wasmer::{imports, FunctionEnv, Imports, Store};
@@ -34,9 +34,10 @@ pub trait WasmEnv: Send + Sync {
     fn imports(&self, store: &mut Store, with: Option<Imports>) -> Imports;
 }
 
-
-
-impl<T> WasmEnv for T where T: Triadic<Store=Store> {
+impl<T> WasmEnv for T
+where
+    T: Triadic<Store = Store>,
+{
     fn imports(&self, _store: &mut Store, with: Option<Imports>) -> Imports {
         let mut imports = imports! {
             "env" => {

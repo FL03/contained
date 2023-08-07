@@ -26,7 +26,5 @@ pub mod prelude {
     pub use super::states::*;
     pub use super::tasks::*;
 
-    pub use super::{
-        errors::*, primitives::*, specs::*, utils::*,
-    };
+    pub use super::{errors::*, primitives::*, specs::*, utils::*};
 }

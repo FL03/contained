@@ -69,16 +69,19 @@ impl Future for Transformer {
     fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
         cx.waker().wake_by_ref();
         if let None = self.next() {
-           return Poll::Ready(self.scope.clone())
+            return Poll::Ready(self.scope.clone());
         }
-        return Poll::Pending
+        return Poll::Pending;
     }
 }
 
 impl Stream for Transformer {
     type Item = Triad;
 
-    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut task::Context<'_>,
+    ) -> Poll<Option<Self::Item>> {
         cx.waker().wake_by_ref();
         if let Some(cur) = self.next() {
             Poll::Ready(Some(cur))
@@ -87,7 +90,6 @@ impl Stream for Transformer {
         }
     }
 }
-
 
 impl Unpin for Transformer {}
 
@@ -118,10 +120,9 @@ impl From<Triad> for Transformer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use LPR::*;
     use lazy_static::lazy_static;
     use strum::IntoEnumIterator;
-
+    use LPR::*;
 
     lazy_static! {
         static ref _EXPECTED: (Triad, Vec<Triad>) = {
@@ -170,7 +171,5 @@ mod tests {
                 assert_eq!(triad, walked[i]);
             }
         }
-        
     }
-
 }

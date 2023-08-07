@@ -3,12 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # Agent
-//! 
-//! An agent is an intelligent entity that acts autonomously, directed by its own internal state. 
+//!
+//! An agent is an intelligent entity that acts autonomously, directed by its own internal state.
 //! An agent is typically a computer system that is situated in some environment, and that is capable of autonomous action in this environment in order to meet its design objectives.
 //! Here, agents are described by their topological execution environments and are capable of executing arbitrary WebAssembly modules.
-use super::Context;
 use super::layer::Command;
+use super::Context;
 
 use tokio::{runtime as rt, sync::mpsc, task};
 use tracing::instrument;
@@ -25,13 +25,17 @@ pub struct AgentParams {
 pub struct Agent {
     cmd: mpsc::Receiver<Command>,
     context: Context,
-    store: Store
+    store: Store,
 }
 
 impl Agent {
     pub fn new(cmd: mpsc::Receiver<Command>, context: Context) -> Self {
         let store = context.clone().store();
-        Self { cmd, context, store }
+        Self {
+            cmd,
+            context,
+            store,
+        }
     }
     pub fn with_capacity(capacity: usize, context: Context) -> (Self, mpsc::Sender<Command>) {
         let (tx, cmd) = mpsc::channel(capacity);
@@ -41,7 +45,6 @@ impl Agent {
     pub fn context(&self) -> Context {
         self.context.clone()
     }
-
 
     #[instrument(err, skip(self, cmd), name = "process", target = "agent")]
     pub async fn process(&mut self, cmd: Command) -> anyhow::Result<()> {
@@ -76,9 +79,7 @@ impl Agent {
             }
             Command::Include { bytes, tx } => {
                 let module = Module::new(self.store(), bytes)?;
-                let hash = self.context
-                    .stack()
-                    .add_module(module);
+                let hash = self.context.stack().add_module(module);
                 tx.send(Ok(hash.into())).unwrap();
                 Ok(())
             }
@@ -112,6 +113,4 @@ impl Agent {
     pub fn store_mut(&mut self) -> &mut Store {
         &mut self.store
     }
-
-
 }

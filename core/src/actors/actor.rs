@@ -4,8 +4,6 @@
 */
 //! # Actor
 
-
 pub trait Actor {
     fn name(&self) -> String;
-    
 }

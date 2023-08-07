@@ -5,13 +5,13 @@
 use super::{Stack, WasmEnv};
 use std::sync::{Arc, Mutex};
 use tracing::instrument;
-use wasmer::{Engine, Store, AsEngineRef,};
+use wasmer::{AsEngineRef, Engine, Store};
 
 #[derive(Clone)]
 pub struct Context {
-    engine: Engine, 
+    engine: Engine,
     env: Arc<Mutex<Box<dyn WasmEnv>>>,
-    
+
     stack: Stack,
 }
 
@@ -31,7 +31,7 @@ impl Context {
     pub fn env(&self) -> Arc<Mutex<Box<dyn WasmEnv>>> {
         self.env.clone()
     }
-    
+
     pub fn stack(&self) -> Stack {
         self.stack.clone()
     }

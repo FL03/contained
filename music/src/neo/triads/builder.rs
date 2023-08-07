@@ -3,8 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! Triad Builder
-//! 
-
+//!
 
 use super::{Triad, Triads};
 use crate::prelude::{Interval, Note};

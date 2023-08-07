@@ -4,7 +4,7 @@
     Description: The stack is a collection of modules and environments that are availible to the agent.
 */
 //! # Stack
-//! 
+//!
 //! The stack is a collection of modules and environments that are availible to the agent.
 use crate::prelude::hash_module;
 use decanter::prelude::H256;
@@ -29,10 +29,7 @@ impl Stack {
 
     pub fn add_module(&self, module: Module) -> H256 {
         let hash = hash_module(&module);
-        self.modules
-            .write()
-            .unwrap()
-            .insert(hash.clone(), module);
+        self.modules.write().unwrap().insert(hash.clone(), module);
         hash
     }
 }

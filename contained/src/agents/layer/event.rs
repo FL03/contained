@@ -21,11 +21,9 @@ pub enum RequestResponse {
     Response,
 }
 
-
 pub enum AgentEvent {
     Command(CommandEvent),
     Connection(ConnectionEvent),
-    
 }
 
 #[derive(

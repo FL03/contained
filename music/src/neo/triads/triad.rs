@@ -18,9 +18,9 @@ use futures::Future;
 use itertools::Itertools;
 use petgraph::{Graph, Undirected};
 use serde::{Deserialize, Serialize};
-use strum::IntoEnumIterator;
 use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
+use strum::IntoEnumIterator;
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     for (a, b, c) in data.iter().circular_tuple_windows() {
@@ -32,7 +32,6 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
         "Failed to find the required relationships within the given notes...".into(),
     ))
 }
-
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {

@@ -9,11 +9,11 @@
         number of elements + freq
 */
 //! (L)eading, (P)arallel, and (R)elative
-//! 
+//!
 //! The three primary means of transforming a given triad. Each transformation preserves two of the original notes, only shifting one.
 //! These transformations are invertible, meaning that any transformation can be undone by applying the same transformation again.
 //! The property of enharmonics allows us to apply the transformations according to a notes assigned position, which is a modulus of 12.
-//! 
+//!
 
 use super::Dirac;
 use crate::intervals::{Interval, Thirds};
@@ -21,7 +21,6 @@ use crate::neo::triads::{ChordFactor, Triad};
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use strum::{Display, EnumIter, EnumString, EnumVariantNames};
-
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
@@ -73,7 +72,7 @@ impl Dirac<Triad> for LPR {
     fn apply(&self, triad: &mut Triad) -> Self::Output {
         use ChordFactor::*;
         use Interval::{Semitone, Tone};
-        
+
         let (rt, _tf, _rf) = triad.clone().class().intervals();
         match rt {
             Thirds::Major => match *self {
@@ -100,15 +99,12 @@ impl std::ops::Mul<Triad> for LPR {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use std::str::FromStr;
 
-
     use super::*;
     use crate::neo::triads::*;
-    
 
     #[test]
     fn test_lpr() {
@@ -124,14 +120,14 @@ mod tests {
 
     #[test]
     fn test_parallel() {
-         let triad = Triad::default();
+        let triad = Triad::default();
         assert_eq!(triad.clone(), LPR::P * (LPR::P * triad.clone()));
         assert_ne!(triad.clone(), LPR::P * triad);
     }
 
     #[test]
     fn test_relative() {
-         let triad = Triad::default();
+        let triad = Triad::default();
         assert_eq!(triad.clone(), LPR::R * (LPR::R * triad.clone()));
         assert_ne!(triad.clone(), LPR::R * triad);
     }

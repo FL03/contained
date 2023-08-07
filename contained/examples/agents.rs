@@ -95,11 +95,15 @@ async fn agents(
     let (tx, rx) = tokio::sync::mpsc::channel(100);
     let mut agent = Agent::new(rx, ctx.clone());
     let mut client = Client::new(tx);
-    let imports = agent.context().env().lock().unwrap().imports(&mut agent.store_mut(), imports);
+    let imports = agent
+        .context()
+        .env()
+        .lock()
+        .unwrap()
+        .imports(&mut agent.store_mut(), imports);
     let func = "sample";
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    
-    
+
     agent.spawn(tokio::runtime::Handle::current());
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
