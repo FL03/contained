@@ -26,7 +26,7 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
     Serialize,
 )]
 #[repr(usize)]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum ChordFactor {
     #[default]
     #[strum(serialize = "r", serialize = "root")]

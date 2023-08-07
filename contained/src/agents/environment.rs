@@ -3,6 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: Implements a virtual wasm environment; each environment describes a set of capabilities and is responsible for tracing the various results
 */
+//! # Environments
+//! 
+//! Environments are the primary means of interacting with the WASM runtime. Each environment describes a set of capabilities and is responsible for tracing the various results.
 use crate::music::prelude::triads::Triadic;
 use wasmer::{imports, FunctionEnv, Imports, Store};
 

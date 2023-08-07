@@ -44,15 +44,7 @@ impl Triads {
         Self::iter().collect()
     }
     pub fn others(&self) -> Vec<Self> {
-        vec![
-            Triads::Augmented,
-            Triads::Diminished,
-            Triads::Major,
-            Triads::Minor,
-        ]
-        .into_iter()
-        .filter(|x| x != self)
-        .collect()
+        Self::iter().filter(|x| x != self).collect()
     }
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
         use Triads::*;

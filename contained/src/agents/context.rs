@@ -11,6 +11,7 @@ use wasmer::{Engine, Store, AsEngineRef,};
 pub struct Context {
     engine: Engine, 
     env: Arc<Mutex<Box<dyn WasmEnv>>>,
+    
     stack: Stack,
 }
 
