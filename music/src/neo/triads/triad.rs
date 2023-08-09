@@ -145,12 +145,7 @@ impl Triad {
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad] and returns a vector all the previous [Triad]
     pub fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
-        let mut triads = Vec::new();
-        for i in iter {
-            triads.push(self.clone());
-            self.transform(i);
-        }
-        triads
+        iter.into_iter().map(|i| self.transform(i)).collect()
     }
     /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
     pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {

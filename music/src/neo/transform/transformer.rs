@@ -137,12 +137,11 @@ mod tests {
         let triad = Triad::default();
         let transformer = Transformer::new(triad).with(LPR::iter());
         let (expected, walked) = _EXPECTED.clone();
-        let walked = walked[1..].to_vec();
-        for (i, triad) in transformer.enumerate() {
+        for (i, t) in transformer.enumerate() {
             if i >= walked.len() {
-                assert_eq!(triad, expected);
+                assert_eq!(t, expected);
             } else {
-                assert_eq!(triad, walked[i]);
+                assert_eq!(t, walked[i]);
             }
         }
     }
@@ -160,7 +159,6 @@ mod tests {
         use futures::{stream, StreamExt};
         let triad = Triad::default();
         let (expected, walked) = _EXPECTED.clone();
-        let walked = walked[1..].to_vec();
         let transformer = Transformer::new(triad).with(LPR::iter());
         let s = stream::iter(transformer);
         let res = s.collect::<Vec<_>>().await;
