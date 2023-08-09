@@ -1,7 +1,7 @@
 /*
     Appellation: frequency <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: Frequency is the number of occurrences of a repeating event per unit time
+    Description: Frequency is the number of occurrences of a repeating event or signal per unit time
 */
 use serde::{Deserialize, Serialize};
 use std::time::Duration;

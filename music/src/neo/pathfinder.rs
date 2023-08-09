@@ -23,7 +23,7 @@ impl PathFinder {
     /// Finds the shortest path to the target
     pub fn find(&mut self) -> Option<Vec<LPR>> {
         while let Some((path, triad)) = self.queue.pop() {
-            if triad.contains(&self.target) {
+            if triad.as_ref().contains(&self.target) {
                 return Some(path);
             }
             for i in LPR::iter() {
@@ -31,7 +31,7 @@ impl PathFinder {
                 triad.transform(i);
                 let mut path = path.clone();
                 path.push(i);
-                if triad.contains(&self.target) {
+                if triad.as_ref().contains(&self.target) {
                     return Some(path);
                 }
                 self.queue.push((path, triad));
