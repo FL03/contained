@@ -179,43 +179,24 @@ impl Default for Triad {
     }
 }
 
+impl std::fmt::Display for Triad {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.root(), self.third(), self.fifth())
+    }
+}
+
 impl Future for Triad {
     type Output = Self;
 
     fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        cx.waker().wake_by_ref();
+
         if self.state.is_valid() {
             if let Ok(t) = self.update() {
-                Poll::Ready(t)
-            } else {
-                cx.waker().wake_by_ref();
-                Poll::Pending
+                return Poll::Ready(t);
             }
-        } else {
-            cx.waker().wake_by_ref();
-            Poll::Pending
         }
-    }
-}
-
-impl Transform for Triad {
-    type Dirac = LPR;
-}
-
-impl IntoIterator for Triad {
-    type Item = Note;
-
-    type IntoIter = std::array::IntoIter<Self::Item, 3>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.notes.into_iter()
-    }
-}
-
-impl Unpin for Triad {}
-
-impl std::fmt::Display for Triad {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}.{}.{}", self.root(), self.third(), self.fifth())
+        Poll::Pending
     }
 }
 
@@ -229,12 +210,7 @@ impl Index<ChordFactor> for Triad {
 
 impl IndexMut<ChordFactor> for Triad {
     fn index_mut(&mut self, index: ChordFactor) -> &mut Self::Output {
-        use ChordFactor::*;
-        match index {
-            Root => &mut self.notes[Root as usize],
-            Third => &mut self.notes[Third as usize],
-            Fifth => &mut self.notes[Fifth as usize],
-        }
+        &mut self.notes[index as usize]
     }
 }
 
@@ -251,6 +227,23 @@ impl IndexMut<Range<ChordFactor>> for Triad {
         &mut self.notes[index.start as usize..index.end as usize]
     }
 }
+
+impl IntoIterator for Triad {
+    type Item = Note;
+
+    type IntoIter = std::array::IntoIter<Self::Item, 3>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.notes.into_iter()
+    }
+}
+
+impl Transform for Triad {
+    type Dirac = LPR;
+}
+
+impl Unpin for Triad {}
+
 
 impl std::ops::Mul<LPR> for Triad {
     type Output = Triad;
@@ -317,12 +310,6 @@ impl From<Triad> for Graph<Note, Interval, Undirected, ChordFactor> {
         graph.add_edge(t, f, tf);
         graph.add_edge(r, f, rf);
         graph.clone()
-    }
-}
-
-impl From<Triad> for Vec<Note> {
-    fn from(d: Triad) -> Vec<Note> {
-        vec![d.root(), d.third(), d.fifth()]
     }
 }
 
