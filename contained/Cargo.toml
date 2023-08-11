@@ -64,7 +64,7 @@ features = [
     "macros",
     "tokio"
 ]
-version = "0.51.1"
+version = "0.52.2"
 
 [dev-dependencies]
 
