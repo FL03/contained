@@ -30,7 +30,7 @@ jobs:
         toolchain: [ stable, nightly ]
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: setup (langspace)
         run: |
           rustup update
@@ -61,7 +61,7 @@ jobs:
     env:
       PACKAGE_NAME: ${{ github.event.repository.name }}-${{ matrix.features }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Publish (${{env.PACKAGE_NAME}})
         run: cargo publish --all-features -v -p ${{env.PACKAGE_NAME}} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
   publish:
@@ -70,7 +70,7 @@ jobs:
     needs: features
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Publish (${{ github.event.repository.name }})
         run: cargo publish --all-features -v -p ${{ github.event.repository.name }} --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
