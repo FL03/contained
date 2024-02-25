@@ -32,7 +32,7 @@ duct = "0.13.6"
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
 smart-default = "0.6"
-strum = { features = ["derive"], version = "0.24" }
+strum = { features = ["derive"], version = "0.26" }
 tracing = "0.1"
 tracing-subscriber = "0.3"
 
