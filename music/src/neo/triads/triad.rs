@@ -12,8 +12,8 @@
 use super::{ChordFactor, Triads};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
 use crate::prelude::{Fifths, Gradient, Interval, MusicError, Note, Thirds};
-use contained_core::states::State;
-use decanter::prelude::Hashable;
+use contained::states::State;
+// use decanter::prelude::Hashable;
 use futures::Future;
 use itertools::Itertools;
 use petgraph::{Graph, Undirected};
@@ -33,7 +33,7 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     ))
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
     class: Triads,
     notes: [Note; 3],
@@ -54,7 +54,7 @@ impl Triad {
             return triad;
         }
         Self {
-            class: Default::default(),
+            class: Triads::default(),
             notes,
             state: State::Invalid,
         }

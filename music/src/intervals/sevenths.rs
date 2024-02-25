@@ -10,10 +10,9 @@
             Diminished (9)
 */
 use crate::{BoxedError, Gradient, Note};
-use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -21,16 +20,18 @@ use strum::{Display, EnumString, EnumVariantNames};
     Debug,
     Deserialize,
     Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
-    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
     Serialize,
     SmartDefault,
+    VariantNames,
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]

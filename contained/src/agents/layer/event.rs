@@ -4,15 +4,15 @@
     Description: ... summary ...
 */
 use crate::BoxedWasmValue;
-use decanter::prelude::H256;
+// use decanter::prelude::H256;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
 #[derive(Debug)]
 pub enum CommandEvent {
-    Executed { cid: H256, result: BoxedWasmValue },
-    Included { cid: H256 },
+    Executed { cid: String, result: BoxedWasmValue },
+    Included { cid: String },
     Transformed,
 }
 

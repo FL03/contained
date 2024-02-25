@@ -1,7 +1,6 @@
 /*
     Appellation: utils <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
 
 /// [subspace] is a function for creating subsets of a given [Vec] and set size

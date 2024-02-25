@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Triad;
-use contained_core::prelude::State;
+use contained::prelude::State;
 
 /// [Triadic] is a trait describing the contextual requirements of a [Triad].
 pub trait Triadic: Send + Sync {

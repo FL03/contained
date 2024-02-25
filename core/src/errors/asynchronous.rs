@@ -6,15 +6,17 @@
 use super::Error;
 use serde::{Deserialize, Serialize};
 use smart_default::SmartDefault;
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
     Debug,
     Deserialize,
     Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
     Ord,
@@ -22,6 +24,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     PartialOrd,
     Serialize,
     SmartDefault,
+    VariantNames,
 )]
 #[strum(serialize_all = "title_case")]
 pub enum AsyncError {

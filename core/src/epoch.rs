@@ -3,7 +3,6 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... Summary ...
 */
-use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -15,7 +14,7 @@ pub enum EpochPerspective {
 
 /// An [Epoch] consists of a start time and optionally, a duration (seconds). If None, the system assumes an infinite duration
 #[derive(
-    Clone, Copy, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+    Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct Epoch {
     pub duration: Duration,

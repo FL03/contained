@@ -5,7 +5,7 @@
         A clef, placed on the far left-hand side of the staff or stave, signals which notes are represented by the respective staff.
 */
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -15,12 +15,12 @@ use strum::{Display, EnumString, EnumVariantNames};
     Deserialize,
     Display,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
     PartialEq,
     PartialOrd,
     Serialize,
+    VariantNames
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]

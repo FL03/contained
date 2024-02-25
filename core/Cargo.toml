@@ -23,7 +23,7 @@ wasm = []
 [build-dependencies]
 
 [dependencies]
-decanter.workspace = true
+# decanter.workspace = true
 
 anyhow.workspace = true
 async-trait.workspace = true

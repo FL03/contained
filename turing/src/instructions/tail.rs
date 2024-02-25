@@ -8,11 +8,10 @@
 use super::Move;
 use crate::Symbolic;
 use contained_core::states::{State, Stateful};
-use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 
 #[derive(
-    Clone, Debug, Default, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize,
+    Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
 )]
 pub struct Tail<S: Symbolic = String> {
     state: State,

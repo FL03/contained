@@ -17,7 +17,6 @@
 use super::{TonnetzGraph, TonnetzSpec};
 use crate::neo::triads::*;
 use crate::prelude::{Interval, Note, LPR};
-use decanter::prelude::H256;
 use petgraph::{Graph, Undirected};
 use std::sync::{Arc, Mutex};
 
@@ -28,7 +27,7 @@ pub enum ClusterEvent {
 }
 
 pub struct Boundary {
-    pub id: H256, // the id of the triad that is the boundary
+    pub id: String, // the id of the triad that is the boundary
     pub interval: Interval,
 }
 

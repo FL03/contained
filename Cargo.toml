@@ -12,7 +12,7 @@ version = "0.1.6"
 
 [workspace.dependencies]
 # Custom crates
-decanter = { features = ["derive"], version = "0.1.5" }
+# decanter = { features = ["derive"], version = "0.1.6" }
 
 # Standard dependencies
 anyhow = "1"

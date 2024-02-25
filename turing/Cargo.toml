@@ -25,7 +25,7 @@ wasm = []
 anyhow.workspace = true
 async-trait.workspace = true
 contained-core = { path = "../core", version = "0.1.6" }
-decanter.workspace = true
+# decanter.workspace = true
 futures.workspace = true
 itertools.workspace = true
 predicates = "3.0"

@@ -6,7 +6,7 @@ use super::Triad;
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{BoxedError, Note};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 
 /// [Triads::Augmented] is a [Triad] created with [Thirds::Major], [Thirds::Major] intervals
 /// [Triads::Diminished] is a [Triad] created with [Thirds::Minor], [Thirds::Minor] intervals
@@ -19,15 +19,17 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
     Default,
     Deserialize,
     Display,
+    EnumCount,
+    EnumIs,
     EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
     Ord,
     PartialEq,
     PartialOrd,
     Serialize,
+    VariantNames,
 )]
 #[repr(u8)]
 #[strum(serialize_all = "lowercase")]

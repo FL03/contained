@@ -4,10 +4,11 @@
     Description: Each triad is composed of three notes, called chord factors: root, third, and fifth; these are used as a means of indexing any given triad
 */
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, IntoEnumIterator, VariantNames};
 
 /// A [ChordFactor] is used as an indexer for a [super::Triad]
 /// [ChordFactor::Root] is the first note, [ChordFactor::Third] is the second note, and [ChordFactor::Fifth] is the third note in a [super::Triad]
+
 #[derive(
     Clone,
     Copy,
@@ -15,15 +16,17 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
     Default,
     Deserialize,
     Display,
+    EnumCount,
+    EnumIs,
     EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
     Ord,
     PartialEq,
     PartialOrd,
     Serialize,
+    VariantNames,
 )]
 #[repr(usize)]
 #[strum(serialize_all = "lowercase")]

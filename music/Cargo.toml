@@ -22,7 +22,7 @@ test = true
 
 [dependencies]
 # Custom
-decanter.workspace = true
+# decanter.workspace = true
 
 # Dependencies
 anyhow.workspace = true

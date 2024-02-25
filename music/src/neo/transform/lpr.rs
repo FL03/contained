@@ -18,30 +18,31 @@
 use super::Dirac;
 use crate::intervals::{Interval, Thirds};
 use crate::neo::triads::{ChordFactor, Triad};
-use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumIter, EnumString, EnumVariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 /// [LPR::L] Preserves the minor third; shifts the remaining note by a semitone
 /// [LPR::P] Preserves the perfect fifth; shifts the remaining note by a semitone
 /// [LPR::R] preserves the major third in the triad and moves the remaining note by whole tone.
+
 #[derive(
     Clone,
     Copy,
     Debug,
-    Default,
     Deserialize,
+    Default,
     Display,
+    EnumCount,
+    EnumIs,
     EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
-    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
     Serialize,
+    VariantNames,
 )]
 #[strum(serialize_all = "lowercase")]
 pub enum LPR {

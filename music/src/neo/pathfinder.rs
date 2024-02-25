@@ -3,7 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # PathFinder
-use super::{triads::Triad, Transform, LPR};
+use super::{Transform, LPR};
+use crate::neo::triads::Triad;
 use crate::Note;
 use strum::IntoEnumIterator;
 

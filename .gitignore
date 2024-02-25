@@ -2,6 +2,8 @@
 **/config.*
 **/*.config.*
 
+!**/.cargo/config*
+
 **/*.env
 **/*.env.*
 

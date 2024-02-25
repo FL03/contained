@@ -5,6 +5,7 @@
 //! # Music
 //!
 //!
+extern crate contained_core as contained;
 pub use self::{errors::*, notes::*, primitives::*, specs::*, utils::*};
 
 pub mod chords;

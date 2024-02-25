@@ -22,21 +22,21 @@ mod cluster;
 
 use crate::neo::triads::*;
 use crate::{intervals::Interval, Note, MODULUS};
-use decanter::prelude::{Hashable, Iter, H256};
+// use decanter::prelude::{Hashable, Iter, H256};
 use petgraph::graph::{DefaultIx, NodeIndex};
 use petgraph::{Graph, Undirected};
 
 pub type TonnetzGraph<Idx = DefaultIx> = Graph<Note, Interval, Undirected, Idx>;
 
-pub trait Link: Hashable {
-    /// [Link::bridge] is used to synchronize the activties of two different triads; required to seperated by a single LPR transformation
-    fn bridge(&self, with: impl Hashable) -> H256 {
-        let mut iter = Iter::new();
-        iter.extend(vec![self.hash(), with.hash()]);
-        iter.hash()
-    }
-    fn interval(&self) -> Interval;
-}
+// pub trait Link: Hashable {
+//     /// [Link::bridge] is used to synchronize the activties of two different triads; required to seperated by a single LPR transformation
+//     fn bridge(&self, with: impl Hashable) -> H256 {
+//         let mut iter = Iter::new();
+//         iter.extend(vec![self.hash(), with.hash()]);
+//         iter.hash()
+//     }
+//     fn interval(&self) -> Interval;
+// }
 
 pub trait TonnetzSpec {
     const N: usize = MODULUS as usize;

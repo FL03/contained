@@ -1,11 +1,9 @@
 /*
     Appellation: state <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... summary ...
 */
-use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumCount, EnumIs, EnumIter, EnumString, VariantNames};
 
 #[derive(
     Clone,
@@ -14,15 +12,17 @@ use strum::{Display, EnumString, EnumVariantNames};
     Default,
     Deserialize,
     Display,
+    EnumCount,
+    EnumIs,
+    EnumIter,
     EnumString,
-    EnumVariantNames,
     Eq,
     Hash,
-    Hashable,
     Ord,
     PartialEq,
     PartialOrd,
     Serialize,
+    VariantNames,
 )]
 #[repr(i64)]
 #[strum(serialize_all = "snake_case")]
@@ -44,9 +44,6 @@ impl State {
     }
     pub fn validate(&mut self) {
         *self = Self::Valid;
-    }
-    pub fn is_valid(&self) -> bool {
-        *self == Self::Valid
     }
 }
 
@@ -84,15 +81,15 @@ impl std::ops::MulAssign for State {
     }
 }
 
-impl From<usize> for State {
-    fn from(d: usize) -> Self {
-        Self::from(d as i64)
+impl From<i64> for State {
+    fn from(d: i64) -> Self {
+        Self::from(d.abs() as usize)
     }
 }
 
-impl From<i64> for State {
-    fn from(d: i64) -> Self {
-        match d.abs() % 2 {
+impl From<usize> for State {
+    fn from(d: usize) -> Self {
+        match d % Self::COUNT {
             0 => State::valid(),
             _ => State::invalid(),
         }

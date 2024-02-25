@@ -42,7 +42,7 @@ contained-turing = { features = [], optional = true, path = "../turing", version
 anyhow.workspace = true
 async-trait.workspace = true
 bytes.workspace = true
-decanter.workspace = true
+decanter = { features = ["derive"], version = "0.1.5" }
 futures.workspace = true
 glob = "0.3"
 lazy_static = "1"
