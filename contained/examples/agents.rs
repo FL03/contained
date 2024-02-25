@@ -1,8 +1,11 @@
 extern crate contained;
 
-use contained::agents::{client::AgentManager, Agent, WasmEnv};
+use contained::agents::client::{AgentManager, Client};
+use contained::agents::{layer::Command, Agent, Context, Stack, WasmEnv};
 use contained::prelude::{AsyncResult, BoxedWasmValue, Shared};
 use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
+use tracing::instrument;
 use wasmer::{wat2wasm, Imports, Store};
 use wasmer::{Function, FunctionEnv, FunctionEnvMut};
 
@@ -41,40 +44,74 @@ pub fn counter_module() -> std::borrow::Cow<'static, [u8]> {
 async fn main() -> AsyncResult {
     // Initialize the tracing layer
     std::env::set_var("RUST_LOG", "info");
-    tracing_subscriber::fmt::init();
-    // Initialize a new store
-    let store = Store::default();
+    tracing_subscriber::fmt::fmt()
+        .compact()
+        .with_line_number(false)
+        .with_target(false)
+        .init();
     // Initialize a new virtual environment
     let venv = CounterVenv::new(0);
-    agents(Box::new([15.into()]), store, venv).await?;
+
+    let ctx = Context::new(wasmer::Engine::default(), Box::new(venv), Stack::new());
+    agents(Box::new([15.into()]), ctx, None).await?;
     Ok(())
 }
 
+pub struct CounterAgent {
+    context: Context,
+    store: Store,
+}
+
+impl CounterAgent {
+    pub fn new() -> Self {
+        let store = Store::default();
+        let venv = CounterVenv::new(0);
+        let context = Context::new(&store, Box::new(venv), Stack::new());
+        Self { context, store }
+    }
+    pub fn build(&self, capacity: Option<usize>) -> (Agent, Client) {
+        let (tx, rx) = mpsc::channel(capacity.unwrap_or(100));
+        let agent = Agent::new(rx, self.context.clone());
+        let client = Client::new(tx);
+        (agent, client)
+    }
+    pub fn channels(&self) -> (mpsc::Sender<Command>, mpsc::Receiver<Command>) {
+        mpsc::channel(100)
+    }
+}
+
+#[instrument(
+    err,
+    skip(ctx, imports),
+    fields(function = "sample", module = "COUNTER_MODULE"),
+    name = "example"
+)]
 async fn agents(
     args: BoxedWasmValue,
-    mut store: Store,
-    venv: CounterVenv,
+    ctx: Context,
+    imports: Option<Imports>,
 ) -> AsyncResult<BoxedWasmValue> {
+    // Initialize a new channel
+    let (tx, rx) = tokio::sync::mpsc::channel(100);
+    let mut agent = Agent::new(rx, ctx.clone());
+    let mut client = Client::new(tx);
+    let imports = agent
+        .context()
+        .env()
+        .lock()
+        .unwrap()
+        .imports(&mut agent.store_mut(), imports);
     let func = "sample";
-    // Create a new imports object to be included with the provided venv
-    let imports = venv.imports(&mut store, None);
     // Initialize a new agent; set the environment; then spawn it on a new thread
-    let (agent, mut client) = Agent::new(9, Box::new(venv));
-    agent
-        .with_store(store)
-        .spawn(tokio::runtime::Handle::current());
+
+    agent.spawn(tokio::runtime::Handle::current());
     // Send the module to the agent
     let cid = client.include(COUNTER_MODULE.to_vec()).await?;
     // Execute the module
     let res = client
         .execute(cid.clone(), func.to_string(), args, Some(imports))
         .await?;
-    tracing::info!(
-        "Success: used the module ({}) to execute the '{}' function and returned {:?}",
-        cid,
-        func,
-        res
-    );
+    tracing::info!("Success: executed the function and got back {:?}", res);
     Ok(res)
 }
 

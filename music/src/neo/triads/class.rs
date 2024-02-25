@@ -1,13 +1,12 @@
 /*
     Appellation: class <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: A triad can be any one of four classes: augmented, diminished, major, or minor depending on the intervals between the notes.
 */
 use super::Triad;
 use crate::intervals::{Fifths, Interval, Thirds};
 use crate::{BoxedError, Note};
 use serde::{Deserialize, Serialize};
-use strum::{Display, EnumString, EnumVariantNames};
+use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
 
 /// [Triads::Augmented] is a [Triad] created with [Thirds::Major], [Thirds::Major] intervals
 /// [Triads::Diminished] is a [Triad] created with [Thirds::Minor], [Thirds::Minor] intervals
@@ -20,6 +19,7 @@ use strum::{Display, EnumString, EnumVariantNames};
     Default,
     Deserialize,
     Display,
+    EnumIter,
     EnumString,
     EnumVariantNames,
     Eq,
@@ -29,42 +29,30 @@ use strum::{Display, EnumString, EnumVariantNames};
     PartialOrd,
     Serialize,
 )]
-#[repr(i64)]
-#[strum(serialize_all = "snake_case")]
+#[repr(u8)]
+#[strum(serialize_all = "lowercase")]
 pub enum Triads {
-    Augmented,
-    Diminished,
+    Augmented = 0,
+    Diminished = 1,
     #[default]
-    Major,
-    Minor,
+    Major = 2,
+    Minor = 3,
 }
 
 impl Triads {
     pub fn classes() -> Vec<Self> {
-        vec![
-            Triads::Augmented,
-            Triads::Diminished,
-            Triads::Major,
-            Triads::Minor,
-        ]
+        Self::iter().collect()
     }
     pub fn others(&self) -> Vec<Self> {
-        vec![
-            Triads::Augmented,
-            Triads::Diminished,
-            Triads::Major,
-            Triads::Minor,
-        ]
-        .into_iter()
-        .filter(|x| x != self)
-        .collect()
+        Self::iter().filter(|x| x != self).collect()
     }
     pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
+        use Triads::*;
         match self {
-            Triads::Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
-            Triads::Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
-            Triads::Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
-            Triads::Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
+            Augmented => (Thirds::Major, Thirds::Major, Fifths::Augmented),
+            Diminished => (Thirds::Minor, Thirds::Minor, Fifths::Diminished),
+            Major => (Thirds::Major, Thirds::Minor, Fifths::Perfect),
+            Minor => (Thirds::Minor, Thirds::Major, Fifths::Perfect),
         }
     }
 }

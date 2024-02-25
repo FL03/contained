@@ -6,10 +6,11 @@ env:
 on:
   schedule:
     - cron: "30 21 * * *" # 9:30pm UTC
+  workflow_dispatch:
 
 jobs:
-  rust:
-    name: Rust
+  build:
+    name: Builder
     strategy:
       matrix:
         platform: [macos-latest, ubuntu-latest, windows-latest]
@@ -17,18 +18,16 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
-      - name: setup langspace
+
+      - name: setup (ubuntu)
         if: ${{ matrix.platform == 'ubuntu-latest' }}
         run: |
           sudo apt install -y protobuf-compiler
-          rustup default ${{ matrix.toolchain }}
-      - name: Build (workspace)
-        run: cargo build --release -v --workspace
-      - name: Bench (workspace)
-        run: cargo bench -v --workspace
-      - name: Test (all)
-        run: cargo test --all --all-features -v
-      - name: Cache
+      - name: langspace
+        run: rustup default ${{ matrix.toolchain }}
+      - name: build
+        run: cargo build -r -v --workspace
+      - name: cache
         uses: actions/cache@v3
         with:
           path: |
@@ -41,7 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          draft: false
           files: |
             target/release/contained
-          draft: true
+          name: ${{ github.repository }}-nightly
           prerelease: true

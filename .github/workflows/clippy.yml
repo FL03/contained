@@ -12,6 +12,13 @@ on:
     - cron: "30 9 * * *" # 9:30am UTC
   workflow_dispatch:
 
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+  issues: write
+  security-events: write
+
 jobs:
   clippy:
     name: Clippy

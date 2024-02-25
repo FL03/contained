@@ -3,21 +3,24 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! Triad
-//! 
-//! 
+//!
+//! A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
+//! [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
+//! In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
+//! Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
+//! The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
 use super::{ChordFactor, Triads};
-use crate::intervals::{Fifths, Interval, Thirds};
 use crate::neo::{Dirac, PathFinder, Transform, LPR};
-use crate::{Gradient, MusicError, Note};
-use algae::graph::{Graph, UndirectedGraph};
+use crate::prelude::{Fifths, Gradient, Interval, MusicError, Note, Thirds};
 use contained_core::states::State;
 use decanter::prelude::Hashable;
 use futures::Future;
 use itertools::Itertools;
-use petgraph::graph::UnGraph;
+use petgraph::{Graph, Undirected};
 use serde::{Deserialize, Serialize};
 use std::ops::{Index, IndexMut, Range};
 use std::task::{self, Poll};
+use strum::IntoEnumIterator;
 
 fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     for (a, b, c) in data.iter().circular_tuple_windows() {
@@ -30,26 +33,7 @@ fn constructor(data: &[Note; 3]) -> Result<Triad, MusicError> {
     ))
 }
 
-
-/// A [Triad] is a set of three [Note]s called chord factors ([ChordFactor]) that are related by a specific interval; represented here with a [Triads] classification.
-/// [Triad]s are also considered to be stateful and can be transformed into other [Triad]s with the use of [LPR] transformations.
-/// In music theory, the [Triad] is a fundamental building block used to construct more complex chords.
-/// Similarly, the [Triad] is used to describe an abstract topological unit-computing environment that is often used in conjuction with other persistent instances to aid in the completion of a given task.
-/// The [Wolfram (2, 3) UTM](https://www.wolframscience.com/prizes/tm23) is used as justification for describing the [Triad] as a topological unit-computing environment.
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Deserialize,
-    Eq,
-    Hash,
-    Hashable,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Triad {
     class: Triads,
     notes: [Note; 3],
@@ -65,6 +49,16 @@ impl Triad {
             state: State::default(),
         }
     }
+    pub fn from_notes(notes: [Note; 3]) -> Self {
+        if let Ok(triad) = constructor(&notes) {
+            return triad;
+        }
+        Self {
+            class: Default::default(),
+            notes,
+            state: State::Invalid,
+        }
+    }
     /// Build a new [Triad] from a given [Notable] root and two [Thirds]
     pub fn build(root: Note, a: Thirds, b: Thirds) -> Self {
         Self::new(root, Triads::from((a, b)))
@@ -75,7 +69,7 @@ impl Triad {
     }
     /// Returns true if the [Triad] contains the [Note]
     pub fn contains(&self, note: &Note) -> bool {
-        self.notes.into_iter().any(|n| n == *note)
+        self.clone().into_iter().contains(note)
     }
     /// Endlessly applies the described transformations to the [Triad]
     pub fn cycle(&mut self, iter: impl IntoIterator<Item = LPR>) {
@@ -88,31 +82,32 @@ impl Triad {
         self.state = state;
         self
     }
+    /// Returns a reference to the current composition of the [Triad]
+    pub fn factors(&self) -> &[Note; 3] {
+        &self.notes
+    }
     /// Returns an cloned instance of the note occupying the fifth
     pub fn fifth(&self) -> Note {
         self[ChordFactor::Fifth]
     }
     /// Classifies the [Triad] by describing the intervals that connect the notes
-    pub fn intervals(&self) -> (Thirds, Thirds, Fifths) {
-        self.class().intervals()
+    pub fn intervals(&self) -> (Interval, Interval, Interval) {
+        let (rt, tf, rf) = self.class.intervals();
+        (rt.into(), tf.into(), rf.into())
     }
     /// Returns a [Vec] of all neighboring [Triad]s; the [Triad]s that are one [LPR] away from the current [Triad]
     pub fn neighbors(&self) -> Vec<Self> {
         let mut neighbors = Vec::with_capacity(3);
-        for i in LPR::transformations() {
-            let mut triad = *self;
+        for i in LPR::iter() {
+            let mut triad = self.clone();
             triad.transform(i);
             neighbors.push(triad);
         }
         neighbors
     }
-    /// Returns a [Vec] of all notes in the [Triad]
-    pub fn notes_vec(&self) -> Vec<Note> {
-        self.notes.to_vec()
-    }
     /// Returns a [PathFinder] that can be used to find the path between the [Triad] and the [Note]
     pub fn pathfinder(&self, note: Note) -> PathFinder {
-        PathFinder::new(note).set_origin(*self)
+        PathFinder::new(note).set_origin(self.clone())
     }
     /// Returns an cloned instance of the root of the triad
     pub fn root(&self) -> Note {
@@ -134,13 +129,12 @@ impl Triad {
     pub fn update(&mut self) -> Result<Self, MusicError> {
         if let Ok(t) = constructor(self.as_ref()) {
             *self = t;
-            Ok(*self)
-        } else {
-            self.state.invalidate();
-            Err(MusicError::IntervalError(
-                "The given notes failed to contain the necessary relationships...".into(),
-            ))
+            return Ok(self.clone());
         }
+        self.state.invalidate();
+        Err(MusicError::IntervalError(
+            "The given notes failed to contain the necessary relationships...".into(),
+        ))
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad]
     /// The goal here is to allow the machine to work on and in the scope
@@ -151,12 +145,7 @@ impl Triad {
     }
     /// Applies multiple [LPR] transformations onto the scoped [Triad] and returns a vector all the previous [Triad]
     pub fn walk_across(&mut self, iter: impl IntoIterator<Item = LPR>) -> Vec<Self> {
-        let mut triads = Vec::new();
-        for i in iter {
-            triads.push(*self);
-            self.transform(i);
-        }
-        triads
+        iter.into_iter().map(|i| self.transform(i)).collect()
     }
     /// Applies a set of [LPR] transformations from left-to-right, then returns home applying the same transformations in reverse
     pub fn yoyo(&mut self, iter: impl Clone + IntoIterator<Item = LPR>) {
@@ -164,9 +153,6 @@ impl Triad {
         let mut args = Vec::from_iter(iter);
         args.reverse();
         self.walk(args);
-    }
-    pub fn triad(&self) -> &Self {
-        self
     }
 }
 
@@ -182,39 +168,11 @@ impl AsRef<[Note; 3]> for Triad {
     }
 }
 
-impl Future for Triad {
-    type Output = Self;
-
-    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
-        if self.state.is_valid() {
-            if let Ok(t) = self.update() {
-                Poll::Ready(t)
-            } else {
-                cx.waker().wake_by_ref();
-                Poll::Pending
-            }
-        } else {
-            cx.waker().wake_by_ref();
-            Poll::Pending
-        }
+impl Default for Triad {
+    fn default() -> Self {
+        Self::new(0.into(), Triads::Major)
     }
 }
-
-impl Transform for Triad {
-    type Dirac = LPR;
-}
-
-impl IntoIterator for Triad {
-    type Item = Note;
-
-    type IntoIter = std::vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.notes_vec().into_iter()
-    }
-}
-
-impl Unpin for Triad {}
 
 impl std::fmt::Display for Triad {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -222,27 +180,32 @@ impl std::fmt::Display for Triad {
     }
 }
 
+impl Future for Triad {
+    type Output = Self;
+
+    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut task::Context<'_>) -> Poll<Self::Output> {
+        cx.waker().wake_by_ref();
+
+        if self.state.is_valid() {
+            if let Ok(t) = self.update() {
+                return Poll::Ready(t);
+            }
+        }
+        Poll::Pending
+    }
+}
+
 impl Index<ChordFactor> for Triad {
     type Output = Note;
 
     fn index(&self, index: ChordFactor) -> &Self::Output {
-        use ChordFactor::*;
-        match index {
-            Root => &self.notes[Root as usize],
-            Third => &self.notes[Third as usize],
-            Fifth => &self.notes[Fifth as usize],
-        }
+        &self.notes[index as usize]
     }
 }
 
 impl IndexMut<ChordFactor> for Triad {
     fn index_mut(&mut self, index: ChordFactor) -> &mut Self::Output {
-        use ChordFactor::*;
-        match index {
-            Root => &mut self.notes[Root as usize],
-            Third => &mut self.notes[Third as usize],
-            Fifth => &mut self.notes[Fifth as usize],
-        }
+        &mut self.notes[index as usize]
     }
 }
 
@@ -260,11 +223,28 @@ impl IndexMut<Range<ChordFactor>> for Triad {
     }
 }
 
+impl IntoIterator for Triad {
+    type Item = Note;
+
+    type IntoIter = std::array::IntoIter<Self::Item, 3>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.notes.into_iter()
+    }
+}
+
+impl Transform for Triad {
+    type Dirac = LPR;
+}
+
+impl Unpin for Triad {}
+
+
 impl std::ops::Mul<LPR> for Triad {
     type Output = Triad;
 
     fn mul(self, rhs: LPR) -> Self::Output {
-        rhs.dirac(&mut self.clone())
+        rhs.apply(&mut self.clone())
     }
 }
 
@@ -284,14 +264,7 @@ impl TryFrom<[Note; 3]> for Triad {
     type Error = MusicError;
 
     fn try_from(data: [Note; 3]) -> Result<Triad, Self::Error> {
-        for (a, b, c) in data.into_iter().circular_tuple_windows() {
-            if let Ok(class) = Triads::try_from((a, b, c)) {
-                return Ok(Triad::new(a, class));
-            }
-        }
-        Err(MusicError::IntervalError(
-            "Failed to find the required relationships within the given notes...".into(),
-        ))
+        constructor(&data)
     }
 }
 
@@ -320,38 +293,18 @@ impl TryFrom<(i64, i64, i64)> for Triad {
     }
 }
 
-impl From<Triad> for UndirectedGraph<Note, Interval> {
-    fn from(triad: Triad) -> UndirectedGraph<Note, Interval> {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-        let mut cluster = UndirectedGraph::with_capacity(3);
-        let edges = vec![
-            (triad.root(), triad.third(), rt.into()).into(),
-            (triad.third(), triad.fifth(), tf.into()).into(),
-            (triad.root(), triad.fifth(), rf.into()).into(),
-        ];
-        cluster.add_edges(edges);
-        cluster.clone()
-    }
-}
+impl From<Triad> for Graph<Note, Interval, Undirected, ChordFactor> {
+    fn from(d: Triad) -> Graph<Note, Interval, Undirected, ChordFactor> {
+        let (rt, tf, rf): (Interval, Interval, Interval) = d.intervals();
 
-impl From<Triad> for UnGraph<Note, Interval> {
-    fn from(d: Triad) -> UnGraph<Note, Interval> {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = d.intervals();
-
-        let mut cluster = UnGraph::with_capacity(3, 3);
-        let root = cluster.add_node(d.root());
-        let third = cluster.add_node(d.third());
-        let fifth = cluster.add_node(d.fifth());
-        cluster.add_edge(root, third, rt.into());
-        cluster.add_edge(third, fifth, tf.into());
-        cluster.add_edge(root, fifth, rf.into());
-        cluster.clone()
-    }
-}
-
-impl From<Triad> for Vec<Note> {
-    fn from(d: Triad) -> Vec<Note> {
-        vec![d.root(), d.third(), d.fifth()]
+        let mut graph = Graph::with_capacity(3, 3);
+        let r = graph.add_node(d.root());
+        let t = graph.add_node(d.third());
+        let f = graph.add_node(d.fifth());
+        graph.add_edge(r, t, rt);
+        graph.add_edge(t, f, tf);
+        graph.add_edge(r, f, rf);
+        graph.clone()
     }
 }
 
@@ -369,13 +322,12 @@ impl From<Triad> for (i64, i64, i64) {
 
 impl From<Triad> for (Thirds, Thirds, Fifths) {
     fn from(data: Triad) -> (Thirds, Thirds, Fifths) {
-        data.intervals()
+        data.class().intervals()
     }
 }
 
 impl From<Triad> for (Interval, Interval, Interval) {
     fn from(data: Triad) -> (Interval, Interval, Interval) {
-        let intervals = data.intervals();
-        (intervals.0.into(), intervals.1.into(), intervals.2.into())
+        data.intervals()
     }
 }

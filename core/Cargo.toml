@@ -23,14 +23,13 @@ wasm = []
 [build-dependencies]
 
 [dependencies]
-algae.workspace = true
 decanter.workspace = true
 
 anyhow.workspace = true
 async-trait.workspace = true
 atoi = "2"
 bytes.workspace = true
-chrono = "0.4"
+chrono.workspace = true
 futures.workspace = true
 itertools.workspace = true
 petgraph ={ features = [], version = "0.6"  }
@@ -39,7 +38,7 @@ serde.workspace = true
 serde_json.workspace = true
 smart-default.workspace = true
 strum.workspace = true
-tokio.workspace = true
+tokio = { features = ["full"], version = "1"}
 
 [dev-dependencies]
 tokio = { features = ["macros", "rt"], version = "1" }

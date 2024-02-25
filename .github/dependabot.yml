@@ -5,7 +5,7 @@ updates:
     schedule:
         interval: daily
   - package-ecosystem: docker
-    directory: /
+    directory: /.docker
     schedule:
         interval: daily
   - package-ecosystem: github-actions
@@ -22,10 +22,6 @@ updates:
         interval: daily
   - package-ecosystem: cargo
     directory: /music
-    schedule:
-        interval: daily
-  - package-ecosystem: cargo
-    directory: /net
     schedule:
         interval: daily
   - package-ecosystem: cargo

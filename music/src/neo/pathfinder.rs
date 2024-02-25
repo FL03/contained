@@ -1,10 +1,11 @@
 /*
     Appellation: pathfinder <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description: ... Summary ...
 */
+//! # PathFinder
 use super::{triads::Triad, Transform, LPR};
 use crate::Note;
+use strum::IntoEnumIterator;
 
 #[derive(Clone, Debug, Default, Eq, Hash, PartialEq, PartialOrd)]
 pub struct PathFinder {
@@ -22,15 +23,15 @@ impl PathFinder {
     /// Finds the shortest path to the target
     pub fn find(&mut self) -> Option<Vec<LPR>> {
         while let Some((path, triad)) = self.queue.pop() {
-            if triad.contains(&self.target) {
+            if triad.as_ref().contains(&self.target) {
                 return Some(path);
             }
-            for i in LPR::transformations() {
-                let mut triad = triad;
+            for i in LPR::iter() {
+                let mut triad = triad.clone();
                 triad.transform(i);
                 let mut path = path.clone();
                 path.push(i);
-                if triad.contains(&self.target) {
+                if triad.as_ref().contains(&self.target) {
                     return Some(path);
                 }
                 self.queue.push((path, triad));

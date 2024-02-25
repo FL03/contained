@@ -1,13 +1,13 @@
 /*
     Appellation: tail <module>
     Contrib: FL03 <jo3mccain@icloud.com>
-    Description:
-        Turing machines accept instructions in the form of a five-tuple:
-            (State, Symbol, State, Symbol, Move)
 */
+/// # Tail
+///
+/// The tail of an instruction is the second half of a instruction set
 use super::Move;
-use crate::{State, Symbolic};
-use contained_core::states::Stateful;
+use crate::Symbolic;
+use contained_core::states::{State, Stateful};
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 

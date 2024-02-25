@@ -26,7 +26,7 @@ use strum::{Display, EnumIter, EnumString, EnumVariantNames, IntoEnumIterator};
     Serialize,
 )]
 #[repr(usize)]
-#[strum(serialize_all = "snake_case")]
+#[strum(serialize_all = "lowercase")]
 pub enum ChordFactor {
     #[default]
     #[strum(serialize = "r", serialize = "root")]
@@ -52,6 +52,36 @@ impl ChordFactor {
     }
     pub fn others(&self) -> Vec<Self> {
         Self::iter().filter(|x| x != self).collect()
+    }
+}
+
+impl From<usize> for ChordFactor {
+    fn from(x: usize) -> Self {
+        match x % 3 {
+            0 => ChordFactor::Root,
+            1 => ChordFactor::Third,
+            _ => ChordFactor::Fifth,
+        }
+    }
+}
+
+impl From<ChordFactor> for usize {
+    fn from(x: ChordFactor) -> Self {
+        x as usize
+    }
+}
+
+unsafe impl petgraph::graph::IndexType for ChordFactor {
+    fn new(x: usize) -> Self {
+        Self::from(x)
+    }
+
+    fn index(&self) -> usize {
+        *self as usize
+    }
+
+    fn max() -> Self {
+        Self::Fifth
     }
 }
 

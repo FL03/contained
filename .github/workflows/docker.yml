@@ -7,7 +7,7 @@ on:
     branches-ignore: [ "dev*", "next", "nightly*" ]
     tags: [ "v*.*.*" ]
   schedule:
-    - cron: "30 9 * * *" # 9:30 UTC
+    - cron: "30 21 * * *" # 9:30 UTC
   workflow_dispatch:
 
 env:
@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build the Docker image
+      - name: buildx
         run: docker buildx build --tag ${{ secrets.DOCKERHUB_USERNAME }}/contained:latest .
       - name: cache
         uses: actions/cache@v3
         with:
-          path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
+          path: /tmp/.buildx-cache
           restore-keys: |
             ${{ runner.os }}-buildx-${{ github.sha }}
   publish:
@@ -36,8 +36,8 @@ jobs:
     - name: Get cache
       uses: actions/cache@v3
       with:
-        path: /tmp/.buildx-cache
         key: ${{ runner.os }}-buildx-${{ github.sha }}
+        path: /tmp/.buildx-cache
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:

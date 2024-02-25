@@ -2,8 +2,6 @@
     Appellation: cluster <module>
     Contrib: FL03 <jo3mccain@icloud.com>
     Description:
-        This module is dedicated to the proposed harmonic computational fabric;
-        A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
         The cluster is an undirected, circular graph where each node is a note which is connected to 6 other nodes.
 
         If a tonnetz is a topological computer, then a cluster is a topological computer that is used to orchestrate a set of topological computers.
@@ -13,12 +11,14 @@
         Each triad persisted is required to maintian a set of invariants that are used to determine the state of the cluster.
         If each edge in a traditional tonnetz is the interval between the two notes, than each edge in the cluster describes a type of seed value that encodes some information about the triad.
 */
-use super::Tonnetz;
-use crate::intervals::{Fifths, Thirds};
+//! # Cluster
+//!
+//! A cluster is a type of tonnetz that is used to orchestrate a set of local or detached triadic machines.
+use super::{TonnetzGraph, TonnetzSpec};
 use crate::neo::triads::*;
-use crate::{intervals::Interval, neo::LPR, Note};
-use algae::graph::{Graph, UndirectedGraph};
+use crate::prelude::{Interval, Note, LPR};
 use decanter::prelude::H256;
+use petgraph::{Graph, Undirected};
 use std::sync::{Arc, Mutex};
 
 pub enum ClusterEvent {
@@ -34,42 +34,55 @@ pub struct Boundary {
 
 #[derive(Clone, Debug, Default)]
 pub struct Cluster {
-    cluster: UndirectedGraph<Note, Interval>,
     scope: Arc<Mutex<Triad>>,
+    store: TonnetzGraph,
 }
 
 impl Cluster {}
 
 impl std::fmt::Display for Cluster {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.cluster)
+        write!(f, "{:?}", self.store)
     }
 }
 
-impl Tonnetz for Cluster {
-    fn scope(&self) -> &Arc<Mutex<Triad>> {
-        &self.scope
+impl TonnetzSpec for Cluster {
+    fn scope(&self) -> Triad {
+        self.scope.lock().unwrap().clone()
     }
 
-    fn tonnetz(&self) -> &UndirectedGraph<Note, Interval> {
-        &self.cluster
+    fn store(&self) -> &TonnetzGraph {
+        &self.store
     }
 
-    fn tonnetz_mut(&mut self) -> &mut UndirectedGraph<Note, Interval> {
-        &mut self.cluster
+    fn store_mut(&mut self) -> &mut TonnetzGraph {
+        &mut self.store
+    }
+}
+
+impl AsRef<TonnetzGraph> for Cluster {
+    fn as_ref(&self) -> &TonnetzGraph {
+        &self.store
+    }
+}
+
+impl AsMut<TonnetzGraph> for Cluster {
+    fn as_mut(&mut self) -> &mut TonnetzGraph {
+        &mut self.store
     }
 }
 
 impl From<Triad> for Cluster {
     fn from(triad: Triad) -> Self {
-        let (rt, tf, rf): (Thirds, Thirds, Fifths) = triad.intervals();
-        let mut cluster = UndirectedGraph::with_capacity(crate::MODULUS as usize);
+        let (rt, tf, rf): (Interval, Interval, Interval) = triad.clone().intervals();
+        let mut cluster = Graph::<Note, Interval, Undirected>::new_undirected();
 
-        cluster.add_edge((triad.root(), triad.third(), rt.into()).into());
-        cluster.add_edge((triad.third(), triad.fifth(), tf.into()).into());
-        cluster.add_edge((triad.root(), triad.fifth(), rf.into()).into());
+        let r = cluster.add_node(triad.root());
+        let t = cluster.add_node(triad.third());
+        let f = cluster.add_node(triad.fifth());
+        cluster.extend_with_edges([(r, t, rt), (t, f, tf), (r, f, rf)]);
         Self {
-            cluster,
+            store: cluster,
             scope: Arc::new(Mutex::new(triad)),
         }
     }
@@ -89,7 +102,7 @@ mod tests {
         for i in 1..MODULUS {
             cluster.insert(Triad::new(i.into(), Triads::Major));
         }
-        eprintln!("{:?}", cluster.tonnetz().nodes());
+        eprintln!("{:?}", cluster.store());
         assert!(cluster.fulfilled());
         for class in [Triads::Minor, Triads::Augmented, Triads::Diminished] {
             for i in 0..MODULUS {
