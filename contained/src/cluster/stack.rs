@@ -4,14 +4,14 @@
     Description: The stack is a collection of modules and environments that are availible to the cluster
 */
 use crate::agents::VirtualEnv;
-// use decanter::prelude::H256;
+use decanter::prelude::H256;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use wasmer::Module;
 
 pub struct Stack {
-    pub envs: Arc<RwLock<HashMap<String, VirtualEnv>>>,
-    pub modules: Arc<RwLock<HashMap<String, Module>>>,
+    pub envs: Arc<RwLock<HashMap<H256, VirtualEnv>>>,
+    pub modules: Arc<RwLock<HashMap<H256, Module>>>,
 }
 
 impl Stack {

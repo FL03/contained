@@ -10,13 +10,13 @@
 use super::OneshotSender;
 use crate::music::neo::LPR;
 use crate::prelude::BoxedWasmValue;
-// use decanter::prelude::H256;
+use decanter::prelude::H256;
 use wasmer::Imports;
 
 #[derive(Debug)]
 pub enum Command {
     Execute {
-        module: String,
+        module: H256,
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
@@ -24,10 +24,10 @@ pub enum Command {
     },
     Include {
         bytes: Vec<u8>,
-        tx: OneshotSender<String>,
+        tx: OneshotSender<H256>,
     },
     Transform {
-        id: String,
+        id: H256,
         dirac: LPR,
         tx: OneshotSender,
     },
@@ -35,7 +35,7 @@ pub enum Command {
 
 impl Command {
     pub fn execute(
-        module: String,
+        module: H256,
         function: String,
         args: BoxedWasmValue,
         with: Option<Imports>,
@@ -49,10 +49,10 @@ impl Command {
             tx,
         }
     }
-    pub fn include(bytes: Vec<u8>, tx: OneshotSender<String>) -> Self {
+    pub fn include(bytes: Vec<u8>, tx: OneshotSender<H256>) -> Self {
         Self::Include { bytes, tx }
     }
-    pub fn transform(id: String, dirac: LPR, tx: OneshotSender) -> Self {
+    pub fn transform(id: H256, dirac: LPR, tx: OneshotSender) -> Self {
         Self::Transform { id, dirac, tx }
     }
 }
