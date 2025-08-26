@@ -11,22 +11,36 @@ keywords.workspace = true
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+bench = true
+doctest = true
+test = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["default"]
+rustc-args = ["--cfg", "docsrs"]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
 
 [[bench]]
 name = "default"
 harness = false
 
-[lib]
-bench = true
-crate-type = ["cdylib", "rlib"]
-doctest = true
-test = true
-
-[build-dependencies]
+[[test]]
+name = "default"
 
 [dependencies]
 contained-core = { workspace = true }
+contained-derive = { optional = true, workspace = true }
+contained-macros = { optional = true, workspace = true }
 
 [dev-dependencies]
 criterion = { features = ["plotters"], version = "0.7" }
@@ -38,6 +52,19 @@ default = [
 
 full = [
   "default",
+  "derive",
+  "macros",
+]
+
+# ********* [FF] Features *********
+derive = ["dep:contained-derive"]
+
+macros = ["dep:contained-macros"]
+
+nightly = [
+  "contained-core/nightly",
+  "contained-derive?/nightly",
+  "contained-macros?/nightly",
 ]
 
 json = [
@@ -69,8 +96,3 @@ alloc = [
 serde = [
   "contained-core/serde",
 ]
-
-[package.metadata.docs.rs]
-all-features = false
-features = ["full"]
-rustc-args = ["--cfg", "docsrs"]

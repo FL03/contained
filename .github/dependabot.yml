@@ -14,5 +14,7 @@ updates:
     directories: 
       - /contained
       - /core
+      - /derive
+      - /macros
     schedule:
         interval: monthly

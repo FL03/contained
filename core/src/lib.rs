@@ -12,7 +12,16 @@ extern crate alloc;
 #[doc(inline)]
 pub use self::error::{Error, Result};
 
+#[macro_use]
+pub(crate) mod macros {
+    #[macro_use]
+    mod seal;
+    #[macro_use]
+    mod wrapper_ops;
+    #[macro_use]
+    mod wrapper;
+}
+
 pub mod error;
 
-pub mod prelude {
-}
+pub mod prelude {}
