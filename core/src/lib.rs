@@ -2,29 +2,17 @@
     Appellation: core <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{errors::*, primitives::*, specs::*, utils::*};
+//! this core components of the contained crate
+#![allow(clippy::missing_saftey_doc, clippy::needless_doctest_main)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-mod errors;
-mod primitives;
-mod specs;
-mod utils;
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
-pub mod actors;
-pub mod compute;
-pub mod connect;
-pub mod delay;
-pub mod epoch;
-pub mod states;
-pub mod tasks;
+#[doc(inline)]
+pub use self::error::{Error, Result};
+
+pub mod error;
 
 pub mod prelude {
-    pub use super::actors::*;
-    pub use super::compute::*;
-    pub use super::connect::*;
-    pub use super::delay::*;
-    pub use super::epoch::*;
-    pub use super::states::*;
-    pub use super::tasks::*;
-
-    pub use super::{errors::*, primitives::*, specs::*, utils::*};
 }

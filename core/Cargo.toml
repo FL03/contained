@@ -1,52 +1,80 @@
 [package]
+build = "build.rs"
+description = "The core crate for the contained project, providing essential abstractions and utilities."
+name = "contained-core"
+
 authors.workspace = true
-categories = []
-description.workspace = true
+categories.workspace = true
 edition.workspace = true
 homepage.workspace = true
-keywords = []
+keywords.workspace = true
 license.workspace = true
-name = "contained-core"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+bench = false
+doctest = true
 test = true
 
-[features]
-default = []
-
-wasm = []
-
-[build-dependencies]
+[[test]]
+name = "default"
 
 [dependencies]
-# decanter.workspace = true
+# error handling
+thiserror = { workspace = true }
+# serialization
+serde = { optional = true, features = ["derive"], workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+# WebAssembly
+wasm-bindgen = { optional = true, workspace = true }
 
-anyhow.workspace = true
-async-trait.workspace = true
-atoi = "2"
-bytes.workspace = true
-chrono.workspace = true
-futures.workspace = true
-itertools.workspace = true
-petgraph ={ features = [], version = "0.6"  }
-predicates = "3.0"
-serde.workspace = true
-serde_json.workspace = true
-smart-default.workspace = true
-strum.workspace = true
-tokio = { features = ["full"], version = "1"}
+[features]
+default = [
+  "std"
+]
 
-[dev-dependencies]
-tokio = { features = ["macros", "rt"], version = "1" }
+full = [
+  "default"
+]
+
+json = [
+  "alloc",
+  "serde_json",
+]
+
+# ********* [FF] Environments *********
+std = [
+  "alloc",
+  "serde?/std",
+  "serde_json?/std",
+  "thiserror/std",
+]
+
+wasm = [
+  "alloc",
+  "wasm_bindgen",
+]
+
+# ********* [FF] Dependencies *********
+alloc = [
+  "serde?/alloc",
+  "serde_json?/alloc",
+]
+
+serde = [
+  "dep:serde",
+  "dep:serde_derive",
+]
+
+serde_json = ["dep:serde_json"]
+
+wasm_bindgen = ["dep:wasm-bindgen"]
 
 [package.metadata.docs.rs]
 all-features = true
 rustc-args = ["--cfg", "docsrs"]
-
-[target.wasm32-unknown-unknown]
-
-[target.wasm32-wasi]
