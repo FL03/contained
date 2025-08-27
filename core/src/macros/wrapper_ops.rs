@@ -7,7 +7,7 @@
 ///
 /// ## Syntax
 ///
-/// ```no_run
+/// ```ignore
 /// impl_wrapper_binary!(WrapperType::<[Op1.call, Op2.call, ...]>);
 /// ```
 #[macro_export]
