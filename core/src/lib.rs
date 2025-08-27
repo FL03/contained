@@ -6,9 +6,15 @@
 #![allow(
     clippy::missing_safety_doc,
     clippy::module_inception,
-    clippy::needless_doctest_main
+    clippy::needless_doctest_main,
+    clippy::upper_case_acronyms
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(not(any(feature = "std", feature = "alloc")))]
+compiler_error! {
+    "Either the 'std' or 'alloc' feature must be enabled."
+}
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

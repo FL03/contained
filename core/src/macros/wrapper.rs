@@ -4,16 +4,16 @@
 */
 
 /// A macro to implement formatting traits for wrapper structs
-/// 
-/// For tuple structs, use the gollowing: 
+///
+/// For tuple structs, use the gollowing:
 /// ```ignore
 /// fmt_wrapper! {
 ///     WrapperType<T>::(Display, Debug, ...);
 /// }
 /// ```
-/// 
+///
 /// For structs with named fields, use the following syntax, replacing `field` with the actual field name:
-/// 
+///
 /// ```ignore
 /// fmt_wrapper! {
 ///     WrapperType<T>.field::(Display, Debug, ...)
