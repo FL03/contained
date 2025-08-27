@@ -7,12 +7,24 @@
 ///
 /// ## Syntax
 ///
+/// For tuple structs:
+///
 /// ```ignore
-/// impl_wrapper_binary!(WrapperType::<[Op1.call, Op2.call, ...]>);
+/// impl_wrapper_binary! {
+///     WrapperType::<[Op1.call, Op2.call, ...]>
+/// }
+/// ```
+///
+/// For structs with named fields:
+///
+/// ```ignore
+/// impl_wrapper_binary! {
+///     ${struct}.$field::<[Op1.call, Op2.call, ...]>
+/// }
 /// ```
 #[macro_export]
 macro_rules! impl_wrapper_binary {
-    ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>($field:tt)) => {
+    ($s:ident.$field:tt::<[$($op:ident.$call:ident),* $(,)?]>) => {
         $(
             $crate::impl_wrapper_binary!(@impl $s::$op.$call($field));
             $crate::impl_wrapper_binary!(@mut $s::$op.$call($field));
