@@ -14,11 +14,11 @@
 macro_rules! impl_wrapper_binary {
     ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
         $(
-            $crate::impl_wrapper_binary!(@impl $s::$op.$call);
-            $crate::impl_wrapper_binary!(@mut $s::$op.$call);
+            $crate::impl_wrapper_binary!(@impl $s::$op.$call(0));
+            $crate::impl_wrapper_binary!(@mut $s::$op.$call(0));
         )*
     };
-    (@impl $s:ident::$op:ident.$call:ident) => {
+    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
         impl<A, B, C> ::core::ops::$op<$s<B>> for $s<A>
         where
             A: ::core::ops::$op<B, Output = C>,
@@ -26,7 +26,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.0, rhs.0))
+                $s(::core::ops::$op::$call(self.$field, rhs.$field))
             }
         }
 
@@ -37,7 +37,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.0, rhs.0))
+                $s(::core::ops::$op::$call(&self.$field, rhs.$field))
             }
         }
 
@@ -48,7 +48,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: &'a $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.0, &rhs.0))
+                $s(::core::ops::$op::$call(&self.$field, &rhs.$field))
             }
         }
 
@@ -59,7 +59,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: &'a $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.0, &rhs.0))
+                $s(::core::ops::$op::$call(self.$field, &rhs.$field))
             }
         }
 
@@ -70,7 +70,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.0, rhs.0))
+                $s(::core::ops::$op::$call(&self.$field, rhs.$field))
             }
         }
 
@@ -81,7 +81,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: &'a mut $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.0, &rhs.0))
+                $s(::core::ops::$op::$call(self.$field, &rhs.$field))
             }
         }
 
@@ -92,7 +92,7 @@ macro_rules! impl_wrapper_binary {
             type Output = $s<C>;
 
             fn $call(self, rhs: &'a mut $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.0, &rhs.0))
+                $s(::core::ops::$op::$call(&self.$field, &rhs.$field))
             }
         }
     };
@@ -109,14 +109,14 @@ macro_rules! impl_wrapper_binary_mut {
             $crate::impl_wrapper_binary_mut!(@impl $s::$op.$call);
         )*
     };
-    (@impl $s:ident::$op:ident.$call:ident) => {
+    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
         impl<A, B> ::core::ops::$op<$s<B>> for &mut $s<A>
         where
             A: ::core::ops::$op<B>,
         {
 
             fn $call(&mut self, rhs: $s<B>) {
-                core::ops::$op::$call(&mut self.0, rhs.0)
+                core::ops::$op::$call(&mut self.$field, rhs.$field)
             }
         }
     };
@@ -125,10 +125,10 @@ macro_rules! impl_wrapper_binary_mut {
 macro_rules! impl_wrapper_unary {
     ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
         $(
-            $crate::impl_wrapper_unary!(@impl $s::$op.$call);
+            $crate::impl_wrapper_unary!(@impl $s::$op.$call(0));
         )*
     };
-    (@impl $s:ident::$op:ident.$call:ident) => {
+    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
         impl<A, B> ::core::ops::$op for $s<A>
         where
             A: ::core::ops::$op<Output = B>,
@@ -136,7 +136,7 @@ macro_rules! impl_wrapper_unary {
             type Output = $s<B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(self.0))
+                $s(core::ops::$op::$call(self.$field))
             }
         }
 
@@ -147,7 +147,7 @@ macro_rules! impl_wrapper_unary {
             type Output = $s<B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(&self.0))
+                $s(core::ops::$op::$call(&self.$field))
             }
         }
 
@@ -158,7 +158,29 @@ macro_rules! impl_wrapper_unary {
             type Output = $s<B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(&mut self.0))
+                $s(core::ops::$op::$call(&mut self.$field))
+            }
+        }
+
+        impl<'a, A, B> ::core::ops::$op for $s<&'a A>
+        where
+            &'a A: ::core::ops::$op<Output = B>,
+        {
+            type Output = $s<B>;
+
+            fn $call(self) -> Self::Output {
+                $s(core::ops::$op::$call(self.$field))
+            }
+        }
+
+        impl<'a, A, B> ::core::ops::$op for $s<&'a mut A>
+        where
+            &'a mut A: ::core::ops::$op<Output = B>,
+        {
+            type Output = $s<B>;
+
+            fn $call(self) -> Self::Output {
+                $s(core::ops::$op::$call(self.$field))
             }
         }
     };
