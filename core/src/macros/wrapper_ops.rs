@@ -12,6 +12,12 @@
 /// ```
 #[macro_export]
 macro_rules! impl_wrapper_binary {
+    ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>($field:tt)) => {
+        $(
+            $crate::impl_wrapper_binary!(@impl $s::$op.$call($field));
+            $crate::impl_wrapper_binary!(@mut $s::$op.$call($field));
+        )*
+    };
     ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
         $(
             $crate::impl_wrapper_binary!(@impl $s::$op.$call(0));
