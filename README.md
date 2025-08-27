@@ -1,59 +1,37 @@
-# Contained
+# contained
 
-[![crates.io](https://img.shields.io/crates/v/contained.svg)](https://crates.io/crates/contained)
-[![docs.rs](https://docs.rs/contained/badge.svg)](https://docs.rs/contained)
-[![Clippy](https://github.com/FL03/contained/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/clippy.yml)
-[![Docker](https://github.com/FL03/contained/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/docker.yml)
-[![Rust](https://github.com/FL03/contained/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/contained/actions/workflows/rust.yml)
+[![crates.io](https://img.shields.io/crates/v/contained?style=for-the-badge&logo=rust)](https://crates.io/crates/contained)
+[![docs.rs](https://img.shields.io/docsrs/contained?style=for-the-badge&logo=docs.rs)](https://docs.rs/contained)
+[![GitHub License](https://img.shields.io/github/license/fl03/contained?style=for-the-badge&logo=github)](./LICENSE)
 
 ***
 
-Contained is a research oriented project focusing on implementing the proposed harmonic computational framework. Contained considers a harmonic framework capable of efficiently orchestrating clusters of devices following a set of instructions broadcast from valid actors preserving only the I/O and required metadata. The metadata stored typically pertains to the temporality or ordering of events which lead to the completion of any particular task and generally distributed as a part of a unique proof. In order to do so, we consider the neo-Riemannian theory and its potential implications for computational systems. Consequentially, several more traditional notions of harmonic analysis are additionally introduced to complete the theorem and solidify the framework. The resulting compositional procedures suggest novel means of generating ephemeral computational spaces capable of supporting interactions across each of the four permutations facilitated by digital systems. Typically these spaces are leveraged in conjunction with one another to elegantly orchestrate complex workloads.
+Welcome to `contained`, a collection of macros and other utilities designed to facilitate the creation and manipulation of so-called wrapper types in Rust. Here, a wrapper type is essentially any object capable of implementing the `#[repr(transparent)]` attribute, such as newtypes, tuple structs, and single-field enums.
+
+## Usage
+
+Before you start using `contained`, make sure to add it as a dependency in your `Cargo.toml` file. You can do this by adding the following lines:
+
+```toml
+[dependencies.contained]
+features = [
+    "derive",
+]
+version = "0.2.x"
+```
+
+### Examples
+
+For more detailed examples, please visit the [examples](https://github.com/FL03/contained/tree/main/contained/examples) directory in the repository. Below are some brief examples highlighting certain features of the library.
 
 ## Getting Started
 
-### Building from the source
-
-#### _Clone the repository_
-
-```bash
-git clone https://github.com/FL03/contained
-```
-
-### Docker
-
-#### _Build the image locally_
-
-```bash
-docker buildx build --tag contained:alpha .
-```
-
-#### _Pull the pre-built image_
-
-```bash
-docker pull jo3mccain/contained:latest
-```
-
-#### _Run the image_
-
-```bash
-docker run -p 8080:8080 jo3mccain/contained:latest system --up
-```
-
-### Usage
-
-```rust
-
-```
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
+To get started with `contained`, you can check out the [QUICKSTART.md](QUICKSTART.md) file, which provides a step-by-step guide on how to set up your development environment and start using the library.
 
 ## License
 
-- [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
-- [MIT](https://choosealicense.com/licenses/mit/)
+Licensed under the Apache License, Version 2.0, ([LICENSE-APACHE](http://www.apache.org/licenses/LICENSE-2.0))
+
+## Contribution
+
+Contributions are welcome, however, ensure that you have read the [CONTRIBUTING.md](CONTRIBUTING.md) file before submitting a pull request.

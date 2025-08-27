@@ -2,29 +2,36 @@
     Appellation: core <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::{errors::*, primitives::*, specs::*, utils::*};
+//! this core components of the contained crate
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::module_inception,
+    clippy::needless_doctest_main,
+    clippy::upper_case_acronyms
+)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-mod errors;
-mod primitives;
-mod specs;
-mod utils;
-
-pub mod actors;
-pub mod compute;
-pub mod connect;
-pub mod delay;
-pub mod epoch;
-pub mod states;
-pub mod tasks;
-
-pub mod prelude {
-    pub use super::actors::*;
-    pub use super::compute::*;
-    pub use super::connect::*;
-    pub use super::delay::*;
-    pub use super::epoch::*;
-    pub use super::states::*;
-    pub use super::tasks::*;
-
-    pub use super::{errors::*, primitives::*, specs::*, utils::*};
+#[cfg(not(any(feature = "std", feature = "alloc")))]
+compiler_error! {
+    "Either the 'std' or 'alloc' feature must be enabled."
 }
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[doc(inline)]
+pub use self::error::{Error, Result};
+
+#[macro_use]
+pub(crate) mod macros {
+    #[macro_use]
+    pub mod seal;
+    #[macro_use]
+    pub mod wrapper_ops;
+    #[macro_use]
+    pub mod wrapper;
+}
+
+pub mod error;
+
+pub mod prelude {}

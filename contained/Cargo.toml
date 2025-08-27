@@ -1,76 +1,98 @@
 [package]
+build = "build.rs"
+name = "contained"
+
 authors.workspace = true
 categories.workspace = true
-default-run = "neo"
 description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
 license.workspace = true
-name = "contained"
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
 
-[[bin]]
-bench = true
-name = "neo"
-test = false
-
-[features]
-default = ["core", "music", "turing"]
-full = ["core", "music", "turing"]
-
-core = [
-    "dep:contained-core"
-]
-music = [
-    "dep:contained-music"
-]
-turing = [
-    "dep:contained-turing"
-]
-
 [lib]
-bench = true
 crate-type = ["cdylib", "rlib"]
+bench = true
 doctest = true
 test = true
 
-[build-dependencies]
+[package.metadata.docs.rs]
+all-features = false
+features = ["default"]
+rustc-args = ["--cfg", "docsrs"]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
+[[bench]]
+name = "default"
+harness = false
+
+[[test]]
+name = "default"
 
 [dependencies]
-contained-core = { features = [], optional = true, path = "../core", version = "0.1.6" }
-contained-music = { features = [], optional = true, path = "../music", version = "0.1.6" }
-contained-turing = { features = [], optional = true, path = "../turing", version = "0.1.6" }
-
-# Standard dependencies
-anyhow.workspace = true
-async-trait.workspace = true
-bytes.workspace = true
-decanter = { features = ["derive"], version = "0.1.6" }
-futures.workspace = true
-glob = "0.3"
-lazy_static = "1"
-petgraph = "0.6"
-serde.workspace = true
-serde_json.workspace = true
-smart-default.workspace = true
-strum.workspace = true
-tokio = { features = ["macros", "rt", "signal", "sync", "time"], version = "1" }
-tokio-stream = "0.1"
-tracing = { features = ["log"], version = "0.1" }
-tracing-subscriber = { features = ["env-filter", "fmt"], version = "0.3" }
-wasmer = { features = [], version = "4" }
-
+contained-core = { workspace = true }
+contained-derive = { optional = true, workspace = true }
+contained-macros = { optional = true, workspace = true }
 
 [dev-dependencies]
+criterion = { features = ["plotters"], version = "0.7" }
 
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = ["--cfg", "docsrs"]
+[features]
+default = [
+  "std"
+]
 
-[target.wasm32-unknown-unknown]
+full = [
+  "default",
+  "derive",
+  "macros",
+]
 
-[target.wasm32-wasi.dependencies]
-tokio_wasi = { features = ["full"], version = "1" }
+# ********* [FF] Features *********
+derive = ["dep:contained-derive"]
+
+macros = ["dep:contained-macros"]
+
+nightly = [
+  "contained-core/nightly",
+  "contained-derive?/nightly",
+  "contained-macros?/nightly",
+]
+
+json = [
+  "alloc",
+  "contained-core/json",
+]
+
+# ********* [FF] Environments *********
+std = [
+  "alloc",
+  "contained-core/std",
+]
+
+wasi = [
+  "alloc",
+  "contained-core/wasi",
+]
+
+wasm = [
+  "alloc",
+  "contained-core/wasm",
+]
+
+# ********* [FF] Dependencies *********
+alloc = [
+  "contained-core/alloc",
+]
+
+serde = [
+  "contained-core/serde",
+]

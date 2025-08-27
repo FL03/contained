@@ -2,32 +2,31 @@
     Appellation: contained <library>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-/// # Contained
-///
-/// A novel harmonic orchestration mechanism derived from the neo-Riemannian theory of music.
-#[cfg(feature = "core")]
-pub use contained_core as core;
-#[cfg(feature = "music")]
-pub use contained_music as music;
-#[cfg(feature = "turing")]
-pub use contained_turing as turing;
+//! # contained
+//!
+//! Welcome to `contained`! A library focused on providing useful abstractions, macros, and
+//! utilities for handling so-called wrapper types. In short, a wrapper type is any implemented
+//! object capable of using `#[repr(transparent)]`.
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::module_inception,
+    clippy::needless_doctest_main,
+    clippy::upper_case_acronyms
+)]
+#![cfg_attr(not(feature = "std"), no_std)]
 
-pub use self::{primitives::*, utils::*};
+pub use contained_core::*;
 
-mod primitives;
-mod utils;
+#[cfg(feature = "derive")]
+pub use contained_derive::*;
+#[cfg(feature = "macros")]
+pub use contained_macros::*;
 
-pub mod agents;
-pub mod cluster;
-
+#[allow(unused_imports)]
 pub mod prelude {
-    pub use super::primitives::*;
-    pub use super::utils::*;
-
-    #[cfg(feature = "core")]
-    pub use super::core::prelude::*;
-    #[cfg(feature = "music")]
-    pub use super::music::prelude::*;
-    #[cfg(feature = "turing")]
-    pub use super::turing::prelude::*;
+    pub use contained_core::prelude::*;
+    #[cfg(feature = "derive")]
+    pub use contained_derive::*;
+    #[cfg(feature = "macros")]
+    pub use contained_macros::*;
 }
