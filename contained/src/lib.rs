@@ -22,6 +22,12 @@ pub use contained_derive::*;
 #[cfg(feature = "macros")]
 pub use contained_macros::*;
 
+#[macro_use]
+pub(crate) mod macros {
+    #[macro_use]
+    mod format;
+}
+
 #[allow(unused_imports)]
 pub mod prelude {
     pub use contained_core::prelude::*;
