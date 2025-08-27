@@ -3,7 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! this core components of the contained crate
-#![allow(clippy::missing_saftey_doc, clippy::needless_doctest_main)]
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::module_inception,
+    clippy::needless_doctest_main
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -15,11 +19,11 @@ pub use self::error::{Error, Result};
 #[macro_use]
 pub(crate) mod macros {
     #[macro_use]
-    mod seal;
+    pub mod seal;
     #[macro_use]
-    mod wrapper_ops;
+    pub mod wrapper_ops;
     #[macro_use]
-    mod wrapper;
+    pub mod wrapper;
 }
 
 pub mod error;

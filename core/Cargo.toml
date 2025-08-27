@@ -28,6 +28,9 @@ rustc-args = ["--cfg", "docsrs"]
 [[test]]
 name = "default"
 
+[[test]]
+name = "macros"
+
 [dependencies]
 # error handling
 thiserror = { workspace = true }
