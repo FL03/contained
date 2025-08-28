@@ -12,6 +12,12 @@ on:
   pull_request:
     branches: [ main, master, $default-branch ]
     types: [ opened, synchronize, reopened ]
+    paths:
+      - '**.rs'
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
+      - '.github/workflows/cargo-*.yml'
+      - '.github/workflows/rust.yml'
   push:
     branches: [ main, master, $default-branch ]
     tags:
