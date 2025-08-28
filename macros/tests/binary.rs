@@ -15,7 +15,7 @@ pub struct B<T> {
 }
 
 binary_wrapper! {
-    A {
+    impl A {
         Add.add,
         Sub.sub,
         Mul.mul,
@@ -30,7 +30,7 @@ binary_wrapper! {
 }
 
 binary_wrapper! {
-    B.value {
+    impl B.value {
         Add.add,
         Sub.sub,
         Mul.mul,

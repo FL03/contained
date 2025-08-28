@@ -15,11 +15,29 @@ pub struct B<T> {
 }
 
 fmt_wrapper! {
-    A<Q>::(Binary, Debug, Display, LowerHex, UpperHex, LowerExp, UpperExp, Pointer)
+    impl A<Q> { 
+        Binary, 
+        Debug, 
+        Display, 
+        LowerHex, 
+        UpperHex, 
+        LowerExp, 
+        UpperExp, 
+        Pointer 
+    }
 }
 
 fmt_wrapper! {
-    B<Q>.value::(Binary, Debug, Display, LowerHex, UpperHex, LowerExp, UpperExp, Pointer)
+    impl B<Q>.value { 
+        Binary, 
+        Debug, 
+        Display, 
+        LowerHex, 
+        UpperHex, 
+        LowerExp, 
+        UpperExp, 
+        Pointer 
+    }
 }
 
 #[test]

@@ -15,7 +15,7 @@ pub enum NestedAttr {
 impl NestedAttr {
     /// attempts to parse the attribute from the given metadata
     pub fn parse_nested(meta: &syn::meta::ParseNestedMeta<'_>) -> syn::Result<Self> {
-        // #[wrapper(inner(...))]
+        // #[wrap(inner(...))]
         if meta.path.is_ident("inner") {
             let attr = DisplayAttr::parse_nested(meta)?;
             return Ok(Self::Inner(attr));

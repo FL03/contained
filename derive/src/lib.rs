@@ -28,7 +28,7 @@ use syn::{DeriveInput, parse_macro_input};
 
 /// The [`Wrapper`] macro is designed for single-field structs, implementing additional methods
 /// supporting interactions with the inner value
-#[proc_macro_derive(Wrapper, attributes(wrapper))]
+#[proc_macro_derive(Wrapper, attributes(wrap))]
 pub fn wrapper(input: TokenStream) -> TokenStream {
     // Parse the inputs into the proper struct
     let ast = parse_macro_input!(input as DeriveInput);

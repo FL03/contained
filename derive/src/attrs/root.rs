@@ -12,7 +12,7 @@ pub struct RootAttr {
 }
 
 impl RootAttr {
-    const BASEPATH: &'static str = "wrapper";
+    const BASEPATH: &'static str = "wrap";
 
     pub fn set_inner(&mut self, attr: DisplayAttr) {
         self.inner = Some(attr);

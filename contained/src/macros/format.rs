@@ -6,9 +6,14 @@
 /// A macro to implement formatting traits for wrapper structs
 ///
 /// For tuple structs, use the following:
+/// 
 /// ```ignore
 /// fmt_wrapper! {
-///     WrapperType<T>::(Display, Debug, ...);
+///     impl WrapperType<T> {
+///         Display, 
+///         Debug, 
+///         ...
+///     }
 /// }
 /// ```
 ///
@@ -16,17 +21,21 @@
 ///
 /// ```ignore
 /// fmt_wrapper! {
-///     WrapperType<T>.field::(Display, Debug, ...)
+///     impl WrapperType<T>.field {
+///         Display, 
+///         Debug, 
+///         ...
+///     }
 /// }
 /// ```
 #[macro_export]
 macro_rules! fmt_wrapper {
-    ($s:ident<$T:ident>.$field:ident::($($trait:ident),* $(,)?)) => {
+    (impl $s:ident<$T:ident>.$field:ident { $($trait:ident),* $(,)? }) => {
         $(
             $crate::fmt_wrapper!(@impl $s<$T>::$trait.$field);
         )*
     };
-    ($s:ident<$T:ident>$(.$field:ident)?::($($trait:ident),* $(,)?)) => {
+    (impl $s:ident<$T:ident>$(.$field:ident)? { $($trait:ident),* $(,)? }) => {
         $(
             $crate::fmt_wrapper!(@impl $s<$T>::$trait.0);
         )*

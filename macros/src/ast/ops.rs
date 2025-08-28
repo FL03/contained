@@ -3,11 +3,13 @@
     authors: @FL03
 */
 use syn::parse::{Parse, ParseStream};
+use syn::token::Impl;
 use syn::{Ident, Token, braced};
 
 /// The abstract syntax tree for the `binary_wrapper` macro input;
-/// e.g. `A { Add.add, Sub.sub }` or `B.field { Add.add, Sub.sub }`
+/// e.g. `impl A { Add.add, Sub.sub }` or `impl B.field { Add.add, Sub.sub }`
 pub struct WrapperOpsAst {
+    pub _impl: Impl,
     pub target: Ident,
     pub field: Option<Ident>,
     pub ops: Vec<(Ident, Ident)>,
@@ -15,7 +17,8 @@ pub struct WrapperOpsAst {
 
 impl Parse for WrapperOpsAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let target: Ident = input.parse()?;
+        let _impl = input.parse::<Impl>()?;
+        let target = input.parse::<Ident>()?;
         // resolve the optional named field
         let field = if input.peek(Token![.]) {
             input.parse::<Token![.]>()?;
@@ -35,6 +38,6 @@ impl Parse for WrapperOpsAst {
             }
             ops.push((op, call));
         }
-        Ok(Self { target, field, ops })
+        Ok(Self { _impl, target, field, ops })
     }
 }
