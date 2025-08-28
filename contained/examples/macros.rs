@@ -5,7 +5,6 @@
 use contained::fmt_wrapper;
 
 fn main() -> contained::Result<()> {
-    
     let a = A(255);
     let b = B { value: 255 };
     println!("A: {a:?}, B: {b:?}");

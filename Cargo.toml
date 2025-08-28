@@ -21,13 +21,13 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/contained.git"
 rust-version = "1.85.0"
-version = "0.2.1"
+version = "0.2.2"
 
 [workspace.dependencies]
-contained = { default-features = false, path = "contained", version = "0.2.1" }
-contained-core = { default-features = false, path = "core", version = "0.2.1" }
-contained-derive = { default-features = false, path = "derive", version = "0.2.1" }
-contained-macros = { default-features = false, path = "macros", version = "0.2.1" }
+contained = { default-features = false, path = "contained", version = "0.2.2" }
+contained-core = { default-features = false, path = "core", version = "0.2.2" }
+contained-derive = { default-features = false, path = "derive", version = "0.2.2" }
+contained-macros = { default-features = false, path = "macros", version = "0.2.2" }
 
 # error handling
 anyhow = { default-features = false, version = "1" }
