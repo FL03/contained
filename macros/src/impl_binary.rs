@@ -2,70 +2,89 @@
     appellation: impl_binary <module>
     authors: @FL03
 */
+use crate::ast::WrapperOpsAst;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse_macro_input, Ident, Token, braced, parse::{Parse, ParseStream}};
+use syn::parse_macro_input;
 
-pub struct WrapperOpsInput {
-    pub target: Ident,
-    pub field: Option<Ident>,
-    pub ops: Vec<(Ident, Ident)>,
-}
-
-impl Parse for WrapperOpsInput {
-    fn parse(input: ParseStream) -> syn::Result<Self> {
-        let target: Ident = input.parse()?;
-        let field = if input.peek(Token![.]) {
-            input.parse::<Token![.]>()?;
-            Some(input.parse()?)
-        } else {
-            None
-        };
-        let content;
-        braced!(content in input);
-        let mut ops = Vec::new();
-        while !content.is_empty() {
-            let op: Ident = content.parse()?;
-            content.parse::<Token![.]>()?;
-            let call: Ident = content.parse()?;
-            if content.peek(Token![,]) {
-                content.parse::<Token![,]>()?;
-            }
-            ops.push((op, call));
-        }
-        Ok(Self { target, field, ops })
-    }
-}
 /// Procedural macro entry point
-pub fn wrapper_ops_impl(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let WrapperOpsInput {target, field, ops } = parse_macro_input!(input as WrapperOpsInput);
+pub fn impl_wrapper_binary_ops(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let ast = parse_macro_input!(input as WrapperOpsAst);
+
+    let mut impls = Vec::new();
+    impls.extend(impl_base_ops(&ast));
+    impls.extend(impl_assign_ops(&ast));
+
+    TokenStream::from(quote! { #(#impls)* }).into()
+}
+
+fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<TokenStream> {
+    let mut impls = Vec::new();
+    for (op, call) in ops {
+        let _impl = if let Some(f) = field {
+            quote! {
+                impl<_A, _B, _C> ::core::ops::#op<#target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op<_B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+                    fn #call(self, rhs: #target<_B>) -> Self::Output {
+                        let res = ::core::ops::#op::#call(self.#f, rhs.#f);
+                        #target { #f: res, ..self }
+                    }
+                }
+            }
+        } else {
+            quote! {
+                impl<_A, _B, _C> ::core::ops::#op<#target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op<_B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+                    fn #call(self, rhs: #target<_B>) -> Self::Output {
+                        #target(::core::ops::#op::#call(self.0, rhs.0))
+                    }
+                }
+            }
+        };
+        impls.push(_impl);
+    }
+    impls
+}
+
+fn impl_assign_ops(options: &WrapperOpsAst) -> Vec<TokenStream> {
+    let WrapperOpsAst { target, field, ops } = options;
 
     let mut impls = Vec::new();
     for (op, call) in ops {
         let op_assign = format_ident!("{}Assign", op);
         let call_assign = format_ident!("{}_assign", call);
 
-        impls.push(quote! {
-            impl<A, B, C> ::core::ops::#op<#target<B>> for #target<A>
-            where
-                A: ::core::ops::#op<B, Output = C>,
-            {
-                type Output = #target<C>;
-                fn #call(self, rhs: #target<B>) -> Self::Output {
-                    #target(::core::ops::#op::#call(self.#field, rhs.#field))
+        let _impl = if let Some(f) = field {
+            quote! {
+                impl<_A, _B> ::core::ops::#op_assign<#target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op_assign<_B>,
+                {
+                    fn #call_assign(&mut self, rhs: #target<_B>) {
+                        ::core::ops::#op_assign::#call_assign(&mut self.#f, rhs.#f)
+                    }
                 }
             }
-
-            impl<A, B> ::core::ops::#op_assign<#target<B>> for #target<A>
-            where
-                A: ::core::ops::#op_assign<B>,
-            {
-                fn #call_assign(&mut self, rhs: #target<B>) {
-                    ::core::ops::#op_assign::#call_assign(&mut self.#field, rhs.#field)
+        } else {
+            quote! {
+                impl<_A, _B> ::core::ops::#op_assign<#target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op_assign<_B>,
+                {
+                    fn #call_assign(&mut self, rhs: #target<_B>) {
+                        ::core::ops::#op_assign::#call_assign(&mut self.0, rhs.0)
+                    }
                 }
             }
-        });
+        };
+        // register the implementation
+        impls.push(_impl);
     }
-
-    TokenStream::from(quote! { #(#impls)* }).into()
+    impls
 }

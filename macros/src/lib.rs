@@ -7,12 +7,20 @@ extern crate proc_macro;
 
 pub(crate) mod impl_binary;
 
+pub(crate) mod ast {
+    #[doc(inline)]
+    pub use self::ops::*;
+
+    mod ops;
+}
+
 use proc_macro::TokenStream;
 
-/// Automatically generate the binary operator implementations for a wrapper type
+/// A procedural macro for generating implementations for core binary operations on a wrapper 
+/// type
 #[proc_macro]
 pub fn binary_wrapper(input: TokenStream) -> TokenStream {
-    let output = impl_binary::wrapper_ops_impl(input);
+    let output = impl_binary::impl_wrapper_binary_ops(input);
 
     TokenStream::from(output)
 }

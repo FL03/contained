@@ -3,8 +3,6 @@
     Contrib: @FL03
 */
 
-
-
 #[macro_export]
 macro_rules! wrapper {
     ($($S:ident($vis:vis $T:ident) $(where $($rest:tt)*)?;),* $(,)?) => {
