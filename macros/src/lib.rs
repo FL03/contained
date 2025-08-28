@@ -5,13 +5,27 @@
 //! procedural macros for interacting with various wrappers
 extern crate proc_macro;
 
+pub(crate) mod impl_binary;
+
+pub(crate) mod ast {
+    #[doc(inline)]
+    #[allow(unused_imports)]
+    pub use self::{ops::*, wrapper::*};
+
+    mod ops;
+    #[allow(dead_code)]
+    mod wrapper;
+}
+
+use crate::ast::WrapperOpsAst;
 use proc_macro::TokenStream;
+use syn::parse_macro_input;
 
-pub(crate) mod wrap;
-
-/// A procedural macro for generativly creating getter methods; i.e. $field_name() -> &$field_type and $field_name_mut() -> &mut $field_type
+/// A procedural macro for generating implementations for core binary operations on a wrapper
+/// type
 #[proc_macro]
-pub fn wrap(input: TokenStream) -> TokenStream {
-    println!("display: {:?}", input);
-    input
+pub fn binary_wrapper(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as WrapperOpsAst);
+    let output = impl_binary::impl_wrapper_binary_ops(ast);
+    output.into()
 }

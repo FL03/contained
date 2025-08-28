@@ -101,7 +101,7 @@ checksum = "b94f61472cee1439c0b966b47e3aca9ae07e45d070759512cd390ea2bebc6675"
 
 [[package]]
 name = "contained"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "contained-core",
  "contained-derive",
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "contained-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "paste",
  "serde",
@@ -123,7 +123,7 @@ dependencies = [
 
 [[package]]
 name = "contained-derive"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -132,7 +132,7 @@ dependencies = [
 
 [[package]]
 name = "contained-macros"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "proc-macro2",
  "quote",

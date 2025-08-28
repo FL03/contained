@@ -20,6 +20,7 @@ bench = true
 doctest = true
 test = true
 
+# ********* Package Metadata *********
 [package.metadata.docs.rs]
 all-features = false
 features = ["default"]
@@ -30,12 +31,27 @@ version = "v{{version}}"
 no-dev-version = true
 tag-name = "{{version}}"
 
+# ********* Benchmarks *********
 [[bench]]
 name = "default"
 harness = false
 
+# ********* Examples *********
+[[example]]
+name = "derive"
+required-features = ["derive"]
+
+[[example]]
+name = "macros"
+required-features = ["macros"]
+
+# ********* Unit Tests *********
 [[test]]
 name = "default"
+
+[[test]]
+name = "format"
+required-features = ["macros"]
 
 [dependencies]
 contained-core = { workspace = true }

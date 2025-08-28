@@ -15,6 +15,7 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(any(feature = "alloc", feature = "std"))]
 pub use contained_core::*;
 
 #[cfg(feature = "derive")]
@@ -22,8 +23,15 @@ pub use contained_derive::*;
 #[cfg(feature = "macros")]
 pub use contained_macros::*;
 
+#[macro_use]
+pub(crate) mod macros {
+    #[macro_use]
+    mod format;
+}
+
 #[allow(unused_imports)]
 pub mod prelude {
+    #[cfg(any(feature = "alloc", feature = "std"))]
     pub use contained_core::prelude::*;
     #[cfg(feature = "derive")]
     pub use contained_derive::*;

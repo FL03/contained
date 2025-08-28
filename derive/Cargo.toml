@@ -14,6 +14,20 @@ repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
+[lib]
+bench = false
+doc = true
+doctest = false
+proc-macro = true
+test = false
+
+[[test]]
+name = "default"
+
+[[test]]
+name = "wrapper"
+
+# ********* Package Metadata *********
 [package.metadata.docs.rs]
 all-features = false
 features = ["default"]
@@ -24,19 +38,15 @@ version = "v{{version}}"
 no-dev-version = true
 tag-name = "{{version}}"
 
-[lib]
-bench = false
-doc = true
-doctest = false
-proc-macro = true
-test = false
-
 [dependencies]
-proc-macro2 = "1"
-quote = "1"
+# procedural macros
+proc-macro2 = { version = "1" }
+quote = { version = "1" }
 syn = { features = ["full"], version = "2" }
 
+# ********* Features Flags *********
 [features]
 default = []
 
 nightly = ["proc-macro2/nightly"]
+

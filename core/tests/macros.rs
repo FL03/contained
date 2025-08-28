@@ -2,25 +2,32 @@
     appellation: macros <test>
     authors: @FL03
 */
-use contained_core::fmt_wrapper;
+use contained_core::impl_wrapper_unary;
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct A<T>(pub T);
 
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct B<T> {
     pub field: T,
 }
 
-fmt_wrapper! {
-    A<Q>::(Binary, Debug, Display, LowerHex, UpperHex, LowerExp, UpperExp, Pointer)
+impl_wrapper_unary! {
+    A {
+        Not.not
+    }
 }
 
-fmt_wrapper! {
-    B<Q>.field::(Binary, Debug, Display, LowerHex, UpperHex, LowerExp, UpperExp, Pointer)
+impl_wrapper_unary! {
+    B.field {
+        Not.not
+    }
 }
 
 #[test]
-fn test_fmt_wrapper() {
-    let a = A(42);
-    let b = B { field: 42 };
-    assert_eq!(format!("{}", a), format!("{}", b));
+fn test_unary_impls() {
+    let a = A(true);
+    let b = B { field: true };
+    assert_eq!(!a, A(false));
+    assert_eq!(!b, B { field: false });
 }

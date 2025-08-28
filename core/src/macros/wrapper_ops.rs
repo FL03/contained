@@ -3,202 +3,107 @@
     authors: @FL03
 */
 
-/// the [`impl_wrapper_binary!`] macro implements binary operations for a wrapper type.
+/// the [`impl_wrapper_unary!`] macro implements binary operations for a wrapper type.
 ///
 /// ## Syntax
 ///
 /// For tuple structs:
 ///
 /// ```ignore
-/// impl_wrapper_binary! {
-///     WrapperType::<[Op1.call, Op2.call, ...]>
+/// impl_wrapper_unary! {
+///    ${struct} { Op1.call, Op2.call, ... }
 /// }
 /// ```
 ///
 /// For structs with named fields:
 ///
 /// ```ignore
-/// impl_wrapper_binary! {
-///     ${struct}.$field::<[Op1.call, Op2.call, ...]>
+/// impl_wrapper_unary! {
+///     ${struct}.${field} { Op1.call, Op2.call, ... }
 /// }
 /// ```
-#[macro_export]
-macro_rules! impl_wrapper_binary {
-    ($s:ident.$field:tt::<[$($op:ident.$call:ident),* $(,)?]>) => {
-        $(
-            $crate::impl_wrapper_binary!(@impl $s::$op.$call($field));
-            $crate::impl_wrapper_binary!(@mut $s::$op.$call($field));
-        )*
-    };
-    ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
-        $(
-            $crate::impl_wrapper_binary!(@impl $s::$op.$call(0));
-            $crate::impl_wrapper_binary!(@mut $s::$op.$call(0));
-        )*
-    };
-    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
-        impl<A, B, C> ::core::ops::$op<$s<B>> for $s<A>
-        where
-            A: ::core::ops::$op<B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.$field, rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<$s<B>> for &'a $s<A>
-        where
-            &'a A: ::core::ops::$op<B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.$field, rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<&'a $s<B>> for &'a $s<A>
-        where
-            &'a A: ::core::ops::$op<&'a B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: &'a $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.$field, &rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<&'a $s<B>> for $s<A>
-        where
-            A: ::core::ops::$op<&'a B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: &'a $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.$field, &rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<$s<B>> for &'a mut $s<A>
-        where
-            &'a A: ::core::ops::$op<B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.$field, rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<&'a mut $s<B>> for $s<A>
-        where
-            A: ::core::ops::$op<&'a B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: &'a mut $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.$field, &rhs.$field))
-            }
-        }
-
-        impl<'a, A, B, C> ::core::ops::$op<&'a mut $s<B>> for &'a mut $s<A>
-        where
-            &'a A: ::core::ops::$op<&'a B, Output = C>,
-        {
-            type Output = $s<C>;
-
-            fn $call(self, rhs: &'a mut $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(&self.$field, &rhs.$field))
-            }
-        }
-    };
-    (@mut $s:ident::$op:ident.$call:ident) => {
-        paste::paste! {
-            $crate::impl_wrapper_binary_mut!(@impl $s::[<$op Assign>].[<$call _assign>]);
-        }
-    };
-}
-#[macro_export]
-macro_rules! impl_wrapper_binary_mut {
-    ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
-        $(
-            $crate::impl_wrapper_binary_mut!(@impl $s::$op.$call);
-        )*
-    };
-    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
-        impl<A, B> ::core::ops::$op<$s<B>> for &mut $s<A>
-        where
-            A: ::core::ops::$op<B>,
-        {
-
-            fn $call(&mut self, rhs: $s<B>) {
-                core::ops::$op::$call(&mut self.$field, rhs.$field)
-            }
-        }
-    };
-}
+///
+/// **Note**: The target struct must have exactly one field;
 #[macro_export]
 macro_rules! impl_wrapper_unary {
-    ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
+    ($s:ident.$field:ident { $($op:ident.$call:ident),* $(,)?}) => {
+        $(
+            $crate::impl_wrapper_unary!(@impl $s::$op.$call($field));
+        )*
+    };
+    ($s:ident { $($op:ident.$call:ident),* $(,)?}) => {
         $(
             $crate::impl_wrapper_unary!(@impl $s::$op.$call(0));
         )*
     };
-    (@impl $s:ident::$op:ident.$call:ident($field:tt)) => {
-        impl<A, B> ::core::ops::$op for $s<A>
+    (@impl $s:ident::$op:ident.$call:ident($field:ident)) => {
+        impl<_A, _B> ::core::ops::$op for $s<_A>
         where
-            A: ::core::ops::$op<Output = B>,
+           _A: ::core::ops::$op<Output = _B>,
         {
-            type Output = $s<B>;
+            type Output = $s<_B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(self.$field))
+                let $field = ::core::ops::$op::$call(self.$field);
+                $s { $field }
             }
         }
 
-        impl<'a, A, B> ::core::ops::$op for &'a $s<A>
+        impl<'a, _A, _B> ::core::ops::$op for &'a $s<_A>
         where
-            &'a A: ::core::ops::$op<Output = B>,
+            &'a _A: ::core::ops::$op<Output = _B>,
         {
-            type Output = $s<B>;
+            type Output = $s<_B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(&self.$field))
+                let $field = ::core::ops::$op::$call(&self.$field);
+                $s { $field }
             }
         }
 
-        impl<'a, A, B> ::core::ops::$op for &'a mut $s<A>
+        impl<'a, _A, _B> ::core::ops::$op for &'a mut $s<_A>
         where
-            &'a mut A: ::core::ops::$op<Output = B>,
+            &'a mut _A: ::core::ops::$op<Output = _B>,
         {
-            type Output = $s<B>;
+            type Output = $s<_B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(&mut self.$field))
+                let $field = ::core::ops::$op::$call(&mut self.$field);
+                $s { $field }
+            }
+        }
+    };
+    (@impl $s:ident::$op:ident.$call:ident(0)) => {
+        impl<_A, _B> ::core::ops::$op for $s<_A>
+        where
+           _A: ::core::ops::$op<Output = _B>,
+        {
+            type Output = $s<_B>;
+
+            fn $call(self) -> Self::Output {
+                $s(::core::ops::$op::$call(self.0))
             }
         }
 
-        impl<'a, A, B> ::core::ops::$op for $s<&'a A>
+        impl<'a, _A, _B> ::core::ops::$op for &'a $s<_A>
         where
-            &'a A: ::core::ops::$op<Output = B>,
+            &'a _A: ::core::ops::$op<Output = _B>,
         {
-            type Output = $s<B>;
+            type Output = $s<_B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(self.$field))
+                $s(::core::ops::$op::$call(&self.0))
             }
         }
 
-        impl<'a, A, B> ::core::ops::$op for $s<&'a mut A>
+        impl<'a, _A, _B> ::core::ops::$op for &'a mut $s<_A>
         where
-            &'a mut A: ::core::ops::$op<Output = B>,
+            &'a mut _A: ::core::ops::$op<Output = _B>,
         {
-            type Output = $s<B>;
+            type Output = $s<_B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(self.$field))
+                $s(::core::ops::$op::$call(&mut self.0))
             }
         }
     };
