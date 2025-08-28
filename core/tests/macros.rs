@@ -2,7 +2,7 @@
     appellation: macros <test>
     authors: @FL03
 */
-use contained_core::impl_wrapper_binary;
+use contained_core::impl_wrapper_unary;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct A<T>(pub T);
@@ -12,39 +12,22 @@ pub struct B<T> {
     pub field: T,
 }
 
-impl_wrapper_binary! {
+impl_wrapper_unary! {
     A {
-        Add.add,
-        Sub.sub,
-        Mul.mul,
-        Div.div,
-        Rem.rem,
-        BitAnd.bitand,
-        BitOr.bitor,
-        BitXor.bitxor,
-        Shl.shl,
-        Shr.shr,
+        Not.not
     }
 }
 
-// impl_wrapper_binary! {
-//     B.field {
-//         Add.add,
-//         Sub.sub,
-//         Mul.mul,
-//         Div.div,
-//         Rem.rem,
-//         BitAnd.bitand,
-//         BitOr.bitor,
-//         BitXor.bitxor,
-//         Shl.shl,
-//         Shr.shr,
-//     }
-// }
+impl_wrapper_unary! {
+    B.field {
+        Not.not
+    }
+}
 
 #[test]
-fn test_binary_ops() {
-    let (x, y) = (A(42), A(2));
-    assert_eq!((x + y), A(44));
-    assert_eq!((x - y), A(40));
+fn test_unary_impls() {
+    let a = A(true);
+    let b = B { field: true };
+    assert_eq!(!a, A(false));
+    assert_eq!(!b, B { field: false });
 }

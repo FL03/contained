@@ -24,15 +24,8 @@ macro_rules! wrapper {
         pub struct $S<$T>($vis $T) $(where $($rest)*)?;
 
         impl<$T> $S<$T> {
-            /// returns a new instance initialized with the default value
-            pub fn new() -> Self
-            where
-                $T: Default,
-            {
-                Self($T::default())
-            }
             /// returns a new instance with the given value
-            pub fn from_value(value: $T) -> Self {
+            pub const fn new(value: $T) -> Self {
                 Self(value)
             }
             /// returns an immutable reference to the inner value
@@ -44,45 +37,51 @@ macro_rules! wrapper {
                 &mut self.0
             }
             /// consumes the current instance to return the inner value
+            #[inline]
             pub fn into_inner(self) -> $T {
                 self.0
             }
             /// applies the given function to the inner value and returns a new instance with
             /// the result
+            #[inline]
             pub fn map<R, F>(self, f: F) -> $S<R>
             where
                 F: FnOnce($T) -> R,
             {
                 $S(f(self.0))
             }
-            /// uses the [`replace`](core::mem::replace) method to update and return the inner value
-            pub fn replace(&mut self, value: $T) -> $T {
-                core::mem::replace(self.get_mut(), value)
+            /// [`replace`](core::mem::replace) the inner value with the given, returning the previous value
+            pub const fn replace(&mut self, value: $T) -> $T {
+                ::core::mem::replace(self.get_mut(), value)
             }
-            /// update the innerstate before returing a mutable reference to the wrapper
-            pub fn set(&mut self, value: $T) -> &mut Self {
+            /// set the inner value, in-place
+            #[inline]
+            pub fn set(&mut self, value: $T) {
                 *self.get_mut() = value;
-                self
             }
-            /// uses the [`take`](core::mem::take) method to replace the inner value with the default
-            /// value to return its previous value
+            /// [`swap`](core::mem::swap) the inner value with that of another instance of the same type
+            pub const fn swap(&mut self, other: &mut Self) {
+                ::core::mem::swap(self.get_mut(), other.get_mut());
+            }
+            /// [`take`](core::mem::take) the inner value, leaving a default in its place
+            #[inline]
             pub fn take(&mut self) -> $T
             where
                 $T: Default,
             {
-                core::mem::take(self.get_mut())
+                ::core::mem::take(self.get_mut())
             }
             /// consumes the current instance to create another with the given value
-            pub fn with(self, value: $T) -> Self {
-                Self(value)
+            pub fn with<_U>(self, value: _U) -> $S<_U> {
+                $S::new(value)
             }
             /// captures a referenced value in a new instance
             pub fn view(&self) -> $S<&$T> {
-                $S(self.get())
+                $S::new(self.get())
             }
             /// captures a mutable reference to the inner value
             pub fn view_mut(&mut self) -> $S<&mut $T> {
-                $S(self.get_mut())
+                $S::new(self.get_mut())
             }
         }
 
