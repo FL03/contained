@@ -8,15 +8,14 @@ use quote::{format_ident, quote};
 
 /// Procedural macro entry point
 pub fn impl_wrapper_binary_ops(input: WrapperOpsAst) -> TokenStream {
-
     let mut impls = Vec::new();
-    impls.extend(impl_base_ops(&input));
+    impls.extend(impl_core_binary_ops(&input));
     impls.extend(impl_assign_ops(&input));
 
     quote! { #(#impls)* }
 }
 
-fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<TokenStream> {
+fn impl_core_binary_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<TokenStream> {
     let mut impls = Vec::new();
     for (op, call) in ops {
         let _impl = if let Some(f) = field {
@@ -32,6 +31,42 @@ fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<To
                         #target { #f }
                     }
                 }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<&'a #target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op<&'a _B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: &'a #target<_B>) -> Self::Output {
+                        let #f = ::core::ops::#op::#call(self.#f, &rhs.#f);
+                        #target { #f }
+                    }
+                }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<&'a #target<_B>> for &'a #target<_A>
+                where
+                    &'a _A: ::core::ops::#op<&'a _B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: &'a #target<_B>) -> Self::Output {
+                        let #f = ::core::ops::#op::#call(&self.#f, &rhs.#f);
+                        #target { #f }
+                    }
+                }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<#target<_B>> for &'a #target<_A>
+                where
+                    &'a _A: ::core::ops::#op<_B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: #target<_B>) -> Self::Output {
+                        let #f = ::core::ops::#op::#call(&self.#f, rhs.#f);
+                        #target { #f }
+                    }
+                }
             }
         } else {
             quote! {
@@ -43,6 +78,39 @@ fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<To
 
                     fn #call(self, rhs: #target<_B>) -> Self::Output {
                         #target(::core::ops::#op::#call(self.0, rhs.0))
+                    }
+                }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<&'a #target<_B>> for #target<_A>
+                where
+                    _A: ::core::ops::#op<&'a _B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: &'a #target<_B>) -> Self::Output {
+                        #target(::core::ops::#op::#call(self.0, &rhs.0))
+                    }
+                }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<&'a #target<_B>> for &'a #target<_A>
+                where
+                    &'a _A: ::core::ops::#op<&'a _B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: &'a #target<_B>) -> Self::Output {
+                        #target(::core::ops::#op::#call(&self.0, &rhs.0))
+                    }
+                }
+
+                impl<'a, _A, _B, _C> ::core::ops::#op<#target<_B>> for &'a #target<_A>
+                where
+                    &'a _A: ::core::ops::#op<_B, Output = _C>,
+                {
+                    type Output = #target<_C>;
+
+                    fn #call(self, rhs: #target<_B>) -> Self::Output {
+                        #target(::core::ops::#op::#call(&self.0, rhs.0))
                     }
                 }
             }
