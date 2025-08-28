@@ -46,7 +46,7 @@ binary_wrapper! {
 
 #[test]
 fn test_impl_binary_ops_on_tuple() {
-    let (x, y) = (A(42), A(2));
+    let (x, y) = (A(42), A(&2));
     assert_eq!((x + y), A(44));
     assert_eq!((x - y), A(40));
 }

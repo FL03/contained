@@ -5,6 +5,8 @@
 use syn::parse::{Parse, ParseStream};
 use syn::{Ident, Token, braced};
 
+/// The abstract syntax tree for the `binary_wrapper` macro input;
+/// e.g. `A { Add.add, Sub.sub }` or `B.field { Add.add, Sub.sub }`
 pub struct WrapperOpsAst {
     pub target: Ident,
     pub field: Option<Ident>,

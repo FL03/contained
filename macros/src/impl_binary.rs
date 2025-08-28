@@ -8,11 +8,14 @@ use quote::{format_ident, quote};
 
 /// Procedural macro entry point
 pub fn impl_wrapper_binary_ops(input: WrapperOpsAst) -> TokenStream {
-    let mut impls = Vec::new();
-    impls.extend(impl_core_binary_ops(&input));
-    impls.extend(impl_assign_ops(&input));
+    let base = impl_core_binary_ops(&input);
+    let assign = impl_assign_ops(&input);
 
-    quote! { #(#impls)* }
+    quote! {
+        #(#base)*
+
+        #(#assign)*
+    }
 }
 
 fn impl_core_binary_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<TokenStream> {

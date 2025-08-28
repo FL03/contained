@@ -9,9 +9,12 @@ pub(crate) mod impl_binary;
 
 pub(crate) mod ast {
     #[doc(inline)]
-    pub use self::ops::*;
+    #[allow(unused_imports)]
+    pub use self::{ops::*, wrapper::*};
 
     mod ops;
+    #[allow(dead_code)]
+    mod wrapper;
 }
 
 use crate::ast::WrapperOpsAst;
@@ -24,5 +27,5 @@ use syn::parse_macro_input;
 pub fn binary_wrapper(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as WrapperOpsAst);
     let output = impl_binary::impl_wrapper_binary_ops(ast);
-    TokenStream::from(output)
+    output.into()
 }
