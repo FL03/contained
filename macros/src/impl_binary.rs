@@ -1,4 +1,7 @@
-
+/*
+    appellation: impl_binary <module>
+    authors: @FL03
+*/
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{parse_macro_input, Ident, Token, braced, parse::{Parse, ParseStream}};
