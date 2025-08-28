@@ -5,24 +5,46 @@
 use contained::fmt_wrapper;
 
 fn main() -> contained::Result<()> {
-    let a = Sample { value: 42 };
-    println!("a = {}", a);
+    
+    let a = A(255);
+    let b = B { value: 255 };
+    println!("A: {a:?}, B: {b:?}");
+    assert_eq!(format!("{:x}", a), format!("{:x}", b));
     Ok(())
 }
 
-pub struct Sample<T> {
-    value: T,
+#[derive(Clone, Copy, Eq, Hash, PartialEq, PartialOrd)]
+pub struct A<T>(T);
+
+#[derive(Clone, Copy, Eq, Hash, PartialEq, PartialOrd)]
+pub struct B<T> {
+    pub value: T,
 }
 
 fmt_wrapper! {
-    impl Sample<T>.value {
-        Display,
+    impl A<T> {
         Debug,
+        Display,
         LowerHex,
         UpperHex,
         LowerExp,
         UpperExp,
+        Binary,
         Octal,
-        Binary
+        Pointer,
+    }
+}
+
+fmt_wrapper! {
+    impl B<T>.value {
+        Debug,
+        Display,
+        LowerHex,
+        UpperHex,
+        LowerExp,
+        UpperExp,
+        Binary,
+        Octal,
+        Pointer,
     }
 }
