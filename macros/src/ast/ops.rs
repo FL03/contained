@@ -38,6 +38,11 @@ impl Parse for WrapperOpsAst {
             }
             ops.push((op, call));
         }
-        Ok(Self { _impl, target, field, ops })
+        Ok(Self {
+            _impl,
+            target,
+            field,
+            ops,
+        })
     }
 }

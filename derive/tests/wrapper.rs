@@ -1,4 +1,3 @@
-
 use contained_derive::Wrapper;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Wrapper)]

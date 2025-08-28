@@ -4,9 +4,8 @@
 */
 use contained::fmt_wrapper;
 
-
 fn main() -> contained::Result<()> {
-   let a = Sample { value: 42 };
+    let a = Sample { value: 42 };
     println!("a = {}", a);
     Ok(())
 }

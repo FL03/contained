@@ -2,9 +2,9 @@
     Appellation: display_attrs <module>
     Contrib: @FL03
 */
-use syn::parse::{Parse, ParseBuffer, ParseStream};
-use syn::{parenthesized, Ident};
 use syn::meta::ParseNestedMeta;
+use syn::parse::{Parse, ParseBuffer, ParseStream};
+use syn::{Ident, parenthesized};
 
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct DisplayAttr {

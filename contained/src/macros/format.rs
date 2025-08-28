@@ -6,12 +6,12 @@
 /// A macro to implement formatting traits for wrapper structs
 ///
 /// For tuple structs, use the following:
-/// 
+///
 /// ```ignore
 /// fmt_wrapper! {
 ///     impl WrapperType<T> {
-///         Display, 
-///         Debug, 
+///         Display,
+///         Debug,
 ///         ...
 ///     }
 /// }
@@ -22,8 +22,8 @@
 /// ```ignore
 /// fmt_wrapper! {
 ///     impl WrapperType<T>.field {
-///         Display, 
-///         Debug, 
+///         Display,
+///         Debug,
 ///         ...
 ///     }
 /// }

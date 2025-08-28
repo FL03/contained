@@ -18,7 +18,11 @@ pub fn impl_wrapper_binary_ops(input: WrapperOpsAst) -> TokenStream {
     }
 }
 
-fn impl_core_binary_ops(WrapperOpsAst { target, field, ops, .. }: &WrapperOpsAst) -> Vec<TokenStream> {
+fn impl_core_binary_ops(
+    WrapperOpsAst {
+        target, field, ops, ..
+    }: &WrapperOpsAst,
+) -> Vec<TokenStream> {
     let mut impls = Vec::new();
     for (op, call) in ops {
         let _impl = if let Some(f) = field {
@@ -124,7 +128,9 @@ fn impl_core_binary_ops(WrapperOpsAst { target, field, ops, .. }: &WrapperOpsAst
 }
 
 fn impl_assign_ops(options: &WrapperOpsAst) -> Vec<TokenStream> {
-    let WrapperOpsAst { target, field, ops, .. } = options;
+    let WrapperOpsAst {
+        target, field, ops, ..
+    } = options;
 
     let mut impls = Vec::new();
     for (op, call) in ops {

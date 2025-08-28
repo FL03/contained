@@ -22,7 +22,7 @@
 ///     ${struct}.${field} { Op1.call, Op2.call, ... }
 /// }
 /// ```
-/// 
+///
 /// **Note**: The target struct must have exactly one field;
 #[macro_export]
 macro_rules! impl_wrapper_unary {
