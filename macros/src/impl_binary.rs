@@ -5,17 +5,15 @@
 use crate::ast::WrapperOpsAst;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::parse_macro_input;
 
 /// Procedural macro entry point
-pub fn impl_wrapper_binary_ops(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let ast = parse_macro_input!(input as WrapperOpsAst);
+pub fn impl_wrapper_binary_ops(input: WrapperOpsAst) -> TokenStream {
 
     let mut impls = Vec::new();
-    impls.extend(impl_base_ops(&ast));
-    impls.extend(impl_assign_ops(&ast));
+    impls.extend(impl_base_ops(&input));
+    impls.extend(impl_assign_ops(&input));
 
-    TokenStream::from(quote! { #(#impls)* }).into()
+    quote! { #(#impls)* }
 }
 
 fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<TokenStream> {
@@ -28,9 +26,10 @@ fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<To
                     _A: ::core::ops::#op<_B, Output = _C>,
                 {
                     type Output = #target<_C>;
+
                     fn #call(self, rhs: #target<_B>) -> Self::Output {
-                        let res = ::core::ops::#op::#call(self.#f, rhs.#f);
-                        #target { #f: res, ..self }
+                        let #f = ::core::ops::#op::#call(self.#f, rhs.#f);
+                        #target { #f }
                     }
                 }
             }
@@ -41,6 +40,7 @@ fn impl_base_ops(WrapperOpsAst { target, field, ops }: &WrapperOpsAst) -> Vec<To
                     _A: ::core::ops::#op<_B, Output = _C>,
                 {
                     type Output = #target<_C>;
+
                     fn #call(self, rhs: #target<_B>) -> Self::Output {
                         #target(::core::ops::#op::#call(self.0, rhs.0))
                     }

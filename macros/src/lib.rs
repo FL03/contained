@@ -14,13 +14,16 @@ pub(crate) mod ast {
     mod ops;
 }
 
+use crate::ast::WrapperOpsAst;
 use proc_macro::TokenStream;
+use syn::parse_macro_input;
 
 /// A procedural macro for generating implementations for core binary operations on a wrapper 
 /// type
 #[proc_macro]
 pub fn binary_wrapper(input: TokenStream) -> TokenStream {
-    let output = impl_binary::impl_wrapper_binary_ops(input);
 
+    let ast = parse_macro_input!(input as WrapperOpsAst);
+    let output = impl_binary::impl_wrapper_binary_ops(ast);
     TokenStream::from(output)
 }

@@ -31,6 +31,12 @@ doctest = false
 proc-macro = true
 test = false
 
+[[test]]
+name = "default"
+
+[[test]]
+name = "binary"
+
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
