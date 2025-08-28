@@ -12,7 +12,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(any(feature = "std", feature = "alloc")))]
-compiler_error! {
+compile_error! {
     "Either the 'std' or 'alloc' feature must be enabled."
 }
 

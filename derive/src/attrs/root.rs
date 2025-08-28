@@ -5,27 +5,29 @@
 use crate::attrs::{DisplayAttr, NestedAttr};
 use syn::Attribute;
 
-// AST for the scsys attribute
+// AST for the root attribute
 #[derive(Debug, Default)]
-pub struct ContainedAttr {
-    pub display: Option<DisplayAttr>,
+pub struct RootAttr {
+    pub inner: Option<DisplayAttr>,
 }
 
-impl ContainedAttr {
-    pub fn set_display(&mut self, display: DisplayAttr) {
-        self.display = Some(display);
+impl RootAttr {
+    const BASEPATH: &'static str = "wrapper";
+
+    pub fn set_inner(&mut self, attr: DisplayAttr) {
+        self.inner = Some(attr);
     }
 
-    // tries to extract the scsys attribute from a list of attributes
+    // tries to extract the root attribute from a list of attributes
     pub fn extract(attrs: &[Attribute]) -> syn::Result<Self> {
-        let mut scsys = Self::default();
+        let mut root = Self::default();
         for attr in attrs {
-            if attr.path().is_ident("contained") {
+            if attr.path().is_ident(Self::BASEPATH) {
                 attr.parse_nested_meta(|meta| {
                     if let Ok(nested) = NestedAttr::parse_nested(&meta) {
                         match nested {
-                            NestedAttr::Display(inner) => {
-                                scsys.set_display(inner);
+                            NestedAttr::Inner(inner) => {
+                                root.set_inner(inner);
                                 return Ok(());
                             }
                         }
@@ -34,6 +36,6 @@ impl ContainedAttr {
                 })?;
             }
         }
-        Ok(scsys)
+        Ok(root)
     }
 }

@@ -6,21 +6,19 @@ use super::DisplayAttr;
 use syn::Ident;
 use syn::parse::{Parse, ParseStream};
 
-//[`Meta`] for key-value pairs
-
 /// [`NestedAttr`] is an enumeration of various nested attributes the crate recognizes.
 #[derive(Debug)]
 pub enum NestedAttr {
-    Display(DisplayAttr),
+    Inner(DisplayAttr),
 }
 
 impl NestedAttr {
     /// attempts to parse the attribute from the given metadata
     pub fn parse_nested(meta: &syn::meta::ParseNestedMeta<'_>) -> syn::Result<Self> {
-        // #[contained(display(...))]
-        if meta.path.is_ident("display") {
+        // #[wrapper(inner(...))]
+        if meta.path.is_ident("inner") {
             let attr = DisplayAttr::parse_nested(meta)?;
-            return Ok(Self::Display(attr));
+            return Ok(Self::Inner(attr));
         }
 
         Err(meta.error("unrecognized repr"))
@@ -30,8 +28,7 @@ impl NestedAttr {
 impl Parse for NestedAttr {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let ident: Ident = input.parse()?;
-        if ident == "display" {
-            dbg!("found display attribute ");
+        if ident == "inner" {
             let content;
             syn::parenthesized!(content in input);
             // Parse an optional identifier
@@ -41,7 +38,7 @@ impl Parse for NestedAttr {
                 Some(content.parse::<Ident>()?)
             };
 
-            Ok(NestedAttr::Display(DisplayAttr { format }))
+            Ok(NestedAttr::Inner(DisplayAttr { format }))
         } else {
             Err(syn::Error::new_spanned(ident, "unknown attribute"))
         }
