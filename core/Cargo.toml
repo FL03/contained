@@ -20,11 +20,13 @@ bench = false
 doctest = true
 test = true
 
+# ********* Package Metadata *********
 [package.metadata.docs.rs]
 all-features = false
 features = ["full"]
 rustc-args = ["--cfg", "docsrs"]
 
+# ********* Unit Tests *********
 [[test]]
 name = "default"
 
@@ -43,13 +45,16 @@ serde_json = { optional = true, workspace = true }
 # WebAssembly
 wasm-bindgen = { optional = true, workspace = true }
 
+# ********* Feature Flags *********
 [features]
 default = [
   "std"
 ]
 
 full = [
-  "default"
+  "default",
+  "json",
+  "serde",
 ]
 
 # ********* [FF] Features *********
