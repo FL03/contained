@@ -37,6 +37,10 @@ harness = false
 [[test]]
 name = "default"
 
+[[test]]
+name = "format"
+required-features = ["macros"]
+
 [dependencies]
 contained-core = { workspace = true }
 contained-derive = { optional = true, workspace = true }
