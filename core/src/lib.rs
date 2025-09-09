@@ -27,8 +27,6 @@ pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
     #[macro_use]
-    pub mod wrapper_ops;
-    #[macro_use]
     pub mod wrapper;
 }
 

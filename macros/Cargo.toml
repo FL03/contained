@@ -27,15 +27,15 @@ tag-name = "{{version}}"
 [lib]
 bench = false
 doc = true
-doctest = false
+doctest = true
 proc-macro = true
-test = false
+test = true
 
 [[test]]
 name = "default"
 
 [[test]]
-name = "binary"
+name = "ops"
 
 [dependencies]
 # procedural macros

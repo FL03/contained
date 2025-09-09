@@ -2,7 +2,7 @@
     appellation: macros <test>
     authors: @FL03
 */
-use contained_macros::binary_wrapper;
+use contained_macros::{binary_wrapper, unary_wrapper};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[repr(transparent)]
@@ -44,6 +44,20 @@ binary_wrapper! {
     }
 }
 
+unary_wrapper! {
+    impl A {
+        Neg.neg,
+        Not.not,
+    }
+}
+
+unary_wrapper! {
+    impl B.value {
+        Neg.neg,
+        Not.not,
+    }
+}
+
 #[test]
 fn test_impl_binary_ops_on_tuple() {
     let (x, y) = (A(42), A(&2));
@@ -56,4 +70,12 @@ fn test_impl_binary_ops_on_struct() {
     let (x, y) = (B { value: 42 }, B { value: 2 });
     assert_eq!((x + y), B { value: 44 });
     assert_eq!((x - y), B { value: 40 });
+}
+
+#[test]
+fn test_unary_impls() {
+    let a = A(true);
+    let b = B { value: true };
+    assert_eq!(!a, A(false));
+    assert_eq!(!b, B { value: false });
 }
