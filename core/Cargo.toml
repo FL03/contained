@@ -26,12 +26,8 @@ all-features = false
 features = ["full"]
 rustc-args = ["--cfg", "docsrs"]
 
-# ********* Unit Tests *********
 [[test]]
 name = "default"
-
-[[test]]
-name = "macros"
 
 [dependencies]
 # error handling

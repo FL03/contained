@@ -4,8 +4,6 @@
 */
 //! this module defines the core error type for the crate
 
-#[cfg(feature = "alloc")]
-use alloc::{boxed::Box, string::String};
 /// a type alias for a [`Result`](core::result::Result) configured to use the custom [`Error`] type.
 pub type Result<T> = core::result::Result<T, Error>;
 
@@ -14,7 +12,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     #[cfg(feature = "alloc")]
     #[error(transparent)]
-    BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    BoxError(#[from] alloc::boxed::Box<dyn core::error::Error + Send + Sync + 'static>),
     #[error(transparent)]
     FmtError(#[from] core::fmt::Error),
     #[cfg(feature = "std")]
@@ -22,19 +20,33 @@ pub enum Error {
     IOError(#[from] std::io::Error),
     #[cfg(feature = "alloc")]
     #[error("Unknown Error: {0}")]
-    Unknown(String),
+    Unknown(alloc::string::String),
 }
 
 #[cfg(feature = "alloc")]
-impl From<&str> for Error {
-    fn from(value: &str) -> Self {
-        Self::Unknown(String::from(value))
+mod impl_alloc {
+    use super::Error;
+    use alloc::boxed::Box;
+    use alloc::string::String;
+
+    impl Error {
+        pub fn box_error<E>(error: E) -> Self
+        where
+            E: core::error::Error + Send + Sync + 'static,
+        {
+            Self::BoxError(Box::new(error))
+        }
     }
-}
 
-#[cfg(feature = "alloc")]
-impl From<String> for Error {
-    fn from(value: String) -> Self {
-        Self::Unknown(value)
+    impl From<&str> for Error {
+        fn from(value: &str) -> Self {
+            Self::Unknown(String::from(value))
+        }
+    }
+
+    impl From<String> for Error {
+        fn from(value: String) -> Self {
+            Self::Unknown(value)
+        }
     }
 }

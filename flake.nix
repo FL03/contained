@@ -1,23 +1,42 @@
 {
-  description = "A flake for building a Rust workspace using buildRustPackage.";
+  description = "A developmental environment for a Rust project using Nix flakes with direnv";
 
   inputs = {
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    flake-utils.follows = "rust-overlay/flake-utils";
-    nixpkgs.follows = "rust-overlay/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs: with inputs;
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        code = pkgs.callPackage ./. { inherit nixpkgs system rust-overlay; };
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
+        rustToolchain = pkgs.rust-bin.stable.latest.default;
       in rec {
-        packages = {
-          default = pkgs.symlinkJoin {
-            name = "all";
-            paths = with code; [];
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          pname = "contained";
+          version = "0.2.2";
+          src = ./.;
+          cargoLock = {
+            lockFile = ./Cargo.lock;
           };
+        };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [
+            rustToolchain
+            pkgs.cargo
+            pkgs.rust-analyzer
+            pkgs.pkg-config
+            pkgs.openssl
+          ];
+          shellHook = ''
+            export CARGO_HOME=$PWD/.cargo
+          '';
         };
       }
     );
