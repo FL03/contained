@@ -25,7 +25,7 @@ fn impl_core_unary_ops(
     let mut impls = Vec::new();
     for (op, call) in ops {
         let _impl = if let Some(f) = field {
-            impl_named(op, target, call, &f)
+            impl_named(op, target, call, f)
         } else {
             impl_tuple(op, target, call)
         };
