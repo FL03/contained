@@ -26,18 +26,17 @@ use syn::parse_macro_input;
 /// onto a generic wrapper type. It supports both tuple structs and structs with named fields.
 ///
 /// ```rust
-/// use contained_macros::binary_wrapper;
+/// extern crate contained_macros as macros;
 ///
 /// pub struct Wrapper<T>(pub T);
 ///
-/// binary_wrapper! {
+/// macros::binary_wrapper! {
 ///     impl Wrapper {
 ///         Add.add,
 ///         Sub.sub,
 ///         Mul.mul,
 ///         Div.div,
 ///         Rem.rem,
-///         ...
 ///     }
 /// }
 /// ```
@@ -45,20 +44,19 @@ use syn::parse_macro_input;
 /// or, for transparent structs with a named field:
 ///
 /// ```rust
-/// use contained_macros::binary_wrapper;
+/// extern crate contained_macros as macros;
 ///
 /// pub struct Wrapper<T> {
 ///     pub field: T,
 /// }
 ///
-/// binary_wrapper! {
-///     impl Wrapper.$field {
+/// macros::binary_wrapper! {
+///     impl Wrapper.field {
 ///         Add.add,
 ///         Sub.sub,
 ///         Mul.mul,
 ///         Div.div,
 ///         Rem.rem,
-///         ...
 ///     }
 /// }
 /// ```
@@ -73,11 +71,11 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 /// onto a generic wrapper type. It supports both tuple structs and structs with named fields.
 ///
 /// ```rust
-/// pub struct Wrapper<T> {
-///     pub field: T,
-/// }
+/// extern crate contained_macros as macros;
+/// 
+/// pub struct Wrapper<T>(pub T);
 ///
-/// contained_macros::unary_wrapper! {
+/// macros::unary_wrapper! {
 ///     impl Wrapper {
 ///         Neg.neg,
 ///         Not.not,
@@ -88,12 +86,14 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 /// or, for transparent structs with a named field:
 ///
 /// ```rust
+/// extern crate contained_macros as macros;
+/// 
 /// pub struct Wrapper<T> {
 ///     pub field: T,
 /// }
 ///
-/// contained_macros::unary_wrapper! {
-///     impl Wrapper.$field {
+/// macros::unary_wrapper! {
+///     impl Wrapper.field {
 ///         Neg.neg,
 ///         Not.not,
 ///     }
