@@ -32,8 +32,6 @@ name = "default"
 [dependencies]
 # error handling
 thiserror = { workspace = true }
-# macros & utilities
-paste = { workspace = true }
 # serialization
 serde = { optional = true, features = ["derive"], workspace = true }
 serde_derive = { optional = true, workspace = true }
