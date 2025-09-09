@@ -105,3 +105,15 @@ pub fn unary_wrapper(input: TokenStream) -> TokenStream {
     let output = impl_unary::impl_wrapper_unary_ops(ast);
     output.into()
 }
+
+
+#[deprecated(
+    since = "0.2.2",
+    note = "use `unary_wrapper` instead"
+)]
+#[proc_macro]
+pub fn impl_wrapper_unary(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as WrapperOpsAst);
+    let output = impl_unary::impl_wrapper_unary_ops(ast);
+    output.into()
+}

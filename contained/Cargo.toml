@@ -14,16 +14,9 @@ repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-bench = true
-doctest = true
-test = true
-
-# ********* Package Metadata *********
 [package.metadata.docs.rs]
 all-features = false
-features = ["default"]
+features = ["full"]
 rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
@@ -31,12 +24,16 @@ version = "v{{version}}"
 no-dev-version = true
 tag-name = "{{version}}"
 
-# ********* Benchmarks *********
+[lib]
+crate-type = ["cdylib", "rlib"]
+bench = true
+doctest = true
+test = true
+
 [[bench]]
 name = "default"
 harness = false
 
-# ********* Examples *********
 [[example]]
 name = "derive"
 required-features = ["derive"]
@@ -45,7 +42,6 @@ required-features = ["derive"]
 name = "macros"
 required-features = ["macros"]
 
-# ********* Unit Tests *********
 [[test]]
 name = "default"
 
