@@ -5,17 +5,14 @@
 //! procedural macros for interacting with various wrappers
 extern crate proc_macro;
 
-pub(crate) mod impl_binary;
-pub(crate) mod impl_unary;
+pub(crate) mod ast;
 
-pub(crate) mod ast {
+pub(crate) mod impls {
     #[doc(inline)]
-    #[allow(unused_imports)]
-    pub use self::{ops::*, wrapper::*};
+    pub use self::{binary::*, unary::*};
 
-    mod ops;
-    #[allow(dead_code)]
-    mod wrapper;
+    pub mod binary;
+    pub mod unary;
 }
 
 use crate::ast::WrapperOpsAst;
@@ -63,7 +60,7 @@ use syn::parse_macro_input;
 #[proc_macro]
 pub fn binary_wrapper(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as WrapperOpsAst);
-    let output = impl_binary::impl_wrapper_binary_ops(ast);
+    let output = impls::impl_wrapper_binary_ops(ast);
     output.into()
 }
 
@@ -72,7 +69,7 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// extern crate contained_macros as macros;
-/// 
+///
 /// pub struct Wrapper<T>(pub T);
 ///
 /// macros::unary_wrapper! {
@@ -87,7 +84,7 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 ///
 /// ```rust
 /// extern crate contained_macros as macros;
-/// 
+///
 /// pub struct Wrapper<T> {
 ///     pub field: T,
 /// }
@@ -102,18 +99,6 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn unary_wrapper(input: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(input as WrapperOpsAst);
-    let output = impl_unary::impl_wrapper_unary_ops(ast);
-    output.into()
-}
-
-
-#[deprecated(
-    since = "0.2.2",
-    note = "use `unary_wrapper` instead"
-)]
-#[proc_macro]
-pub fn impl_wrapper_unary(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as WrapperOpsAst);
-    let output = impl_unary::impl_wrapper_unary_ops(ast);
+    let output = impls::impl_wrapper_unary_ops(ast);
     output.into()
 }

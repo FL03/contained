@@ -30,9 +30,6 @@ bench = false
 doctest = true
 test = true
 
-[[test]]
-name = "default"
-
 [dependencies]
 # error handling
 thiserror = { workspace = true }
@@ -43,11 +40,8 @@ serde_json = { optional = true, workspace = true }
 # WebAssembly
 wasm-bindgen = { optional = true, workspace = true }
 
-# ********* Feature Flags *********
 [features]
-default = [
-  "std"
-]
+default = ["std"]
 
 full = [
   "default",
@@ -71,12 +65,9 @@ std = [
   "thiserror/std",
 ]
 
-wasi = [
-  "alloc",
-]
+wasi = []
 
 wasm = [
-  "alloc",
   "wasm_bindgen",
 ]
 
