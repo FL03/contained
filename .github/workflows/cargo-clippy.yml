@@ -6,17 +6,15 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ main, master, $default-branch ]
-    types: [ opened, synchronize, reopened ]
+    branches: [main, master]
+    types: [opened, reopened]
   push:
-    branches: [ main, master, $default-branch ]
-    tags:
-      - v*.*.*
-      - "*-nightly"
+    branches: [main, master]
+    tags: [latest, v*.*.*, "*-nightly"]
   release:
-    types: [ created, edited ]
+    types: [created, edited]
   repository_dispatch:
-    types: [ clippy, cargo-clippy ]
+    types: [clippy, cargo-clippy]
   workflow_dispatch:
 
 jobs:
@@ -28,29 +26,23 @@ jobs:
       security-events: write
       statuses: write
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v5
-      -
-        name: Setup Rust
+      - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           components: clippy, rustfmt
           toolchain: nightly
           override: true
-      -
-        name: Setup the for sarif output
+      - name: Setup the for sarif output
         run: cargo install clippy-sarif sarif-fmt
-      -
-        name: Run Clippy
-        run:
-          cargo clippy
-          --all-features
-          --workspace
+      - name: Run Clippy
+        run: cargo clippy 
+          --all-features 
+          --workspace 
           --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
-      -
-        name: Upload analysis
+      - name: Upload analysis
         uses: github/codeql-action/upload-sarif@v3
         continue-on-error: true
         with:
