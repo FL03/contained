@@ -13,7 +13,7 @@ authors = [
   "FL03 <joe@pzzld.org> (https://github.com/FL03)"
 ]
 categories = []
-description = "contained is a zero-cost Rust library for creating transparent wrapper types."
+description = "contained works to provide several macros and interface for transparent wrapper types in Rust."
 edition = "2024"
 homepage = "https://github.com/FL03/contained/wiki"
 keywords = ["macros", "transparent", "wrapper"]
