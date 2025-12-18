@@ -15,10 +15,7 @@ pub struct B<T> {
 }
 
 binary_wrapper! {
-    impl<T> A
-    where
-        T: core::fmt::Debug
-    {
+    impl<T> A where T: core::fmt::Debug {
         Add.add,
         Sub.sub,
         Mul.mul,
