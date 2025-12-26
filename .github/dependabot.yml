@@ -1,9 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: docker
-    directories: 
-      - .
-      - /.docker
+    directories: [/, /.docker]
     schedule:
         interval: monthly
   - package-ecosystem: github-actions
@@ -11,10 +9,11 @@ updates:
     schedule:
         interval: monthly
   - package-ecosystem: cargo
+    schedule:
+        interval: monthly
     directories: 
       - /contained
       - /core
       - /derive
       - /macros
-    schedule:
-        interval: monthly
+      - /traits

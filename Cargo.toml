@@ -1,16 +1,17 @@
 [workspace]
 default-members = ["contained"]
 members = [
-  "contained", 
+  "contained",
   "core",
   "derive",
   "macros",
+  "traits",
 ]
 resolver = "3"
 
 [workspace.package]
 authors = [
-  "FL03 <joe@pzzld.org> (https://github.com/FL03)"
+  "FL03 <joe@pzzld.org> (https://github.com/FL03)",
 ]
 categories = []
 description = "contained works to provide several macros and interface for transparent wrapper types in Rust."
@@ -28,12 +29,27 @@ contained = { default-features = false, path = "contained", version = "0.2.3" }
 contained-core = { default-features = false, path = "core", version = "0.2.3" }
 contained-derive = { default-features = false, path = "derive", version = "0.2.3" }
 contained-macros = { default-features = false, path = "macros", version = "0.2.3" }
+contained-traits = { default-features = false, path = "traits", version = "0.2.3" }
 
+# concurrency & parallelism
+rayon = { default-features = false, version = "1" }
+rayon-core = { default-features = false, version = "1" }
+# data structures
+hashbrown = { default-features = false, version = "0.16" }
 # error handling
-thiserror = { default-features = false, version = "2" }
+anyhow = { default-features = false, version = "1" }
+thiserror = { default-features = false, version = "2.0.7" }
+# math
+num-complex = { default-features = false, version = "0.4" }
+num-traits = { default-features = false, version = "0.2" }
+# random
+getrandom = { default-features = false, version = "0.3" }
+rand = { default-features = false, version = "0.9" }
+rand_core = { default-features = false, version = "0.9" }
+rand_distr = { default-features = false, version = "0.5" }
 # serialization
 serde = { default-features = false, features = ["derive"], version = "1" }
-serde_derive = { version = "1" }
+serde_derive = { default-features = false, version = "1" }
 serde_json = { default-features = false, version = "1" }
 # macros & utilities
 paste = { version = "1" }
@@ -60,7 +76,7 @@ codegen-units = 16
 debug = false
 debug-assertions = false
 incremental = false
-lto = true
+lto = "fat"
 opt-level = "z"
 overflow-checks = false
 panic = "abort"

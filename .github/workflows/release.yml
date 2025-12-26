@@ -2,19 +2,19 @@ name: release
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   repository_dispatch:
-    types: [ release ]
+    types: [release]
   workflow_dispatch:
     inputs:
       draft:
         default: false
-        description: 'Create a draft release'
+        description: "Create a draft release"
         required: true
         type: boolean
       prerelease:
         default: false
-        description: 'Create a prerelease'
+        description: "Create a prerelease"
         required: true
         type: boolean
 
@@ -26,16 +26,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
           repository: ${{ github.repository }}
-      - 
-        name: Publish to crates.io
-        uses: peter-evans/repository-dispatch@v3
+      - name: Publish to crates.io
+        uses: peter-evans/repository-dispatch@v4
         with:
           event-type: cargo-publish
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
@@ -48,11 +46,9 @@ jobs:
       IS_DRAFT: ${{ github.event.inputs.draft || false }}
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v5
-      -
-        name: Create release
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           append_body: false

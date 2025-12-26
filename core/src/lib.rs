@@ -19,17 +19,33 @@ compile_error! {
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-#[doc(inline)]
-pub use self::error::{Error, Result};
-
 #[macro_use]
 pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
+
     #[macro_use]
-    pub mod wrapper;
+    #[cfg(feature = "macros")]
+    pub mod ext {
+        #[macro_use]
+        pub mod format;
+        #[macro_use]
+        pub mod wrapper;
+    }
 }
 
 pub mod error;
-
-pub mod prelude {}
+// re-exports
+#[doc(inline)]
+pub use self::{
+    error::{Error, Result},
+    traits::prelude::*,
+};
+#[doc(inline)]
+pub use contained_traits as traits;
+// prelude
+#[doc(hidden)]
+pub mod prelude {
+    #[cfg(feature = "macros")]
+    pub use crate::{fmt_wrapper, wrapper};
+}

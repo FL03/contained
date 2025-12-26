@@ -31,8 +31,19 @@ doctest = true
 test = true
 
 [dependencies]
+contained-traits = { workspace = true }
+# data structures
+hashbrown = { optional = true, workspace = true }
+# mathematics
+num-complex = { optional = true, workspace = true }
+num-traits = { workspace = true }
 # error handling
 thiserror = { workspace = true }
+# random
+getrandom = { optional = true, workspace = true }
+rand = { optional = true, workspace = true }
+rand_core = { optional = true, workspace = true }
+rand_distr = { optional = true, workspace = true }
 # serialization
 serde = { optional = true, features = ["derive"], workspace = true }
 serde_derive = { optional = true, workspace = true }
@@ -45,6 +56,8 @@ default = ["std"]
 
 full = [
   "default",
+  "complex",
+  "hashbrown",
   "json",
   "serde",
 ]
@@ -55,33 +68,81 @@ json = [
   "serde_json",
 ]
 
-nightly = []
+macros = []
+
+nightly = [
+  "contained-traits/nightly",
+]
 
 # ********* [FF] Environments *********
 std = [
   "alloc",
+  "contained-traits/std",
+  "hashbrown?/default",
+  "num-complex?/std",
+  "num-traits/std",
+  "rand?/std",
+  "rand_core?/std",
+  "rand_distr?/std",
   "serde?/std",
   "serde_json?/std",
   "thiserror/std",
 ]
 
-wasi = []
+wasi = [
+  "contained-traits/wasi",
+]
 
 wasm = [
   "wasm_bindgen",
+  "contained-traits/wasm",
+  "getrandom?/wasm_js",
 ]
 
 # ********* [FF] Dependencies *********
 alloc = [
+  "contained-traits/alloc",
+  "hashbrown?/alloc",
   "serde?/alloc",
   "serde_json?/alloc",
+]
+
+complex = ["dep:num-complex"]
+
+hashbrown = [
+  "dep:hashbrown",
+  "contained-traits/hashbrown",
+]
+
+rand = [
+  "rng",
+  "dep:rand",
+  "dep:rand_core",
+  "dep:rand_distr",
+  "contained-traits/rand",
+  "num-complex?/rand",
+]
+
+rayon = [
+  "contained-traits/rayon",
+  "hashbrown?/rayon",
+]
+
+rng = [
+  "dep:getrandom",
 ]
 
 serde = [
   "dep:serde",
   "dep:serde_derive",
+  "contained-traits/serde",
+  "hashbrown?/serde",
+  "num-complex?/serde",
 ]
 
 serde_json = ["dep:serde_json"]
 
-wasm_bindgen = ["dep:wasm-bindgen"]
+wasm_bindgen = [
+  "dep:wasm-bindgen",
+  "contained-traits/wasm_bindgen",
+]
