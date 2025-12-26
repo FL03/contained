@@ -27,6 +27,7 @@ pub(crate) mod macros {
 extern crate alloc;
 // modules
 pub mod container;
+pub mod key_value;
 pub mod store;
 
 pub mod ops {
@@ -44,6 +45,7 @@ pub use self::{container::*, ops::*, store::*};
 #[doc(hidden)]
 pub mod prelude {
     pub use crate::container::*;
+    pub use crate::key_value::*;
     pub use crate::ops::*;
     pub use crate::store::*;
 }
