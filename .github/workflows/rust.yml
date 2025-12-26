@@ -10,7 +10,7 @@ env:
 
 on:
   pull_request:
-    branches: [main, master, $default-branch]
+    branches: [main, master]
     types: [opened, synchronize, reopened]
     paths:
       - "**.rs"
@@ -18,10 +18,10 @@ on:
       - "**/Cargo.lock"
       - ".github/workflows/rust.yml"
   push:
-    branches: [main, master, $default-branch]
-    tags:
-      - v*.*.*
-      - "*-nightly"
+    branches: [main, master]
+    tags: [latest, v*.*.*, "*-nightly"]
+  release:
+    types: [created, edited]
   repository_dispatch:
     types: [rust]
   workflow_dispatch:
@@ -40,7 +40,7 @@ jobs:
       matrix:
         target: [x86_64-unknown-linux-gnu]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -59,14 +59,14 @@ jobs:
       actions: read
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
           repository: ${{ github.repository }}
       - name: Benchmark the workspace
         id: cargo-bench
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           event-type: cargo-bench
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
@@ -80,7 +80,7 @@ jobs:
         features: [full, default]
         target: [x86_64-unknown-linux-gnu]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
