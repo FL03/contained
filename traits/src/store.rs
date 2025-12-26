@@ -9,6 +9,10 @@ pub trait RawStore {
     /// The type of elements associated with the container
     type Elem;
 }
+/// [`RawStoreMut`] is a trait that provides various mutable methods for accessing elements.
+pub trait RawStoreMut: RawStore {}
+/// [`RawStoreRef`] is a trait that provides various read-only methods for accessing elements.
+pub trait RawStoreRef: RawStore {}
 
 /*
  ************* Implementations *************
@@ -30,14 +34,14 @@ where
 
 macro_rules! impl_raw_store  {
     (impl<Elem = $elem:ident> $trait:ident for {$(
-        $($cont:ident)::*<$($T:ident),*> $({where $($rest:tt)*})?
+        $($cont:ident)::*<$($lt:lifetime,)? $($T:ident),*> $({where $($rest:tt)*})?
     ),* $(,)?}) => {
         $(impl_raw_store! {
-            @impl<Elem = $elem> $trait for $($cont)::*<$($T),*> $(where $($rest)*)?
+            @impl<Elem = $elem> $trait for $($cont)::*<$($lt,)? $($T),*> $(where $($rest)*)?
         })*
     };
-    (@impl<Elem = $elem:ident> $trait:ident for $($cont:ident)::*<$($T:ident),*> $(where $($rest:tt)*)?) => {
-        impl<$($T),*> $trait for $($cont)::*<$($T),*> $(where $($rest)*)? {
+    (@impl<Elem = $elem:ident> $trait:ident for $($cont:ident)::*<$($lt:lifetime,)? $($T:ident),*> $(where $($rest:tt)*)?) => {
+        impl<$($lt,)? $($T),*> $trait for $($cont)::*<$($lt,)? $($T),*> $(where $($rest)*)? {
             type Elem = $elem;
         }
     };
@@ -65,6 +69,8 @@ impl_raw_tuple_store! {
         (T, T, T, T, T, T, T, T),
         (T, T, T, T, T, T, T, T, T),
         (T, T, T, T, T, T, T, T, T, T),
+        (T, T, T, T, T, T, T, T, T, T, T),
+        (T, T, T, T, T, T, T, T, T, T, T, T),
     }
 }
 
@@ -92,6 +98,7 @@ impl_raw_store! {
         alloc::collections::VecDeque<T>,
         alloc::collections::BinaryHeap<T>,
         alloc::collections::BTreeMap<K, T>,
+        alloc::collections::btree_map::Entry<'a, K, T>,
     }
 }
 
@@ -103,6 +110,7 @@ impl_raw_store! {
         std::sync::LazyLock<T>,
         std::collections::HashMap<K, T>,
         std::collections::HashSet<T>,
+
     }
 }
 

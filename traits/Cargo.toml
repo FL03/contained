@@ -44,6 +44,8 @@ serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 # webassembly
 wasm-bindgen = { optional = true, workspace = true }
+# macros and utilities
+paste = { workspace = true }
 
 [features]
 default = ["std"]
