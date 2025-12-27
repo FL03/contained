@@ -18,9 +18,12 @@ compile_error! { "Either the 'alloc' or 'std' feature must be enabled for this c
 #[cfg(feature = "alloc")]
 extern crate alloc;
 // re-exports
+#[doc(inline)]
 pub use contained_core::*;
+#[doc(inline)]
 #[cfg(feature = "derive")]
 pub use contained_derive::*;
+#[doc(inline)]
 #[cfg(feature = "macros")]
 pub use contained_macros::*;
 // prelude
