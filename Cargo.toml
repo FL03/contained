@@ -5,7 +5,6 @@ members = [
   "core",
   "derive",
   "macros",
-  "traits",
 ]
 resolver = "3"
 
@@ -29,10 +28,9 @@ contained = { default-features = false, path = "contained", version = "0.2.3" }
 contained-core = { default-features = false, path = "core", version = "0.2.3" }
 contained-derive = { default-features = false, path = "derive", version = "0.2.3" }
 contained-macros = { default-features = false, path = "macros", version = "0.2.3" }
-contained-traits = { default-features = false, path = "traits", version = "0.2.3" }
-
+# development
+criterion = { version = "0.8" }
 # concurrency & parallelism
-rayon = { default-features = false, version = "1" }
 rayon-core = { default-features = false, version = "1" }
 # data structures
 hashbrown = { default-features = false, version = "0.16" }

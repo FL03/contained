@@ -34,7 +34,6 @@ jobs:
       max-parallel: 1
       matrix:
         package:
-          - contained-traits
           - contained-core
           - contained-derive
           - contained-macros
