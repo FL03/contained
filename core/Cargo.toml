@@ -59,18 +59,22 @@ full = [
   "complex",
   "hashbrown",
   "json",
+  "rand",
   "serde",
 ]
 
 # ********* [FF] Features *********
 json = [
   "alloc",
+  "serde",
   "serde_json",
 ]
 
 macros = []
 
 nightly = [
+  "hashbrown?/nightly",
+  "rand?/nightly",
   "contained-traits/nightly",
 ]
 
@@ -103,6 +107,8 @@ wasm = [
 alloc = [
   "contained-traits/alloc",
   "hashbrown?/alloc",
+  "rand?/alloc",
+  "rand_distr?/alloc",
   "serde?/alloc",
   "serde_json?/alloc",
 ]
@@ -130,14 +136,19 @@ rayon = [
 
 rng = [
   "dep:getrandom",
+  "rand?/small_rng",
 ]
 
 serde = [
   "dep:serde",
   "dep:serde_derive",
-  "contained-traits/serde",
+  "serde?/derive",
   "hashbrown?/serde",
   "num-complex?/serde",
+  "rand?/serde",
+  "rand_core?/serde",
+  "rand_distr?/serde",
+  "contained-traits/serde",
 ]
 
 serde_json = ["dep:serde_json"]
