@@ -31,7 +31,8 @@ doctest = true
 test = true
 
 [dependencies]
-contained-traits = { workspace = true }
+# concurrency & parallelism
+rayon-core = { optional = true, workspace = true }
 # data structures
 hashbrown = { optional = true, workspace = true }
 # mathematics
@@ -75,13 +76,11 @@ macros = []
 nightly = [
   "hashbrown?/nightly",
   "rand?/nightly",
-  "contained-traits/nightly",
 ]
 
 # ********* [FF] Environments *********
 std = [
   "alloc",
-  "contained-traits/std",
   "hashbrown?/default",
   "num-complex?/std",
   "num-traits/std",
@@ -93,19 +92,16 @@ std = [
   "thiserror/std",
 ]
 
-wasi = [
-  "contained-traits/wasi",
-]
+wasi = []
 
 wasm = [
   "wasm_bindgen",
-  "contained-traits/wasm",
   "getrandom?/wasm_js",
+  "rayon-core?/web_spin_lock",
 ]
 
 # ********* [FF] Dependencies *********
 alloc = [
-  "contained-traits/alloc",
   "hashbrown?/alloc",
   "rand?/alloc",
   "rand_distr?/alloc",
@@ -115,22 +111,18 @@ alloc = [
 
 complex = ["dep:num-complex"]
 
-hashbrown = [
-  "dep:hashbrown",
-  "contained-traits/hashbrown",
-]
+hashbrown = ["dep:hashbrown"]
 
 rand = [
   "rng",
   "dep:rand",
   "dep:rand_core",
   "dep:rand_distr",
-  "contained-traits/rand",
   "num-complex?/rand",
 ]
 
 rayon = [
-  "contained-traits/rayon",
+  "dep:rayon-core",
   "hashbrown?/rayon",
 ]
 
@@ -148,12 +140,8 @@ serde = [
   "rand?/serde",
   "rand_core?/serde",
   "rand_distr?/serde",
-  "contained-traits/serde",
 ]
 
 serde_json = ["dep:serde_json"]
 
-wasm_bindgen = [
-  "dep:wasm-bindgen",
-  "contained-traits/wasm_bindgen",
-]
+wasm_bindgen = ["dep:wasm-bindgen"]

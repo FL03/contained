@@ -47,9 +47,6 @@ name = "macros"
 required-features = ["macros"]
 
 [[test]]
-name = "default"
-
-[[test]]
 name = "format"
 required-features = ["macros"]
 
@@ -59,7 +56,7 @@ contained-derive = { optional = true, workspace = true }
 contained-macros = { optional = true, workspace = true }
 
 [dev-dependencies]
-criterion = { features = ["plotters"], version = "0.8" }
+criterion = { features = ["plotters"], workspace = true }
 
 [features]
 default = ["std"]
@@ -135,4 +132,12 @@ rng = [
 
 serde = [
   "contained-core/serde",
+]
+
+serde_json = [
+  "contained-core/serde_json",
+]
+
+wasm_bindgen = [
+  "contained-core/wasm_bindgen",
 ]

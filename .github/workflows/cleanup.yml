@@ -5,29 +5,35 @@ on:
     types: [closed]
 
 jobs:
-  cache_cleanup:
+  cleanup:
+    name: Cleanup PR Cache(s)
     runs-on: ubuntu-latest
     env:
-      BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
+      BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
     permissions:
       actions: write
+    outputs:
+      status: dirty
     steps:
-      - uses: actions/github-script@v6
-        name: Cleanup caches for closed PR
+      - uses: actions/checkout@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            echo "Fetching list of cache keys"
-            cacheKeysForPR=$(gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id')
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup
+        run: |
+          echo "Fetching list of cache keys"
+          cacheKeysForPR=$(gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id')
 
-            ## Setting this to not fail the workflow while deleting cache keys.
-            set +e
-            echo "Deleting caches..."
-            for cacheKey in $cacheKeysForPR
-            do
-                gh cache delete $cacheKey
-            done
-            echo "Done"
-            set -e
+          ## Setting this to not fail the workflow while deleting cache keys.
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+              gh cache delete $cacheKey
+          done
+          echo "Done"
+      - name: Set output(s)
+        run: |
+          echo "status=cleaned" >> "$GITHUB_OUTPUT"
