@@ -36,7 +36,7 @@ rayon-core = { default-features = false, version = "1" }
 hashbrown = { default-features = false, version = "0.16" }
 # error handling
 anyhow = { default-features = false, version = "1" }
-thiserror = { default-features = false, version = "2.0.7" }
+thiserror = { default-features = false, version = "2" }
 # math
 num-complex = { default-features = false, version = "0.4" }
 num-traits = { default-features = false, version = "0.2" }
@@ -51,7 +51,6 @@ serde_derive = { default-features = false, version = "1" }
 serde_json = { default-features = false, version = "1" }
 # macros & utilities
 paste = { version = "1" }
-smart-default = { version = "0.7" }
 strum = { default-features = false, features = ["derive"], version = "0.27" }
 # WebAssembly
 wasm-bindgen = { default-features = false, version = "0.2" }
@@ -67,14 +66,14 @@ opt-level = 2
 overflow-checks = true
 panic = "abort"
 rpath = false
-strip = "symbols"
+strip = false
 
 [profile.release]
 codegen-units = 16
 debug = false
 debug-assertions = false
 incremental = false
-lto = "fat"
+lto = true
 opt-level = "z"
 overflow-checks = false
 panic = "abort"
