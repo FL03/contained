@@ -11,7 +11,7 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
-// compile-time checks 
+// compile-time checks
 #[cfg(not(any(feature = "alloc", feature = "std")))]
 compile_error! { "Either the 'alloc' or 'std' feature must be enabled for this crate to compile." }
 // external crates
