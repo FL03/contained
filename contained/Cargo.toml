@@ -84,6 +84,7 @@ nightly = [
 
 json = [
   "alloc",
+  "serde",
   "contained-core/json",
 ]
 
@@ -128,7 +129,6 @@ rayon = [
 rng = [
   "contained-core/rng",
 ]
-
 
 serde = [
   "contained-core/serde",

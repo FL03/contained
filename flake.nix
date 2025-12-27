@@ -20,7 +20,7 @@
         packages.default = pkgs.rustPlatform.buildRustPackage {
           pname = "contained";
           version = "0.2.3";
-          src = ./.;
+          src = self; # ./.
           cargoLock = {
             lockFile = ./Cargo.lock;
           };

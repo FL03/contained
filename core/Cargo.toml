@@ -85,6 +85,8 @@ std = [
   "num-complex?/std",
   "num-traits/std",
   "rand?/std",
+  "rand?/std_rng",
+  "rand?/thread_rng",
   "rand_core?/std",
   "rand_distr?/std",
   "serde?/std",
@@ -128,7 +130,9 @@ rayon = [
 
 rng = [
   "dep:getrandom",
+  "rand?/os_rng",
   "rand?/small_rng",
+  "rand_core?/os_rng",
 ]
 
 serde = [
