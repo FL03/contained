@@ -5,17 +5,10 @@
 //! procedural macros for interacting with various wrappers
 extern crate proc_macro;
 
-pub(crate) mod ast;
+mod ast;
+mod impls;
 
-pub(crate) mod impls {
-    #[doc(inline)]
-    pub use self::{binary::*, unary::*};
-
-    pub mod binary;
-    pub mod unary;
-}
-
-use crate::ast::WrapperOpsAst;
+use crate::ast::WrapperImpls;
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
@@ -59,7 +52,7 @@ use syn::parse_macro_input;
 /// ```
 #[proc_macro]
 pub fn binary_wrapper(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as WrapperOpsAst);
+    let ast = parse_macro_input!(input as WrapperImpls);
     let output = impls::impl_wrapper_binary_ops(ast);
     output.into()
 }
@@ -98,7 +91,7 @@ pub fn binary_wrapper(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn unary_wrapper(input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as WrapperOpsAst);
+    let ast = parse_macro_input!(input as WrapperImpls);
     let output = impls::impl_wrapper_unary_ops(ast);
     output.into()
 }
