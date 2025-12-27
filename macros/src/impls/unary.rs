@@ -2,13 +2,13 @@
     appellation: impl_unary <module>
     authors: @FL03
 */
-use crate::ast::WrapperOpsAst;
+use crate::ast::{MethodCallAst, WrapperImpls};
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Ident;
 
 /// Procedural macro entry point
-pub fn impl_wrapper_unary_ops(input: WrapperOpsAst) -> TokenStream {
+pub fn impl_wrapper_unary_ops(input: WrapperImpls) -> TokenStream {
     let base = impl_core_unary_ops(&input);
 
     quote! {
@@ -18,12 +18,12 @@ pub fn impl_wrapper_unary_ops(input: WrapperOpsAst) -> TokenStream {
 }
 
 fn impl_core_unary_ops(
-    WrapperOpsAst {
+    WrapperImpls {
         target, field, ops, ..
-    }: &WrapperOpsAst,
+    }: &WrapperImpls,
 ) -> Vec<TokenStream> {
     let mut impls = Vec::new();
-    for (op, call) in ops {
+    for MethodCallAst { name: op, call, .. } in ops {
         let _impl = if let Some(f) = field {
             impl_named(op, target, call, f)
         } else {
