@@ -86,6 +86,7 @@ jobs:
       fail-fast: false
       matrix:
         target: [x86_64-unknown-linux-gnu]
+        package: [contained]
         features:
           - all
           - no_std
@@ -100,16 +101,16 @@ jobs:
           override: true
       - name: Test (all-features)
         if: matrix.features == 'all'
-        run: cargo test -r --locked --all-features --workspace  --target ${{ matrix.target }}
+        run: cargo test -r --locked --all-features --package ${{ matrix.package }} --target ${{ matrix.target }}
       - name: Test (no_std)
         continue-on-error: true
         if: matrix.features == 'no_std'
-        run: cargo test -r --locked --no-default-features --workspace --target ${{ matrix.target }}
+        run: cargo test -r --locked --no-default-features --package ${{ matrix.package }} --target ${{ matrix.target }}
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
       - name: Test (${{ matrix.features }})
         continue-on-error: true
         if: matrix.features != 'all' && matrix.features != 'no_std'
-        run: cargo test -r --locked --no-default-features --workspace --features ${{ matrix.features }} --target ${{ matrix.target }}
+        run: cargo test -r --locked --no-default-features --package ${{ matrix.package }} --features ${{ matrix.features }} --target ${{ matrix.target }}
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
