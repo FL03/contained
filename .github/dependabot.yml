@@ -1,18 +1,20 @@
 version: 2
+
 updates:
-  - package-ecosystem: docker
-    directories: [/, /.docker]
+  - package-ecosystem: rust-toolchain
+    directory: /
     schedule:
-        interval: monthly
+      interval: monthly
   - package-ecosystem: github-actions
     directory: /
     schedule:
-        interval: monthly
+      interval: monthly
   - package-ecosystem: cargo
     schedule:
-        interval: monthly
-    directories: 
-      - /contained
-      - /core
-      - /derive
-      - /macros
+      interval: monthly
+    directories:
+      - /
+      - contained
+      - core
+      - derive
+      - macros

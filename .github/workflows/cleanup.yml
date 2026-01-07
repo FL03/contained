@@ -5,22 +5,11 @@ on:
     types: [closed]
 
 jobs:
-  cleanup:
-    name: Cleanup PR Cache(s)
+  cache_cleanup:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_REPO: ${{ github.repository }}
-      BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
     permissions:
       actions: write
-    outputs:
-      status: dirty
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Cleanup
         run: |
           echo "Fetching list of cache keys"
@@ -34,6 +23,7 @@ jobs:
               gh cache delete $cacheKey
           done
           echo "Done"
-      - name: Set output(s)
-        run: |
-          echo "status=cleaned" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
