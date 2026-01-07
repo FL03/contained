@@ -46,11 +46,6 @@ jobs:
         toolchain: [stable]
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          token: ${{ github.token }}
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -71,11 +66,6 @@ jobs:
         target: [x86_64-unknown-linux-gnu]
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          token: ${{ github.token }}
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -88,7 +78,7 @@ jobs:
         if: matrix.features != 'default'
         run: cargo test -r --locked --workspace --target ${{ matrix.target}} --features ${{ matrix.features }}
   test_nightly:
-    if: (github.event_name == 'workflow_dispatch' && github.event.inputs.toolchain != 'stable') || false
+    if: github.event.inputs.toolchain != 'stable' || github.event_name != 'workflow_dispatch'
     continue-on-error: true
     needs: build
     runs-on: ubuntu-latest
@@ -102,11 +92,6 @@ jobs:
           - "alloc,nightly"
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          token: ${{ github.token }}
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
