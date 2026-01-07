@@ -5,8 +5,18 @@
 //! procedural macros for interacting with various wrappers
 extern crate proc_macro;
 
-mod ast;
-mod impls;
+mod ast {
+    pub use self::wrapper_impl_ast::*;
+
+    mod wrapper_impl_ast;
+}
+
+mod impls {
+    pub use self::{binary::impl_wrapper_binary_ops, unary::impl_wrapper_unary_ops};
+
+    pub mod binary;
+    pub mod unary;
+}
 
 use crate::ast::WrapperImpls;
 use proc_macro::TokenStream;
