@@ -25,11 +25,7 @@ no-dev-version = true
 tag-name = "v{{version}}"
 
 [lib]
-crate-type = ["lib"]
 path = "lib.rs"
-bench = true
-doctest = true
-test = true
 
 [[bench]]
 name = "default"

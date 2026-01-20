@@ -1,8 +1,11 @@
 /*
-    Appellation: core <library>
-    Contrib: FL03 <jo3mccain@icloud.com>
+    Appellation: lib <module>
+    Created At: 2026.01.20:14:52:56
+    Contrib: @FL03
 */
-//! this core components of the contained crate
+//! the core modules supporting the `contained` crate focused on establishing foundational
+//! primitives and utilities for getter, setters, and wrappers.
+#![crate_type = "lib"]
 #![allow(
     clippy::missing_docs_in_private_items,
     clippy::missing_errors_doc,
@@ -21,21 +24,21 @@ extern crate alloc;
 pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
-
     #[macro_use]
-    #[cfg(feature = "macros")]
-    pub mod ext {
-        #[macro_use]
-        pub mod format;
-        #[macro_use]
-        pub mod wrapper;
-    }
+    pub mod format;
+    #[macro_use]
+    pub mod wrapper;
 }
 // modules
 pub mod error;
 
 pub mod traits {
     //! core traits and interfaces for wrappers and their operations, formatting, etc.
+    #[doc(inline)]
+    pub use self::{get::*, wrapper::*};
+
+    mod get;
+    mod wrapper;
 }
 // re-exports
 #[doc(inline)]

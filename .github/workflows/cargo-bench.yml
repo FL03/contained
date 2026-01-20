@@ -16,20 +16,30 @@ on:
   repository_dispatch:
     types: [cargo-bench]
   workflow_dispatch:
+    inputs:
+      toolchain:
+        description: 'Rust toolchain to use (stable, beta, nightly, or a specific version)'
+        required: false
+        default: 'stable'
+        type: choice
+        options: [ stable, nightly, beta]
+
+        
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
+permissions:
+  contents: write
+  checks: write
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    env:
-      CARGO_TERM_COLOR: always
-      RUST_BACKTRACE: full
     outputs:
       id: ${{ steps.artifacts.outputs.artifact-id }}
       digest: ${{ steps.artifacts.outputs.artifact-digest }}
       url: ${{ steps.artifacts.outputs.artifact-url }}
-    permissions:
-      contents: write
-      checks: write
     strategy:
       fail-fast: false
       matrix:
@@ -47,13 +57,15 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          toolchain: ${{ github.event.inputs.toolchain || 'stable' }}
+          override: true
       - name: Install criterion
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-criterion
       - name: Benchmark (${{ matrix.target }})
         run: cargo criterion --benches --locked --verbose --workspace --features ${{ matrix.features }} --target ${{ matrix.target }}
-      - name: Upload the benchmarks
+      - name: Upload the Benchmark Report
         id: artifacts
         uses: actions/upload-artifact@v6
         with:

@@ -26,9 +26,6 @@ tag-name = "{{version}}"
 
 [lib]
 bench = false
-crate-type = ["lib"]
-doctest = true
-test = true
 
 [dependencies]
 # concurrency & parallelism
@@ -80,6 +77,7 @@ nightly = [
 # ********* [FF] Environments *********
 std = [
   "alloc",
+  "getrandom?/std",
   "hashbrown?/default",
   "num-complex?/std",
   "num-traits/std",

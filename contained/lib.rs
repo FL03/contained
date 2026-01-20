@@ -1,5 +1,7 @@
-//! `contained` is a collection of utilities focused on facilitating the implementation of
-//! so-called wrapper types as well as providing additional
+//! `contained` is a collection of utilities and macros split into two focuses, wrapper types
+//! and getter / setter methods.
+#![crate_name = "contained"]
+#![crate_type = "lib"]
 #![allow(
     clippy::missing_docs_in_private_items,
     clippy::missing_errors_doc,
@@ -24,7 +26,9 @@ pub use contained_derive::*;
 pub use contained_macros::*;
 // prelude
 #[doc(hidden)]
+#[allow(unused_imports)]
 pub mod prelude {
+    pub use contained_core::prelude::*;
     #[cfg(feature = "derive")]
     pub use contained_derive::*;
     #[cfg(feature = "macros")]

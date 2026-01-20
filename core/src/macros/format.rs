@@ -2,6 +2,7 @@
     appellation: format <module>
     authors: @FL03
 */
+#![cfg(feature = "macros")]
 
 /// A macro to implement formatting traits for wrapper structs
 ///
@@ -46,10 +47,7 @@ macro_rules! fmt_wrapper {
             $T: ::core::fmt::$trait
         {
             fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
-                ::core::fmt::$trait::fmt(
-                    &self.$field,
-                    f,
-                )
+                ::core::fmt::$trait::fmt(&self.$field, f)
             }
         }
     };

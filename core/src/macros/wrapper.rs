@@ -2,16 +2,16 @@
     Appellation: wrapper <module>
     Contrib: @FL03
 */
+#![cfg(feature = "macros")]
 
+#[doc(hidden)]
 #[macro_export]
 macro_rules! wrapper {
-    ($($S:ident($vis:vis $T:ident) $(where $($rest:tt)*)?;),* $(,)?) => {
-        $(
-            $crate::wrapper!(@impl $S($vis $T) $(where $($rest)*)?;);
-        )*
+    ($($(#[$meta:meta])* $S:ident($vis:vis $T:ident) $(where $($rest:tt)*)?;),* $(,)?) => {
+        $($crate::wrapper! { @impl $(#[$meta])* $S($vis $T) $(where $($rest)*)? };)*
     };
     (@impl
-        #[derive($($derive:ident),*)]
+        $(#[$meta:meta])*
         $S:ident($vis:vis $T:ident) $(where $($rest:tt)*)?;
     ) => {
         #[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd, $($derive),*)]
