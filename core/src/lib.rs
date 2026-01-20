@@ -12,10 +12,7 @@
     clippy::upper_case_acronyms
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "nightly", feature(allocator_api))]
-// compile-time checks
-#[cfg(not(any(feature = "std", feature = "alloc")))]
-compile_error! { "Either the 'std' or 'alloc' feature must be enabled." }
+#![cfg_attr(all(feature = "alloc", feature = "nightly"), feature(allocator_api))]
 // external crates
 #[cfg(feature = "alloc")]
 extern crate alloc;

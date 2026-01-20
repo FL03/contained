@@ -20,12 +20,8 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          repository: ${{ github.repository }}
-          ref: ${{ github.ref }}
-          token: ${{ github.token }}
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Setup Nix
         uses: cachix/install-nix-action@v31
         with:
