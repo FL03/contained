@@ -4,11 +4,11 @@
 
 This namespace has been repurposed since `v0.2.0`. For security reasons, we only support the latest patch version of the current minor version.
 
-| semver          | supported          |
-|:----------------|:-------------------|
-| 0.2.1           | :white_check_mark: |
-| < 0.2.1,>=0.2.0 | :white_check_mark: |
-| < 0.2.0         | :x:                |
+| Version           | Supported          |
+|:------------------|:-------------------|
+| 0.2.5 (latest)    | :white_check_mark: |
+| <0.2.1,>=0.2.4    | :white_check_mark: |
+| <0.2.0            | :x:                |
 
 ## Reporting a Vulnerability
 
