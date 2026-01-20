@@ -4,33 +4,34 @@ concurrency:
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ github.ref }}
 
-env:
-  CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: full
-
 on:
   pull_request:
     branches: [main, master]
-    types: [opened, synchronize, reopened]
+    types: [synchronize]
     paths:
-      - "**.rs"
-      - "**/Cargo.toml"
-      - "**/Cargo.lock"
       - ".github/workflows/rust.yml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "**/*.rs"
   push:
     branches: [main, master]
-    tags: [latest, v*.*.*, "*-nightly"]
-  release:
-    types: [created, edited]
+    tags: [latest, v*, "*-nightly"]
   repository_dispatch:
-    types: [rust]
+    types: [rust, rust-ci]
+  release:
+    types: [created]
   workflow_dispatch:
     inputs:
-      benchmark:
-        default: false
-        description: "Run benchmarks"
+      toolchain:
+        default: stable
+        description: "Choose which toolchain to test (stable, nightly)"
         required: true
-        type: boolean
+        type: choice
+        options: [stable, nightly]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
 
 jobs:
   build:
@@ -40,38 +41,19 @@ jobs:
       matrix:
         target: [x86_64-unknown-linux-gnu]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           target: ${{ matrix.target }}
+          toolchain: ${{ github.event.inputs.toolchain || 'stable' }}
+          override: true
       - name: Build the workspace
-        run: cargo build --release --locked --workspace --features full --target ${{ matrix.target }}
-  benchmark:
-    if: ${{ inputs.benchmark || github.event_name == 'push' }}
-    runs-on: ubuntu-latest
-    outputs:
-      digest: ${{ steps.cargo-bench.outputs.digest }}
-      id: ${{ steps.cargo-bench.outputs.id }}
-      url: ${{ steps.cargo-bench.outputs.url }}
-    permissions:
-      actions: read
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          ref: ${{ github.ref }}
-          repository: ${{ github.repository }}
-      - name: Benchmark the workspace
-        id: cargo-bench
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          event-type: cargo-bench
-          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
-          token: ${{ github.token }}
+        run: cargo build -r --locked --workspace --features full --target ${{ matrix.target }}
   test:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.toolchain == 'stable'
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -80,15 +62,52 @@ jobs:
         features: [full, default]
         target: [x86_64-unknown-linux-gnu]
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
       - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           target: ${{ matrix.target }}
+          toolchain: stable
+          override: true
       - name: Test (${{ matrix.features }})
-        if: matrix.features != 'default' && matrix.features != 'all'
-        run: cargo test -r --locked --workspace --target ${{ matrix.target }} --features ${{ matrix.features }}
-      - name: Test (default)
-        if: matrix.features == 'default'
-        run: cargo test -r --locked --workspace --target ${{ matrix.target }}
+        run: cargo test -r --locked --workspace --target ${{ matrix.target}} -F ${{ matrix.features }}
+  test_nightly:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.toolchain == 'nightly'
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [x86_64-unknown-linux-gnu]
+        package: [contained-core, contained]
+        features:
+          - all
+          - no_std
+          - "alloc,nightly"
+        
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          target: ${{ matrix.target }}
+          toolchain: nightly
+          override: true
+      - name: Test (all-features)
+        if: matrix.features == 'all'
+        run: cargo test -r --locked --all-features --target ${{ matrix.target }} -p ${{ matrix.package }} 
+      - name: Test (no_std)
+        continue-on-error: true
+        if: matrix.features == 'no_std'
+        run: cargo test -r --locked --no-default-features --target ${{ matrix.target }} -p ${{ matrix.package }}
+      - name: Test (${{ matrix.features }})
+        continue-on-error: true
+        if: matrix.features != 'all' && matrix.features != 'no_std'
+        run: cargo test -r --locked --no-default-features --target ${{ matrix.target }} -p ${{ matrix.package }} -F ${{ matrix.features }}
+

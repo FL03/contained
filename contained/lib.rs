@@ -1,6 +1,7 @@
-//! `contained` is a collection of macros, traits, and other useful primitives for defining,
-//! managing, and interacting with so-called wrapper types. More specifically, any type capable
-//! of deriving the `#[repr(transparent)]` attribute in Rust.
+//! `contained` is a collection of utilities and macros split into two focuses, wrapper types
+//! and getter / setter methods.
+#![crate_name = "contained"]
+#![crate_type = "lib"]
 #![allow(
     clippy::missing_docs_in_private_items,
     clippy::missing_errors_doc,
@@ -10,22 +11,24 @@
     clippy::upper_case_acronyms
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(feature = "nightly", feature(allocator_api))]
-// compile-time checks
-#[cfg(not(any(feature = "alloc", feature = "std")))]
-compile_error! { "Either the 'alloc' or 'std' feature must be enabled for this crate to compile." }
+#![cfg_attr(all(feature = "alloc", feature = "nightly"), feature(allocator_api))]
 // external crates
 #[cfg(feature = "alloc")]
 extern crate alloc;
 // re-exports
+#[doc(inline)]
 pub use contained_core::*;
+#[doc(inline)]
 #[cfg(feature = "derive")]
 pub use contained_derive::*;
+#[doc(inline)]
 #[cfg(feature = "macros")]
 pub use contained_macros::*;
 // prelude
 #[doc(hidden)]
+#[allow(unused_imports)]
 pub mod prelude {
+    pub use contained_core::prelude::*;
     #[cfg(feature = "derive")]
     pub use contained_derive::*;
     #[cfg(feature = "macros")]

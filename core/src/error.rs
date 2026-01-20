@@ -2,51 +2,67 @@
     appellation: error <module>
     authors: @FL03
 */
-//! this module defines the core error type for the crate
+//! this module defines the [`Error`] enum and related types for error handling within the
+//! crate.
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, string::String};
 
 /// a type alias for a [`Result`](core::result::Result) configured to use the custom [`Error`] type.
 pub type Result<T> = core::result::Result<T, Error>;
 
-/// The custom error type for the crate.
+/// The [`Error`] implementation defines the possible errors that can occur within the crate.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
-    #[cfg(feature = "alloc")]
+    // core errors
     #[error(transparent)]
-    BoxError(#[from] alloc::boxed::Box<dyn core::error::Error + Send + Sync + 'static>),
+    AddrParseError(#[from] core::net::AddrParseError),
     #[error(transparent)]
     FmtError(#[from] core::fmt::Error),
+    #[error(transparent)]
+    Utf8Error(#[from] core::str::Utf8Error),
+    // std-dependent errors
     #[cfg(feature = "std")]
     #[error(transparent)]
     IOError(#[from] std::io::Error),
+    // alloc-dependent variants
+    #[cfg(feature = "alloc")]
+    #[error(transparent)]
+    BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
     #[cfg(feature = "alloc")]
     #[error("Unknown Error: {0}")]
-    Unknown(alloc::string::String),
+    Unknown(String),
+}
+
+impl Error {
+    #[cfg(feature = "alloc")]
+    /// a functional constructor for the [`BoxError`](Self::BoxError) variant
+    pub fn boxed<E>(error: E) -> Self
+    where
+        E: core::error::Error + Send + Sync + 'static,
+    {
+        Self::BoxError(Box::new(error))
+    }
+    #[cfg(feature = "alloc")]
+    /// a functional constructor for the [`Unknown`](Self::Unknown) variant
+    pub fn unknown<E>(message: E) -> Self
+    where
+        E: alloc::string::ToString,
+    {
+        Self::Unknown(message.to_string())
+    }
 }
 
 #[cfg(feature = "alloc")]
-mod impl_alloc {
-    use super::Error;
-    use alloc::boxed::Box;
-    use alloc::string::String;
-
-    impl Error {
-        pub fn box_error<E>(error: E) -> Self
-        where
-            E: core::error::Error + Send + Sync + 'static,
-        {
-            Self::BoxError(Box::new(error))
-        }
+impl From<&str> for Error {
+    fn from(value: &str) -> Self {
+        Self::unknown(value)
     }
+}
 
-    impl From<&str> for Error {
-        fn from(value: &str) -> Self {
-            Self::Unknown(String::from(value))
-        }
-    }
-
-    impl From<String> for Error {
-        fn from(value: String) -> Self {
-            Self::Unknown(value)
-        }
+#[cfg(feature = "alloc")]
+impl From<String> for Error {
+    fn from(value: String) -> Self {
+        Self::Unknown(value)
     }
 }

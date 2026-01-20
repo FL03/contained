@@ -16,7 +16,7 @@ version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = false
-features = ["full"]
+features = ["default"]
 rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
@@ -25,10 +25,7 @@ no-dev-version = true
 tag-name = "{{version}}"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
 bench = false
-doctest = true
-test = true
 
 [dependencies]
 # concurrency & parallelism
@@ -43,7 +40,6 @@ thiserror = { workspace = true }
 # random
 getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
-rand_core = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
 # serialization
 serde = { optional = true, features = ["derive"], workspace = true }
@@ -81,13 +77,13 @@ nightly = [
 # ********* [FF] Environments *********
 std = [
   "alloc",
+  "getrandom?/std",
   "hashbrown?/default",
   "num-complex?/std",
   "num-traits/std",
   "rand?/std",
   "rand?/std_rng",
   "rand?/thread_rng",
-  "rand_core?/std",
   "rand_distr?/std",
   "serde?/std",
   "serde_json?/std",
@@ -118,7 +114,6 @@ hashbrown = ["dep:hashbrown"]
 rand = [
   "rng",
   "dep:rand",
-  "dep:rand_core",
   "dep:rand_distr",
   "num-complex?/rand",
 ]
@@ -132,7 +127,6 @@ rng = [
   "dep:getrandom",
   "rand?/os_rng",
   "rand?/small_rng",
-  "rand_core?/os_rng",
 ]
 
 serde = [
@@ -142,7 +136,6 @@ serde = [
   "hashbrown?/serde",
   "num-complex?/serde",
   "rand?/serde",
-  "rand_core?/serde",
   "rand_distr?/serde",
 ]
 

@@ -2,18 +2,36 @@
     appellation: ops <module>
     authors: @FL03
 */
-use crate::ast::{MethodCallAst, WrapperImpls};
 
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::token::Impl;
-use syn::{Ident, Token, braced};
+use syn::{AngleBracketedGenericArguments, Ident, Token, WhereClause, braced};
 
 fn _parse_ops(input: ParseStream) -> syn::Result<Punctuated<MethodCallAst, Token![,]>> {
     // parse the operations defined within braces
     let content;
     let _ = braced! { content in input };
     Punctuated::parse_terminated(&content)
+}
+
+#[allow(dead_code)]
+/// The abstract syntax tree for the `binary_wrapper` macro input;
+/// e.g. `impl A { Add.add, Sub.sub }` or `impl B.field { Add.add, Sub.sub }`
+pub struct WrapperImpls {
+    pub impl_token: Impl,
+    pub generics: Option<AngleBracketedGenericArguments>,
+    pub target: Ident,
+    pub field: Option<Ident>,
+    pub where_clause: Option<WhereClause>,
+    pub ops: Punctuated<MethodCallAst, Token![,]>,
+}
+
+#[allow(dead_code)]
+pub struct MethodCallAst {
+    pub name: Ident,
+    pub dot: Token![.],
+    pub call: Ident,
 }
 
 impl Parse for MethodCallAst {
