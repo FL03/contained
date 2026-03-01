@@ -44,7 +44,7 @@ num-traits = { default-features = false, version = "0.2" }
 getrandom = { default-features = false, version = "0.3" }
 rand = { default-features = false, version = "0.9" }
 rand_core = { default-features = false, version = "0.9" }
-rand_distr = { default-features = false, version = "0.5" }
+rand_distr = { default-features = false, version = "0.6" }
 # serialization
 serde = { default-features = false, features = ["derive"], version = "1" }
 serde_derive = { default-features = false, version = "1" }
