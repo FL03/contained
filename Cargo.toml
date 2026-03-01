@@ -41,7 +41,7 @@ thiserror = { default-features = false, version = "2" }
 num-complex = { default-features = false, version = "0.4" }
 num-traits = { default-features = false, version = "0.2" }
 # random
-getrandom = { default-features = false, version = "0.3" }
+getrandom = { default-features = false, version = "0.4" }
 rand = { default-features = false, version = "0.9" }
 rand_core = { default-features = false, version = "0.9" }
 rand_distr = { default-features = false, version = "0.5" }
