@@ -3,6 +3,7 @@
     "default",
     "full"
   ],
+  "rust-analyzer.cargo.buildScripts.enable": true,
   "github-actions.workflows.pinned.workflows": [
     ".github/workflows/rust.yml"
   ]

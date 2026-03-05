@@ -14,7 +14,4 @@ updates:
       interval: monthly
     directories:
       - /
-      - /contained
-      - /core
-      - /derive
-      - /macros
+      - /crates/*

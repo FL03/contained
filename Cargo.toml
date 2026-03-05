@@ -1,10 +1,7 @@
 [workspace]
-default-members = ["contained"]
+default-members = ["crates/contained"]
 members = [
-  "contained",
-  "core",
-  "derive",
-  "macros",
+  "crates/*",
 ]
 resolver = "3"
 
@@ -20,14 +17,14 @@ keywords = ["macros", "transparent", "wrapper"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/contained.git"
-rust-version = "1.85.0"
+rust-version = "1.91.0"
 version = "0.2.5"
 
 [workspace.dependencies]
-contained = { default-features = false, path = "contained", version = "0.2.5" }
-contained-core = { default-features = false, path = "core", version = "0.2.5" }
-contained-derive = { default-features = false, path = "derive", version = "0.2.5" }
-contained-macros = { default-features = false, path = "macros", version = "0.2.5" }
+contained = { default-features = false, path = "crates/contained", version = "0.2.5" }
+contained-core = { default-features = false, path = "crates/core", version = "0.2.5" }
+contained-derive = { default-features = false, path = "crates/derive", version = "0.2.5" }
+contained-macros = { default-features = false, path = "crates/macros", version = "0.2.5" }
 # development
 criterion = { version = "0.8" }
 # concurrency & parallelism
@@ -41,17 +38,16 @@ thiserror = { default-features = false, version = "2" }
 num-complex = { default-features = false, version = "0.4" }
 num-traits = { default-features = false, version = "0.2" }
 # random
-getrandom = { default-features = false, version = "0.3" }
-rand = { default-features = false, version = "0.9" }
-rand_core = { default-features = false, version = "0.9" }
-rand_distr = { default-features = false, version = "0.5" }
+getrandom = { default-features = false, version = "0.4" }
+rand = { default-features = false, version = "0.10" }
+rand_distr = { default-features = false, version = "0.6" }
 # serialization
 serde = { default-features = false, features = ["derive"], version = "1" }
 serde_derive = { default-features = false, version = "1" }
 serde_json = { default-features = false, version = "1" }
 # macros & utilities
 paste = { version = "1" }
-strum = { default-features = false, features = ["derive"], version = "0.27" }
+strum = { default-features = false, features = ["derive"], version = "0.28" }
 # WebAssembly
 wasm-bindgen = { default-features = false, version = "0.2" }
 

@@ -1,118 +1,140 @@
 # General
-
-**/.artifacts/data
-**/.cache
-**/.docker/data
-
-*.csv
-*.csv.*
+*.bk
+*.bk.*
 
 *.db
 *.db.*
 
-*.db-*.*
-
-*.lock
-*.lock.*
-
-*-lock.*
-
 *.log
 *.log.*
+
+*.pem
+*.pem.*
+
+*.gz
+*.gz.*
+
+*.sqlite
+*.sqlite.*
+
+*.sqlite3
+*.sqlite3.*
 
 *.zip
 *.zip.*
 
-## Operating Systems
+## Directories
+**/.artifacts/cache/
+**/.artifacts/temp/
+**/.artifacts/uploads/
 
-### NixOS
-!flake.lock
+!**/.artifacts/docs
+!**/.artifacts/.gitkeep
 
-### Windows (WSL2)
-**/*:Zone.Identifier
+**/.cache/
+**/coverage/
+**/build/
+**/coverage/
+**/dist/
+**/out/
+**/logs/
+**/tmp/
 
-# Configuration Files
+## Development
 
+### Config Files
 **/.config/*.config.*
-!**/default.config.*
 
+!**/.config/default.config.*
+!**/.config/docker.config.*
+!**/.config/xtask.config.*
+
+### dotenv
 *.env
 *.env.*
 
-!**/default.env
-!**/example.env
+!*default.env*
+!*.env.default
 
-## Development Environments
-**/.direnv/
+!*example.env*
+!*.env.example
 
-### JetBrains IDEs
+### IDEs
+
+#### Atom
+**/.atom
+
+#### JetBrains
 **/.idea/
 
 *.iml
-*.iml.*
+*.ipr
+*.iws
 
-### Visual Studio Code
-**/.vscode/*
+#### Visual Studio Code
+**/.vscode/
 
 !**/.vscode/settings.json
 
+## Operating Systems
+
+### Linux
+
+#### NixOS
+!**/flake.lock
+
+**/.nix-channels
+**/.nix
+
+### Windows
+
+#### Windows Subsystem for Linux (WSL)
+*:Zone.Identifier
+
 # Language Specific
-
-## Rust
-**/debug/
-**/target/
-
-*.bk
-*.bk.*
-
-!**/Cargo.lock
 
 ## Python
 **/__pycache__/
-**/.pytest_cache/
 **/venv/
-
-*.egg
-*.egg.*
-
-*.egg-info
 
 *.pyc
 *.pyc.*
 
 *.pyo
-*.pyo.*
+*.pyd
 
-*.pyz
-*.pyz.*
+## Rust
+**/target
 
-*.pyzw
-*.pyzw.*
+!.cargo/config.toml
+!**/Cargo.lock
 
-*.whl
-*.whl.*
+*.rs.bk
 
+# *.lock
+*-lock.json
 
-## Node
-**/build/
-**/debug/
-**/dist/
-**/node_modules/
+## Node.JS
+**/.DS_STORE
+**/build
+**/node_modules
+
+*.tsbuildinfo
+
+**/.pnp
+**/.pnp.*
+
+**/.yarn/install-state.gz
 
 ### Frameworks
 
 #### Next.js
-**/.next/
+**/.next
+**/out
 
-#### SvelteKit
-**/__sapper__/
-**/.DS_STORE/
-**/.svelte-kit/
+**/next-env.d.ts
 
-#### Supabase
-**/.supabase/
-**/supabase/tmp/
+# Services
 
-#### Vercel
-**/.vercel/
-**/.vercel_build_output/
+## Vercel
+**/.vercel

@@ -5,8 +5,14 @@ on:
     types: [closed]
 
 jobs:
-  cache_cleanup:
+  pr_cache_cleanup:
+    if: github.event.pull_request.merged == true
+    name: Cleanup Pull Request Caches
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
     permissions:
       actions: write
     steps:
@@ -23,7 +29,3 @@ jobs:
               gh cache delete $cacheKey
           done
           echo "Done"
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
