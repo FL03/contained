@@ -173,7 +173,7 @@ checksum = "c8d4a3bb8b1e0c1050499d1815f5ab16d04f0959b233085fb31653fbfc9d98f9"
 
 [[package]]
 name = "contained"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "contained-core",
  "contained-derive",
@@ -183,7 +183,7 @@ dependencies = [
 
 [[package]]
 name = "contained-core"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "getrandom",
  "hashbrown 0.17.1",
@@ -201,7 +201,7 @@ dependencies = [
 
 [[package]]
 name = "contained-derive"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -210,7 +210,7 @@ dependencies = [
 
 [[package]]
 name = "contained-macros"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "proc-macro2",
  "quote",
