@@ -31,12 +31,10 @@ jobs:
       matrix:
         package:
           # sdk
-          - rstm-traits
-          - rstm-state
-          - rstm-tape
-          - rstm-core
-          - rstm-macros
-          - rstm
+          - contained-core
+          - contained-derive
+          - contained-macros
+          - contained
     steps:
       - name: Checkout
         uses: actions/checkout@v7
