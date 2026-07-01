@@ -35,7 +35,7 @@ jobs:
         # Pinned to v4 (stable header-based credential helper). `token:` +
         # `persist-credentials: true` ensure the later `git push` steps are
         # authenticated regardless of checkout's internal plumbing.
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
