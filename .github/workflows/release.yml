@@ -24,13 +24,16 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
     env:
       IS_PRERELEASE: ${{ github.event.inputs.prerelease || false }}
       IS_DRAFT: ${{ github.event.inputs.draft || false }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
       - name: Create release
         uses: softprops/action-gh-release@v2
         continue-on-error: true
