@@ -29,7 +29,7 @@ bench = false
 
 [dependencies]
 # concurrency & parallelism
-rayon-core = { optional = true, workspace = true }
+rayon = { optional = true, workspace = true }
 # data structures
 hashbrown = { optional = true, workspace = true }
 # mathematics
@@ -95,7 +95,7 @@ wasm = [
   "alloc",
   "wasm_bindgen",
   "getrandom?/wasm_js",
-  "rayon-core?/web_spin_lock",
+  "rayon?/web_spin_lock",
 ]
 
 # ********* [FF] Dependencies *********
@@ -119,7 +119,7 @@ rand = [
 ]
 
 rayon = [
-  "dep:rayon-core",
+  "dep:rayon",
   "hashbrown?/rayon",
 ]
 

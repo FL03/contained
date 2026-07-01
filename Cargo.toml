@@ -17,7 +17,7 @@ keywords = ["macros", "transparent", "wrapper"]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/contained.git"
-rust-version = "1.93.0"
+rust-version = "1.96.0"
 version = "0.2.5"
 
 [workspace.dependencies]
@@ -26,11 +26,12 @@ contained-core = { default-features = false, path = "crates/core", version = "0.
 contained-derive = { default-features = false, path = "crates/derive", version = "0.2.5" }
 contained-macros = { default-features = false, path = "crates/macros", version = "0.2.5" }
 # development
-criterion = { version = "0.8" }
-# concurrency & parallelism
+criterion = { version = "0.8", features = ["plotters"] }
+# parallelism
+rayon = { default-features = false, version = "1" }
 rayon-core = { default-features = false, version = "1" }
 # data structures
-hashbrown = { default-features = false, version = "0.16" }
+hashbrown = { default-features = false, version = "0.17" }
 # error handling
 anyhow = { default-features = false, version = "1" }
 thiserror = { default-features = false, version = "2" }
