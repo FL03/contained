@@ -1,0 +1,87 @@
+name: gitflow
+
+# Opens the sprint draft PR  vX.Y.Z-dev.N → vX.Y.Z  as soon as a dev branch has
+# its first commit ahead of the patch base, then stays out of the way.
+#
+# Scope is deliberately narrow — three rules keep this cheap and keep it from
+# colliding with release.yml's mod-10 cascade:
+#
+#   1. Dev branches ONLY. The patch branch, the vNEXT→main draft PR, and the
+#      dev.0 cut are all minted by release.yml. gitflow never touches that lane,
+#      so there is no duplicate / raced PR against a freshly-minted patch.
+#   2. No checkout. The job is a single set of gh-API calls; the "is the PR
+#      already open?" guard runs FIRST, so a no-op exits in ~2s instead of after
+#      cloning the repo.
+#   3. Concurrency coalescing. A burst of pushes to one branch collapses to a
+#      single run.
+#
+# Why `push` and not `create`: a just-cut dev branch is even with its patch base
+# (zero commits ahead) and GitHub rejects a PR with "no commits between" — so we
+# must wait for the first real commit, which arrives as a push, not a creation.
+# release.yml pushes its branches with GITHUB_TOKEN, which by design does not
+# trigger further workflow runs, so the release cascade never wakes this up.
+
+on:
+  push:
+    branches:
+      - 'v[0-9]*.[0-9]*.[0-9]*-dev.*'   # sprint branches only (e.g. v0.3.6-dev.1)
+
+concurrency:
+  group: gitflow-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  draft-sprint-pr:
+    name: Draft PR (dev → patch)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open draft PR  dev → patch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          DEV: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          OWNER="${REPO%%/*}"
+          BASE="${DEV%%-dev.*}"          # vX.Y.Z-dev.N → patch base vX.Y.Z
+          echo "Sprint branch '$DEV' targets patch base '$BASE'."
+
+          # Cheapest guard first: an open PR already exists → nothing to do.
+          EXISTING=$(gh api \
+            "repos/${REPO}/pulls?head=${OWNER}:${DEV}&base=${BASE}&state=open" \
+            --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            echo "Draft PR #$EXISTING already open ($DEV → $BASE); nothing to do."
+            exit 0
+          fi
+
+          # Patch base must exist on the remote (release.yml / operator cut it).
+          if ! gh api "repos/${REPO}/branches/${BASE}" >/dev/null 2>&1; then
+            echo "Patch base '$BASE' not on remote yet; skipping."
+            exit 0
+          fi
+
+          # Open the draft PR. A dev branch that is still even with its base
+          # ("no commits between") is the expected pre-first-commit state — exit
+          # cleanly and let the next push retry. Any other failure is fatal.
+          set +e
+          OUT=$(gh api --method POST "repos/${REPO}/pulls" \
+                  -f title="$DEV" \
+                  -f head="$DEV" \
+                  -f base="$BASE" \
+                  -F draft=true \
+                  -f body="Automated sprint draft PR from \`$DEV\` to \`$BASE\`." 2>&1)
+          RC=$?
+          set -e
+          if [ "$RC" -eq 0 ]; then
+            echo "Opened draft PR: $DEV → $BASE."
+          elif printf '%s' "$OUT" | grep -qiE 'no commits between|has no history in common'; then
+            echo "No commits between $BASE and $DEV yet; will retry on next push."
+          else
+            printf '::error::Failed to open draft PR (%s → %s):\n%s\n' "$DEV" "$BASE" "$OUT"
+            exit 1
+          fi

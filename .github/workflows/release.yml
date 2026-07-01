@@ -1,51 +1,369 @@
 name: release
 
-on:
-  release:
-    types: [published]
-  repository_dispatch:
-    types: [release]
-  workflow_dispatch:
-    inputs:
-      draft:
-        default: false
-        description: "Create a draft release"
-        required: true
-        type: boolean
-      prerelease:
-        default: false
-        description: "Create a prerelease"
-        required: true
-        type: boolean
+# Monorepo patch-release pipeline. Triggered by the squash-merge of a release
+# PR landing on main whose subject is "vX.Y.Z", "vX.Y.Z: <summary>", or
+# "release: vX.Y.Z" (gh appends " (#N)" on squash — tolerated). The extracted
+# version is cross-checked against [workspace.package].version in Cargo.toml;
+# non-release pushes are skipped cleanly.
+#
+# Sequence: detect → tag → release → cut next branch → bump versions → draft PR
+#           → cut dev.0 → orphan sweep → milestone roll
+#
+# Branch protection on main MUST require PR + linear history + no force-push for
+# the trigger to be reliable (configured outside this file).
 
-permissions:
-  contents: write
-  discussions: write
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   release:
-    env:
-      IS_PRERELEASE: ${{ github.event.inputs.prerelease || false }}
-      IS_DRAFT: ${{ github.event.inputs.draft || false }}
+    name: Patch release pipeline
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      discussions: write
+      issues: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout main with full history + tags
+        # Pinned to v4 (stable header-based credential helper). `token:` +
+        # `persist-credentials: true` ensure the later `git push` steps are
+        # authenticated regardless of checkout's internal plumbing.
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          fetch-tags: true
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.ref }}
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        continue-on-error: true
-        with:
-          append_body: false
-          draft: ${{ env.IS_DRAFT }}
-          prerelease: ${{ env.IS_PRERELEASE }}
-          tag_name: ${{ github.event.release.tag_name }}
-          body: |
-            ${{ github.event.release.body }}
+          persist-credentials: true
 
-            ## Links
+      - name: Detect release squash commit
+        id: detect
+        # Recognise release commit subjects:
+        #   "vX.Y.Z"            — bare (gh may append " (#N)")
+        #   "vX.Y.Z: <summary>" — descriptive
+        #   "release: vX.Y.Z"   — back-compat / automation-authored
+        # Extracted version is cross-checked against [workspace.package].version
+        # in Cargo.toml so a stray commit can't accidentally fire the pipeline.
+        # SUBJECT is read from `git log` (not github.event.*), held as a
+        # shell-quoted var, and only used for regex comparison + echo — never
+        # interpolated into a command.
+        run: |
+          set -euo pipefail
+          SUBJECT=$(git log -1 --format=%s HEAD)
+          if [[ "$SUBJECT" =~ ^(release:[[:space:]]+)?v([0-9]+\.[0-9]+\.[0-9]+)([[:space:]:]|$) ]]; then
+            SUBJECT_VER="${BASH_REMATCH[2]}"
+            CARGO_VER=$(awk '/^\[workspace\.package\]/{f=1} f && /^version[[:space:]]*=/{match($0, /"([^"]+)"/, a); print a[1]; exit}' Cargo.toml)
+            if [ "$SUBJECT_VER" = "$CARGO_VER" ]; then
+              echo "proceed=true" >> "$GITHUB_OUTPUT"
+              printf 'Release commit detected: %s (v%s)\n' "$SUBJECT" "$SUBJECT_VER"
+            else
+              echo "proceed=false" >> "$GITHUB_OUTPUT"
+              printf '::warning::Subject version (v%s) does not match Cargo.toml workspace version (v%s); skipping.\n' "$SUBJECT_VER" "$CARGO_VER"
+            fi
+          else
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            printf 'Skipping: head subject does not match release pattern.\nSubject: %s\n' "$SUBJECT"
+          fi
 
-              - [Crates.io](https://crates.io/crates/${{ github.event.repository.name }})
-              - [Documentation](https://docs.rs/${{ github.event.repository.name }})
+      - name: Configure git identity
+        if: steps.detect.outputs.proceed == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: Compute current + next version triple (mod-10 cascade)
+        if: steps.detect.outputs.proceed == 'true'
+        id: ver
+        run: |
+          set -euo pipefail
+          CURRENT=$(awk '/^\[workspace\.package\]/{f=1} f && /^version[[:space:]]*=/{match($0, /"([^"]+)"/, a); print a[1]; exit}' Cargo.toml)
+          IFS=. read -r X Y Z <<<"$CURRENT"
+
+          if   [ "$Z" -lt 9 ]; then NX=$X;        NY=$Y;        NZ=$((Z+1)); SHIFT=patch
+          elif [ "$Y" -lt 9 ]; then NX=$X;        NY=$((Y+1)); NZ=0;        SHIFT=minor
+          else                      NX=$((X+1)); NY=0;         NZ=0;        SHIFT=major
+          fi
+          NEXT="${NX}.${NY}.${NZ}"
+
+          {
+            echo "current=$CURRENT"
+            echo "next=$NEXT"
+            echo "shift=$SHIFT"
+            echo "tag=v${CURRENT}"
+            echo "patch_branch=v${NEXT}"
+            echo "dev0_branch=v${NEXT}-dev.0"
+            echo "old_milestone=v${CURRENT}"
+            echo "new_milestone=v${NEXT}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing v${CURRENT}; next patch v${NEXT} (${SHIFT} shift)."
+
+      - name: Extract release notes from CHANGELOG.md
+        if: steps.detect.outputs.proceed == 'true'
+        id: notes
+        env:
+          CURRENT: ${{ steps.ver.outputs.current }}
+        run: |
+          set -euo pipefail
+          NOTES="${RUNNER_TEMP}/release-notes-v${CURRENT}.md"
+          # Slice the CHANGELOG section for this version if it exists.
+          if [ -f CHANGELOG.md ]; then
+            awk -v ver="${CURRENT}" '
+              BEGIN { gsub(/\./, "\\.", ver); pat = "^## v" ver "( |$)" }
+              $0 ~ pat                { capture = 1; print; next }
+              capture && /^## v[0-9]/ { exit }
+              capture                 { print }
+            ' CHANGELOG.md > "$NOTES"
+          fi
+          if [ -s "$NOTES" ]; then
+            echo "use_notes_file=true" >> "$GITHUB_OUTPUT"
+            echo "::group::Extracted release notes for v${CURRENT}"
+            head -20 "$NOTES"
+            echo "::endgroup::"
+          else
+            echo "use_notes_file=false" >> "$GITHUB_OUTPUT"
+            echo "No '## v${CURRENT}' section found in CHANGELOG.md; GitHub will auto-generate notes."
+          fi
+          echo "path=$NOTES" >> "$GITHUB_OUTPUT"
+
+      # ─── Patch close: tag + GitHub release ──────────────────────────────────
+      - name: Tag the release commit
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists locally; skipping create."
+          else
+            git tag -a "$TAG" -m "$TAG"
+          fi
+          if git ls-remote --exit-code --tags origin "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already on origin; skipping push."
+          else
+            git push origin "$TAG"
+          fi
+
+      - name: Create GitHub Release (CHANGELOG notes)
+        if: >-
+          steps.detect.outputs.proceed == 'true' &&
+          steps.notes.outputs.use_notes_file == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          NOTES: ${{ steps.notes.outputs.path }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; skipping create."
+          else
+            # Added --discussion-category flag below
+            gh release create "$TAG" --target main --title "$TAG" --notes-file "$NOTES" --discussion-category "Announcements"
+          fi
+
+      - name: Create GitHub Release (auto-generated notes)
+        if: >-
+          steps.detect.outputs.proceed == 'true' &&
+          steps.notes.outputs.use_notes_file == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; skipping create."
+          else
+            # Added --discussion-category flag below
+            gh release create "$TAG" --target main --title "$TAG" --generate-notes --discussion-category "Announcements"
+          fi
+
+      # ─── Next patch: cut branch + bump all version refs ─────────────────────
+      - name: Cut next patch branch + bump all version refs
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          CURRENT: ${{ steps.ver.outputs.current }}
+          NEXT: ${{ steps.ver.outputs.next }}
+          PATCH: ${{ steps.ver.outputs.patch_branch }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "$PATCH" >/dev/null 2>&1; then
+            echo "Branch $PATCH already on origin; reusing (partial prior run)."
+            git fetch origin "$PATCH"
+            git checkout -B "$PATCH" "origin/$PATCH"
+          else
+            git checkout -b "$PATCH" main
+          fi
+
+          # ── Rust: bump [workspace.package] version + all inline axiom-* dep pins ──
+          # Two targeted sed expressions:
+          #   1. exact-line match catches `version = "X.Y.Z"` in [workspace.package]
+          #   2. axiom-line match catches `axiom-foo = { ..., version = "X.Y.Z" }`
+          if [ -f Cargo.toml ]; then
+            sed -i.bak \
+              -e "s/^version = \"${CURRENT}\"$/version = \"${NEXT}\"/" \
+              -e "/axiom/s/version = \"${CURRENT}\"/version = \"${NEXT}\"/" \
+              Cargo.toml
+            rm -f Cargo.toml.bak
+            echo "  bumped Cargo.toml"
+          fi
+
+          # ── Nix: bump version in flake.nix and default.nix ──
+          # Nix attribute syntax uses a trailing semicolon: `version = "X.Y.Z";`
+          for NIX_FILE in flake.nix default.nix; do
+            if [ -f "$NIX_FILE" ]; then
+              sed -i.bak \
+                "s/version = \"${CURRENT}\";/version = \"${NEXT}\";/" \
+                "$NIX_FILE"
+              rm -f "${NIX_FILE}.bak"
+              echo "  bumped $NIX_FILE"
+            fi
+          done
+
+          # ── README: bump current-version badge/line if present ──
+          if [ -f README.md ]; then
+            sed -i.bak -E \
+              "s/Current version: \*\*${CURRENT}\*\*/Current version: **${NEXT}**/" \
+              README.md
+            rm -f README.md.bak
+          fi
+
+          # ── Report any remaining old-version strings for manual review ──
+          # Excludes: .artifacts/ (sprint docs), .git/, target/, and all lock files —
+          # these contain version strings that are NOT intentional version refs.
+          echo "::group::Remaining references to ${CURRENT} (review manually if any)"
+          grep -rn "${CURRENT}" \
+            --include="*.toml" \
+            --include="*.nix" \
+            --include="*.md" \
+            --include="*.json" \
+            --exclude-dir=.git \
+            --exclude-dir=.artifacts \
+            --exclude-dir=target \
+            --exclude=Cargo.lock \
+            --exclude=flake.lock \
+            --exclude=poetry.lock \
+            --exclude=skills-lock.json \
+            --exclude='*.lock' \
+            . || true
+          echo "::endgroup::"
+
+      - name: Commit + push patch branch with version bump
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          CURRENT: ${{ steps.ver.outputs.current }}
+          NEXT: ${{ steps.ver.outputs.next }}
+          PATCH: ${{ steps.ver.outputs.patch_branch }}
+        run: |
+          set -euo pipefail
+          # Stage only the files the bump step explicitly modified — never `git add -A`.
+          # .artifacts/, lock files, and unrelated tracked/untracked files must not ride
+          # this commit.
+          git add Cargo.toml
+          for f in flake.nix default.nix README.md; do
+            [ -f "$f" ] && git add "$f" || true
+          done
+          if git diff --cached --quiet; then
+            echo "No version changes to commit (idempotent re-run?)."
+          else
+            git commit -m "chore(${PATCH}/version): bump Cargo workspace + Nix ${CURRENT} → ${NEXT}"
+          fi
+          git push -u origin "$PATCH"
+
+      - name: Open draft PR vNEXT → main
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PATCH: ${{ steps.ver.outputs.patch_branch }}
+          NEXT: ${{ steps.ver.outputs.next }}
+        run: |
+          set -euo pipefail
+          if gh pr view "$PATCH" --json number >/dev/null 2>&1; then
+            echo "Draft PR for $PATCH already exists; skipping."
+          else
+            gh pr create --base main --head "$PATCH" --draft \
+              --title "release: v${NEXT}" \
+              --body "Draft PR — accumulates dev.0..dev.9 of v${NEXT}. Generated by .github/workflows/release.yml."
+          fi
+
+      - name: Cut dev.0 off the new patch branch
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          PATCH: ${{ steps.ver.outputs.patch_branch }}
+          DEV0: ${{ steps.ver.outputs.dev0_branch }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "$DEV0" >/dev/null 2>&1; then
+            echo "Branch $DEV0 already exists on origin; skipping."
+          else
+            git checkout -b "$DEV0" "$PATCH"
+            git push -u origin "$DEV0"
+          fi
+
+      # ─── Housekeeping: orphan sweep + milestone roll ─────────────────────────
+      - name: Sweep orphan dev branches of closing patch
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          CURRENT: ${{ steps.ver.outputs.current }}
+        run: |
+          set -euo pipefail
+          for SPRINT in 0 1 2 3 4 5 6 7 8 9; do
+            BRANCH="v${CURRENT}-dev.${SPRINT}"
+            git push origin --delete "$BRANCH" 2>/dev/null \
+              && echo "Deleted $BRANCH from origin" \
+              || true
+          done
+          git fetch --prune origin
+
+      - name: Roll open issues to new milestone
+        if: steps.detect.outputs.proceed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OLD: ${{ steps.ver.outputs.old_milestone }}
+          NEW: ${{ steps.ver.outputs.new_milestone }}
+        run: |
+          set -euo pipefail
+
+          # ── Ensure milestone $NEW exists AND is open (idempotent) ──
+          # Milestone titles are unique across open+closed, so resolve $NEW
+          # against ?state=all with --paginate: the repo pre-creates future
+          # milestones and a single page caps at 30. The prior open-only check
+          # false-negatived a pre-created/closed $NEW, so the duplicate create
+          # returned 422 and killed the whole step before any issue moved.
+          NEW_NUM=$(gh api --paginate "repos/${GITHUB_REPOSITORY}/milestones?state=all" \
+            --jq '.[] | select(.title == env.NEW) | .number' | head -n1)
+          if [ -z "$NEW_NUM" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/milestones" \
+              -f title="$NEW" -f state=open >/dev/null \
+              && echo "Created milestone $NEW" \
+              || echo "::warning::Create of milestone $NEW failed (already exists?); continuing"
+          else
+            # Reopen if it was closed so issues can be assigned into it.
+            gh api --method PATCH \
+              "repos/${GITHUB_REPOSITORY}/milestones/${NEW_NUM}" \
+              -f state=open >/dev/null 2>&1 || true
+            echo "Milestone $NEW already exists (#${NEW_NUM}); ensured open."
+          fi
+
+          # ── Move EVERY open issue from $OLD → $NEW (skip cleanly if absent) ──
+          # --limit 1000 because `gh issue list` defaults to 30 — a large backlog
+          # was silently truncated before (376 issues stranded on $OLD). The step
+          # is idempotent, so a re-dispatch sweeps up any stragglers.
+          if gh api --paginate "repos/${GITHUB_REPOSITORY}/milestones?state=all" \
+               --jq '.[].title' | grep -qx "$OLD"; then
+            gh issue list --milestone "$OLD" --state open --limit 1000 \
+              --json number --jq '.[].number' \
+              | while read -r N; do
+                  [ -z "$N" ] && continue
+                  gh issue edit "$N" --milestone "$NEW" \
+                    && echo "Moved #$N to milestone $NEW" \
+                    || echo "::warning::Failed to move #$N"
+                done
+          else
+            echo "Milestone $OLD not found; nothing to roll."
+          fi
