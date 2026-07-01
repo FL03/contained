@@ -18,13 +18,13 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/contained.git"
 rust-version = "1.96.0"
-version = "0.2.5"
+version = "0.2.6"
 
 [workspace.dependencies]
-contained = { default-features = false, path = "crates/contained", version = "0.2.5" }
-contained-core = { default-features = false, path = "crates/core", version = "0.2.5" }
-contained-derive = { default-features = false, path = "crates/derive", version = "0.2.5" }
-contained-macros = { default-features = false, path = "crates/macros", version = "0.2.5" }
+contained = { default-features = false, path = "crates/contained", version = "0.2.6" }
+contained-core = { default-features = false, path = "crates/core", version = "0.2.6" }
+contained-derive = { default-features = false, path = "crates/derive", version = "0.2.6" }
+contained-macros = { default-features = false, path = "crates/macros", version = "0.2.6" }
 # development
 criterion = { version = "0.8", features = ["plotters"] }
 # parallelism
